@@ -125,8 +125,8 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- filter by tanggal 
-CREATE OR REPLACE FUNCTION get_riwayat_by_tanggal(f_created_at TIMESTAMP)
-RETURN TABEL (
+CREATE OR REPLACE FUNCTION get_riwayat_by_tanggal(p_tanggal DATE)
+RETURNS TABLE (
     id_aktivitas VARCHAR,
     jenis_aktivitas VARCHAR,
     keterangan TEXT,
@@ -134,20 +134,20 @@ RETURN TABEL (
 ) AS $$
 BEGIN
     RETURN QUERY
-    SELECT
+    SELECT 
         id_aktivitas,
         jenis_aktivitas,
         keterangan,
         created_at
     FROM riwayat_aktivitas
-    WHERE create_user = f_created_at
+    WHERE created_at::DATE = p_tanggal
     ORDER BY created_at DESC;
 END;
 $$ LANGUAGE plpgsql;
 
 -- filter by jenis aktivitas 
-CREATE OR REPLACE FUNCTION get_riwayat_by_tanggal(f_jenis_aktivitas VARCHAR)
-RETURN TABEL (
+CREATE OR REPLACE FUNCTION get_riwayat_by_jenis(p_jenis VARCHAR)
+RETURNS TABLE (
     id_aktivitas VARCHAR,
     jenis_aktivitas VARCHAR,
     keterangan TEXT,
@@ -155,59 +155,48 @@ RETURN TABEL (
 ) AS $$
 BEGIN
     RETURN QUERY
-    SELECT
+    SELECT 
         id_aktivitas,
         jenis_aktivitas,
         keterangan,
         created_at
     FROM riwayat_aktivitas
-    WHERE jenis_aktivitas = f_jenis_aktivitas
+    WHERE jenis_aktivitas = p_jenis
     ORDER BY created_at DESC;
 END;
 $$ LANGUAGE plpgsql;
 
 -- filter by kombinasi
-CREATE OR REPLACE FUNCTION filter_riwayat_kombinasi(
+CREATE OR REPLACE FUNCTION filter_riwayat(
     p_id_laptop VARCHAR DEFAULT NULL,
     p_id_user VARCHAR DEFAULT NULL,
-    f_created_at VARCHAR DEFAULT NULL,
-    f_jenis_aktivitas VARCHAR DEFAULT NULL
-    )
-RETURN TEXT AS $$
-CREATE OR REPLACE FUNCTION fn_get_riwayat_master(
-    p_id_laptop INT DEFAULT NULL,
-    p_id_user INT DEFAULT NULL,
-    f_created_at DATE DEFAULT NULL,
-    f_jenis_aktivitas TEXT DEFAULT NULL
+    p_tanggal DATE DEFAULT NULL,
+    p_jenis VARCHAR DEFAULT NULL
 )
-RETURNS TEXT AS $$
-BEGIN 
-    -- 1. Cek berdasarkan Laptop
-    IF p_id_laptop IS NOT NULL THEN
-        PERFORM get_riwayat_by_laptop(p_id_laptop);
-    END IF;
-
-    -- 2. Cek berdasarkan User
-    IF p_id_user IS NOT NULL THEN
-        PERFORM get_riwayat_by_user(p_id_user);
-    END IF;
-
-    -- 3. Cek berdasarkan Tanggal
-    IF f_created_at IS NOT NULL THEN
-        PERFORM get_riwayat_by_tanggal(f_created_at);
-    END IF;
-
-    -- 4. Cek jika SEMUA parameter terisi (Kombinasi)
-    -- Menggunakan AND untuk mengecek semua kondisi sekaligus
-    IF f_jenis_aktivitas IS NOT NULL 
-       AND f_created_at IS NOT NULL 
-       AND p_id_user IS NOT NULL 
-       AND p_id_laptop IS NOT NULL 
-    THEN
-        PERFORM get_riwayat_lengkap(f_jenis_aktivitas, f_created_at, p_id_user, p_id_laptop);
-    END IF;
-
-    RETURN 'Proses Filter Selesai';
+RETURNS TABLE (
+    id_aktivitas VARCHAR,
+    id_user VARCHAR,
+    id_laptop VARCHAR,
+    jenis_aktivitas VARCHAR,
+    keterangan TEXT,
+    created_at TIMESTAMP
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        id_aktivitas,
+        id_user,
+        id_laptop_inventori,
+        jenis_aktivitas,
+        keterangan,
+        created_at
+    FROM riwayat_aktivitas
+    WHERE 
+        (p_id_laptop IS NULL OR id_laptop_inventori = p_id_laptop)
+        AND (p_id_user IS NULL OR id_user = p_id_user)
+        AND (p_tanggal IS NULL OR created_at::DATE = p_tanggal)
+        AND (p_jenis IS NULL OR jenis_aktivitas = p_jenis)
+    ORDER BY created_at DESC;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -247,17 +236,17 @@ $$ LANGUAGE plpgsql;
 
 
 -- DELETE
-CREATE OR REPLACE FUNCTION delete_riwayat(id_aktivitas VARCHAR)
-RETURN TEXT AS $$
-BEGIN 
+CREATE OR REPLACE FUNCTION delete_riwayat(p_id_aktivitas VARCHAR)
+RETURNS TEXT AS $$
+BEGIN
     DELETE FROM riwayat_aktivitas
-    WHERE id_aktivitas = f_id_aktivitas;
+    WHERE id_aktivitas = p_id_aktivitas;
 
-    RETURN 'RIWAYAT TELAH DIHAPUS';
+    RETURN 'Riwayat berhasil dihapus';
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION 
+
 
 -- PAGINATION
 
@@ -274,63 +263,8 @@ EXECUTE FUNCTION create_riwayat_aktivitas(p_id_aktivitas VARCHAR,
     p_jenis_aktivitas VARCHAR,
     p_keterangan TEXT);
 
-CREATE TRIGGER trg_create_riwayat_aktivitas_prosessor
-AFTER INSERT OR UPDATE OR DELETE ON prosessor
-FOR EACH ROW
-EXECUTE FUNCTION create_riwayat_aktivitas(p_id_aktivitas VARCHAR,
-    p_id_user VARCHAR,
-    p_id_laptop VARCHAR,
-    p_nama_aset VARCHAR,
-    p_role VARCHAR,
-    p_jenis_aktivitas VARCHAR,
-    p_keterangan TEXT);
-
-CREATE TRIGGER trg_create_riwayat_aktivitas_ram
-AFTER INSERT OR UPDATE OR DELETE ON ram
-FOR EACH ROW
-EXECUTE FUNCTION create_riwayat_aktivitas(p_id_aktivitas VARCHAR,
-    p_id_user VARCHAR,
-    p_id_laptop VARCHAR,
-    p_nama_aset VARCHAR,
-    p_role VARCHAR,
-    p_jenis_aktivitas VARCHAR,
-    p_keterangan TEXT);
-
-CREATE TRIGGER trg_create_riwayat_aktivitas_storage
-AFTER INSERT OR UPDATE OR DELETE ON storage
-FOR EACH ROW
-EXECUTE FUNCTION create_riwayat_aktivitas(p_id_aktivitas VARCHAR,
-    p_id_user VARCHAR,
-    p_id_laptop VARCHAR,
-    p_nama_aset VARCHAR,
-    p_role VARCHAR,
-    p_jenis_aktivitas VARCHAR,
-    p_keterangan TEXT);
-
 CREATE TRIGGER trg_create_riwayat_aktivitas_pengadaan
 AFTER INSERT OR UPDATE OR DELETE ON pengadaan
-FOR EACH ROW
-EXECUTE FUNCTION create_riwayat_aktivitas(p_id_aktivitas VARCHAR,
-    p_id_user VARCHAR,
-    p_id_laptop VARCHAR,
-    p_nama_aset VARCHAR,
-    p_role VARCHAR,
-    p_jenis_aktivitas VARCHAR,
-    p_keterangan TEXT);
-
-CREATE TRIGGER trg_create_riwayat_aktivitas_kriteria
-AFTER INSERT OR UPDATE OR DELETE ON kriteria
-FOR EACH ROW
-EXECUTE FUNCTION create_riwayat_aktivitas(p_id_aktivitas VARCHAR,
-    p_id_user VARCHAR,
-    p_id_laptop VARCHAR,
-    p_nama_aset VARCHAR,
-    p_role VARCHAR,
-    p_jenis_aktivitas VARCHAR,
-    p_keterangan TEXT);
-
-CREATE TRIGGER trg_create_riwayat_aktivitas_bobot_kriteria
-AFTER INSERT OR UPDATE OR DELETE ON bobot_kriteria
 FOR EACH ROW
 EXECUTE FUNCTION create_riwayat_aktivitas(p_id_aktivitas VARCHAR,
     p_id_user VARCHAR,
@@ -353,39 +287,6 @@ EXECUTE FUNCTION create_riwayat_aktivitas(p_id_aktivitas VARCHAR,
 
 CREATE TRIGGER trg_create_riwayat_aktivitas_pemimjaman
 AFTER INSERT OR UPDATE OR DELETE ON pemimjaman
-FOR EACH ROW
-EXECUTE FUNCTION create_riwayat_aktivitas(p_id_aktivitas VARCHAR,
-    p_id_user VARCHAR,
-    p_id_laptop VARCHAR,
-    p_nama_aset VARCHAR,
-    p_role VARCHAR,
-    p_jenis_aktivitas VARCHAR,
-    p_keterangan TEXT);
-
-CREATE TRIGGER trg_create_riwayat_aktivitas_hasil_saw
-AFTER INSERT OR UPDATE OR DELETE ON hasil_saw
-FOR EACH ROW
-EXECUTE FUNCTION create_riwayat_aktivitas(p_id_aktivitas VARCHAR,
-    p_id_user VARCHAR,
-    p_id_laptop VARCHAR,
-    p_nama_aset VARCHAR,
-    p_role VARCHAR,
-    p_jenis_aktivitas VARCHAR,
-    p_keterangan TEXT);
-
-CREATE TRIGGER trg_create_riwayat_aktivitas_datail_hasil_saw
-AFTER INSERT OR UPDATE OR DELETE ON datail_hasil_saw
-FOR EACH ROW
-EXECUTE FUNCTION create_riwayat_aktivitas(p_id_aktivitas VARCHAR,
-    p_id_user VARCHAR,
-    p_id_laptop VARCHAR,
-    p_nama_aset VARCHAR,
-    p_role VARCHAR,
-    p_jenis_aktivitas VARCHAR,
-    p_keterangan TEXT);
-
-CREATE TRIGGER trg_create_riwayat_aktivitas_dss_proses
-AFTER INSERT OR UPDATE OR DELETE ON dss_proses
 FOR EACH ROW
 EXECUTE FUNCTION create_riwayat_aktivitas(p_id_aktivitas VARCHAR,
     p_id_user VARCHAR,

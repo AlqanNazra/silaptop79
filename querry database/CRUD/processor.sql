@@ -6,10 +6,10 @@ CREATE TABLE processor (
     nama_processor VARCHAR(255),
     manufacturer VARCHAR(255),
     model VARCHAR(255),
-    cores INTEGER,
-    threads INTEGER,
-    base_clock FLOAT,
-    max_clock FLOAT,
+    cores INTEGER CHECK (cores > 0),
+    threads INTEGER CHECK (threads > 0),
+    base_clock FLOAT CHECK (base_clock > 0),
+    max_clock FLOAT CHECK (max_clock > 0),
     arsitektur VARCHAR(100),
     keterangan TEXT
 );

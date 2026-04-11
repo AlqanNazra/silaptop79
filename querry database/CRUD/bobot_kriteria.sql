@@ -14,27 +14,27 @@ CREATE TABLE bobot_kriteria (
 CREATE OR REPLACE FUNCTION tambah_bobot_kriteria(f_id_kriteria VARCHAR(100), f_role VARCHAR(100), f_nilai_bobot FLOAT)
 RETURNS VOID AS $$
 BEGIN 
-    INSERT INTO bobot_kriteria(id_bobot,id_kriteria, role, nilai_bobot, id_kriteria)
-    VALUES (f_generate_id('bobot','bobot_kriteria'), f_id_kriteria, f_role, f_nilai_bobot)
+    INSERT INTO bobot_kriteria(id_bobot,id_kriteria, role, nilai_bobot)
+    VALUES (f_generate_id('bobot','bobot_kriteria'), f_id_kriteria, f_role, f_nilai_bobot);
 END;
 $$ LANGUAGE plpgsql;
 
 -- cari bobot kriteria
 
 CREATE OR REPLACE FUNCTION cari_bobot_kriteria(f_id_bobot VARCHAR(100))
-RETURNS TABLE (id_bobot,id_kriteria, role, nilai_bobot, id_kriteria) AS $$
+RETURNS TABLE (id_bobot VARCHAR,id_kriteria VARCHAR, role VARCHAR, nilai_bobot FLOAT) AS $$
 BEGIN 
-    RETURNS QUERY
-    SELECT b.id_bobot,b.id_kriteria, b.role, b.nilai_bobot, b.id_kriteria
+    RETURN  QUERY
+    SELECT b.id_bobot,b.id_kriteria, b.role, b.nilai_bobot
     FROM bobot_kriteria b
     WHERE b.id_bobot = f_id_bobot;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION ambil_semua_data_detail_hasil_saw()
-RETURNS TABLE (id_bobot,id_kriteria, role, nilai_bobot, id_kriteria) AS $$
+CREATE OR REPLACE FUNCTION ambil_semua_data_detail_bobot()
+RETURNS TABLE (id_bobot VARCHAR,id_kriteria VARCHAR, role VARCHAR, nilai_bobot FLOAT) AS $$
 BEGIN
-    RETURNS  QUERY
+    RETURN  QUERY
     SELECT *
     FROM bobot_kriteria;
 END;
@@ -48,20 +48,31 @@ BEGIN
     UPDATE bobot_kriteria 
     SET nilai_bobot = f_nilai_bobot 
     WHERE id_bobot = f_id_bobot;
-    RETURNS 'Bobot berhasil diupdate!';
+    RETURN 'Bobot berhasil diupdate!';
 END;
 $$ LANGUAGE plpgsql;
 
 -- DELETE bobot kriteria
 
-CREATE OR REPLACE function hapus_bobot_kriteria(f_id_bobot VARCHAR(100),f_id_kriteria VALUES(100))
-RETURNS TEXT As $$
+CREATE OR REPLACE FUNCTION hapus_bobot_kriteria(f_id_bobot VARCHAR)
+RETURNS TEXT AS $$ DECLARE v_id_kriteria VARCHAR;
 BEGIN
-    DELETE FROM kriteria WHERE id_kriteria = f_id_kriteria
-    DELETE FROM bobot_kriteria WHERE id_bobot = f_id_bobot;
-    RETURNS 'DATA bobot dengan id' || id_alternatif || ' telah dihapus,';
+    -- ambil id_kriteria dulu
+    SELECT id_kriteria INTO v_id_kriteria
+    FROM bobot_kriteria
+    WHERE id_bobot = f_id_bobot;
+
+    -- hapus bobot dulu (child)
+    DELETE FROM bobot_kriteria
+    WHERE id_bobot = f_id_bobot;
+
+    -- hapus kriteria (parent)
+    DELETE FROM kriteria
+    WHERE id_kriteria = v_id_kriteria;
+
+    RETURN 'Bobot dan kriteria berhasil dihapus';
 END;
-$$ LANGUAGE plpgsql
+$$ LANGUAGE plpgsql;
 
 -- Cara panggil:
 -- SELECT update_stok(4, 15);

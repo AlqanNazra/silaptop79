@@ -20,7 +20,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-3(q613-v1!@y7s%he$#v^m=z_7ce6_f^l0@t+gox&ez!*9&^6^'
+SECRET_KEY = 'django-insecure-68e461gv0a9s&i4vs1fd%^z_xy^hu**#6m%u)cqmtf1h^*(5nl'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -37,8 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    
-    'silaptop79_app'
+    'inventori',
+    'dss',
 ]
 
 MIDDLEWARE = [
@@ -76,11 +76,14 @@ WSGI_APPLICATION = 'silaptop79.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'TA',
+        'USER': 'postgres',
+        'PASSWORD': 'alqan',
+        'HOST': '127.0.0.1',
+        'PORT': '5432',
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators

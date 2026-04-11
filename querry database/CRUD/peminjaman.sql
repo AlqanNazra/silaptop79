@@ -3,7 +3,7 @@
 -- =============================================
 CREATE TABLE peminjaman (
     id_peminjaman VARCHAR(100) PRIMARY KEY,
-    id_pengajuan VARCHAR (100),
+    id_pengajuan VARCHAR(100),
     id_user VARCHAR(15),
     id_laptop_inventori VARCHAR(100),
     tanggal_pinjam DATE,
@@ -11,21 +11,35 @@ CREATE TABLE peminjaman (
     status VARCHAR(50),
     keterangan TEXT,
     FOREIGN KEY (id_user) REFERENCES users(id_user),
-    FOREIGN KEY (id_laptop_inventori) REFERENCES laptop_inventori(id_laptop_inventori)
+    FOREIGN KEY (id_laptop_inventori) REFERENCES laptop_inventori(id_laptop_inventori),
     FOREIGN KEY (id_pengajuan) REFERENCES pengajuan(id_pengajuan)
 );
 
-CREATE OR REPLACE FUNCTION tambah_peminjaman
-(f_id_user VARCHAR(15),f_id_laptop_inventori VARCHAR(100),f_tanggal_pinjam DATE,f_tanggal_kembali DATE,f_status VARCHAR(50),f_keterangan TEXT)
-RETURN VOID AS $$
+CREATE OR REPLACE FUNCTION tambah_peminjaman(
+    f_id_user VARCHAR,f_id_laptop_inventori VARCHAR,f_tanggal_pinjam DATE,
+    f_tanggal_kembali DATE,f_status VARCHAR,f_keterangan TEXT)
+RETURNS VOID AS $$
 BEGIN 
-    INSERT INTO peminjaman(id_peminjaman, id_user,id_laptop_inventori,tanggal_pinjam ,tanggal_kembali ,status,keterangan)
-    VALUES (f_generate_id('PIM','peminjaman'),f_id_user,f_id_laptop_inventori,f_tanggal_pinjam,f_tanggal_kembali,f_status,f_keterangan)
+    INSERT INTO peminjaman(
+        id_peminjaman,id_user,id_laptop_inventori,
+        tanggal_pinjam,tanggal_kembali,status,keterangan
+    )
+    VALUES (
+        f_generate_id('PIM','peminjaman'),f_id_user,f_id_laptop_inventori,f_tanggal_pinjam,
+        f_tanggal_kembali,f_status,f_keterangan);
 END;
 $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION ambil_semua_peminjaman()
-RETURN TABLE (id_peminjaman, id_user,id_laptop_inventori,tanggal_pinjam ,tanggal_kembali ,status,keterangan) AS $$
+RETURNS TABLE (
+    id_peminjaman VARCHAR,
+    id_user VARCHAR,
+    id_laptop_inventori VARCHAR,
+    tanggal_pinjam DATE,
+    tanggal_kembali DATE,
+    status VARCHAR,
+    keterangan TEXT
+) AS $$
 BEGIN 
     RETURN  QUERY
     SELECT *
@@ -34,7 +48,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION cari_peminjaman(f_id_peminjaman VARCHAR(100))
-RETURN TABLE (id_peminjaman, id_user,id_laptop_inventori,tanggal_pinjam ,tanggal_kembali,status,keterangan) AS $$
+RETURNS TABLE (id_peminjaman, id_user,id_laptop_inventori,tanggal_pinjam ,tanggal_kembali,status,keterangan) AS $$
 BEGIN 
     RETURN QUERY
     SELECT *
@@ -44,12 +58,12 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION update_peminjaman(f_id_peminjaman VARCHAR(100), f_tanggal_pinjam DATE, f_tanggal_kembali DATE, f_status VARCHAR(50), f_keterangan TEXT)
-RETURN TEXT AS $$
+RETURNS TEXT AS $$
 BEGIN
     UPDATE peminjaman
     SET tanggal_pinjam = f_tanggal_pinjam, tanggal_kembali = f_tanggal_kembali, status = f_status, keterangan = f_keterangan 
     WHERE id_peminjaman = f_id_peminjaman;
-    RETURN 'Bobot berhasil diupdate!';
+    RETURN 'Pemimjaman berhasil diupdate!';
 END;
 $$ LANGUAGE plpgsql;
 
@@ -57,9 +71,9 @@ CREATE OR REPLACE function hapus_peminjaman(f_id_peminjaman VARCHAR(100))
 RETURN TEXT As $$
 BEGIN
     DELETE FROM peminjaman WHERE id_peminjaman = f_id_peminjaman;
-    RETURN 'DATA bobot dengan id' || id_peminjaman || ' telah dihapus,';
+    RETURN 'DATA pemimjaman dengan id' || id_peminjaman || ' berhasil dihapus,';
 END;
-$$ LANGUAGE plpgsql
+$$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION pinjam_laptop(
     f_id_user VARCHAR,
@@ -85,6 +99,14 @@ BEGIN
 
     IF v_status != 'tersedia' THEN
         RETURN 'Laptop tidak tersedia';
+    END IF;
+
+    IF EXISTS (
+        SELECT 1 FROM peminjaman
+        WHERE id_laptop_inventori = f_id_laptop
+        AND status = 'dipinjam'
+    ) THEN
+        RETURN 'Laptop sedang dipinjam';
     END IF;
 
     -- cek pengajuan
@@ -160,7 +182,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION rusak_laptop(f_id_laptop VARCHAR,status VARCHAR,f_kondisi VARCHAR)
-RETURN TEXT AS $$
+RETURNS TEXT AS $$
 BEGIN
     Update laptop_inventori
     SET status = 'rusak' , kondisi = f_kondisi
@@ -170,14 +192,14 @@ END
 $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION sync_status_laptop()
-RETURN VOID AS $$
+RETURNS VOID AS $$
 BEGIN
     UPDATE laptop_inventori l
     SET status = CASE
         WHEN EXISTS (
             SELECT 1 FROM peminjaman p
             WHERE p.id_laptop_inventori = l.id_laptop_inventori
-            AND p.status = 'dipinjam'
+            AND p.status = 'rusak'
         ) THEN 'dipinjam'
         ELSE 'tersedia'
     END;

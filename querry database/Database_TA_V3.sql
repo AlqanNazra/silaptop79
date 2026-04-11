@@ -85,10 +85,10 @@ CREATE TABLE processor (
     nama_processor VARCHAR(255),
     manufacturer VARCHAR(255),
     model VARCHAR(255),
-    cores INTEGER,
-    threads INTEGER,
-    base_clock FLOAT,
-    max_clock FLOAT,
+    cores INTEGER CHECK (cores > 0),
+    threads INTEGER CHECK (threads > 0),
+    base_clock FLOAT CHECK (base_clock > 0),
+    max_clock FLOAT CHECK (max_clock > 0),
     arsitektur VARCHAR(100),
     keterangan TEXT
 );
@@ -98,7 +98,7 @@ CREATE TABLE processor (
 -- =============================================
 CREATE TABLE ram (
     id_ram SERIAL PRIMARY KEY,
-    kapasitas_gb INTEGER,
+    kapasitas_gb INTEGER CHECK (kapasitas_gb > 0),
     tipe VARCHAR(50),
     keterangan TEXT
 );
@@ -108,7 +108,7 @@ CREATE TABLE ram (
 -- =============================================
 CREATE TABLE storage (
     id_storage SERIAL PRIMARY KEY,
-    kapasitas_gb INTEGER,
+    kapasitas_gb INTEGER CHECK (kapasitas_gb > 0),
     tipe VARCHAR(100)
 );
 
@@ -121,10 +121,11 @@ CREATE TABLE laptop_pengadaan (
     id_ram INTEGER,
     id_storage INTEGER,
     nama_laptop VARCHAR(255),
-    harga INTEGER,
+    harga INTEGER CHECK (harga > 0),
     gpu VARCHAR(255),
-    ukuran_layar FLOAT,
-    baterai FLOAT,
+    ukuran_layar FLOAT CHECK (ukuran_layar > 0),
+    baterai FLOAT CHECK (baterai > 0),
+    berat FLOAT CHECK (berat > 0),,
     FOREIGN KEY (id_processor) REFERENCES processor(id_processor),
     FOREIGN KEY (id_ram) REFERENCES ram(id_ram),
     FOREIGN KEY (id_storage) REFERENCES storage(id_storage)
@@ -139,8 +140,8 @@ CREATE TABLE laptop_inventori (
     nama_laptop VARCHAR(255),
     model VARCHAR(255),
     os VARCHAR(100),
-    kondisi VARCHAR(50),
-    status VARCHAR(50),
+    kondisi VARCHAR(50)     CHECK (kondisi IN ('baik','rusak ringan','rusak berat')),
+    status VARCHAR(50) CHECK (status IN ('tersedia','dipinjam','rusak')),
     lokasi VARCHAR(255),
     id_processor INTEGER,
     id_ram INTEGER,
@@ -150,12 +151,12 @@ CREATE TABLE laptop_inventori (
     FOREIGN KEY (id_ram) REFERENCES ram(id_ram),
     FOREIGN KEY (id_storage) REFERENCES storage(id_storage)
 );
-
 -- =============================================
 -- 13. PEMINJAMAN
 -- =============================================
 CREATE TABLE peminjaman (
     id_peminjaman VARCHAR(100) PRIMARY KEY,
+    id_pengajuan VARCHAR(100),
     id_user VARCHAR(15),
     id_laptop_inventori VARCHAR(100),
     tanggal_pinjam DATE,
@@ -163,7 +164,8 @@ CREATE TABLE peminjaman (
     status VARCHAR(50),
     keterangan TEXT,
     FOREIGN KEY (id_user) REFERENCES users(id_user),
-    FOREIGN KEY (id_laptop_inventori) REFERENCES laptop_inventori(id_laptop_inventori)
+    FOREIGN KEY (id_laptop_inventori) REFERENCES laptop_inventori(id_laptop_inventori),
+    FOREIGN KEY (id_pengajuan) REFERENCES pengajuan(id_pengajuan)
 );
 
 -- =============================================
@@ -178,4 +180,23 @@ CREATE TABLE riwayat_aktivitas (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (id_user) REFERENCES users(id_user),
     FOREIGN KEY (id_laptop_inventori) REFERENCES laptop_inventori(id_laptop_inventori)
+);
+
+-- =============================================
+--  15, PEngajuan
+-- =============================================
+CREATE TABLE pengajuan (
+    id_pengajuan VARCHAR(100) PRIMARY KEY,
+    id_user VARCHAR(15),
+    kebutuhan_role VARCHAR(100),
+    kebutuhan_requirement TEXT,
+    bulan DATE,
+    keterangan TEXT,
+    perusahaan TEXT,
+    status VARCHAR(20) DEFAULT 'pending',
+    tanggal_pengajuan TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    tanggal_approval TIMESTAMP,
+    approved_by VARCHAR(15),
+    FOREIGN KEY (id_user) REFERENCES users(id_user),
+    FOREIGN KEY (approved_by) REFERENCES users(id_user)
 );

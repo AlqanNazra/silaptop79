@@ -3,7 +3,7 @@
 -- =============================================
 CREATE TABLE storage (
     id_storage SERIAL PRIMARY KEY,
-    kapasitas_gb INTEGER,
+    kapasitas_gb INTEGER CHECK (kapasitas_gb > 0),
     tipe VARCHAR(100)
 );
 
