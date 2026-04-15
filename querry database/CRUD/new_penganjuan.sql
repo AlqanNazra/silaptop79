@@ -27,7 +27,7 @@ CREATE OR REPLACE FUNCTION tambah_pengajuan (
 )
 RETURNS VOID AS $$
 BEGIN
-    INSERT INTO pengajuan (
+    INSERT INTO inventori_pengajuan (
         id_pengajuan,
         id_user,
         kebutuhan_role,
@@ -58,7 +58,7 @@ BEGIN
     SELECT 
         p.id_pengajuan,p.id_user,p.id_peminjaman,p.kebutuhan_role,p.kebutuhan_requirement,
         p.bulan,p.keterangan,p.perusahaan,p.status,p.tanggal_pengajuan
-    FROM pengajuan p;
+    FROM inventori_pengajuan p;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -70,7 +70,7 @@ RETURNS TABLE (
 BEGIN 
     RETURN QUERY
     SELECT *
-    FROM pengajuan
+    FROM inventori_pengajuan
     WHERE id_pengajuan = f_id_pengajuan;
 END;
 $$ LANGUAGE plpgsql;
@@ -78,7 +78,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION hapus_pengajuan(f_id_pengajuan VARCHAR)
 RETURNS TEXT AS $$
 BEGIN
-    DELETE FROM pengajuan 
+    DELETE FROM inventori_pengajuan 
     WHERE id_pengajuan = f_id_pengajuan;
     RETURN 'Pengajuan dengan id ' || f_id_pengajuan || ' telah dihapus';
 END;
@@ -95,7 +95,7 @@ BEGIN
         RAISE EXCEPTION 'Status tidak valid';
     END IF;
     
-    UPDATE pengajuan 
+    UPDATE inventori_pengajuan 
     SET 
         status = f_status,
         tanggal_approval = CURRENT_TIMESTAMP,

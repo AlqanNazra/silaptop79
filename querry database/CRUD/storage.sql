@@ -13,7 +13,7 @@ CREATE OR REPLACE FUNCTION tambah_storage(
 )
 RETURNS TEXT AS $$
 BEGIN
-    INSERT INTO storage (kapasitas_gb, tipe)
+    INSERT INTO inventori_storage (kapasitas_gb, tipe)
     VALUES (f_kapasitas, f_tipe);
 
     RETURN 'Storage berhasil ditambahkan!';
@@ -29,7 +29,7 @@ RETURNS TABLE (
 AS $$
 BEGIN
     RETURN QUERY
-    SELECT * FROM storage;
+    SELECT * FROM inventori_storage;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -40,7 +40,7 @@ CREATE OR REPLACE FUNCTION update_storage(
 )
 RETURNS TEXT AS $$
 BEGIN
-    UPDATE storage
+    UPDATE inventori_storage
     SET 
         kapasitas_gb = f_kapasitas,
         tipe = f_tipe
@@ -53,7 +53,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION hapus_storage(f_id INT)
 RETURNS TEXT AS $$
 BEGIN
-    DELETE FROM storage
+    DELETE FROM inventori_storage
     WHERE id_storage = f_id;
 
     RETURN 'Storage berhasil dihapus!';

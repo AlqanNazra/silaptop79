@@ -13,7 +13,7 @@ CREATE TABLE riwayat_aktivitas (
 );
 
 -- Update Table
-ALTER TABLE riwayat_aktivitas
+ALTER TABLE inventori_riwayataktivitas
 ADD COLUMN role_pengguna VARCHAR(50),
 ADD COLUMN nama_aset VARCHAR(255);
 
@@ -97,7 +97,7 @@ BEGIN
         jenis_aktivitas,
         keterangan,
         created_at
-    FROM riwayat_aktivitas
+    FROM inventori_riwayataktivitas
     WHERE id_laptop_inventori = p_id_laptop
     ORDER BY created_at DESC;
 END;
@@ -118,7 +118,7 @@ BEGIN
         jenis_aktivitas,
         keterangan,
         created_at
-    FROM riwayat_aktivitas
+    FROM inventori_riwayataktivitas
     WHERE id_user = p_id_user
     ORDER BY created_at DESC;
 END;
@@ -139,7 +139,7 @@ BEGIN
         jenis_aktivitas,
         keterangan,
         created_at
-    FROM riwayat_aktivitas
+    FROM inventori_riwayataktivitas
     WHERE created_at::DATE = p_tanggal
     ORDER BY created_at DESC;
 END;
@@ -160,7 +160,7 @@ BEGIN
         jenis_aktivitas,
         keterangan,
         created_at
-    FROM riwayat_aktivitas
+    FROM inventori_riwayataktivitas
     WHERE jenis_aktivitas = p_jenis
     ORDER BY created_at DESC;
 END;
@@ -177,6 +177,8 @@ RETURNS TABLE (
     id_aktivitas VARCHAR,
     id_user VARCHAR,
     id_laptop VARCHAR,
+    nama_aset VARCHAR,
+    role_pengguna VARCHAR,
     jenis_aktivitas VARCHAR,
     keterangan TEXT,
     created_at TIMESTAMP
@@ -187,6 +189,8 @@ BEGIN
         id_aktivitas,
         id_user,
         id_laptop_inventori,
+        nama_aset,
+        role_pengguna,
         jenis_aktivitas,
         keterangan,
         created_at
@@ -200,60 +204,55 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Filter joint kobinasi
-CREATE OR REPLACE FUNCTION get_riwayat_lengkap(
-    f_jenis_aktivitas TEXT,
-    f_created_at DATE,
-    p_id_user INT,
-    p_id_laptop INT
-)
-RETURNS TABLE (
-    id_log INT,
-    laptop_name TEXT,
-    username TEXT,
-    aktivitas TEXT,
-    waktu_kejadian TIMESTAMP
-) AS $$
-BEGIN
-    RETURN QUERY
-    SELECT 
-        l.id, 
-        lp.nama_laptop, 
-        u.nama_user, 
-        l.jenis_aktivitas, 
-        l.created_at
-    FROM logs l
-    JOIN laptops lp ON l.id_laptop = lp.id
-    JOIN users u ON l.id_user = u.id
-    WHERE 
-        -- Filter ini bersifat "Strict" karena dipanggil dari blok IF semua-tidak-null
-        l.jenis_aktivitas = f_jenis_aktivitas
-        AND l.created_at::DATE = f_created_at
-        AND l.id_user = p_id_user
-        AND l.id_laptop = p_id_laptop;
-END;
-$$ LANGUAGE plpgsql;
+-- -- Filter joint kobinasi
+-- CREATE OR REPLACE FUNCTION get_riwayat_lengkap(
+--     f_jenis_aktivitas TEXT,
+--     f_created_at DATE,
+--     p_id_user INT,
+--     p_id_laptop INT
+-- )
+-- RETURNS TABLE (
+--     id_log INT,
+--     laptop_name TEXT,
+--     username TEXT,
+--     aktivitas TEXT,
+--     waktu_kejadian TIMESTAMP
+-- ) AS $$
+-- BEGIN
+--     RETURN QUERY
+--     SELECT 
+--         l.id, 
+--         lp.nama_laptop, 
+--         u.nama_user, 
+--         l.jenis_aktivitas, 
+--         l.created_at
+--     FROM logs l
+--     JOIN laptops lp ON l.id_laptop = lp.id
+--     JOIN users u ON l.id_user = u.id
+--     WHERE 
+--         -- Filter ini bersifat "Strict" karena dipanggil dari blok IF semua-tidak-null
+--         l.jenis_aktivitas = f_jenis_aktivitas
+--         AND l.created_at::DATE = f_created_at
+--         AND l.id_user = p_id_user
+--         AND l.id_laptop = p_id_laptop;
+-- END;
+-- $$ LANGUAGE plpgsql;
 
 
 -- DELETE
 CREATE OR REPLACE FUNCTION delete_riwayat(p_id_aktivitas VARCHAR)
 RETURNS TEXT AS $$
 BEGIN
-    DELETE FROM riwayat_aktivitas
+    DELETE FROM inventori_riwayataktivitas
     WHERE id_aktivitas = p_id_aktivitas;
 
     RETURN 'Riwayat berhasil dihapus';
 END;
 $$ LANGUAGE plpgsql;
 
-
-
--- PAGINATION
-
-
 -- Triger 
 CREATE TRIGGER trg_create_riwayat_aktivitas_invetori
-AFTER INSERT OR UPDATE OR DELETE ON laptop_inventori
+AFTER INSERT OR UPDATE OR DELETE ON inventori_laptopinventori
 FOR EACH ROW
 EXECUTE FUNCTION create_riwayat_aktivitas(p_id_aktivitas VARCHAR,
     p_id_user VARCHAR,
@@ -264,7 +263,7 @@ EXECUTE FUNCTION create_riwayat_aktivitas(p_id_aktivitas VARCHAR,
     p_keterangan TEXT);
 
 CREATE TRIGGER trg_create_riwayat_aktivitas_pengadaan
-AFTER INSERT OR UPDATE OR DELETE ON pengadaan
+AFTER INSERT OR UPDATE OR DELETE ON dss_laptoppengadaan
 FOR EACH ROW
 EXECUTE FUNCTION create_riwayat_aktivitas(p_id_aktivitas VARCHAR,
     p_id_user VARCHAR,
@@ -275,7 +274,7 @@ EXECUTE FUNCTION create_riwayat_aktivitas(p_id_aktivitas VARCHAR,
     p_keterangan TEXT);
 
 CREATE TRIGGER trg_create_riwayat_aktivitas_pengajuan
-AFTER INSERT OR UPDATE OR DELETE ON pengajuan
+AFTER INSERT OR UPDATE OR DELETE ON inventori_pengajuan
 FOR EACH ROW
 EXECUTE FUNCTION create_riwayat_aktivitas(p_id_aktivitas VARCHAR,
     p_id_user VARCHAR,
@@ -286,7 +285,7 @@ EXECUTE FUNCTION create_riwayat_aktivitas(p_id_aktivitas VARCHAR,
     p_keterangan TEXT);
 
 CREATE TRIGGER trg_create_riwayat_aktivitas_pemimjaman
-AFTER INSERT OR UPDATE OR DELETE ON pemimjaman
+AFTER INSERT OR UPDATE OR DELETE ON inventori_peminjaman
 FOR EACH ROW
 EXECUTE FUNCTION create_riwayat_aktivitas(p_id_aktivitas VARCHAR,
     p_id_user VARCHAR,

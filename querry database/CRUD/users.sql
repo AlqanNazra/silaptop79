@@ -10,10 +10,13 @@ CREATE TABLE users (
 );
 
 -- Update database
-ALTER TABLE users
+ALTER TABLE inventori_user
 ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 ADD COLUMN updated_at TIMESTAMP,
 ADD COLUMN is_active BOOLEAN DEFAULT TRUE;
+ADD CONSTRAINT role_check
+CHECK (role IN ('HC', 'IT', 'TALENT'));
+ADD CONSTRAINT unique_email UNIQUE (email);
 
 -- Ekstention 
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
@@ -26,24 +29,31 @@ CREATE OR REPLACE FUNCTION create_user(
     p_password TEXT,
     p_role VARCHAR
 )
-RETURNS VOID AS $$
+RETURNS TEXT AS $$
 BEGIN
-    INSERT INTO users (
+    -- VALIDASI EMAIL UNIK
+    IF EXISTS (
+        SELECT 1 FROM inventori_user WHERE email = p_email
+    ) THEN
+        RETURN 'Email sudah digunakan';
+    END IF;
+
+    INSERT INTO inventori_user (
         id_user,
         nama,
         email,
         password,
-        role,
-        created_at
+        role
     )
     VALUES (
         p_id_user,
         p_nama,
         p_email,
-        crypt(p_password, gen_salt('bf')), -- HASH PASSWORD
-        p_role,
-        CURRENT_TIMESTAMP
+        crypt(p_password, gen_salt('bf')),
+        p_role
     );
+
+    RETURN 'User berhasil dibuat';
 END;
 $$ LANGUAGE plpgsql;
 
@@ -64,8 +74,9 @@ BEGIN
         u.email,
         u.role,
         u.is_active
-    FROM users u
-    WHERE u.is_active = TRUE;
+    FROM inventori_user u
+    WHERE u.is_active = TRUE
+    ORDER BY u.created_at DESC;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -79,7 +90,7 @@ RETURNS TABLE (
 BEGIN
     RETURN QUERY
     SELECT id_user, nama, email, role
-    FROM users
+    FROM inventori_user
     WHERE id_user = p_id_user;
 END;
 $$ LANGUAGE plpgsql;
@@ -102,10 +113,12 @@ BEGIN
         u.nama,
         u.email,
         u.role
-    FROM users u
+    FROM inventori_user u
     WHERE u.email = p_email
       AND u.password = crypt(p_password, u.password)
       AND u.is_active = TRUE;
+
+    -- kalau tidak ada hasil → return kosong (normal behavior)
 END;
 $$ LANGUAGE plpgsql;
 
@@ -116,15 +129,16 @@ CREATE OR REPLACE FUNCTION update_user(
     p_email VARCHAR,
     p_role VARCHAR
 )
-RETURNS VOID AS $$
+RETURNS TEXT AS $$
 BEGIN
-    UPDATE users
+    UPDATE inventori_user
     SET 
         nama = p_nama,
         email = p_email,
-        role = p_role,
-        updated_at = CURRENT_TIMESTAMP
+        role = p_role
     WHERE id_user = p_id_user;
+
+    RETURN 'User berhasil diupdate';
 END;
 $$ LANGUAGE plpgsql;
 
@@ -133,30 +147,30 @@ CREATE OR REPLACE FUNCTION update_password(
     p_id_user VARCHAR,
     p_password_baru TEXT
 )
-RETURNS VOID AS $$
+RETURNS TEXT AS $$
 BEGIN
-    UPDATE users
-    SET password = crypt(p_password_baru, gen_salt('bf')),
-        updated_at = CURRENT_TIMESTAMP
+    UPDATE inventori_user
+    SET password = crypt(p_password_baru, gen_salt('bf'))
     WHERE id_user = p_id_user;
+
+    RETURN 'Password berhasil diupdate';
 END;
 $$ LANGUAGE plpgsql;
 
 -- DELETE USER
 CREATE OR REPLACE FUNCTION deactivate_user(p_id_user VARCHAR)
-RETURNS VOID AS $$
+RETURNS TEXT AS $$
 BEGIN
-    UPDATE users
-    SET is_active = FALSE,
-        updated_at = CURRENT_TIMESTAMP
+    UPDATE inventori_user
+    SET is_active = FALSE
     WHERE id_user = p_id_user;
+
+    RETURN 'User berhasil dinonaktifkan';
 END;
 $$ LANGUAGE plpgsql;
 
 -- VALIDASI ROLE 
-ALTER TABLE users
-ADD CONSTRAINT role_check
-CHECK (role IN ('HC', 'IT', 'TALENT'));
+
 
 -- TRIGER
 CREATE OR REPLACE FUNCTION set_updated_at()
@@ -168,6 +182,6 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER trg_users_updated
-BEFORE UPDATE ON users
+BEFORE UPDATE ON inventori_user
 FOR EACH ROW
 EXECUTE FUNCTION set_updated_at();

@@ -1,7 +1,7 @@
 -- =============================================
 -- 11. LAPTOP PENGADAAN (SCRAPING)
 -- =============================================
-CREATE TABLE laptop_pengadaan (
+CREATE TABLE dss_laptoppengadaan (
     id_laptop_pengadaan VARCHAR(100) PRIMARY KEY,
     id_processor INTEGER,
     id_ram INTEGER,
@@ -12,9 +12,9 @@ CREATE TABLE laptop_pengadaan (
     ukuran_layar FLOAT CHECK (ukuran_layar > 0),
     baterai FLOAT CHECK (baterai > 0),
     berat FLOAT CHECK (berat > 0),,
-    FOREIGN KEY (id_processor) REFERENCES processor(id_processor),
-    FOREIGN KEY (id_ram) REFERENCES ram(id_ram),
-    FOREIGN KEY (id_storage) REFERENCES storage(id_storage)
+    FOREIGN KEY (id_processor) REFERENCES inventori_processor(id_processor),
+    FOREIGN KEY (id_ram) REFERENCES inventori_ram(id_ram),
+    FOREIGN KEY (id_storage) REFERENCES inventori_storage(id_storage)
 );
 
 CREATE OR REPLACE FUNCTION tambah_laptop_pengadaan(f_nama_laptop VARCHAR,f_harga INTEGER,f_gpu VARCHAR,f_ukuran_layar FLOAT,

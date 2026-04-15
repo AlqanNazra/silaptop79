@@ -18,6 +18,7 @@ class User(models.Model):
 # 2. MASTER HARDWARE
 # =============================================
 class Processor(models.Model):
+    
     nama_processor = models.CharField(max_length=255)
     manufacturer = models.CharField(max_length=255)
     model = models.CharField(max_length=255)

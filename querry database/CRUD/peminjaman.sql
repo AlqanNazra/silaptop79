@@ -20,7 +20,7 @@ CREATE OR REPLACE FUNCTION tambah_peminjaman(
     f_tanggal_kembali DATE,f_status VARCHAR,f_keterangan TEXT)
 RETURNS VOID AS $$
 BEGIN 
-    INSERT INTO peminjaman(
+    INSERT INTO inventori_peminjaman(
         id_peminjaman,id_user,id_laptop_inventori,
         tanggal_pinjam,tanggal_kembali,status,keterangan
     )
@@ -43,7 +43,7 @@ RETURNS TABLE (
 BEGIN 
     RETURN  QUERY
     SELECT *
-    FROM peminjaman;
+    FROM inventori_peminjaman;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -52,7 +52,7 @@ RETURNS TABLE (id_peminjaman, id_user,id_laptop_inventori,tanggal_pinjam ,tangga
 BEGIN 
     RETURN QUERY
     SELECT *
-    FROM peminjaman b
+    FROM inventori_peminjaman b
     WHERE b.id_peminjaman = f_id_peminjaman;
 END;
 $$ LANGUAGE plpgsql;
@@ -60,7 +60,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION update_peminjaman(f_id_peminjaman VARCHAR(100), f_tanggal_pinjam DATE, f_tanggal_kembali DATE, f_status VARCHAR(50), f_keterangan TEXT)
 RETURNS TEXT AS $$
 BEGIN
-    UPDATE peminjaman
+    UPDATE inventori_peminjaman
     SET tanggal_pinjam = f_tanggal_pinjam, tanggal_kembali = f_tanggal_kembali, status = f_status, keterangan = f_keterangan 
     WHERE id_peminjaman = f_id_peminjaman;
     RETURN 'Pemimjaman berhasil diupdate!';
@@ -70,7 +70,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE function hapus_peminjaman(f_id_peminjaman VARCHAR(100))
 RETURN TEXT As $$
 BEGIN
-    DELETE FROM peminjaman WHERE id_peminjaman = f_id_peminjaman;
+    DELETE FROM inventori_peminjaman WHERE id_peminjaman = f_id_peminjaman;
     RETURN 'DATA pemimjaman dengan id' || id_peminjaman || ' berhasil dihapus,';
 END;
 $$ LANGUAGE plpgsql;
@@ -102,7 +102,7 @@ BEGIN
     END IF;
 
     IF EXISTS (
-        SELECT 1 FROM peminjaman
+        SELECT 1 FROM inventori_peminjaman
         WHERE id_laptop_inventori = f_id_laptop
         AND status = 'dipinjam'
     ) THEN
@@ -111,7 +111,7 @@ BEGIN
 
     -- cek pengajuan
     SELECT status INTO v_status_pengajuan
-    FROM pengajuan
+    FROM inventori_pengajuan
     WHERE id_pengajuan = f_id_pengajuan;
 
     IF v_status_pengajuan != 'approved' THEN
@@ -119,7 +119,7 @@ BEGIN
     END IF;
 
     -- insert peminjaman
-    INSERT INTO peminjaman(
+    INSERT INTO inventori_peminjaman(
         id_peminjaman,
         id_pengajuan,
         id_user,
@@ -141,7 +141,7 @@ BEGIN
     );
 
     -- update laptop
-    UPDATE laptop_inventori
+    UPDATE inventori_laptopinventori
     SET status = 'dipinjam'
     WHERE id_laptop_inventori = f_id_laptop;
 
@@ -159,20 +159,20 @@ DECLARE
     v_id_laptop VARCHAR;
 BEGIN 
     SELECT id_laptop_inventori INTO v_id_laptop 
-    FROM peminjaman 
+    FROM inventori_peminjaman 
     WHERE id_peminjaman = f_id_peminjaman;
 
     IF NOT FOUND THEN
         RETURN 'Data peminjaman tidak ditemukan';
     END IF;
 
-    UPDATE peminjaman
+    UPDATE inventori_peminjaman
     SET status = 'selesai',
         tanggal_kembali = CURRENT_DATE,
         keterangan = f_keterangan
     WHERE id_peminjaman = f_id_peminjaman;
 
-    UPDATE laptop_inventori
+    UPDATE inventori_laptopinventori
     SET status = 'tersedia',
         lokasi = f_lokasi
     WHERE id_laptop_inventori = v_id_laptop;
@@ -184,7 +184,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION rusak_laptop(f_id_laptop VARCHAR,status VARCHAR,f_kondisi VARCHAR)
 RETURNS TEXT AS $$
 BEGIN
-    Update laptop_inventori
+    Update inventori_laptopinventori
     SET status = 'rusak' , kondisi = f_kondisi
     WHERE id_laptop_inventori = f_id_laptop;
     RETURN 'Status laptop' || id_laptop_inventori || 'Sudah diupdate';
@@ -194,7 +194,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION sync_status_laptop()
 RETURNS VOID AS $$
 BEGIN
-    UPDATE laptop_inventori l
+    UPDATE inventori_laptopinventori l
     SET status = CASE
         WHEN EXISTS (
             SELECT 1 FROM peminjaman p
@@ -227,7 +227,7 @@ BEGIN
         li.lokasi,
         p.tanggal_pinjam,
         p.tanggal_kembali
-    FROM laptop_inventori li
+    FROM inventori_laptopinventori li
     LEFT JOIN peminjaman p
         ON p.id_laptop_inventori = li.id_laptop_inventori;
 END;

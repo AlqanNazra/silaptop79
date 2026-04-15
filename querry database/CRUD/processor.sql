@@ -27,7 +27,7 @@ CREATE OR REPLACE FUNCTION tambah_processor(
 )
 RETURNS TEXT AS $$
 BEGIN
-    INSERT INTO processor (
+    INSERT INTO inventori_processor (
         nama_processor,
         manufacturer,
         model,
@@ -70,7 +70,7 @@ RETURNS TABLE (
 AS $$
 BEGIN
     RETURN QUERY
-    SELECT * FROM processor;
+    SELECT * FROM inventori_processor;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -90,7 +90,7 @@ RETURNS TABLE (
 AS $$
 BEGIN
     RETURN QUERY
-    SELECT * FROM processor
+    SELECT * FROM inventori_processor
     WHERE id_processor = f_id;
 END;
 $$ LANGUAGE plpgsql;
@@ -109,7 +109,7 @@ CREATE OR REPLACE FUNCTION update_processor(
 )
 RETURNS TEXT AS $$
 BEGIN
-    UPDATE processor
+    UPDATE inventori_processor
     SET 
         nama_processor = f_nama_processor,
         manufacturer = f_manufacturer,
@@ -129,7 +129,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION hapus_processor(f_id INT)
 RETURNS TEXT AS $$
 BEGIN
-    DELETE FROM processor
+    DELETE FROM inventori_processor
     WHERE id_processor = f_id;
 
     RETURN 'Processor berhasil dihapus!';

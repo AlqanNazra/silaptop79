@@ -1,7 +1,7 @@
 -- =============================================
 -- 5. ALTERNATIF DSS
 -- =============================================
-CREATE TABLE alternatif_dss (
+CREATE TABLE dss_alternatifdss (
     id_alternatif VARCHAR(100) PRIMARY KEY,
     id_dss VARCHAR(100),
     id_laptop_pengadaan VARCHAR(100),
@@ -14,7 +14,7 @@ CREATE TABLE alternatif_dss (
 CREATE OR REPLACE FUNCTION tambah_alternatif_dss(T_id_alternatif VARCHAR(100),T_id_dss VARCHAR(100),T_id_laptop_pengadaan VARCHAR(100),T_id_laptop_inventori VARCHAR(100),T_sumber_data VARCHAR(100))
 RETURNS VOID AS $$
 BEGIN 
-    INSERT INTO  alternatif_dss (id_alternatif,id_dss,id_laptop_pengadaan,id_laptop_invetori,sumber_data)
+    INSERT INTO  dss_alternatifdss (id_alternatif,id_dss,id_laptop_pengadaan,id_laptop_invetori,sumber_data)
     VALUES (T_id_alternatif,T_id_dss,T_id_laptop_pengadaan,T_id_laptop_invetori,T_sumber_data);
 END; 
 $$ LANGUAGE plpgsql;
@@ -39,7 +39,7 @@ BEGIN
         a.id_laptop_pengadaan,
         a.id_laptop_inventori,
         a.sumber_data
-    FROM alternatif_dss a
+    FROM dss_alternatifdss a
     WHERE a.id_alternatif = T_id_alternatif;
 END;
 $$ LANGUAGE plpgsql;
@@ -47,7 +47,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION hapus_alternatif_dss (T_id_alternatif VARCHAR(100))
 RETURNS TEXT AS $$
 BEGIN
-    DELETE FROM alternatif_dss WHERE id_alternatif = T_id_alternatif;
+    DELETE FROM dss_alternatifdss WHERE id_alternatif = T_id_alternatif;
     RETURN 'Data alternatif dengan ID ' || T_id_alternatif  || ' berhasil dihapus';
 END;
 $$ LANGUAGE plpgsql;

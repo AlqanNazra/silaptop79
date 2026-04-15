@@ -1,7 +1,7 @@
 -- =============================================
 -- 12. LAPTOP INVENTORI
 -- =============================================
-CREATE TABLE laptop_inventori (
+CREATE TABLE inventori_laptopinventori (
     id_laptop_inventori VARCHAR(100) PRIMARY KEY,
     no_inventori VARCHAR(100) UNIQUE,
     nama_laptop VARCHAR(255),
@@ -24,7 +24,7 @@ CREATE OR REPLACE FUNCTION tambah_laptop_inventori
 f_lokasi VARCHAR,f_id_processor INTEGER,f_id_ram INTEGER,f_id_storage INTEGER,f_ukuran_layar FLOAT)
 RETURNS VOID AS $$
 BEGIN
-    INSERT INTO laptop_inventori (id_laptop_inventori,no_inventori,nama_laptop,model,os,kondisi,status,lokasi,id_processor,id_ram,id_storage,ukuran_layar)
+    INSERT INTO inventori_laptopinventori (id_laptop_inventori,no_inventori,nama_laptop,model,os,kondisi,status,lokasi,id_processor,id_ram,id_storage,ukuran_layar)
     VALUES (f_generate_id('inventori','laptop_inventori'),generate_no_inventori(),f_nama_laptop,f_model,f_os,f_kondisi,f_status,f_lokasi,f_id_processor,f_id_ram,f_id_storage,f_ukuran_layar);
 END;
 $$ LANGUAGE plpgsql;
@@ -44,7 +44,7 @@ BEGIN
         r.tipe,
         s.kapasitas_gb,
         s.tipe
-    FROM laptop_inventori li
+    FROM inventori_laptopinventori li
     LEFT JOIN processor pro ON li.id_processor = pro.id_processor
     LEFT JOIN ram r ON li.id_ram = r.id_ram
     LEFT JOIN storage s ON li.id_storage = s.id_storage
@@ -96,7 +96,7 @@ BEGIN
         s.kapasitas_gb,
         s.tipe
 
-    FROM laptop_inventori li
+    FROM inventori_laptopinventori li
 
     LEFT JOIN processor pro ON li.id_processor = pro.id_processor
     LEFT JOIN ram r ON li.id_ram = r.id_ram
@@ -150,18 +150,18 @@ BEGIN
         dhs.nilai_preferensi,
         dhs.ranking
 
-    FROM hasil_saw hs
+    FROM dss_hasilsaw hs
 
-    JOIN detail_hasil_saw dhs 
+    JOIN dss_detailhasilsaw dhs 
         ON hs.id_hasil = dhs.id_hasil
 
-    JOIN dss_proses dp 
+    JOIN dss_dssproses dp 
         ON hs.id_dss = dp.id_dss
 
-    JOIN alternatif_dss ad 
+    JOIN dss_alternatifdss ad 
         ON dp.id_dss = ad.id_dss
 
-    LEFT JOIN laptop_inventori li 
+    LEFT JOIN inventori_laptopinventori li 
         ON ad.id_laptop_inventori = li.id_laptop_inventori
 
     WHERE 
@@ -173,7 +173,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION update_kondisi_inventori (f_id_laptop_inventori VARCHAR(100), f_kondisi VARCHAR(100))
 RETURNs TEXT AS $$
 BEGIN
-    UPDATE laptop_inventori
+    UPDATE inventori_laptopinventori
     set kondisi = f_kondisi
     WHERE id_laptop_inventori = f_id_laptop_inventori;
     RETURN 'Kondisi berhasil diupdate!';
@@ -183,7 +183,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION update_status_inventori (f_id_laptop_inventori VARCHAR(100), f_status VARCHAR(100), f_lokasi VARCHAR(100) DEFAULT NULL)
 RETURNs TEXT AS $$
 BEGIN
-    UPDATE laptop_inventori
+    UPDATE inventori_laptopinventori
     set status = f_status, lokasi = f_lokasi
     WHERE id_laptop_inventori = f_id_laptop_inventori;
     RETURN 'status berhasil diupdate!';
@@ -193,7 +193,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION hapus_laptop_inventori (f_id_laptop_inventori VARCHAR)
 RETURNS TEXT AS $$
 BEGIN
-    DELETE FROM laptop_inventori 
+    DELETE FROM inventori_laptopinventori 
     WHERE id_laptop_inventori = f_id_laptop_inventori;
     RETURN 'Data inventori dengan ID ' || f_id_laptop_inventori || ' berhasil dihapus';
 END;
@@ -202,7 +202,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION update_spek_inventori(f_id_laptop_inventori VARCHAR,f_id_processor INTEGER,f_id_ram INTEGER,f_id_storage INTEGER)
 RETURNS TEXT AS $$
 BEGIN
-    UPDATE laptop_inventori
+    UPDATE inventori_laptopinventori
     SET 
         id_processor = f_id_processor,
         id_ram = f_id_ram,

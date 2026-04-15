@@ -15,7 +15,7 @@ CREATE OR REPLACE FUNCTION tambah_ram(
 )
 RETURNS TEXT AS $$
 BEGIN
-    INSERT INTO ram (kapasitas_gb, tipe, keterangan)
+    INSERT INTO inventori_ram (kapasitas_gb, tipe, keterangan)
     VALUES (f_kapasitas, f_tipe, f_keterangan);
 
     RETURN 'RAM berhasil ditambahkan!';
@@ -32,7 +32,7 @@ RETURNS TABLE (
 AS $$
 BEGIN
     RETURN QUERY
-    SELECT * FROM ram;
+    SELECT * FROM inventori_ram;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -44,7 +44,7 @@ CREATE OR REPLACE FUNCTION update_ram(
 )
 RETURNS TEXT AS $$
 BEGIN
-    UPDATE ram
+    UPDATE inventori_ram
     SET 
         kapasitas_gb = f_kapasitas,
         tipe = f_tipe,
@@ -58,7 +58,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION hapus_ram(f_id INT)
 RETURNS TEXT AS $$
 BEGIN
-    DELETE FROM ram
+    DELETE FROM inventori_ram
     WHERE id_ram = f_id;
 
     RETURN 'RAM berhasil dihapus!';

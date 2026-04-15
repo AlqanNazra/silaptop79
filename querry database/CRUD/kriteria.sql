@@ -10,7 +10,7 @@ CREATE TABLE kriteria (
 CREATE OR REPLACE FUNCTION tambah_kriteria (f_nama_kriteria VARCHAR(100),f_tipe_kriteria VARCHAR(20))
 RETURNS VOID AS $$
 BEGIN
-    INSERT INTO kriteria(id_kriteria,nama_kriteria,tipe_kriteria)
+    INSERT INTO dss_kriteria(id_kriteria,nama_kriteria,tipe_kriteria)
     VALUES (f_generate_id('kriteria', 'kriteria'),f_nama_kriteria,f_tipe_kriteria);
 END;
 $$ LANGUAGE plpgsql;
@@ -20,18 +20,18 @@ RETURNS TABLE (id_kriteria VARCHAR,nama_kriteria VARCHAR,tipe_kriteria VARCHAR) 
 BEGIN
     RETURN QUERY
     SELECT id_kriteria,nama_kriteria,tipe_kriteria
-    FROM kriteria;
+    FROM dss_kriteria;
 END;
 $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION update_kriteria (f_id_kriteria VARCHAR(100), f_nama_kriteria VARCHAR(100), f_tipe_kriteria VARCHAR(20))
 RETURNS TEXT AS $$
 BEGIN  
-    UPDATE kriteria
+    UPDATE dss_kriteria
     SET nama_kriteria = f_nama_kriteria, tipe_kriteria = f_tipe_kriteria WHERE id_kriteria = f_id_kriteria;
     RETURN 'Data sudah diupdate';
 END;
 $$ LANGUAGE plpgsql;
 
-ALTER TABLE kriteria
+ALTER TABLE dss_kriteria
 ADD CONSTRAINT kriteria UNIQUE (nama_kriteria);
