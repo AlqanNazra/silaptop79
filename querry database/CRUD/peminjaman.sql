@@ -25,7 +25,7 @@ BEGIN
         tanggal_pinjam,tanggal_kembali,status,keterangan
     )
     VALUES (
-        f_generate_id('PIM','peminjaman'),f_id_user,f_id_laptop_inventori,f_tanggal_pinjam,
+        f_generate_id('PIM','inventori_peminjaman','id_piminjaman'),f_id_user,f_id_laptop_inventori,f_tanggal_pinjam,
         f_tanggal_kembali,f_status,f_keterangan);
 END;
 $$ LANGUAGE plpgsql;

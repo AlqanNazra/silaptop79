@@ -1,7 +1,7 @@
--- =============================================
+ -- =============================================
 --  PEngajuan
 -- =============================================
-CREATE TABLE pengajuan (
+CREATE TABLE inventori_pengajuan (
     id_pengajuan VARCHAR(100) PRIMARY KEY,
     id_user VARCHAR(15),
     kebutuhan_role VARCHAR(100),
@@ -23,7 +23,11 @@ CREATE OR REPLACE FUNCTION tambah_pengajuan (
     f_kebutuhan_requirement TEXT,
     f_bulan DATE,
     f_keterangan TEXT,
-    f_perusahaan TEXT
+    f_perusahaan TEXT,
+    f_status VARCHAR,
+    f_tanggal_pengajuan TIMESTAMP,
+    f_tanggal_approval TIMESTAMP,
+    f_approved_by VARCHAR
 )
 RETURNS VOID AS $$
 BEGIN
@@ -34,46 +38,79 @@ BEGIN
         kebutuhan_requirement,
         bulan,
         keterangan,
-        perusahaan
+        perusahaan,
+        status,
+        tanggal_pengajuan ,
+        tanggal_approval ,
+        approved_by 
     )
     VALUES (
-        f_generate_id('PNJ','pengajuan'),
+        f_generate_id('PNJ','inventori_pengajuan','id_pengajuan'),
         f_id_user,
         f_kebutuhan_role,
         f_kebutuhan_requirement,
         f_bulan,
         f_keterangan,
-        f_perusahaan
+        f_perusahaan,
+        f_status VARCHAR,
+        f_tanggal_pengajuan TIMESTAMP,
+        f_tanggal_approval TIMESTAMP,
+        f_approved_by VARCHAR
     );
 END;
 $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION ambil_semua_pengajuan()
 RETURNS TABLE (
-    id_pengajuan VARCHAR,id_user VARCHAR,id_peminjaman VARCHAR,kebutuhan_role VARCHAR,kebutuhan_requirement TEXT,
-    bulan DATE,keterangan TEXT,perusahaan TEXT,status VARCHAR,tanggal_pengajuan TIMESTAMP
+    id_pengajuan VARCHAR,
+    id_user VARCHAR,
+    kebutuhan_role VARCHAR,
+    kebutuhan_requirement TEXT,
+    bulan DATE,
+    keterangan TEXT,
+    perusahaan TEXT,
+    status VARCHAR,
+    tanggal_pengajuan TIMESTAMPTZ
 ) AS $$
 BEGIN 
     RETURN QUERY
     SELECT 
-        p.id_pengajuan,p.id_user,p.id_peminjaman,p.kebutuhan_role,p.kebutuhan_requirement,
-        p.bulan,p.keterangan,p.perusahaan,p.status,p.tanggal_pengajuan
+        p.id_pengajuan,p.id_user,
+        p.kebutuhan_role,p.kebutuhan_requirement
+        ,p.bulan,p.keterangan,p.perusahaan,
+        p.status,p.tanggal_pengajuan
     FROM inventori_pengajuan p;
 END;
 $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION cari_pengajuan(f_id_pengajuan VARCHAR)
 RETURNS TABLE (
-    id_pengajuan VARCHAR,id_user VARCHAR,id_peminjaman VARCHAR,
-    kebutuhan_role VARCHAR,kebutuhan_requirement TEXT,bulan DATE,keterangan TEXT,perusahaan TEXT,status VARCHAR
+    id_pengajuan VARCHAR,
+    id_user VARCHAR,
+    kebutuhan_role VARCHAR,
+    kebutuhan_requirement TEXT,
+    bulan DATE,
+    keterangan TEXT,
+    perusahaan TEXT,
+    status VARCHAR,
+    tanggal_pengajuan TIMESTAMPTZ
 ) AS $$
 BEGIN 
     RETURN QUERY
-    SELECT *
-    FROM inventori_pengajuan
-    WHERE id_pengajuan = f_id_pengajuan;
+    SELECT 
+        p.id_pengajuan,
+        p.id_user,
+        p.kebutuhan_role,
+        p.kebutuhan_requirement,
+        p.bulan,
+        p.keterangan,
+        p.perusahaan,
+        p.status,
+        p.tanggal_pengajuan
+    FROM inventori_pengajuan p
+    WHERE p.id_pengajuan = f_id_pengajuan;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql;;
 
 CREATE OR REPLACE FUNCTION hapus_pengajuan(f_id_pengajuan VARCHAR)
 RETURNS TEXT AS $$
@@ -99,7 +136,7 @@ BEGIN
     SET 
         status = f_status,
         tanggal_approval = CURRENT_TIMESTAMP,
-        approved_by = f_approved_by
+        approved_by_id = f_approved_by
     WHERE id_pengajuan = f_id_pengajuan;
 
     RETURN 'Pengajuan berhasil diupdate menjadi ' || f_status;

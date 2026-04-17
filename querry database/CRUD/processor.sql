@@ -56,7 +56,7 @@ $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION ambil_processor()
 RETURNS TABLE (
-    id_processor INT,
+    id_processor BIGINT,
     nama_processor VARCHAR,
     manufacturer VARCHAR,
     model VARCHAR,
@@ -74,9 +74,9 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION ambil_processor_by_id(f_id INT)
+CREATE OR REPLACE FUNCTION ambil_processor_by_id(f_id BIGINT)
 RETURNS TABLE (
-    id_processor INT,
+    id_processor BIGINT,
     nama_processor VARCHAR,
     manufacturer VARCHAR,
     model VARCHAR,
@@ -90,8 +90,17 @@ RETURNS TABLE (
 AS $$
 BEGIN
     RETURN QUERY
-    SELECT * FROM inventori_processor
-    WHERE id_processor = f_id;
+    SELECT p.id_processor, 
+        p.nama_processor, 
+        p.manufacturer, 
+        p.model, 
+        p.cores, 
+        p.threads, 
+        p.base_clock, 
+        p.max_clock, 
+        p.arsitektur, 
+        p.keterangan FROM inventori_processor
+    WHERE p.id_processor = f_id;
 END;
 $$ LANGUAGE plpgsql;
 

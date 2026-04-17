@@ -15,7 +15,7 @@ tambah_detail_hasil_saw(f_id_hasil VARCHAR(100), f_nilai_normalisasi FLOAT, f_ni
 RETURNS VOID AS $$
 BEGIN
     INSERT INTO dss_detailhasilsaw(id_detail, id_hasil, nilai_normalisasi, nilai_preferensi,ranking)
-    VALUES (f_generate_id('detailsaw','detail_hasil_saw'), f_id_hasil, f_nilai_normalisasi, f_nilai_preferensi, f_ranking);
+    VALUES (f_generate_id('DHS','dss_detailhasilsaw','id_detail'), f_id_hasil, f_nilai_normalisasi, f_nilai_preferensi, f_ranking);
 END;
 $$ LANGUAGE plpgsql;
 
@@ -25,7 +25,7 @@ BEGIN
     RETURN QUERY
     SELECT d.id_detail,d.id_hasil,d.nilai_normalisasi,d.nilai_preferensi,d.ranking
     FROM dss_detailhasilsaw d
-    WHERE d.id_detail = f_id_bobot;
+    WHERE d.id_detail = f_id_detail;
 END;  
 $$ LANGUAGE plpgsql;
 
@@ -34,29 +34,49 @@ RETURNS TABLE (id_detail VARCHAR, id_hasil VARCHAR, nilai_normalisasi FLOAT, nil
 AS $$
 BEGIN
     RETURN QUERY
-    SELECT id_detail,id_hasil,nilai_normalisasi,nilai_preferensi,ranking
-    FROM dss_detailhasilsaw;
+    SELECT d.id_detail,d.id_hasil,d.nilai_normalisasi,d.nilai_preferensi,d.ranking
+    FROM dss_detailhasilsaw d;
 END;
 $$ LANGUAGE plpgsql;
 
 
-CREATE OR REPLACE FUNCTION hapus_detail_hasil_saw(f_id_detail VARCHAR)
-RETURNS TEXT AS $$ DECLARE v_id_hasil VARCHAR;
+CREATE OR REPLACE FUNCTION hapus_detail_hasil_saw(
+    f_id_detail VARCHAR
+)
+RETURNS TEXT AS $$
+DECLARE 
+    v_id_hasil VARCHAR;
 BEGIN
-    -- ambil id_hasil dulu
+    -- ambil id_hasil
     SELECT id_hasil INTO v_id_hasil
     FROM dss_detailhasilsaw
-    WHERE id_bobot = f_id_detail;
+    WHERE id_detail = f_id_detail;
 
-    -- hapus bobot dulu (child)
+    -- DEBUG
+    RAISE NOTICE 'ID HASIL: %', v_id_hasil;
+
+    IF v_id_hasil IS NULL THEN
+        RETURN 'ID hasil tidak ditemukan dari detail';
+    END IF;
+
+    -- hapus child
     DELETE FROM dss_detailhasilsaw
     WHERE id_detail = f_id_detail;
 
-    -- hapus hasil (parent)
-    DELETE FROM dss_detailhasilsaw
-    WHERE id_hasil = v_id_hasil;
+    -- cek apakah masih ada child
+    IF NOT EXISTS (
+        SELECT 1 
+        FROM dss_detailhasilsaw
+        WHERE id_hasil = v_id_hasil
+    ) THEN
+        DELETE FROM dss_hasilsaw
+        WHERE id_hasil = v_id_hasil;
 
-    RETURN 'detail dan hasil saw berhasil dihapus';
+        RETURN 'Detail dan parent berhasil dihapus';
+    ELSE
+        RETURN 'Detail dihapus, tapi parent masih punya child lain';
+    END IF;
+
 END;
 $$ LANGUAGE plpgsql;
 

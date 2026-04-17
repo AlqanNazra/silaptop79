@@ -1,31 +1,34 @@
-CREATE OR REPLACE FUNCTION f_generate_id(prefix VARCHAR, nama_tabel VARCHAR)
+CREATE OR REPLACE FUNCTION f_generate_id(
+    prefix VARCHAR, 
+    nama_tabel VARCHAR, 
+    nama_kolom VARCHAR
+)
 RETURNS VARCHAR AS $$
 DECLARE
     last_id VARCHAR;
     new_no INT;
-    final_id VARCHAR;
     query_str TEXT;
 BEGIN
-    -- 1. Cari ID terakhir dari tabel yang ditentukan secara dinamis
-    -- Kita asumsikan nama kolom primary key-nya adalah 'id'
-    -- Jika nama kolom PK berbeda-beda, kamu bisa menambah parameter ketiga untuk nama kolom
-    query_str := 'SELECT id FROM ' || quote_ident(nama_tabel) || ' ORDER BY id DESC LIMIT 1';
+    query_str := 'SELECT ' || quote_ident(nama_kolom) || 
+                 ' FROM ' || quote_ident(nama_tabel) || 
+                 ' ORDER BY ' || quote_ident(nama_kolom) || ' DESC LIMIT 1';
     
     EXECUTE query_str INTO last_id;
 
-    -- 2. Cek apakah tabel kosong atau belum ada ID
-    IF last_id IS NULL THEN
+    IF last_id IS NULL OR last_id = '' THEN
         new_no := 1;
     ELSE
-        -- Mengambil angka di belakang underscore (misal mobil_0001 -> ambil 0001)
-        -- Lalu mengubahnya menjadi integer dan ditambah 1
-        new_no := (split_part(last_id, '_', 2)::INT) + 1;
+        -- Menggunakan regex untuk mengambil angka saja dari string ID
+        -- Ini lebih aman daripada split_part jika ada banyak underscore
+        BEGIN
+            new_no := (substring(last_id FROM '[0-9]+$')::INT) + 1;
+        EXCEPTION WHEN OTHERS THEN
+            -- Jika gagal ekstrak angka, mulai dari 1
+            new_no := 1;
+        END;
     END IF;
 
-    -- 3. Format angka menjadi 4 digit (LPAD) dan gabungkan dengan prefix
-    final_id := prefix || '_' || LPAD(new_no::TEXT, 4, '0');
-
-    RETURN final_id;
+    RETURN prefix || '_' || LPAD(new_no::TEXT, 4, '0');
 END;
 $$ LANGUAGE plpgsql;
 

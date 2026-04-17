@@ -17,14 +17,45 @@ CREATE TABLE dss_laptoppengadaan (
     FOREIGN KEY (id_storage) REFERENCES inventori_storage(id_storage)
 );
 
-CREATE OR REPLACE FUNCTION tambah_laptop_pengadaan(f_nama_laptop VARCHAR,f_harga INTEGER,f_gpu VARCHAR,f_ukuran_layar FLOAT,
-f_baterai FLOAT,f_id_processor INTEGER,f_id_ram INTEGER,f_id_storage INTEGER,f_berat FLOAT)
-RETURNS VOID AS $$
+CREATE OR REPLACE FUNCTION tambah_laptop_pengadaan(
+    f_nama_laptop VARCHAR,
+    f_harga INTEGER,
+    f_gpu VARCHAR,
+    f_ukuran_layar FLOAT,
+    f_baterai FLOAT,
+    f_id_processor INTEGER,
+    f_id_ram INTEGER,
+    f_id_storage INTEGER,
+    f_berat FLOAT
+)
+RETURNS TEXT AS $$
 BEGIN
-    INSERT INTO laptop_pengadaan (id_laptop_pengadaan,id_processor,id_ram,id_storage,
-    nama_laptop,harga,gpu,ukuran_layar,baterai,berat)
-    VALUES (f_generate_id('pengadaan','laptop_pengadaan'),f_id_processor,f_id_ram,f_id_storage,
-    f_nama_laptop,f_harga,f_gpu,f_ukuran_layar,f_baterai,f_berat);
+    INSERT INTO dss_laptoppengadaan (
+        id_laptop_pengadaan,
+        id_processor,
+        id_ram,
+        id_storage,
+        nama_laptop,
+        harga,
+        gpu,
+        ukuran_layar,
+        baterai,
+        berat
+    )
+    VALUES (
+        f_generate_id('LP','dss_laptoppengadaan','id_laptop_pengadaan'), -- sesuaikan!
+        f_id_processor,
+        f_id_ram,
+        f_id_storage,
+        f_nama_laptop,
+        f_harga,
+        f_gpu,
+        f_ukuran_layar,
+        f_baterai,
+        f_berat
+    );
+
+    RETURN 'Insert berhasil';
 END;
 $$ LANGUAGE plpgsql;
 
@@ -68,17 +99,17 @@ BEGIN
         r.tipe,
         s.kapasitas_gb,
         s.tipe
-    FROM laptop_pengadaan lp
-    LEFT JOIN processor pro ON lp.id_processor = pro.id_processor
-    LEFT JOIN ram r ON lp.id_ram = r.id_ram
-    LEFT JOIN storage s ON lp.id_storage = s.id_storage;
+    FROM dss_laptoppengadaan lp
+    LEFT JOIN inventori_processor pro ON lp.id_processor = pro.id_processor
+    LEFT JOIN inventori_ram r ON lp.id_ram = r.id_ram
+    LEFT JOIN inventori_storage s ON lp.id_storage = s.id_storage;
 END;
 $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION update_laptop_pengadaan(f_id_laptop_pengadaan VARCHAR,f_nama_laptop VARCHAR,f_harga INTEGER,f_gpu VARCHAR,f_ukuran_layar FLOAT,f_baterai FLOAT)
 RETURNS TEXT AS $$
 BEGIN
-    UPDATE laptop_pengadaan
+    UPDATE dss_laptoppengadaan
     SET 
         nama_laptop = f_nama_laptop,
         harga = f_harga,
@@ -94,7 +125,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION update_spek_pengadaan(f_id_laptop_pengadaan VARCHAR,f_id_processor INTEGER,f_id_ram INTEGER,f_id_storage INTEGER)
 RETURNS TEXT AS $$
 BEGIN
-    UPDATE laptop_pengadaan
+    UPDATE dss_laptoppengadaan
     SET 
         id_processor = f_id_processor,
         id_ram = f_id_ram,
@@ -110,7 +141,7 @@ CREATE OR REPLACE FUNCTION hapus_laptop_pengadaan(
 )
 RETURNS TEXT AS $$
 BEGIN
-    DELETE FROM laptop_pengadaan
+    DELETE FROM dss_laptoppengadaan
     WHERE id_laptop_pengadaan = f_id_laptop_pengadaan;
 
     RETURN 'Data laptop pengadaan berhasil dihapus!';
@@ -157,18 +188,18 @@ BEGIN
         dhs.nilai_preferensi,
         dhs.ranking
 
-    FROM hasil_saw hs
+    FROM dss_hasilsaw hs
 
-    JOIN detail_hasil_saw dhs 
+    JOIN dss_detailhasilsaw dhs 
         ON hs.id_hasil = dhs.id_hasil
 
     JOIN dss_proses dp 
         ON hs.id_dss = dp.id_dss
 
-    JOIN alternatif_dss ad 
+    JOIN dss_alternatifdss ad 
         ON dp.id_dss = ad.id_dss
 
-    LEFT JOIN laptop_pengadaan lp 
+    LEFT JOIN dss_laptoppengadaan lp 
         ON ad.id_laptop_pengadaan = lp.id_laptop_pengadaan
 
     WHERE 

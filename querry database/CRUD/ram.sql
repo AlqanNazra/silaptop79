@@ -24,7 +24,7 @@ $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION ambil_ram()
 RETURNS TABLE (
-    id_ram INT,
+    id_ram BIGINT,
     kapasitas_gb INT,
     tipe VARCHAR,
     keterangan TEXT

@@ -19,7 +19,7 @@ BEGIN
     END IF;
 
     INSERT INTO dss_hasilsaw(id_hasil,id_dss)
-    VALUES (f_generate_id('saw','hasil_saw'),f_id_dss);
+    VALUES (f_generate_id('SAW','hasil_saw','id_hasil'),f_id_dss);
     RETURN 'Hasil SAW berhasil dibuat';
 END;
 $$ LANGUAGE plpgsql;

@@ -15,7 +15,7 @@ CREATE OR REPLACE FUNCTION tambah_bobot_kriteria(f_id_kriteria VARCHAR(100), f_r
 RETURNS VOID AS $$
 BEGIN 
     INSERT INTO dss_bobotkriteria(id_bobot,id_kriteria, role, nilai_bobot)
-    VALUES (f_generate_id('bobot','bobot_kriteria'), f_id_kriteria, f_role, f_nilai_bobot);
+    VALUES (f_generate_id('bobot','dss_bobotkriteria','id_bobot'), f_id_kriteria, f_role, f_nilai_bobot);
 END;
 $$ LANGUAGE plpgsql;
 
@@ -25,7 +25,7 @@ CREATE OR REPLACE FUNCTION cari_bobot_kriteria(f_id_bobot VARCHAR(100))
 RETURNS TABLE (id_bobot VARCHAR,id_kriteria VARCHAR, role VARCHAR, nilai_bobot FLOAT) AS $$
 BEGIN 
     RETURN  QUERY
-    SELECT b.id_bobot,b.id_kriteria, b.role, b.nilai_bobot
+    SELECT b.id_bobot,b.kriteria_id, b.role, b.nilai_bobot
     FROM dss_bobotkriteria b
     WHERE b.id_bobot = f_id_bobot;
 END;
@@ -35,8 +35,8 @@ CREATE OR REPLACE FUNCTION ambil_semua_data_detail_bobot()
 RETURNS TABLE (id_bobot VARCHAR,id_kriteria VARCHAR, role VARCHAR, nilai_bobot FLOAT) AS $$
 BEGIN
     RETURN  QUERY
-    SELECT *
-    FROM dss_bobotkriteria;
+    SELECT b.id_bobot,b.kriteria_id, b.role, b.nilai_bobot
+    FROM dss_bobotkriteria b;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -55,24 +55,38 @@ $$ LANGUAGE plpgsql;
 -- DELETE bobot kriteria
 
 CREATE OR REPLACE FUNCTION hapus_bobot_kriteria(f_id_bobot VARCHAR)
-RETURNS TEXT AS $$ DECLARE v_id_kriteria VARCHAR;
+RETURNS TEXT AS $$ 
+DECLARE 
+    v_id_kriteria VARCHAR;
+    v_jumlah_bobot_lain INT;
 BEGIN
-    -- ambil id_kriteria dulu
+    -- 1. Ambil id_kriteria dari baris yang akan dihapus
     SELECT id_kriteria INTO v_id_kriteria
     FROM dss_bobotkriteria
     WHERE id_bobot = f_id_bobot;
 
-    -- hapus bobot dulu (child)
+    -- Jika data tidak ditemukan, keluar
+    IF v_id_kriteria IS NULL THEN
+        RETURN 'Data bobot tidak ditemukan';
+    END IF;
+
+    -- 2. Hapus baris bobot yang dimaksud (Child)
     DELETE FROM dss_bobotkriteria
     WHERE id_bobot = f_id_bobot;
 
-    -- hapus kriteria (parent)
-    DELETE FROM dss_kriteria
+    -- 3. Cek apakah masih ada baris LAIN yang menggunakan kriteria tersebut
+    SELECT COUNT(*) INTO v_jumlah_bobot_lain
+    FROM dss_bobotkriteria
     WHERE id_kriteria = v_id_kriteria;
 
-    RETURN 'Bobot dan kriteria berhasil dihapus';
+    -- 4. Jika sudah bersih (tidak ada lagi yang pakai), baru hapus kriterianya (Parent)
+    IF v_jumlah_bobot_lain = 0 THEN
+        DELETE FROM dss_kriteria
+        WHERE id_kriteria = v_id_kriteria;
+        RETURN 'Bobot dan kriteria berhasil dihapus sepenuhnya';
+    ELSE
+        RETURN 'Data bobot berhasil dihapus, kriteria tetap ada karena masih digunakan bobot lain';
+    END IF;
+
 END;
 $$ LANGUAGE plpgsql;
-
--- Cara panggil:
--- SELECT update_stok(4, 15);

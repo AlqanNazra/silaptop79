@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'inventori',
     'dss',
+    'seeders',
 ]
 
 MIDDLEWARE = [

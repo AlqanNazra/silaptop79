@@ -1,0 +1,105 @@
+import psycopg2
+from psycopg2.extras import RealDictCursor
+from dto.dto_pengajuan import PengajuanDTO
+from interfaces.interface_pengajuan import IPengajuanRepository
+
+
+class PengajuanRepository(IPengajuanRepository):
+
+    def __init__(self, conn):
+        self.conn = conn
+
+    # =========================
+    # CREATE
+    # =========================
+    def tambah_pengajuan(self, data: PengajuanDTO):
+        query = """
+        SELECT tambah_pengajuan(%s,%s,%s,%s,%s,%s);
+        """
+
+        with self.conn.cursor() as cur:
+            cur.execute(query, (
+                data.id_user,
+                data.kebutuhan_role,
+                data.kebutuhan_requirement,
+                data.bulan,
+                data.keterangan,
+                data.perusahaan
+            ))
+            self.conn.commit()
+
+            return "Pengajuan berhasil ditambahkan"
+
+    # =========================
+    # READ ALL
+    # =========================
+    def ambil_semua_pengajuan(self):
+        query = "SELECT * FROM ambil_semua_pengajuan();"
+
+        with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
+            cur.execute(query)
+            rows = cur.fetchall()
+
+            return [self._map_to_dto(row) for row in rows]
+
+    # =========================
+    # READ BY ID
+    # =========================
+    def cari_pengajuan(self, id_pengajuan):
+        query = "SELECT * FROM cari_pengajuan(%s);"
+
+        with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
+            cur.execute(query, (id_pengajuan,))
+            row = cur.fetchone()
+
+            return self._map_to_dto(row) if row else None
+
+    # =========================
+    # DELETE
+    # =========================
+    def hapus_pengajuan(self, id_pengajuan):
+        query = "SELECT hapus_pengajuan(%s);"
+
+        with self.conn.cursor() as cur:
+            cur.execute(query, (id_pengajuan,))
+            result = cur.fetchone()
+            self.conn.commit()
+
+            return result[0] if result else None
+
+    # =========================
+    # APPROVE / REJECT
+    # =========================
+    def approve_pengajuan(self, data: PengajuanDTO):
+        query = """
+        SELECT approve_pengajuan(%s,%s,%s);
+        """
+
+        with self.conn.cursor() as cur:
+            cur.execute(query, (
+                data.id_pengajuan,
+                data.status,        # approved / rejected
+                data.approved_by
+            ))
+            result = cur.fetchone()
+            self.conn.commit()
+
+            return result[0] if result else None
+
+    # =========================
+    # MAPPING
+    # =========================
+    def _map_to_dto(self, row):
+        return PengajuanDTO(
+            id_pengajuan=row.get("id_pengajuan"),
+            id_user=row.get("id_user"),
+            kebutuhan_role=row.get("kebutuhan_role"),
+            kebutuhan_requirement=row.get("kebutuhan_requirement"),
+            bulan=row.get("bulan"),
+            keterangan=row.get("keterangan"),
+            perusahaan=row.get("perusahaan"),
+            status=row.get("status"),
+            tanggal_pengajuan=row.get("tanggal_pengajuan"),
+            tanggal_approval=row.get("tanggal_approval"),
+            approved_by=row.get("approved_by")
+        )

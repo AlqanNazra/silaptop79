@@ -6,21 +6,34 @@ CREATE TABLE kriteria (
     nama_kriteria VARCHAR(255) NOT NULL,
     tipe_kriteria VARCHAR(20) CHECK (tipe_kriteria IN ('benefit','cost'))
 );
+ALTER TABLE dss_kriteria
+ADD CONSTRAINT kriteria UNIQUE (nama_kriteria);
 
-CREATE OR REPLACE FUNCTION tambah_kriteria (f_nama_kriteria VARCHAR(100),f_tipe_kriteria VARCHAR(20))
+
+CREATE OR REPLACE FUNCTION tambah_kriteria (
+    f_nama_kriteria VARCHAR(100),
+    f_tipe_kriteria VARCHAR(20)
+)
 RETURNS VOID AS $$
 BEGIN
-    INSERT INTO dss_kriteria(id_kriteria,nama_kriteria,tipe_kriteria)
-    VALUES (f_generate_id('kriteria', 'kriteria'),f_nama_kriteria,f_tipe_kriteria);
+    INSERT INTO dss_kriteria(id_kriteria, nama_kriteria, tipe_kriteria)
+    VALUES (
+        f_generate_id('KRIT', 'dss_kriteria', 'id_kriteria'),
+        f_nama_kriteria,
+        f_tipe_kriteria
+    );
 END;
 $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION ambil_kriteria()
-RETURNS TABLE (id_kriteria VARCHAR,nama_kriteria VARCHAR,tipe_kriteria VARCHAR) AS $$
+RETURNS TABLE (id_kriteria VARCHAR, nama_kriteria VARCHAR, tipe_kriteria VARCHAR) AS $$
 BEGIN
     RETURN QUERY
-    SELECT id_kriteria,nama_kriteria,tipe_kriteria
-    FROM dss_kriteria;
+    SELECT 
+        k.id_kriteria, 
+        k.nama_kriteria, 
+        k.tipe_kriteria
+    FROM dss_kriteria k; 
 END;
 $$ LANGUAGE plpgsql;
 

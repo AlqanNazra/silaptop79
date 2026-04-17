@@ -84,3 +84,42 @@ class DetailHasilSAW(models.Model):
     nilai_normalisasi = models.FloatField()
     nilai_preferensi = models.FloatField()
     ranking = models.IntegerField()
+    
+# =============================================
+# 7. LAPTOP PENGADAAN (SCRAPING)
+# =============================================
+class LaptopPengadaan(models.Model):
+    id_laptop_pengadaan = models.CharField(primary_key=True, max_length=100)
+
+    # Foreign Key ke tabel inventori
+    processor = models.ForeignKey(
+        'inventori.Processor',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+
+    ram = models.ForeignKey(
+        'inventori.RAM',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+
+    storage = models.ForeignKey(
+        'inventori.Storage',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+
+    nama_laptop = models.CharField(max_length=255)
+    harga = models.IntegerField()
+    gpu = models.CharField(max_length=255, null=True, blank=True)
+
+    ukuran_layar = models.FloatField()
+    baterai = models.FloatField()
+    berat = models.FloatField()
+
+    def __str__(self):
+        return self.nama_laptop

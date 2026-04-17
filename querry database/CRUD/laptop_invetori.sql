@@ -21,17 +21,26 @@ CREATE TABLE inventori_laptopinventori (
 
 CREATE OR REPLACE FUNCTION tambah_laptop_inventori
 (f_nama_laptop VARCHAR,f_model VARCHAR,VARCHAR,f_kondisi VARCHAR,f_status VARCHAR,
-f_lokasi VARCHAR,f_id_processor INTEGER,f_id_ram INTEGER,f_id_storage INTEGER,f_ukuran_layar FLOAT)
+f_lokasi VARCHAR,f_id_processor BIGINT,f_id_ram BIGINT,f_id_storage BIGINT,f_ukuran_layar FLOAT)
 RETURNS VOID AS $$
 BEGIN
     INSERT INTO inventori_laptopinventori (id_laptop_inventori,no_inventori,nama_laptop,model,os,kondisi,status,lokasi,id_processor,id_ram,id_storage,ukuran_layar)
-    VALUES (f_generate_id('inventori','laptop_inventori'),generate_no_inventori(),f_nama_laptop,f_model,f_os,f_kondisi,f_status,f_lokasi,f_id_processor,f_id_ram,f_id_storage,f_ukuran_layar);
+    VALUES (f_generate_id('inventori','inventori_laptopinventori'),generate_no_inventori(),f_nama_laptop,f_model,f_os,f_kondisi,f_status,f_lokasi,f_id_processor,f_id_ram,f_id_storage,f_ukuran_layar);
 END;
 $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION ambil_spek_laptop(f_id_laptop_inventori VARCHAR)
-RETURNS TABLE (nama_processor VARCHAR,manufacturer VARCHAR,processor_model VARCHAR,cores INT,threads INT,
-    ram_kapasitas INT,ram_tipe VARCHAR,storage_kapasitas INT,storage_tipe VARCHAR) AS $$
+RETURNS TABLE (
+    nama_processor VARCHAR,
+    manufacturer VARCHAR,
+    processor_model VARCHAR,
+    cores INT,
+    threads INT,
+    ram_kapasitas INT,
+    ram_tipe VARCHAR,
+    storage_kapasitas INT,
+    storage_tipe VARCHAR
+) AS $$
 BEGIN
     RETURN QUERY
     SELECT 
@@ -45,9 +54,9 @@ BEGIN
         s.kapasitas_gb,
         s.tipe
     FROM inventori_laptopinventori li
-    LEFT JOIN processor pro ON li.id_processor = pro.id_processor
-    LEFT JOIN ram r ON li.id_ram = r.id_ram
-    LEFT JOIN storage s ON li.id_storage = s.id_storage
+    LEFT JOIN inventori_processor pro ON li.id_processor = pro.id_processor
+    LEFT JOIN inventori_ram r ON li.id_ram = r.id_ram
+    LEFT JOIN inventori_storage s ON li.id_storage = s.id_storage
     WHERE li.id_laptop_inventori = f_id_laptop_inventori;
 END;
 $$ LANGUAGE plpgsql;
@@ -98,9 +107,9 @@ BEGIN
 
     FROM inventori_laptopinventori li
 
-    LEFT JOIN processor pro ON li.id_processor = pro.id_processor
-    LEFT JOIN ram r ON li.id_ram = r.id_ram
-    LEFT JOIN storage s ON li.id_storage = s.id_storage;
+    LEFT JOIN inventori_processor pro ON li.id_processor = pro.id_processor
+    LEFT JOIN inventori_ram r ON li.id_ram = r.id_ram
+    LEFT JOIN inventori_storage s ON li.id_storage = s.id_storage;
 END;
 $$ LANGUAGE plpgsql;
 

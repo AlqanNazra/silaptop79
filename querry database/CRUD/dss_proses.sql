@@ -12,20 +12,42 @@ CREATE TABLE dss_dssproses (
     FOREIGN KEY (id_bobot) REFERENCES bobot_kriteria(id_bobot)
 );
 
-CREATE OR REPLACE FUNCTION tambah_dss_proses (f_id_user VARCHAR(100),f_id_bobot VARCHAR(100),f_role_dss VARCHAR(100),f_jenis_dss VARCHAR(100))
-RETURNS VOID AS $$
+CREATE OR REPLACE FUNCTION tambah_dss_proses (
+    f_id_user VARCHAR,
+    f_id_bobot VARCHAR,
+    f_role_dss VARCHAR,
+    f_jenis_dss VARCHAR
+)
+RETURNS TEXT AS $$
 BEGIN
-    INSERT INTO dss_dssproses(id_dss,id_user,id_bobot,role_dss,jenis_dss)
-    VALUES (f_generate_id('dss','dss_proses'),f_id_user,f_id_bobot,f_role_dss,f_jenis_dss);
+    INSERT INTO dss_dssproses(
+        id_dss,
+        id_user,
+        id_bobot,
+        role_dss,
+        jenis_dss,
+        created_at
+    )
+    VALUES (
+        f_generate_id('DSS','dss_dssproses','id_dss'),
+        f_id_user,
+        f_id_bobot,
+        f_role_dss,
+        f_jenis_dss,
+        CURRENT_TIMESTAMP
+    );
+
+    RETURN 'DSS proses berhasil ditambahkan';
 END;
 $$ LANGUAGE plpgsql;
+
 
 CREATE OR REPLACE FUNCTION ambil_semua_dss_proses()
 RETURNS TABLE (id_dss VARCHAR,id_user VARCHAR,id_bobot VARCHAR,role_dss VARCHAR,jenis_dss VARCHAR,created_at TIMESTAMP) AS $$
 BEGIN
     RETURN QUERY
-    SELECT id_dss,id_user,id_bobot,role_dss,jenis_dss,created_at
-    FROM dss_dssproses;
+    SELECT d.id_dss,d.id_user,d.id_bobot,d.role_dss,d.jenis_dss,d.created_at
+    FROM dss_dssproses d;
 END;
 $$ LANGUAGE plpgsql;
 

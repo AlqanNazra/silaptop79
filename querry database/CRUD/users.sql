@@ -46,7 +46,7 @@ BEGIN
         role
     )
     VALUES (
-        p_id_user,
+        f_generate_id('USR','inventori_user','id_user'),
         p_nama,
         p_email,
         crypt(p_password, gen_salt('bf')),
@@ -89,8 +89,8 @@ RETURNS TABLE (
 ) AS $$
 BEGIN
     RETURN QUERY
-    SELECT id_user, nama, email, role
-    FROM inventori_user
+    SELECT u.id_user, u.nama, u.email, u.role
+    FROM inventori_user u
     WHERE id_user = p_id_user;
 END;
 $$ LANGUAGE plpgsql;

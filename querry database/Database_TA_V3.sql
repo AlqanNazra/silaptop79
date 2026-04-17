@@ -9,19 +9,30 @@ CREATE TABLE users (
     role VARCHAR(50) NOT NULL
 );
 
+-- Update database
+ALTER TABLE inventori_user
+ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN updated_at TIMESTAMP,
+ADD COLUMN is_active BOOLEAN DEFAULT TRUE;
+ADD CONSTRAINT role_check
+CHECK (role IN ('HC', 'IT', 'TALENT'));
+ADD CONSTRAINT unique_email UNIQUE (email);
+
 -- =============================================
 -- 2. KRITERIA
 -- =============================================
-CREATE TABLE kriteria (
+CREATE TABLE dss_kriteria (
     id_kriteria VARCHAR(100) PRIMARY KEY,
     nama_kriteria VARCHAR(255) NOT NULL,
     tipe_kriteria VARCHAR(20) CHECK (tipe_kriteria IN ('benefit','cost'))
 );
+ALTER TABLE dss_kriteria
+ADD CONSTRAINT kriteria UNIQUE (nama_kriteria);
 
 -- =============================================
 -- 3. BOBOT KRITERIA (SWARA)
 -- =============================================
-CREATE TABLE bobot_kriteria (
+CREATE TABLE dss_bobotkriteria (
     id_bobot VARCHAR(100) PRIMARY KEY,
     id_kriteria VARCHAR(100),
     role VARCHAR(100),
@@ -32,7 +43,7 @@ CREATE TABLE bobot_kriteria (
 -- =============================================
 -- 4. DSS PROSES
 -- =============================================
-CREATE TABLE dss_proses (
+CREATE TABLE dss_dssproses (
     id_dss VARCHAR(100) PRIMARY KEY,
     id_user VARCHAR(15),
     id_bobot VARCHAR(100),
@@ -46,7 +57,7 @@ CREATE TABLE dss_proses (
 -- =============================================
 -- 5. ALTERNATIF DSS
 -- =============================================
-CREATE TABLE alternatif_dss (
+CREATE TABLE dss_alternatifdss (
     id_alternatif VARCHAR(100) PRIMARY KEY,
     id_dss VARCHAR(100),
     id_laptop_pengadaan VARCHAR(100),
@@ -58,7 +69,7 @@ CREATE TABLE alternatif_dss (
 -- =============================================
 -- 6. HASIL SAW
 -- =============================================
-CREATE TABLE hasil_saw (
+CREATE TABLE dss_hasilsaw (
     id_hasil VARCHAR(100) PRIMARY KEY,
     id_dss VARCHAR(100),
     tanggal_proses TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -68,7 +79,7 @@ CREATE TABLE hasil_saw (
 -- =============================================
 -- 7. DETAIL HASIL SAW
 -- =============================================
-CREATE TABLE detail_hasil_saw (
+CREATE TABLE dss_detailhasilsaw (
     id_detail VARCHAR(100) PRIMARY KEY,
     id_hasil VARCHAR(100),
     nilai_normalisasi FLOAT,
@@ -80,7 +91,7 @@ CREATE TABLE detail_hasil_saw (
 -- =============================================
 -- 8. PROCESSOR
 -- =============================================
-CREATE TABLE processor (
+CREATE TABLE inventori_processor (
     id_processor SERIAL PRIMARY KEY,
     nama_processor VARCHAR(255),
     manufacturer VARCHAR(255),
