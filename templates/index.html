@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - SiLaptop79{% endblock %}
+
+{% block content %}
+<section class="hero-section">
+    <div class="hero-text">
+        <h1>Manajemen Inventori & <br><span class="highlight">Rekomendasi Laptop</span></h1>
+        <p>Sistem Pendukung Keputusan (SPK) pemilihan laptop karyawan berdasarkan metode SWARA dan SAW secara cerdas dan otomatis.</p>
+        <div class="hero-actions">
+            <a href="#" class="btn-primary">Mulai Analisis</a>
+            <a href="#" class="btn-secondary">Lihat Inventori</a>
+        </div>
+    </div>
+    <div class="hero-image-placeholder">
+        <div class="glass-card">
+            <h3>Total Laptop</h3>
+            <p class="stat-number">124</p>
+            <p class="stat-desc">Tersedia di Gudang</p>
+        </div>
+        <div class="glass-card">
+            <h3>Rekomendasi SAW</h3>
+            <p class="stat-number">#1</p>
+            <p class="stat-desc">ThinkPad T14 Gen 2</p>
+        </div>
+    </div>
+</section>
+
+<section class="features-section">
+    <div class="feature-card">
+        <div class="icon">📦</div>
+        <h3>Inventori Real-time</h3>
+        <p>Pantau stok, kondisi, dan lokasi laptop perusahaan secara akurat.</p>
+    </div>
+    <div class="feature-card">
+        <div class="icon">🤖</div>
+        <h3>SPK Cerdas</h3>
+        <p>Dapatkan rekomendasi spesifikasi laptop terbaik menggunakan SAW & SWARA.</p>
+    </div>
+    <div class="feature-card">
+        <div class="icon">📝</div>
+        <h3>Peminjaman Otomatis</h3>
+        <p>Proses pengajuan dan peminjaman dengan sistem approval terintegrasi.</p>
+    </div>
+</section>
+{% endblock %}
