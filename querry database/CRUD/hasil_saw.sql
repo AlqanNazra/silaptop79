@@ -5,7 +5,9 @@ CREATE TABLE dss_hasilsaw (
     id_hasil VARCHAR(100) PRIMARY KEY,
     id_dss VARCHAR(100),
     tanggal_proses TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (id_dss) REFERENCES dss_proses(id_dss)
+    id_nilai_alternatif VARCHAR(100),
+    FOREIGN KEY (id_dss) REFERENCES dss_proses(id_dss),
+    FOREIGN KEY (id_nilai_alternatif) REFERENCES dss_nilaialternatif(id_nilai_alternatif)
 );
 
 CREATE OR REPLACE FUNCTION buat_hasil_saw(

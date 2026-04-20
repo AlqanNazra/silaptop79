@@ -18,7 +18,8 @@ class User(models.Model):
 # 2. MASTER HARDWARE
 # =============================================
 class Processor(models.Model):
-    
+    id_processor = models.CharField(primary_key=True, max_length=100)
+
     nama_processor = models.CharField(max_length=255)
     manufacturer = models.CharField(max_length=255)
     model = models.CharField(max_length=255)
@@ -31,12 +32,16 @@ class Processor(models.Model):
 
 
 class RAM(models.Model):
+    id_ram = models.CharField(primary_key=True, max_length=100)
+
     kapasitas_gb = models.IntegerField()
     tipe = models.CharField(max_length=50)
     keterangan = models.TextField(null=True, blank=True)
 
 
 class Storage(models.Model):
+    id_storage = models.CharField(primary_key=True, max_length=100)
+
     kapasitas_gb = models.IntegerField()
     tipe = models.CharField(max_length=100)
 
@@ -46,6 +51,7 @@ class Storage(models.Model):
 # =============================================
 class LaptopInventori(models.Model):
     id_laptop_inventori = models.CharField(primary_key=True, max_length=100)
+
     no_inventori = models.CharField(max_length=100, unique=True)
     nama_laptop = models.CharField(max_length=255)
     model = models.CharField(max_length=255)
@@ -55,8 +61,8 @@ class LaptopInventori(models.Model):
         max_length=50,
         choices=[
             ('baik', 'Baik'),
-            ('rusak ringan', 'Rusak Ringan'),
-            ('rusak berat', 'Rusak Berat'),
+            ('rusak_ringan', 'Rusak Ringan'),
+            ('rusak_berat', 'Rusak Berat'),
         ]
     )
 
@@ -71,9 +77,9 @@ class LaptopInventori(models.Model):
 
     lokasi = models.CharField(max_length=255)
 
-    processor = models.ForeignKey(Processor, on_delete=models.SET_NULL, null=True)
-    ram = models.ForeignKey(RAM, on_delete=models.SET_NULL, null=True)
-    storage = models.ForeignKey(Storage, on_delete=models.SET_NULL, null=True)
+    id_processor = models.ForeignKey(Processor, on_delete=models.SET_NULL, null=True)
+    id_ram = models.ForeignKey(RAM, on_delete=models.SET_NULL, null=True)
+    id_storage = models.ForeignKey(Storage, on_delete=models.SET_NULL, null=True)
 
     ukuran_layar = models.FloatField(null=True, blank=True)
 
@@ -83,7 +89,8 @@ class LaptopInventori(models.Model):
 # =============================================
 class Pengajuan(models.Model):
     id_pengajuan = models.CharField(primary_key=True, max_length=100)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    id_user = models.ForeignKey(User, on_delete=models.CASCADE)
     kebutuhan_role = models.CharField(max_length=100)
     kebutuhan_requirement = models.TextField()
     bulan = models.DateField()
@@ -107,9 +114,10 @@ class Pengajuan(models.Model):
 # =============================================
 class Peminjaman(models.Model):
     id_peminjaman = models.CharField(primary_key=True, max_length=100)
-    pengajuan = models.ForeignKey(Pengajuan, on_delete=models.CASCADE)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    laptop = models.ForeignKey(LaptopInventori, on_delete=models.CASCADE)
+
+    id_pengajuan = models.ForeignKey(Pengajuan, on_delete=models.CASCADE)
+    id_user = models.ForeignKey(User, on_delete=models.CASCADE)
+    id_laptop_inventori = models.ForeignKey(LaptopInventori, on_delete=models.CASCADE)
 
     tanggal_pinjam = models.DateField()
     tanggal_kembali = models.DateField(null=True, blank=True)
@@ -123,8 +131,9 @@ class Peminjaman(models.Model):
 # =============================================
 class RiwayatAktivitas(models.Model):
     id_aktivitas = models.CharField(primary_key=True, max_length=100)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    laptop = models.ForeignKey(LaptopInventori, on_delete=models.CASCADE)
+
+    id_user = models.ForeignKey(User, on_delete=models.CASCADE)
+    id_laptop_inventori = models.ForeignKey(LaptopInventori, on_delete=models.CASCADE)
 
     jenis_aktivitas = models.CharField(max_length=100)
     keterangan = models.TextField(null=True, blank=True)
