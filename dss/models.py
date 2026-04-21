@@ -7,6 +7,7 @@ from inventori.models import User, LaptopInventori
 # =============================================
 class Kriteria(models.Model):
     id_kriteria = models.CharField(primary_key=True, max_length=100)
+
     nama_kriteria = models.CharField(max_length=255)
 
     tipe_kriteria = models.CharField(
@@ -23,7 +24,8 @@ class Kriteria(models.Model):
 # =============================================
 class BobotKriteria(models.Model):
     id_bobot = models.CharField(primary_key=True, max_length=100)
-    kriteria = models.ForeignKey(Kriteria, on_delete=models.CASCADE)
+
+    id_kriteria = models.ForeignKey(Kriteria, on_delete=models.CASCADE)
 
     role = models.CharField(max_length=100)
     nilai_bobot = models.FloatField()
@@ -35,8 +37,8 @@ class BobotKriteria(models.Model):
 class DSSProses(models.Model):
     id_dss = models.CharField(primary_key=True, max_length=100)
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    bobot = models.ForeignKey(BobotKriteria, on_delete=models.CASCADE)
+    id_user = models.ForeignKey(User, on_delete=models.CASCADE)
+    id_bobot = models.ForeignKey(BobotKriteria, on_delete=models.CASCADE)
 
     role_dss = models.CharField(max_length=100)
     jenis_dss = models.CharField(max_length=100)
@@ -45,68 +47,74 @@ class DSSProses(models.Model):
 
 
 # =============================================
-# 4. ALTERNATIF DSS
+# 4. LAPTOP ALTERNATIF (NEW - sesuai SQL)
 # =============================================
-class AlternatifDSS(models.Model):
-    id_alternatif = models.CharField(primary_key=True, max_length=100)
+class LaptopAlternatif(models.Model):
+    id_alternatif_laptop = models.CharField(primary_key=True, max_length=100)
 
-    dss = models.ForeignKey(DSSProses, on_delete=models.CASCADE)
+    model_alternatif = models.TextField()
+    brand_alternatif = models.TextField()
 
-    laptop_inventori = models.ForeignKey(
-        LaptopInventori,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True
+    id_dss = models.ForeignKey(DSSProses, on_delete=models.CASCADE)
+
+
+# =============================================
+# 5. NILAI ALTERNATIF (NEW - SAW CORE)
+# =============================================
+class NilaiAlternatif(models.Model):
+    id_nilai_alternatif = models.CharField(primary_key=True, max_length=100)
+
+    nilai_alternatif = models.FloatField()
+    nilai_normalisasi = models.FloatField()
+
+    id_alternatif_laptop = models.ForeignKey(
+        LaptopAlternatif,
+        on_delete=models.CASCADE
     )
 
-    id_laptop_pengadaan = models.CharField(max_length=100, null=True, blank=True)
-
-    sumber_data = models.CharField(max_length=100)
+    id_bobot = models.ForeignKey(
+        BobotKriteria,
+        on_delete=models.CASCADE
+    )
 
 
 # =============================================
-# 5. HASIL SAW
+# 6. HASIL SAW (UPDATED)
 # =============================================
 class HasilSAW(models.Model):
     id_hasil = models.CharField(primary_key=True, max_length=100)
-    dss = models.ForeignKey(DSSProses, on_delete=models.CASCADE)
+
+    id_dss = models.ForeignKey(DSSProses, on_delete=models.CASCADE)
 
     tanggal_proses = models.DateTimeField(auto_now_add=True)
 
+    id_nilai_alternatif = models.ForeignKey(
+        NilaiAlternatif,
+        on_delete=models.CASCADE
+    )
 
-# =============================================
-# 6. DETAIL HASIL SAW
-# =============================================
-class DetailHasilSAW(models.Model):
-    id_detail = models.CharField(primary_key=True, max_length=100)
-    hasil = models.ForeignKey(HasilSAW, on_delete=models.CASCADE)
 
-    nilai_normalisasi = models.FloatField()
-    nilai_preferensi = models.FloatField()
-    ranking = models.IntegerField()
-    
 # =============================================
 # 7. LAPTOP PENGADAAN (SCRAPING)
 # =============================================
 class LaptopPengadaan(models.Model):
     id_laptop_pengadaan = models.CharField(primary_key=True, max_length=100)
 
-    # Foreign Key ke tabel inventori
-    processor = models.ForeignKey(
+    id_processor = models.ForeignKey(
         'inventori.Processor',
         on_delete=models.SET_NULL,
         null=True,
         blank=True
     )
 
-    ram = models.ForeignKey(
+    id_ram = models.ForeignKey(
         'inventori.RAM',
         on_delete=models.SET_NULL,
         null=True,
         blank=True
     )
 
-    storage = models.ForeignKey(
+    id_storage = models.ForeignKey(
         'inventori.Storage',
         on_delete=models.SET_NULL,
         null=True,
