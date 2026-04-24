@@ -90,7 +90,9 @@ class HasilSAW(models.Model):
 
     id_nilai_alternatif = models.ForeignKey(
         NilaiAlternatif,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True
     )
 
 
