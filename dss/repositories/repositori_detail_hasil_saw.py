@@ -1,10 +1,10 @@
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from dto.dto_detail_hasil_saw import DetailHasilSawDTO
-from interface.interface_detail_hasil_saw import IDetailHasilSaw
+from interface.interface_detail_hasil_saw import IDetailHasilSawImpl
 
 
-class DetailHasilSawRepository(IDetailHasilSaw):
+class DetailHasilSawRepository(IDetailHasilSawImpl):
 
     def __init__(self, conn):
         self.conn = conn

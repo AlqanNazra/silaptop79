@@ -14,7 +14,7 @@ CREATE OR REPLACE FUNCTION tambah_storage(
 RETURNS TEXT AS $$
 BEGIN
     INSERT INTO inventori_storage (kapasitas_gb, tipe)
-    VALUES (f_kapasitas, f_tipe);
+    VALUES (f_generate_id('STORE','inventori_storage','id_storage'),f_kapasitas, f_tipe);
 
     RETURN 'Storage berhasil ditambahkan!';
 END;

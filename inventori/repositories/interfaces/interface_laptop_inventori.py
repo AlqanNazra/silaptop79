@@ -29,3 +29,7 @@ class ILaptopInventoriRepository(ABC):
     @abstractmethod
     def update_spek_inventori(self,id_laptop_inventori,id_processor,id_ram,id_storage):
         pass
+    
+    @abstractmethod
+    def filter_pengadaan(self, data) -> list:
+        pass

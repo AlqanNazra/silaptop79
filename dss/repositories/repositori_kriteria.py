@@ -1,10 +1,10 @@
 import psycopg2
 from psycopg2.extras import RealDictCursor
-from dto.dto_kriteria import KriteriaDTO
-from interface.interface_kriteria import IKriteriaRepository
+from .dto.dto_kriteria import KriteriaDTO
+from .interface.interface_kriteria import IKriteriaRepositoryImpl
 
 
-class KriteriaRepository(IKriteriaRepository):
+class KriteriaRepository(IKriteriaRepositoryImpl):
 
     def __init__(self, conn):
         self.conn = conn
@@ -20,11 +20,14 @@ class KriteriaRepository(IKriteriaRepository):
         with self.conn.cursor() as cur:
             cur.execute(query, (
                 data.nama_kriteria,
-                data.tipe_kriteria
+                data.tipe_kriteria,
             ))
+
+            id_kriteria = cur.fetchone()[0]
+
             self.conn.commit()
 
-            return "Berhasil tambah kriteria"
+            return id_kriteria
 
     # =========================
     # READ

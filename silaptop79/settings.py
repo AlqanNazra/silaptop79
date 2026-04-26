@@ -59,7 +59,11 @@ ROOT_URLCONF = 'silaptop79.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
+<<<<<<< HEAD
         'DIRS': [BASE_DIR / 'templates'],
+=======
+        'DIRS': ['templates'],
+>>>>>>> origin/dev-alqan
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

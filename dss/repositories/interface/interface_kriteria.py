@@ -14,3 +14,16 @@ class IKriteriaRepository(ABC):
     def update_kriteria(self, data):
         pass
     
+class IKriteriaRepositoryImpl(IKriteriaRepository):
+    def __init__(self, conn):
+        self.conn = conn
+
+    def tambah_kriteria(self, data):
+        pass
+
+    def ambil_kriteria(self):
+        pass
+    
+    def update_kriteria(self, data):
+        pass
+    

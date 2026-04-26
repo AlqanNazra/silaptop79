@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Testing DSS</title>
+</head>
+<body>
+
+<h2>Form DSS</h2>
+
+{% if error %}
+    <div style="color: red; border: 1px solid red; padding: 10px;">
+        <strong>Error:</strong><br>
+        {{ error }}
+    </div>
+{% endif %}
+
+{% if result %}
+    <div style="color: green; border: 1px solid green; padding: 10px;">
+        <strong>Success:</strong><br>
+        {{ result.message }}
+    </div>
+{% endif %}
+
+<hr>
+
+<!-- ===================== -->
+<!-- FORM INPUT BOBOT -->
+<!-- ===================== -->
+<h3>Input Bobot Batch</h3>
+
+<form method="POST">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="input_bobot">
+
+    <label>Role:</label><br>
+    <input type="text" name="role"><br><br>
+
+    <label>Jumlah Kriteria:</label><br>
+    <input type="number" id="jumlah" min="1"><br><br>
+
+    <button type="button" onclick="generateForm()">Generate Form</button>
+
+    <hr>
+
+    <div id="form-kriteria"></div>
+
+    <br>
+    <button type="submit">Submit</button>
+</form>
+
+<script>
+function generateForm() {
+    const jumlah = document.getElementById("jumlah").value;
+    const container = document.getElementById("form-kriteria");
+
+    container.innerHTML = ""; // reset
+
+    for (let i = 0; i < jumlah; i++) {
+        container.innerHTML += `
+            <div style="margin-bottom:10px; border:1px solid #ccc; padding:10px;">
+                <b>Kriteria ${i + 1}</b><br>
+
+                <input type="text" name="nama[]" placeholder="Nama Kriteria" required>
+                
+                <select name="tipe[]" required>
+                    <option value="">-- Pilih Tipe --</option>
+                    <option value="benefit">Benefit</option>
+                    <option value="cost">Cost</option>
+                </select>
+
+                <input type="number" step="0.01" name="bobot[]" placeholder="Bobot" required>
+            </div>
+        `;
+    }
+}
+</script>
+
+<hr>
+
+<!-- ===================== -->
+<!-- FORM AMBIL KRITERIA -->
+<!-- ===================== -->
+<h3>Ambil Kriteria</h3>
+
+<form method="POST">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="ambil_kriteria">
+
+    <button type="submit">Load Kriteria</button>
+</form>
+
+<hr>
+
+<!-- ===================== -->
+<!-- FORM UPDATE KRITERIA -->
+<!-- ===================== -->
+<h3>Update Kriteria</h3>
+
+<form method="POST">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="update_kriteria">
+
+    <label>ID:</label><br>
+    <input type="text" name="id_kriteria"><br>
+
+    <label>Nama:</label><br>
+    <input type="text" name="nama"><br>
+
+    <label>Tipe:</label><br>
+    <input type="text" name="tipe"><br><br>
+
+    <button type="submit">Update</button>
+</form>
+
+<hr>
+
+<!-- ===================== -->
+<!-- FORM PILIH ROLE (SWARA) -->
+<!-- ===================== -->
+<h3>Proses SWARA</h3>
+
+<form method="POST">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="ambil_bobot">
+
+    <label>Roles:</label><br>
+
+    {% for role in roles_list %}
+        <input type="checkbox" 
+               name="roles" 
+               value="{{ role }}"
+               {% if role in selected_roles %}checked{% endif %}>
+        {{ role }} <br>
+    {% endfor %}
+
+    <br>
+    <button type="submit">Ambil Bobot</button>
+</form>
+
+<hr>
+
+<!-- ===================== -->
+<!-- OUTPUT -->
+<!-- ===================== -->
+{% if data %}
+    <h2>Data Output</h2>
+    <pre>{{ data }}</pre>
+{% endif %}
+
+{% if result.data %}
+    <h2>Output Tabel</h2>
+    <table border="1">
+        <tr>
+            <th>ID</th>
+            <th>Nama</th>
+            <th>Tipe</th>
+            <th>Bobot</th>
+        </tr>
+
+        {% for item in result.data %}
+        <tr>
+            <td>{{ item.id_kriteria }}</td>
+            <td>{{ item.nama_kriteria }}</td>
+            <td>{{ item.tipe_kriteria }}</td>
+            <td>{{ item.nilai_bobot }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+{% endif %}
+
+</body>
+</html>
