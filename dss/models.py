@@ -17,6 +17,8 @@ class Kriteria(models.Model):
             ('cost', 'Cost')
         ]
     )
+    
+    golongan_kriteria = models.CharField(max_length=255)
 
 
 # =============================================
@@ -90,7 +92,8 @@ class HasilSAW(models.Model):
 
     id_nilai_alternatif = models.ForeignKey(
         NilaiAlternatif,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE, 
+        default= 1
     )
 
 

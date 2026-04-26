@@ -28,6 +28,7 @@ CREATE OR REPLACE FUNCTION tambah_processor(
 RETURNS TEXT AS $$
 BEGIN
     INSERT INTO inventori_processor (
+        id_processor,
         nama_processor,
         manufacturer,
         model,
@@ -39,6 +40,7 @@ BEGIN
         keterangan
     )
     VALUES (
+        f_generate_id('PROS','inventori_processor','id_processor'),
         f_nama_processor,
         f_manufacturer,
         f_model,

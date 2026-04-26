@@ -4,24 +4,31 @@
 CREATE TABLE kriteria (
     id_kriteria VARCHAR(100) PRIMARY KEY,
     nama_kriteria VARCHAR(255) NOT NULL,
-    tipe_kriteria VARCHAR(20) CHECK (tipe_kriteria IN ('benefit','cost'))
+    tipe_kriteria VARCHAR(20) CHECK (tipe_kriteria IN ('benefit','cost')),
+    golongan VARCHAR(255) NOT NULL
 );
 ALTER TABLE dss_kriteria
 ADD CONSTRAINT kriteria UNIQUE (nama_kriteria);
-
 
 CREATE OR REPLACE FUNCTION tambah_kriteria (
     f_nama_kriteria VARCHAR(100),
     f_tipe_kriteria VARCHAR(20)
 )
-RETURNS VOID AS $$
+RETURNS VARCHAR AS $$
+DECLARE
+    v_id_kriteria VARCHAR;
 BEGIN
-    INSERT INTO dss_kriteria(id_kriteria, nama_kriteria, tipe_kriteria)
+    INSERT INTO kriteria(id_kriteria, nama_kriteria, tipe_kriteria)
     VALUES (
-        f_generate_id('KRIT', 'dss_kriteria', 'id_kriteria'),
+        f_generate_id('KRIT', 'kriteria', 'id_kriteria'),
         f_nama_kriteria,
         f_tipe_kriteria
-    );
+    )
+    ON CONFLICT (nama_kriteria)
+    DO UPDATE SET tipe_kriteria = EXCLUDED.tipe_kriteria
+    RETURNING id_kriteria INTO v_id_kriteria;
+
+    RETURN v_id_kriteria;
 END;
 $$ LANGUAGE plpgsql;
 

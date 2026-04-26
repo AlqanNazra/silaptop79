@@ -1,10 +1,10 @@
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from dto.dto_dss_proses import DssProsesDTO
-from interface.interface_dss_proses import IDssProssesRepository 
+from interface.interface_dss_proses import IDssProssesRepositoryImpl 
 
 
-class KriteriaRepository(IDssProssesRepository):
+class KriteriaRepository(IDssProssesRepositoryImpl):
 
     def __init__(self, conn):
         self.conn = conn
