@@ -17,7 +17,7 @@ ADD CONSTRAINT unique_kriteria_role UNIQUE (id_kriteria, role);
 CREATE OR REPLACE FUNCTION tambah_bobot_kriteria(
     f_id_kriteria VARCHAR,
     f_role VARCHAR,
-    f_nilai_bobot FLOAT,
+    f_nilai_bobot FLOAT
 )
 RETURNS VARCHAR AS $$
 DECLARE

@@ -1,14 +1,14 @@
-from service_swara import ServiceBobotKriteria
-from service_preposesdata import Servicepreposesdata
-from ..repositories.interface.interface_bobot_kriteria import IBobotKriteriaRepositoryImpl
-from ..repositories.interface.interface_kriteria import IKriteriaRepositoryImpl
+from dss.services.service_swara import ServiceSwara
+from dss.services.service_preposesdata import Servicepreposesdata
 
+from dss.repositories.interface.interface_bobot_kriteria import IBobotKriteriaRepositoryImpl
+from dss.repositories.interface.interface_kriteria import IKriteriaRepositoryImpl
 
 class Servicesaw:
     
     def __init__(self, conn):
         self.conn = conn
-        self.servisBK = ServiceBobotKriteria(conn)
+        self.servisBK = ServiceSwara(conn)
         self.servisPD = Servicepreposesdata(conn)
         self.repoK = IKriteriaRepositoryImpl(conn)
         self.repoBK = IBobotKriteriaRepositoryImpl(conn)
@@ -198,7 +198,7 @@ class Servicesaw:
             role_name = r["role"]
             weight = r.get("weight")
 
-            data = self.repoBK.cari_bobot_kriteria_by_role(roles)
+            data = self.repoBK.cari_bobot_kriteria_by_role(role_name)
 
             if not data:
                 raise ValueError(f"Bobot tidak ditemukan untuk role {role_name}")

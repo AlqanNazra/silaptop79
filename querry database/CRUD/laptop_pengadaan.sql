@@ -23,9 +23,9 @@ CREATE OR REPLACE FUNCTION tambah_laptop_pengadaan(
     f_gpu VARCHAR,
     f_ukuran_layar FLOAT,
     f_baterai FLOAT,
-    f_id_processor INTEGER,
-    f_id_ram INTEGER,
-    f_id_storage INTEGER,
+    f_id_processor VARCHAR,
+    f_id_ram VARCHAR,
+    f_id_storage VARCHAR,
     f_berat FLOAT
 )
 RETURNS TEXT AS $$
@@ -58,6 +58,7 @@ BEGIN
     RETURN 'Insert berhasil';
 END;
 $$ LANGUAGE plpgsql;
+
 
 CREATE OR REPLACE FUNCTION ambil_laptop_pengadaan()
 RETURNS TABLE (

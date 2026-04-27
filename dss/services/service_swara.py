@@ -5,7 +5,7 @@ from ..repositories.dto.dto_kriteria import KriteriaDTO
 from collections import defaultdict
 
 
-class ServiceBobotKriteria:
+class ServiceSwara:
 
     def __init__(self, conn):
         self.conn = conn
@@ -13,24 +13,7 @@ class ServiceBobotKriteria:
         self.repoK = IKriteriaRepositoryImpl(conn)
         
     def ambil_dan_gabung_bobot(self, list_role: list[str]):
-        semua_bobot = []
-        for role in list_role:
-            data = self.repoBK.cari_bobot_kriteria_by_role(role)
-            semua_bobot.append(data)
-        hasil = {}
-        keys = semua_bobot[0].keys()
-
-        for k in keys:
-            total = 0
-            for bobot in semua_bobot:
-                total += bobot[k]
-
-            hasil[k] = total / len(semua_bobot)
-
-        return hasil
-
-    def pengurutan_kriteria(self, role):
-        data = self.ambil_dan_gabung_bobot(role)
+        data = self.repoBK.cari_bobot_kriteria_by_role(list_role)
 
         if not data:
             raise Exception("Data bobot kosong")
@@ -38,24 +21,52 @@ class ServiceBobotKriteria:
         group = defaultdict(list)
         meta = {}
 
-        for d in data:
-            group[d["nama_kriteria"]].append(d["nilai_bobot"])
-            meta[d["nama_kriteria"]] = {
-                "id_kriteria": d["id_kriteria"],
-                "tipe_kriteria": d.get("tipe_kriteria", "benefit")
+        for item in data:
+            group[item["id_kriteria"]].append(item["nilai_bobot"])
+
+            meta[item["id_kriteria"]] = {
+                "nama_kriteria": item["nama_kriteria"],
+                "tipe_kriteria": item.get("tipe_kriteria", "benefit")
             }
 
-        rata = {
-            k: sum(v) / len(v)
-            for k, v in group.items()
-        }
+        hasil = []
 
-        sorted_kriteria = sorted(rata.items(), key=lambda x: x[1], reverse=True)
+        for kriteria_id, values in group.items():
+            hasil.append({
+                "id_kriteria": kriteria_id,
+                "nama_kriteria": meta[kriteria_id]["nama_kriteria"],
+                "tipe_kriteria": meta[kriteria_id]["tipe_kriteria"],
+                "nilai_bobot": sum(values) / len(values)
+            })
 
-        if len(sorted_kriteria) < 2:
+        return hasil
+
+    def pengurutan_kriteria(self, roles):
+        data = self.ambil_dan_gabung_bobot(roles)
+
+        if len(data) < 2:
             raise Exception("Minimal 2 kriteria untuk SWARA")
 
-        return sorted_kriteria, meta
+        sorted_kriteria = sorted(
+            data,
+            key=lambda x: x["nilai_bobot"],
+            reverse=True
+        )
+
+        meta = {
+            d["nama_kriteria"]: {
+                "id_kriteria": d["id_kriteria"],
+                "tipe_kriteria": d["tipe_kriteria"]
+            }
+            for d in sorted_kriteria
+        }
+
+        sorted_simple = [
+            (d["nama_kriteria"], d["nilai_bobot"])
+            for d in sorted_kriteria
+        ]
+
+        return sorted_simple, meta
 
     def mencari_nilai_sj(self, sorted_kriteria):
         sj = []
@@ -117,41 +128,45 @@ class ServiceBobotKriteria:
 
         return hasil
     
-    def proses_swara(self, role,id_bobot):
+    def proses_swara(self, role: list, id_bobot=None):
 
         try:
             with self.conn:
                 sorted_kriteria, meta = self.pengurutan_kriteria(role)
-                sj = self.mencari_nilai_sj(sorted_kriteria)
-                kj = self.menghitung_kj(sj)
-                qj = self.menghitung_qj(kj)
-                hasil = self.normalisasi_bobot(qj, sorted_kriteria, meta) 
-                total = sum([h["bobot_akhir"] for h in hasil])
-                if round(total, 5) != 1:
-                    raise Exception("Bobot SWARA tidak valid")
-                for item in hasil:
-                    bobot_dto = BobotKriteriaDTO(
-                        id_kriteria=item["id_kriteria"],
-                        role=role,
-                        nilai_swara=item["bobot_akhir"]
-                    )
+                print("STEP 1 - SORTED:", sorted_kriteria)
 
-                    self.repoBK.update_nilai_swara(bobot_dto)
-            return {
-                "status": "success",
-                "data": {
-                    "sorted": sorted_kriteria,
-                    "sj": sj,
-                    "kj": kj,
-                    "qj": qj,
-                    "bobot_akhir": hasil
+                sj = self.mencari_nilai_sj(sorted_kriteria)
+                print("STEP 2 - SJ:", sj)
+
+                kj = self.menghitung_kj(sj)
+                print("STEP 3 - KJ:", kj)
+
+                qj = self.menghitung_qj(kj)
+                print("STEP 4 - QJ:", qj)
+
+                hasil = self.normalisasi_bobot(qj, sorted_kriteria, meta)
+                print("STEP 5 - HASIL:", hasil)
+
+                total = sum([h["bobot_akhir"] for h in hasil])
+                print("TOTAL:", total)
+
+                if abs(total - 1) > 0.001:
+                    raise Exception("Bobot SWARA tidak valid")
+
+                return {
+                    "status": "success",
+                    "data": {
+                        "sorted": sorted_kriteria,
+                        "sj": sj,
+                        "kj": kj,
+                        "qj": qj,
+                        "bobot_akhir": hasil
+                    }
                 }
-            }
 
         except Exception as e:
+            print("ERROR:", str(e))  # 🔥 penting
             return {
                 "status": "error",
                 "message": str(e)
             }
-            
-# 

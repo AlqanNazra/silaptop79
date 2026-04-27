@@ -13,6 +13,9 @@ class IKriteriaRepository(ABC):
     @abstractmethod
     def update_kriteria(self, data):
         pass
+    @abstractmethod
+    def ambil_semua_role(self):
+        pass
     
 class IKriteriaRepositoryImpl(IKriteriaRepository):
     def __init__(self, conn):
@@ -25,5 +28,8 @@ class IKriteriaRepositoryImpl(IKriteriaRepository):
         pass
     
     def update_kriteria(self, data):
+        pass
+
+    def ambil_semua_role(self):
         pass
     

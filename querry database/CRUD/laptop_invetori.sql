@@ -19,13 +19,48 @@ CREATE TABLE inventori_laptopinventori (
     FOREIGN KEY (id_storage) REFERENCES storage(id_storage)
 );
 
-CREATE OR REPLACE FUNCTION tambah_laptop_inventori
-(f_nama_laptop VARCHAR,f_model VARCHAR,VARCHAR,f_kondisi VARCHAR,f_status VARCHAR,
-f_lokasi VARCHAR,f_id_processor BIGINT,f_id_ram BIGINT,f_id_storage BIGINT,f_ukuran_layar FLOAT)
+CREATE OR REPLACE FUNCTION tambah_laptop_inventori(
+    f_nama_laptop VARCHAR,
+    f_model VARCHAR,
+    f_os VARCHAR,
+    f_kondisi VARCHAR,
+    f_status VARCHAR,
+    f_lokasi VARCHAR,
+    f_id_processor VARCHAR, -- Ubah ke VARCHAR
+    f_id_ram VARCHAR,       -- Ubah ke VARCHAR
+    f_id_storage VARCHAR,   -- Ubah ke VARCHAR
+    f_ukuran_layar FLOAT
+)
 RETURNS VOID AS $$
 BEGIN
-    INSERT INTO inventori_laptopinventori (id_laptop_inventori,no_inventori,nama_laptop,model,os,kondisi,status,lokasi,id_processor,id_ram,id_storage,ukuran_layar)
-    VALUES (f_generate_id('inventori','inventori_laptopinventori'),generate_no_inventori(),f_nama_laptop,f_model,f_os,f_kondisi,f_status,f_lokasi,f_id_processor,f_id_ram,f_id_storage,f_ukuran_layar);
+    INSERT INTO inventori_laptopinventori (
+        id_laptop_inventori,
+        no_inventori,
+        nama_laptop,
+        model,
+        os,
+        kondisi,
+        status,
+        lokasi,
+        id_processor, -- Gunakan suffix _id jika Django
+        id_ram,
+        id_storage,
+        ukuran_layar
+    )
+    VALUES (
+        f_generate_id('INV','inventori_laptopinventori','id_laptop_inventori'),
+        'LTP-' || CAST(extract(epoch from now()) AS TEXT) || f_nama_laptop, -- Generate manual simpel
+        f_nama_laptop,
+        f_model,
+        f_os,
+        f_kondisi,
+        f_status,
+        f_lokasi,
+        f_id_processor,
+        f_id_ram,
+        f_id_storage,
+        f_ukuran_layar
+    );
 END;
 $$ LANGUAGE plpgsql;
 

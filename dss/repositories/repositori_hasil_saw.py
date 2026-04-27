@@ -14,7 +14,7 @@ class KriteriaRepository(IHasilSawRepositoryImpl):
     # =========================
     def buat_hasil_saw(self, data: HasilSAWDTO):
         query = """
-        SELECT tambah_kriteria(%s, %s);
+        SELECT tambah_hasil_saw(%s, %s);
         """
 
         with self.conn.cursor() as cur:

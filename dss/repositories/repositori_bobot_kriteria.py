@@ -1,9 +1,9 @@
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from .dto.dto_bobot_kriteria import BobotKriteriaDTO
-from .interface.interface_bobot_kriteria import BobotKriteriaRepositoryImpl
+from .interface.interface_bobot_kriteria import IBobotKriteriaRepositoryImpl
 
-class BobotKriteriaRepository(BobotKriteriaRepositoryImpl):
+class BobotKriteriaRepository(IBobotKriteriaRepositoryImpl):
 
     def __init__(self, conn):
         self.conn = conn
@@ -13,17 +13,15 @@ class BobotKriteriaRepository(BobotKriteriaRepositoryImpl):
     # =========================
     def tambah_bobot_kriteria(self, data: BobotKriteriaDTO):
         query = """
-        SELECT tambah_bobot_kriteria(%s, %s,%s,%s);
+        SELECT tambah_bobot_kriteria(%s, %s, %s);
         """
 
         with self.conn.cursor() as cur:
             cur.execute(query, (
-                data.id_kriteria,
-                data.nilai_bobot,
+                str(data.id_kriteria),
                 data.role,
-                data.nilai_swara
+                data.nilai_bobot
             ))
-            self.conn.commit()
 
             return "Berhasil tambah bobot kriteria"
 
@@ -82,7 +80,6 @@ class BobotKriteriaRepository(BobotKriteriaRepositoryImpl):
                 data.nilai_bobot
             ))
             result = cur.fetchone()
-            self.conn.commit()
 
             return result[0] if result else None
         
@@ -94,7 +91,6 @@ class BobotKriteriaRepository(BobotKriteriaRepositoryImpl):
                 data.nilai_swara
             ))
             result = cur.fetchone()
-            self.conn.commit()
 
             return result[0] if result else None
 
@@ -107,6 +103,5 @@ class BobotKriteriaRepository(BobotKriteriaRepositoryImpl):
         with self.conn.cursor() as cur:
             cur.execute(query, (id_bobot,))
             result = cur.fetchone()
-            self.conn.commit()
 
             return result[0] if result else None

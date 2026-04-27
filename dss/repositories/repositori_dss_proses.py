@@ -4,7 +4,7 @@ from dto.dto_dss_proses import DssProsesDTO
 from interface.interface_dss_proses import IDssProssesRepositoryImpl 
 
 
-class KriteriaRepository(IDssProssesRepositoryImpl):
+class DssprossesRepository(IDssProssesRepositoryImpl):
 
     def __init__(self, conn):
         self.conn = conn
@@ -14,7 +14,7 @@ class KriteriaRepository(IDssProssesRepositoryImpl):
     # =========================
     def tambah_dss_proses(self, data: DssProsesDTO):
         query = """
-        SELECT tambah_kriteria(%s, %s, %s, %s, %s);
+        SELECT tambah_dss_proses(%s, %s, %s, %s, %s);
         """
 
         with self.conn.cursor() as cur:

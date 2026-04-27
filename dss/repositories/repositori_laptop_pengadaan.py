@@ -1,7 +1,7 @@
 import psycopg2
 from psycopg2.extras import RealDictCursor
-from dto.dto_laptop_pengadaan import LaptopPengadaanDTO
-from interface.interface_laptop_pengadaan import ILaptopPengadaanRepositoryImpl
+from .dto.dto_laptop_pengadaan import LaptopPengadaanDTO
+from .interface.interface_laptop_pengadaan import ILaptopPengadaanRepositoryImpl
 
 
 class LaptopPengadaanRepository(ILaptopPengadaanRepositoryImpl):

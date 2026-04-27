@@ -1,11 +1,10 @@
-from ..repositories.interface.interface_laptop_pengadaan import ILaptopPengadaanRepositoryImpl
-from ...dss.repositories.dto.dto_laptop_pengadaan import FilterPengadaanDTO
-from ..repositories.dto.dto_laptop_pengadaan import LaptopPengadaanDTO
+from dss.repositories.interface.interface_laptop_pengadaan import ILaptopPengadaanRepositoryImpl
+from dss.repositories.dto.dto_laptop_pengadaan import FilterPengadaanDTO
+from dss.repositories.dto.dto_laptop_pengadaan import LaptopPengadaanDTO
 
-from ...inventori.repositories.dto.dto_laptop_inventori import LaptopInventoriDetailDTO
-from ...inventori.repositories.dto.dto_laptop_inventori import FilterInventoriDTO
-from ...inventori.repositories.interfaces.interface_laptop_inventori import ILaptopInventoriRepository
-
+from inventori.repositories.dto.dto_laptop_inventori import LaptopInventoriDetailDTO
+from inventori.repositories.dto.dto_laptop_inventori import FilterInventoriDTO
+from inventori.repositories.interfaces.interface_laptop_inventori import ILaptopInventoriRepository
 
 from collections import defaultdict
 from typing import Union, Optional
