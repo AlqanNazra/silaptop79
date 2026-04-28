@@ -114,4 +114,4 @@ class LaptopPengadaanRepository(ILaptopPengadaanRepositoryImpl):
         with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute(query, params)
             rows = cur.fetchall()
-            return [self._map_to_dto(row) for row in rows]
+            return rows

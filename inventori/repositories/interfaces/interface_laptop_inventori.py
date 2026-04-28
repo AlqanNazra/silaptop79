@@ -31,5 +31,5 @@ class ILaptopInventoriRepository(ABC):
         pass
     
     @abstractmethod
-    def filter_pengadaan(self, data) -> list:
+    def filter_inventori(self, filter_dto):
         pass

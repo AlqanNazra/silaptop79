@@ -1,4 +1,6 @@
 import pytest
+import json
+from tabulate import tabulate
 from db import get_connection
 from dss.services.service_swara import ServiceSwara
 
@@ -6,8 +8,7 @@ from dss.services.service_swara import ServiceSwara
 @pytest.fixture(scope="module")
 def service_db():
     conn = get_connection()
-    service = ServiceSwara(conn)
-    return service
+    return ServiceSwara(conn)
 
 
 def test_proses_swara_db(service_db):
@@ -15,14 +16,23 @@ def test_proses_swara_db(service_db):
         ["Backend Developer", "Frontend Developer"]
     )
 
-    print("\nHASIL DB:", result)
-    assert False
+    print("\n=== HASIL SWARA (JSON) ===")
+    print(json.dumps(result, indent=4))
 
     assert result["status"] == "success"
 
     data = result["data"]
 
-    # total bobot harus = 1
+    # 🔥 tampilkan tabel (buat laporan TA)
+    print("\n Note: untuk input masih berbentuk desimal belum berbentuk numerik")
+    print("\n=== BOBOT AKHIR (TABLE) ===")
+    print(tabulate(
+        data["bobot_akhir"],
+        headers="keys",
+        tablefmt="grid"
+    ))
+
+    # validasi total = 1
     total = sum([x["bobot_akhir"] for x in data["bobot_akhir"]])
     assert total == pytest.approx(1.0, rel=1e-3)
 

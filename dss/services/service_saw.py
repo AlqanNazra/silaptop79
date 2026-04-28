@@ -1,17 +1,34 @@
 from dss.services.service_swara import ServiceSwara
 from dss.services.service_preposesdata import Servicepreposesdata
 
-from dss.repositories.interface.interface_bobot_kriteria import IBobotKriteriaRepositoryImpl
-from dss.repositories.interface.interface_kriteria import IKriteriaRepositoryImpl
+from dss.repositories.repositori_kriteria import KriteriaRepository
+from dss.repositories.repositori_bobot_kriteria import BobotKriteriaRepository
 
+from inventori.repositories.repositori_laptop_inventori import LaptopInventoriRepository
+from dss.repositories.repositori_laptop_pengadaan import LaptopPengadaanRepository
+from decimal import Decimal
 class Servicesaw:
-    
+
     def __init__(self, conn):
         self.conn = conn
         self.servisBK = ServiceSwara(conn)
         self.servisPD = Servicepreposesdata(conn)
-        self.repoK = IKriteriaRepositoryImpl(conn)
-        self.repoBK = IBobotKriteriaRepositoryImpl(conn)
+
+        self.repoK = KriteriaRepository(conn)
+        self.repoBK = BobotKriteriaRepository(conn)
+        self.repoInventori = LaptopInventoriRepository(conn)
+        self.repoPengadaan = LaptopPengadaanRepository(conn)
+
+    def serialize(self, data):
+        def convert(val):
+            if isinstance(val, Decimal):
+                return float(val)
+            return val
+
+        return [
+            {k: convert(v) for k, v in dict(row).items()}
+            for row in data
+        ]
         
     def normalisasi_saw(self, data_preproses):  
         if not data_preproses:
@@ -56,34 +73,46 @@ class Servicesaw:
 
         return hasil_normalisasi
     
-    def get_bobot_saw(self,role,id_bobot):
-        hasil = self.servisBK.proses_swara(role,id_bobot)
+    def get_bobot_saw(self, role: list):
+        if not role:
+            raise ValueError("Role tidak boleh kosong")
+
+        hasil = self.servisBK.proses_swara(role)
+
         if hasil["status"] != "success":
             raise Exception(hasil["message"])
+        
         bobot_list = hasil["data"]["bobot_akhir"]
-        bobot = {
+
+        return {
             item["nama_kriteria"]: item["bobot_akhir"]
             for item in bobot_list
         }
-        return bobot
     
-    def hitung_saw_data(self,data_normalisasi,role,id_bobot):
+    def hitung_saw_data(self, data_normalisasi, role: list):
         if not data_normalisasi:
-            return[]
-        
-        bobot = self.get_bobot_saw(role,id_bobot)
+            return []
+
+        bobot = self.get_bobot_saw(role)
         hasil = []
-        
+
         for item in data_normalisasi:
             skor = 0
-            for key,nilai_bobot in bobot.items():
-                nilai = item.get(key, 0)
-                skor += nilai * nilai_bobot
-        
+            for key, nilai_bobot in bobot.items():
+                if key not in item:
+                    raise KeyError(f"Kriteria '{key}' tidak ada di data")
+                skor += item[key] * nilai_bobot
+
             hasil.append({
                 "id": item["id"],
                 "skor": round(skor, 6)
             })
+            
+        # print("\n=== DEBUG SAW ===")
+        # print("BOBOT:", bobot)
+
+        # for item in data_normalisasi[:3]:
+        #     print("DATA:", item)
 
         return hasil
     
@@ -95,7 +124,7 @@ class Servicesaw:
             reverse=True
         )
     
-    def proses_dss_saw(self,sumber_data,filter_data,role,id_bobot):
+    def proses_dss_saw(self,sumber_data,filter_data,role: list,debug=False):
         try:
             hasil_filter = self.servisPD.filtering_data(sumber_data,filter_data)
             if hasil_filter["status"] != "success":
@@ -104,15 +133,41 @@ class Servicesaw:
             data_raw = hasil_filter["data_raw"]
             data_pre = self.servisPD.preprocessing(data_raw)
             data_normalisasi = self.normalisasi_saw(data_pre)
-            hasil_saw = self.hitung_saw_data(data_normalisasi,role,id_bobot)
+            hasil_saw = self.hitung_saw_data(data_normalisasi,role)
             ranking = self.ranking_saw(hasil_saw)
+            for i, item in enumerate(ranking, start=1):
+                item["rank"] = i
+            if debug:
+                return {
+                    "status": "success",
+                    "debug": {
+                        "data_awal": self.serialize(data_raw),
+                        "preprocessing": data_pre,
+                        "normalisasi": data_normalisasi,
+                        "hasil_saw": hasil_saw
+                    },
+                    "data": {
+                        "ranking": ranking
+                    }
+                }
+            # return {
+            #     "status": "success",
+            #     "data": {
+            #         "data_awal": data_raw,
+            #         "data_preprocessing": data_pre,
+            #         "data_normalisasi": data_normalisasi,
+            #         "hasil_saw": hasil_saw,
+            #         "ranking": ranking
+            #     }
+            # }
             return {
                 "status": "success",
+                "meta": {
+                    "total_data": len(ranking),
+                    "role": role,
+                    "sumber": sumber_data
+                },
                 "data": {
-                    "data_awal": data_raw,
-                    "data_preprocessing": data_pre,
-                    "data_normalisasi": data_normalisasi,
-                    "hasil_saw": hasil_saw,
                     "ranking": ranking
                 }
             }
@@ -124,16 +179,8 @@ class Servicesaw:
             }
 
     def hitung_average_golongan(self, roles: list[str]):
-        """
-        roles = ["Backend", "Frontend", "Data Analyst"]
-        """
-
         if not roles:
             raise ValueError("Role tidak boleh kosong")
-
-        # =========================
-        # 1. Grouping Golongan
-        # =========================
         golongan_map = {}
 
         for role in roles:
@@ -148,10 +195,6 @@ class Servicesaw:
                 golongan_map[gol] = []
 
             golongan_map[gol].append(data)
-
-        # =========================
-        # 2. Average dalam golongan
-        # =========================
         hasil_golongan = {}
 
         for gol, bobot_list in golongan_map.items():
@@ -165,10 +208,6 @@ class Servicesaw:
                 avg[k] = sum(b[k] for b in bobot_list) / len(bobot_list)
 
             hasil_golongan[gol] = avg
-
-        # =========================
-        # 3. Average antar golongan
-        # =========================
         hasil_final = {}
         gol_keys = list(hasil_golongan.keys())
         keys = hasil_golongan[gol_keys[0]].keys()
@@ -179,19 +218,8 @@ class Servicesaw:
         return hasil_final
     
     def hitung_weighted_golongan(self, roles: list[dict]):
-        """
-        roles = [
-            {"role": "Backend", "weight": 0.6},
-            {"role": "Frontend", "weight": 0.4}
-        ]
-        """
-
         if not roles:
             raise ValueError("Role tidak boleh kosong")
-
-        # =========================
-        # 1. Grouping Golongan
-        # =========================
         golongan_map = {}
 
         for r in roles:
@@ -210,15 +238,9 @@ class Servicesaw:
                     "bobot": [],
                     "weights": []
                 }
-
             golongan_map[gol]["bobot"].append(data)
             golongan_map[gol]["weights"].append(weight)
-
-        # =========================
-        # 2. Average dalam golongan
-        # =========================
         hasil_golongan = {}
-
         for gol, val in golongan_map.items():
             bobot_list = val["bobot"]
 
@@ -232,28 +254,18 @@ class Servicesaw:
                 avg[k] = sum(b[k] for b in bobot_list) / len(bobot_list)
 
             hasil_golongan[gol] = avg
-
-        # =========================
-        # 3. Weighted antar golongan
-        # =========================
         gol_keys = list(hasil_golongan.keys())
-
-        # hitung weight golongan dari role
         weight_gol = []
 
         for gol in gol_keys:
             w = [w for w in golongan_map[gol]["weights"] if w is not None]
 
             if w:
-                weight_gol.append(sum(w) / len(w))  # rata-rata weight dalam golongan
+                weight_gol.append(sum(w) / len(w)) 
             else:
                 weight_gol.append(1)
-
-        # normalisasi
         total = sum(weight_gol)
         weight_gol = [w / total for w in weight_gol]
-
-        # final combine
         hasil_final = {}
         keys = hasil_golongan[gol_keys[0]].keys()
 

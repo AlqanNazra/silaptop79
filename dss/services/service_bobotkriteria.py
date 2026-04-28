@@ -53,9 +53,6 @@ class ServiceBobotKriteria:
         except Exception as e:
             print("❌ SERVICE ERROR:", e)
             return {"status": "error", "message": str(e)}
-    # =========================
-    # Kriteria
-    # =========================
     
     def ambil_kriteria(self):
         try:
@@ -93,9 +90,7 @@ class ServiceBobotKriteria:
                 "status": "error",
                 "message": str(e)
             }
-    # =========================
-    # Bobot Kriteria
-    # =========================
+
     def ambil_bobot_by_kriteria(self, id_bobot, id_kriteria):
         try:
             data = self.repoBK.ambil_bobot_by_kriteria(id_bobot, id_kriteria)

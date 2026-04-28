@@ -27,7 +27,7 @@ class ILaptopPengadaanRepository(ABC):
         pass
     
     @abstractmethod
-    def filter_inventori(self, data) -> list:
+    def filter_pengadaan(self, data) -> list:
         pass
     
 class ILaptopPengadaanRepositoryImpl(ILaptopPengadaanRepository):
@@ -52,5 +52,5 @@ class ILaptopPengadaanRepositoryImpl(ILaptopPengadaanRepository):
     def ambil_hasil_saw_pengadaan(self, id_hasil):
         pass
     
-    def filter_inventori(self, data) -> list:
+    def filter_pengadaan(self, data) -> list:
         pass

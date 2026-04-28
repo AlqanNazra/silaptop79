@@ -1,8 +1,15 @@
 from dss.repositories.repositori_bobot_kriteria import BobotKriteriaRepository
 from dss.repositories.repositori_kriteria import KriteriaRepository
-from ..repositories.dto.dto_bobot_kriteria import BobotKriteriaDTO
-from ..repositories.dto.dto_kriteria import KriteriaDTO
 from collections import defaultdict
+import json
+
+DEBUG = False  # 🔥 ubah True kalau mau debug
+
+
+def debug_print(title, data):
+    if DEBUG:
+        print(f"\n=== {title} ===")
+        print(json.dumps(data, indent=4, default=str))
 
 
 class ServiceSwara:
@@ -11,14 +18,11 @@ class ServiceSwara:
         self.conn = conn
         self.repoBK = BobotKriteriaRepository(conn)
         self.repoK = KriteriaRepository(conn)
-        
+
     def ambil_dan_gabung_bobot(self, list_role: list[str]):
         data = self.repoBK.cari_bobot_kriteria_by_roles(list_role)
-        
-        # Code Testing
-        print("DATA RAW DB:", data)
-        print("REPO TYPE:", type(self.repoBK))
-        print("METHOD EXIST:", hasattr(self.repoBK, "cari_bobot_kriteria_by_roles"))
+
+        debug_print("DATA RAW DB", data)
 
         if not data:
             raise Exception("Data bobot kosong")
@@ -43,6 +47,8 @@ class ServiceSwara:
                 "tipe_kriteria": meta[kriteria_id]["tipe_kriteria"],
                 "nilai_bobot": sum(values) / len(values)
             })
+
+        debug_print("HASIL GABUNG", hasil)
 
         return hasil
 
@@ -71,6 +77,8 @@ class ServiceSwara:
             for d in sorted_kriteria
         ]
 
+        debug_print("STEP 1 - SORTED", sorted_simple)
+
         return sorted_simple, meta
 
     def mencari_nilai_sj(self, sorted_kriteria):
@@ -82,12 +90,10 @@ class ServiceSwara:
             else:
                 prev = sorted_kriteria[i - 1][1]
                 curr = sorted_kriteria[i][1]
-                if prev == 0:
-                    nilai = 0
-                else:
-                    nilai = (prev - curr) / prev
-
+                nilai = (prev - curr) / prev if prev != 0 else 0
                 sj.append(round(nilai, 4))
+
+        debug_print("STEP 2 - SJ", sj)
 
         return sj
 
@@ -100,6 +106,8 @@ class ServiceSwara:
             else:
                 kj.append(round(sj[i] + 1, 4))
 
+        debug_print("STEP 3 - KJ", kj)
+
         return kj
 
     def menghitung_qj(self, kj):
@@ -110,6 +118,8 @@ class ServiceSwara:
                 qj.append(1)
             else:
                 qj.append(round(qj[i - 1] / kj[i], 6))
+
+        debug_print("STEP 4 - QJ", qj)
 
         return qj
 
@@ -131,29 +141,21 @@ class ServiceSwara:
                 "bobot_akhir": round(qj[i] / total, 6)
             })
 
+        debug_print("STEP 5 - HASIL", hasil)
+
         return hasil
-    
-    def proses_swara(self, role: list, id_bobot=None):
+
+    def proses_swara(self, role: list):
 
         try:
             with self.conn:
                 sorted_kriteria, meta = self.pengurutan_kriteria(role)
-                print("STEP 1 - SORTED:", sorted_kriteria)
-
                 sj = self.mencari_nilai_sj(sorted_kriteria)
-                print("STEP 2 - SJ:", sj)
-
                 kj = self.menghitung_kj(sj)
-                print("STEP 3 - KJ:", kj)
-
                 qj = self.menghitung_qj(kj)
-                print("STEP 4 - QJ:", qj)
-
                 hasil = self.normalisasi_bobot(qj, sorted_kriteria, meta)
-                print("STEP 5 - HASIL:", hasil)
 
                 total = sum([h["bobot_akhir"] for h in hasil])
-                print("TOTAL:", total)
 
                 if abs(total - 1) > 0.001:
                     raise Exception("Bobot SWARA tidak valid")
@@ -170,7 +172,6 @@ class ServiceSwara:
                 }
 
         except Exception as e:
-            print("ERROR:", str(e))  # 🔥 penting
             return {
                 "status": "error",
                 "message": str(e)

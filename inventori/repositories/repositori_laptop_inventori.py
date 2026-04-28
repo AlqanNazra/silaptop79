@@ -1,157 +1,67 @@
-import psycopg2
+from inventori.repositories.interface_laptop_inventori import ILaptopInventoriRepository
 from psycopg2.extras import RealDictCursor
-from dto.dto_laptop_inventori import LaptopInventoriDetailDTO
-from interfaces.interface_laptop_inventori import ILaptopInventoriRepository
-
 
 class LaptopInventoriRepository(ILaptopInventoriRepository):
+    def __init__(self, connection):
+        self.conn = connection
 
-    def __init__(self, conn):
-        self.conn = conn
-
-    # =========================
-    # CREATE
-    # =========================
-    def tambah_laptop_inventori(self, data: LaptopInventoriDetailDTO):
-        query = """
-        SELECT tambah_laptop_inventori(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);
-        """
-
+    def tambah_laptop(self, dto):
         with self.conn.cursor() as cur:
-            cur.execute(query, (
-                data.nama_laptop,
-                data.model,
-                data.os,
-                data.kondisi,
-                data.status,
-                data.lokasi,
-                data.id_processor,
-                data.id_ram,
-                data.id_storage,
-                data.ukuran_layar
-            ))
-            self.conn.commit()
+            cur.execute("""
+                SELECT tambah_laptop_inventori(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """, (dto.nama_laptop, dto.model, dto.os, dto.kondisi, dto.status, 
+                  dto.lokasi, dto.id_processor, dto.id_ram, dto.id_storage, dto.ukuran_layar))
+            return cur.fetchone()['tambah_laptop_inventori']
 
-            return "Berhasil tambah laptop inventori"
 
-    # =========================
-    # READ DETAIL SPEK
-    # =========================
-    def ambil_spek_laptop(self, id_laptop_inventori):
-        query = "SELECT * FROM ambil_spek_laptop(%s);"
-
+    def ambil_laptop(self):
         with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
-            cur.execute(query, (id_laptop_inventori,))
+            cur.execute("SELECT * FROM ambil_laptop_inventori()")
+            return cur.fetchall()
+
+    def ambil_spek_laptop(self, id_laptop):
+        with self.conn.cursor() as cur:
+            cur.execute("SELECT * FROM ambil_spek_laptop(%s)", (id_laptop,))
             return cur.fetchone()
 
-    # =========================
-    # READ ALL INVENTORI
-    # =========================
-    def ambil_laptop_inventori(self):
-        query = "SELECT * FROM ambil_laptop_inventori();"
-
-        with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
-            cur.execute(query)
-            rows = cur.fetchall()
-
-            return [self._map_to_detail_dto(row) for row in rows]
-
-    # =========================
-    # HASIL DSS SAW
-    # =========================
-    def ambil_hasil_saw_inventori(self, id_hasil):
-        query = "SELECT * FROM ambil_hasil_saw_inventori(%s);"
-
-        with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
-            cur.execute(query, (id_hasil,))
-            rows = cur.fetchall()
-
-            return rows
-
-    # =========================
-    # UPDATE KONDISI
-    # =========================
-    def update_kondisi_inventori(self, id_laptop_inventori, kondisi):
-        query = "SELECT update_kondisi_inventori(%s,%s);"
-
+    def update_kondisi(self, id_laptop, kondisi):
         with self.conn.cursor() as cur:
-            cur.execute(query, (id_laptop_inventori, kondisi))
-            result = cur.fetchone()
-            self.conn.commit()
+            cur.execute("SELECT update_kondisi_inventori(%s, %s)", (id_laptop, kondisi))
+            return cur.fetchone()['update_kondisi_inventori']
 
-            return result[0] if result else None
-
-    # =========================
-    # DELETE
-    # =========================
-    def hapus_laptop_inventori(self, id_laptop_inventori):
-        query = "SELECT hapus_laptop_inventori(%s);"
-
+    def update_status(self, id_laptop, status, lokasi):
         with self.conn.cursor() as cur:
-            cur.execute(query, (id_laptop_inventori,))
-            result = cur.fetchone()
-            self.conn.commit()
+            cur.execute("SELECT update_status_inventori(%s, %s, %s)", (id_laptop, status, lokasi))
+            return cur.fetchone()['update_status_inventori']
 
-            return result[0] if result else None
-
-    # =========================
-    # UPDATE SPEK
-    # =========================
-    def update_spek_inventori(self, id_laptop_inventori, id_processor, id_ram, id_storage):
-        query = "SELECT update_spek_inventori(%s,%s,%s,%s);"
-
+    def update_spek(self, dto):
         with self.conn.cursor() as cur:
-            cur.execute(query, (
-                id_laptop_inventori,
-                id_processor,
-                id_ram,
-                id_storage
-            ))
-            result = cur.fetchone()
-            self.conn.commit()
+            cur.execute("""
+                SELECT update_spek_inventori(%s, %s, %s, %s)
+            """, (dto.id_laptop_inventori, dto.id_processor, dto.id_ram, dto.id_storage))
+            return cur.fetchone()['update_spek_inventori']
 
-            return result[0] if result else None
-        
-    def _map_to_detail_dto(self, row):
-        return LaptopInventoriDetailDTO(
-            id_laptop_inventori=row.get("id_laptop_inventori"),
-            no_inventori=row.get("no_inventori"),
-            nama_laptop=row.get("nama_laptop"),
-            model=row.get("model"),
-            os=row.get("os"),
-            kondisi=row.get("kondisi"),
-            status=row.get("status"),
-            lokasi=row.get("lokasi"),
-            ukuran_layar=row.get("ukuran_layar"),
+    def hapus_laptop(self, id_laptop):
+        with self.conn.cursor() as cur:
+            cur.execute("SELECT hapus_laptop_inventori(%s)", (id_laptop,))
+            return cur.fetchone()['hapus_laptop_inventori']
 
-            nama_processor=row.get("nama_processor"),
-            manufacturer=row.get("manufacturer"),
-            processor_model=row.get("processor_model"),
-            cores=row.get("cores"),
-            threads=row.get("threads"),
-
-            ram_kapasitas=row.get("ram_kapasitas"),
-            ram_tipe=row.get("ram_tipe"),
-
-            storage_kapasitas=row.get("storage_kapasitas"),
-            storage_tipe=row.get("storage_tipe")
-        )
-        
-    def filter_inventori(self, data: LaptopInventoriDetailDTO) -> list:
+    def filter_inventori(self, filter_dto):
         query = """
-            SELECT * FROM GetFilteredLaptopInventori(
-                %s, %s, %s, %s,               -- id, kondisi, status, lokasi
-                %s, %s, %s,                   -- ukuran_layar, min, max
-                %s, %s, %s,                   -- nama_processor, manufacturer, processor_model
-                %s, %s, %s,                   -- cores, min_cores, max_cores
-                %s, %s, %s, %s,               -- ram_kapasitas, min, max, tipe
-                %s, %s, %s, %s                -- storage_kapasitas, min, max, tipe
+            SELECT * FROM GetFilteredLaptopinventori(
+                %s, %s, %s, %s,
+                %s, %s, %s,
+                %s, %s, %s,
+                %s, %s, %s,
+                %s, %s, %s, %s,
+                %s, %s, %s, %s
             );
         """
 
-        params = data.get_params()
+        params = filter_dto.get_params()
 
         with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute(query, params)
             rows = cur.fetchall()
-            return [self._map_to_dto(row) for row in rows]
+
+            return rows

@@ -9,9 +9,6 @@ class PengajuanRepository(IPengajuanRepository):
     def __init__(self, conn):
         self.conn = conn
 
-    # =========================
-    # CREATE
-    # =========================
     def tambah_pengajuan(self, data: PengajuanDTO):
         query = """
         SELECT tambah_pengajuan(%s,%s,%s,%s,%s,%s);
@@ -30,9 +27,6 @@ class PengajuanRepository(IPengajuanRepository):
 
             return "Pengajuan berhasil ditambahkan"
 
-    # =========================
-    # READ ALL
-    # =========================
     def ambil_semua_pengajuan(self):
         query = "SELECT * FROM ambil_semua_pengajuan();"
 
@@ -42,9 +36,6 @@ class PengajuanRepository(IPengajuanRepository):
 
             return [self._map_to_dto(row) for row in rows]
 
-    # =========================
-    # READ BY ID
-    # =========================
     def cari_pengajuan(self, id_pengajuan):
         query = "SELECT * FROM cari_pengajuan(%s);"
 
@@ -54,9 +45,6 @@ class PengajuanRepository(IPengajuanRepository):
 
             return self._map_to_dto(row) if row else None
 
-    # =========================
-    # DELETE
-    # =========================
     def hapus_pengajuan(self, id_pengajuan):
         query = "SELECT hapus_pengajuan(%s);"
 
@@ -67,9 +55,6 @@ class PengajuanRepository(IPengajuanRepository):
 
             return result[0] if result else None
 
-    # =========================
-    # APPROVE / REJECT
-    # =========================
     def approve_pengajuan(self, data: PengajuanDTO):
         query = """
         SELECT approve_pengajuan(%s,%s,%s);
@@ -86,9 +71,6 @@ class PengajuanRepository(IPengajuanRepository):
 
             return result[0] if result else None
 
-    # =========================
-    # MAPPING
-    # =========================
     def _map_to_dto(self, row):
         return PengajuanDTO(
             id_pengajuan=row.get("id_pengajuan"),
