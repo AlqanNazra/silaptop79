@@ -1,0 +1,692 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pengajuan Laptop - SiLaptop79</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1.1">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .dashboard-wrapper {
+            display: block;
+            width: 100%;
+        }
+
+        .sidebar {
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.03);
+        }
+
+        .main-dashboard-content {
+            flex: 1;
+            margin-left: 260px;
+            /* Offset fixed sidebar */
+            padding: 40px 60px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+        }
+
+        /* Page Header */
+        .page-header h1 {
+            margin: 0 0 8px 0;
+            font-size: 26px;
+            font-weight: 700;
+            color: #0F172A;
+            letter-spacing: -0.5px;
+        }
+
+        .page-header p {
+            margin: 0;
+            font-size: 14px;
+            color: #64748B;
+        }
+
+        /* Stats Row */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
+
+        .stat-card {
+            background: #FFFFFF;
+            border-radius: 12px;
+            padding: 24px;
+            border: 1px solid #E2E8F0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+        }
+
+        .stat-card.blue::before {
+            background-color: #0284C7;
+        }
+
+        .stat-card.light-blue::before {
+            background-color: #3B82F6;
+        }
+
+        .stat-card.green::before {
+            background-color: #16A34A;
+        }
+
+        .stat-card.red::before {
+            background-color: #DC2626;
+        }
+
+        .stat-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .stat-title {
+            font-size: 13px;
+            font-weight: 500;
+            color: #475569;
+        }
+
+        .stat-icon {
+            color: #94A3B8;
+        }
+
+        .stat-card.blue .stat-icon {
+            color: #0284C7;
+        }
+
+        .stat-card.light-blue .stat-icon {
+            color: #3B82F6;
+        }
+
+        .stat-card.green .stat-icon {
+            color: #16A34A;
+        }
+
+        .stat-card.red .stat-icon {
+            color: #DC2626;
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: 700;
+            color: #0F172A;
+            margin-bottom: 8px;
+        }
+
+        .stat-subtitle {
+            font-size: 12px;
+            font-weight: 500;
+            color: #64748B;
+        }
+
+        .stat-subtitle.trend-up {
+            color: #16A34A;
+        }
+
+        /* Table Card */
+        .table-card {
+            background: #FFFFFF;
+            border-radius: 16px;
+            border: 1px solid #E2E8F0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .table-header {
+            padding: 24px 32px;
+            border-bottom: 1px solid #E2E8F0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-header h2 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+            color: #0F172A;
+        }
+
+        .table-controls {
+            display: flex;
+            gap: 12px;
+        }
+
+        .select-dept {
+            padding: 8px 36px 8px 16px;
+            border: 1px solid #E2E8F0;
+            border-radius: 8px;
+            color: #475569;
+            font-size: 13px;
+            font-family: inherit;
+            appearance: none;
+            cursor: pointer;
+            outline: none;
+            background-image: url('data:image/svg+xml;utf8,<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="%2364748B" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>');
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+        }
+
+        .btn-filter {
+            background-color: #F1F5F9;
+            color: #0F172A;
+            border: 1px solid #E2E8F0;
+            padding: 8px 20px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-filter:hover {
+            background-color: #E2E8F0;
+        }
+
+        /* Table Specifics */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 16px 16px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #64748B;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid #E2E8F0;
+        }
+
+        td {
+            padding: 16px 16px;
+            font-size: 14px;
+            border-bottom: 1px solid #F1F5F9;
+            vertical-align: middle;
+        }
+
+        /* Applicant Cell Styles */
+        .applicant-cell {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .avatar-initials {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .avatar-initials.blue {
+            background-color: #DBEAFE;
+            color: #1E3A8A;
+        }
+
+        .avatar-initials.green {
+            background-color: #DCFCE7;
+            color: #14532D;
+        }
+
+        .avatar-initials.red {
+            background-color: #FEE2E2;
+            color: #7F1D1D;
+        }
+
+        .applicant-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .applicant-name {
+            font-weight: 600;
+            color: #0F172A;
+        }
+
+        .applicant-email {
+            font-size: 12px;
+            color: #64748B;
+        }
+
+        /* Type Badge */
+        .type-badge {
+            background-color: #F1F5F9;
+            color: #475569;
+            padding: 6px 16px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        /* Date column */
+        .date-col {
+            display: flex;
+            flex-direction: column;
+            color: #475569;
+            font-size: 13px;
+            gap: 4px;
+        }
+
+        /* Outline Badges for Status */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 16px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+
+        .status-badge.pending {
+            background-color: #EFF6FF;
+            color: #1D4ED8;
+        }
+
+        .status-badge.pending::before {
+            background-color: #3B82F6;
+        }
+
+        .status-badge.approved {
+            background-color: #F0FDF4;
+            color: #15803D;
+        }
+
+        .status-badge.approved::before {
+            background-color: #22C55E;
+        }
+
+        .status-badge.rejected {
+            background-color: #FEF2F2;
+            color: #B91C1C;
+        }
+
+        .status-badge.rejected::before {
+            background-color: #EF4444;
+        }
+
+        /* Action Icons */
+        .action-icon {
+            color: #0284C7;
+            cursor: pointer;
+            transition: color 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .action-icon:hover {
+            color: #0369A1;
+        }
+
+        /* Footer/Pagination */
+        .table-footer {
+            padding: 20px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .entries-info {
+            font-size: 13px;
+            color: #64748B;
+        }
+
+        .entries-info span {
+            font-weight: 600;
+            color: #0F172A;
+        }
+
+        .pagination {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .page-item {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #475569;
+            cursor: pointer;
+            background: transparent;
+            border: none;
+            transition: all 0.2s;
+        }
+
+        .page-item:hover:not(.disabled) {
+            background-color: #F1F5F9;
+            color: #0F172A;
+        }
+
+        .page-item.active {
+            background-color: #0284C7;
+            color: #FFFFFF;
+        }
+
+        .page-item.disabled {
+            color: #CBD5E1;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="dashboard-wrapper">
+        <!-- Load Sidebar with pengajuan_laptop Active -->
+        {% include 'components/sidebar.html' with active_page='pengajuan_laptop' %}
+
+        <!-- Main Content -->
+        <div class="main-dashboard-content">
+
+            <!-- Page Header -->
+            <div class="page-header">
+                <h1>Daftar Pengajuan Laptop</h1>
+                <p>Kelola dan tinjau semua permintaan peminjaman atau penggantian perangkat dari karyawan.</p>
+            </div>
+
+            <!-- Stats Row -->
+            <div class="stats-row">
+                <!-- Stat 1 -->
+                <div class="stat-card blue">
+                    <div class="stat-top">
+                        <span class="stat-title">Total Permintaan</span>
+                        <svg class="stat-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                    </div>
+                    <div class="stat-number">124</div>
+                    <div class="stat-subtitle trend-up">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            style="display:inline; margin-right:2px;">
+                            <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline>
+                            <polyline points="16 7 22 7 22 13"></polyline>
+                        </svg>
+                        +12% dari bulan lalu
+                    </div>
+                </div>
+
+                <!-- Stat 2 -->
+                <div class="stat-card light-blue">
+                    <div class="stat-top">
+                        <span class="stat-title">Pending</span>
+                        <svg class="stat-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                    </div>
+                    <div class="stat-number">18</div>
+                    <div class="stat-subtitle">Membutuhkan persetujuan</div>
+                </div>
+
+                <!-- Stat 3 -->
+                <div class="stat-card green">
+                    <div class="stat-top">
+                        <span class="stat-title">Disetujui</span>
+                        <svg class="stat-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                        </svg>
+                    </div>
+                    <div class="stat-number">89</div>
+                    <div class="stat-subtitle" style="color: #16A34A;">Bulan ini</div>
+                </div>
+
+                <!-- Stat 4 -->
+                <div class="stat-card red">
+                    <div class="stat-top">
+                        <span class="stat-title">Ditolak</span>
+                        <svg class="stat-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="15" y1="9" x2="9" y2="15"></line>
+                            <line x1="9" y1="9" x2="15" y2="15"></line>
+                        </svg>
+                    </div>
+                    <div class="stat-number">17</div>
+                    <div class="stat-subtitle" style="color: #DC2626;">Review diperlukan</div>
+                </div>
+            </div>
+
+            <!-- Table Card -->
+            <div class="table-card">
+
+                <div class="table-header">
+                    <h2>Data Pengajuan</h2>
+                    <div class="table-controls">
+                        <select class="select-dept">
+                            <option>Semua Departemen</option>
+                            <option>Engineering</option>
+                            <option>Marketing</option>
+                            <option>Finance</option>
+                        </select>
+                        <button class="btn-filter">Filter</button>
+                    </div>
+                </div>
+
+                <div class="table-responsive" style="width: 100%; overflow-x: auto;">
+                    <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 50px; text-align: center;">NO</th>
+                            <th>NAMA PEMOHON</th>
+                            <th>DEPARTEMEN</th>
+                            <th>JENIS PENGAJUAN</th>
+                            <th>TANGGAL</th>
+                            <th>STATUS</th>
+                            <th style="text-align: center;">ACTIONS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Row 1 -->
+                        <tr>
+                            <td align="center" style="font-weight: 500; color: #475569;">1</td>
+                            <td>
+                                <div class="applicant-cell">
+                                    <div class="avatar-initials blue">AS</div>
+                                    <div class="applicant-info">
+                                        <span class="applicant-name">Adi Saputra</span>
+                                        <span class="applicant-email">adi.saputra@prism.com</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td style="color: #475569;">Engineering</td>
+                            <td><span class="type-badge">Peminjaman</span></td>
+                            <td>
+                                <div class="date-col">
+                                    <span>24 Okt</span>
+                                    <span>2023</span>
+                                </div>
+                            </td>
+                            <td><span class="status-badge pending">Pending</span></td>
+                            <td align="center">
+                                <button class="btn-detail">Detail</button>
+                            </td>
+                        </tr>
+
+                        <!-- Row 2 -->
+                        <tr>
+                            <td align="center" style="font-weight: 500; color: #475569;">2</td>
+                            <td>
+                                <div class="applicant-cell">
+                                    <div class="avatar-initials green">RP</div>
+                                    <div class="applicant-info">
+                                        <span class="applicant-name">Rina Permata</span>
+                                        <span class="applicant-email">rina.p@prism.com</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td style="color: #475569;">Marketing</td>
+                            <td><span class="type-badge">Pergantian</span></td>
+                            <td>
+                                <div class="date-col">
+                                    <span>23 Okt</span>
+                                    <span>2023</span>
+                                </div>
+                            </td>
+                            <td><span class="status-badge approved">Disetujui</span></td>
+                            <td align="center">
+                                <button class="btn-detail">Detail</button>
+                            </td>
+                        </tr>
+
+                        <!-- Row 3 -->
+                        <tr>
+                            <td align="center" style="font-weight: 500; color: #475569;">3</td>
+                            <td>
+                                <div class="applicant-cell">
+                                    <div class="avatar-initials red">BW</div>
+                                    <div class="applicant-info">
+                                        <span class="applicant-name">Budi Wijaya</span>
+                                        <span class="applicant-email">budi.w@prism.com</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td style="color: #475569;">Finance</td>
+                            <td><span class="type-badge">Peminjaman</span></td>
+                            <td>
+                                <div class="date-col">
+                                    <span>22 Okt</span>
+                                    <span>2023</span>
+                                </div>
+                            </td>
+                            <td><span class="status-badge rejected">Ditolak</span></td>
+                            <td align="center">
+                                <button class="btn-detail">Detail</button>
+                            </td>
+                        </tr>
+
+                        <!-- Row 4 -->
+                        <tr>
+                            <td align="center" style="font-weight: 500; color: #475569;">4</td>
+                            <td>
+                                <div class="applicant-cell">
+                                    <div class="avatar-initials blue">DK</div>
+                                    <div class="applicant-info">
+                                        <span class="applicant-name">Dewi Kusuma</span>
+                                        <span class="applicant-email">dewi.k@prism.com</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td style="color: #475569;">Human<br>Resources</td>
+                            <td><span class="type-badge">Peminjaman</span></td>
+                            <td>
+                                <div class="date-col">
+                                    <span>21 Okt</span>
+                                    <span>2023</span>
+                                </div>
+                            </td>
+                            <td><span class="status-badge pending">Pending</span></td>
+                            <td align="center">
+                                <button class="btn-detail">Detail</button>
+                            </td>
+                        </tr>
+
+                        <!-- Row 5 -->
+                        <tr>
+                            <td align="center" style="font-weight: 500; color: #475569;">5</td>
+                            <td>
+                                <div class="applicant-cell">
+                                    <div class="avatar-initials blue">DK</div>
+                                    <div class="applicant-info">
+                                        <span class="applicant-name">Dewi Kusuma</span>
+                                        <span class="applicant-email">dewi.k@prism.com</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td style="color: #475569;">Human<br>Resources</td>
+                            <td><span class="type-badge">Peminjaman</span></td>
+                            <td>
+                                <div class="date-col">
+                                    <span>21 Okt</span>
+                                    <span>2023</span>
+                                </div>
+                            </td>
+                            <td><span class="status-badge pending">Pending</span></td>
+                            <td align="center">
+                                <button class="btn-detail">Detail</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                </div>
+
+                <!-- Pagination footer -->
+                <div class="pagination-container">
+                    <span class="pagination-text">Menampilkan 1-5 dari 124 pengajuan</span>
+                    <div class="pagination-controls">
+                        <button class="page-btn"><i class="fa-solid fa-angle-left"></i></button>
+                        <button class="page-btn active">1</button>
+                        <button class="page-btn">2</button>
+                        <button class="page-btn">3</button>
+                        <button class="page-btn"><i class="fa-solid fa-angle-right"></i></button>
+                    </div>
+                </div>
+
+            </div> <!-- End Table Card -->
+
+        </div> <!-- End Main Content -->
+    </div> <!-- End Dashboard Wrapper -->
+
+</body>
+
+</html>
