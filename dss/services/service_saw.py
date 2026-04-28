@@ -137,7 +137,7 @@ class Servicesaw:
         golongan_map = {}
 
         for role in roles:
-            data = self.repoBK.cari_bobot_kriteria_by_role(role)
+            data = self.repoBK.cari_bobot_kriteria_by_roles(role)
 
             if not data:
                 raise ValueError(f"Bobot tidak ditemukan untuk role {role}")
@@ -198,7 +198,7 @@ class Servicesaw:
             role_name = r["role"]
             weight = r.get("weight")
 
-            data = self.repoBK.cari_bobot_kriteria_by_role(role_name)
+            data = self.repoBK.cari_bobot_kriteria_by_roles(role_name)
 
             if not data:
                 raise ValueError(f"Bobot tidak ditemukan untuk role {role_name}")

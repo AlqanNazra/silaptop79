@@ -15,7 +15,7 @@ class IBobotkriteriaRepository(ABC):
         pass
     
     @abstractmethod
-    def cari_bobot_kriteria_by_role(self, role):
+    def cari_bobot_kriteria_by_roles(self, role):
         pass 
     
     @abstractmethod
@@ -44,7 +44,7 @@ class IBobotKriteriaRepositoryImpl(IBobotkriteriaRepository):
     def ambil_semua_data_detail_bobot(self):
         pass
 
-    def cari_bobot_kriteria_by_role(self, role):
+    def cari_bobot_kriteria_by_roles(self, role):
         pass
 
     def update_bobot_kriteria(self, data):

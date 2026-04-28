@@ -162,7 +162,7 @@ def test_empty_data(service):
 # TEST AVERAGE GOLONGAN
 # =========================
 def test_average_golongan(service):
-    service.repoBK.cari_bobot_kriteria_by_role.side_effect = [
+    service.repoBK.cari_bobot_kriteria_by_roles.side_effect = [
         {"golongan": "A", "harga": 0.3, "ram": 0.3},
         {"golongan": "A", "harga": 0.5, "ram": 0.5},
     ]
@@ -177,7 +177,7 @@ def test_average_golongan(service):
 # TEST WEIGHTED GOLONGAN
 # =========================
 def test_weighted_golongan(service):
-    service.repoBK.cari_bobot_kriteria_by_role.side_effect = [
+    service.repoBK.cari_bobot_kriteria_by_roles.side_effect = [
         {"golongan": "A", "harga": 0.3, "ram": 0.3},
         {"golongan": "B", "harga": 0.5, "ram": 0.5},
     ]

@@ -1,5 +1,5 @@
-from ..repositories.interface.interface_bobot_kriteria import IBobotKriteriaRepositoryImpl
-from ..repositories.interface.interface_kriteria import IKriteriaRepositoryImpl
+from dss.repositories.repositori_bobot_kriteria import BobotKriteriaRepository
+from dss.repositories.repositori_kriteria import KriteriaRepository
 from ..repositories.dto.dto_bobot_kriteria import BobotKriteriaDTO
 from ..repositories.dto.dto_kriteria import KriteriaDTO
 from collections import defaultdict
@@ -9,11 +9,16 @@ class ServiceSwara:
 
     def __init__(self, conn):
         self.conn = conn
-        self.repoBK = IBobotKriteriaRepositoryImpl(conn)
-        self.repoK = IKriteriaRepositoryImpl(conn)
+        self.repoBK = BobotKriteriaRepository(conn)
+        self.repoK = KriteriaRepository(conn)
         
     def ambil_dan_gabung_bobot(self, list_role: list[str]):
-        data = self.repoBK.cari_bobot_kriteria_by_role(list_role)
+        data = self.repoBK.cari_bobot_kriteria_by_roles(list_role)
+        
+        # Code Testing
+        print("DATA RAW DB:", data)
+        print("REPO TYPE:", type(self.repoBK))
+        print("METHOD EXIST:", hasattr(self.repoBK, "cari_bobot_kriteria_by_roles"))
 
         if not data:
             raise Exception("Data bobot kosong")

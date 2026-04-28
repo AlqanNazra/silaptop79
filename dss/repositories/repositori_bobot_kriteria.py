@@ -47,6 +47,7 @@ class BobotKriteriaRepository(IBobotKriteriaRepositoryImpl):
             return rows
         
     def cari_bobot_kriteria_by_roles(self, roles: list):
+        print("FUNCTION REPO KE PANGGIL")  # 🔥 WAJIB MUNCUL
         query = "SELECT * FROM cari_bobot_kriteria_by_roles(%s);"
 
         with self.conn.cursor(cursor_factory=RealDictCursor) as cur:

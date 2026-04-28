@@ -214,3 +214,37 @@ BEGIN
     PERFORM tambah_bobot_kriteria(v_id_baterai,   'Project Manager', 0.30);
 
 END $$;
+
+select * from dss_bobotkriteria
+SELECT * 
+FROM cari_bobot_kriteria_by_roles(
+    ARRAY['Backend Developer', 'Frontend Developer']
+);
+
+drop function cari_bobot_kriteria_by_roles
+
+CREATE OR REPLACE FUNCTION cari_bobot_kriteria_by_roles(
+    f_roles VARCHAR[]
+)
+RETURNS TABLE (
+    id_bobot VARCHAR,
+    id_kriteria VARCHAR,
+    nama_kriteria VARCHAR,
+    tipe_kriteria VARCHAR,
+    role VARCHAR,
+    nilai_bobot FLOAT
+) AS $$
+BEGIN 
+    RETURN QUERY
+    SELECT 
+        b.id_bobot,
+        b.id_kriteria,
+        k.nama_kriteria,
+        k.tipe_kriteria,
+        b.role,
+        b.nilai_bobot
+    FROM dss_bobotkriteria b
+    JOIN dss_kriteria k ON k.id_kriteria = b.id_kriteria
+    WHERE b.role = ANY(f_roles);
+END;
+$$ LANGUAGE plpgsql;

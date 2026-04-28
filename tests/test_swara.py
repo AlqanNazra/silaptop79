@@ -41,7 +41,7 @@ def get_mock_bobot_roles():
 # TEST GABUNG + AVERAGE
 # =========================
 def test_ambil_dan_gabung_bobot_multi_role(service):
-    service.repoBK.cari_bobot_kriteria_by_role.return_value = get_mock_bobot_roles()
+    service.repoBK.cari_bobot_kriteria_by_roles.return_value = get_mock_bobot_roles()
 
     result = service.ambil_dan_gabung_bobot(["Backend Developer", "Frontend Developer"])
 
@@ -61,7 +61,7 @@ def test_ambil_dan_gabung_bobot_multi_role(service):
 # TEST SORTING
 # =========================
 def test_pengurutan_kriteria_real(service):
-    service.repoBK.cari_bobot_kriteria_by_role.return_value = get_mock_bobot_roles()
+    service.repoBK.cari_bobot_kriteria_by_roles.return_value = get_mock_bobot_roles()
 
     sorted_kriteria, meta = service.pengurutan_kriteria(
         ["Backend Developer", "Frontend Developer"]
@@ -79,7 +79,7 @@ def test_pengurutan_kriteria_real(service):
 # TEST FULL SWARA
 # =========================
 def test_proses_swara_realcase(service):
-    service.repoBK.cari_bobot_kriteria_by_role.return_value = get_mock_bobot_roles()
+    service.repoBK.cari_bobot_kriteria_by_roles.return_value = get_mock_bobot_roles()
     service.repoBK.update_nilai_swara = MagicMock(return_value=True)
 
     result = service.proses_swara(
@@ -102,7 +102,7 @@ def test_proses_swara_realcase(service):
 # TEST EDGE CASE (BOBOT KOSONG)
 # =========================
 def test_proses_swara_empty(service):
-    service.repoBK.cari_bobot_kriteria_by_role.return_value = []
+    service.repoBK.cari_bobot_kriteria_by_roles.return_value = []
 
     result = service.proses_swara(["Backend Developer"])
 
@@ -122,7 +122,7 @@ def test_multi_role_complex(service):
         {"id_kriteria": "KRIT_0006", "nama_kriteria": "baterai", "nilai_bobot": 0.05},
     ]
 
-    service.repoBK.cari_bobot_kriteria_by_role.return_value = data
+    service.repoBK.cari_bobot_kriteria_by_roles.return_value = data
     service.repoBK.update_nilai_swara = MagicMock()
 
     result = service.proses_swara(
