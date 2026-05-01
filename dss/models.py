@@ -135,3 +135,26 @@ class LaptopPengadaan(models.Model):
 
     def __str__(self):
         return self.nama_laptop
+    
+# =============================================
+# 8. DETAIL HASIL SAW
+# =============================================
+class DetailHasilSAW(models.Model):
+    id_detail = models.CharField(primary_key=True, max_length=100)
+    
+    # Menghubungkan ke tabel HasilSAW (id_hasil)
+    id_hasil = models.ForeignKey(
+        HasilSAW, 
+        on_delete=models.CASCADE,
+        related_name='detail_set'
+    )
+    
+    nilai_normalisasi = models.FloatField()
+    nilai_preferensi = models.FloatField()
+    ranking = models.IntegerField()
+
+    class Meta:
+        db_table = 'dss_detailhasilsaw'  # Sesuai dengan nama tabel di SQL kamu
+
+    def __str__(self):
+        return f"Detail {self.id_detail} - Rank {self.ranking}"

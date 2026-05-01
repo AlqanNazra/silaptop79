@@ -15,6 +15,10 @@ from inventori.services.laptop_inventori.read import ReadLaptopInventoriService
 from inventori.services.laptop_inventori.update import UpdateLaptopInventoriService
 from inventori.services.laptop_inventori.delete import DeleteLaptopInventoriService
 
+from inventori.services.service_pengajuan import PengajuanService
+from inventori.services.service_peminjaman import PeminjamanService
+from inventori.repositories.dto.dto_pengajuan import PengajuanDTO
+from inventori.repositories.dto.dto_peminjaman import PeminjamanDTO
 # =============================================
 # HELPER: Response standar
 # =============================================
@@ -167,3 +171,284 @@ def laptop_detail(request, id_laptop):
 
 # Catatan: Fungsi CRUD lain untuk RAM, Storage, Peminjaman, Riwayat dapat 
 # diimplementasikan menggunakan pola yang persis sama.
+
+@csrf_exempt
+def tambah_pengajuan_view(request):
+    if request.method == "POST":
+        try:
+            body = json.loads(request.body)
+
+            dto = PengajuanDTO(
+                id_user=request.user.id_user,
+                kebutuhan_role=body.get("kebutuhan_role"),
+                kebutuhan_requirement=body.get("kebutuhan_requirement"),
+                bulan=body.get("bulan"),
+                keterangan=body.get("keterangan"),
+                perusahaan=body.get("perusahaan")
+            )
+
+            service = PengajuanService()
+            result = service.tambah_pengajuan(dto)
+
+            return JsonResponse({"message": result})
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+
+    return JsonResponse({"error": "Method not allowed"}, status=405)
+
+@csrf_exempt
+def tambah_pengajuan_view(request):
+    if request.method == "POST":
+        try:
+            body = json.loads(request.body)
+
+            dto = PengajuanDTO(
+                id_user=request.user.id_user,
+                kebutuhan_role=body.get("kebutuhan_role"),
+                kebutuhan_requirement=body.get("kebutuhan_requirement"),
+                bulan=body.get("bulan"),
+                keterangan=body.get("keterangan"),
+                perusahaan=body.get("perusahaan")
+            )
+
+            service = PengajuanService()
+            result = service.tambah_pengajuan(dto)
+
+            return JsonResponse({"message": result})
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+
+    return JsonResponse({"error": "Method not allowed"}, status=405)
+
+def list_pengajuan_view(request):
+    if request.method == "GET":
+        try:
+            service = PengajuanService()
+            data = service.ambil_semua()
+
+            return JsonResponse({
+                "data": [d.__dict__ for d in data]
+            })
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+
+    return JsonResponse({"error": "Method not allowed"}, status=405)
+
+@csrf_exempt
+def approve_pengajuan_view(request):
+    if request.method == "POST":
+        try:
+            body = json.loads(request.body)
+
+            dto = PengajuanDTO(
+                id_pengajuan=body.get("id_pengajuan"),
+                status=body.get("status"),  
+                approved_by=request.user.id_user  
+            )
+
+            service = PengajuanService()
+            result = service.approve_pengajuan(dto)
+
+            return JsonResponse({"message": result})
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+
+    return JsonResponse({"error": "Method not allowed"}, status=405)
+
+@csrf_exempt
+def approve_dan_pinjam_view(request):
+    if request.method == "POST":
+        try:
+            body = json.loads(request.body)
+
+            # DTO Pengajuan
+            dto_pengajuan = PengajuanDTO(
+                id_pengajuan=body.get("id_pengajuan"),
+                status="approved",
+                approved_by=request.user.id_user
+            )
+
+            # DTO Peminjaman
+            dto_peminjaman = PeminjamanDTO(
+                id_user=body.get("id_user"),
+                id_laptop_inventori=body.get("id_laptop_inventori"),
+                id_pengajuan=body.get("id_pengajuan"),
+                tanggal_pinjam=body.get("tanggal_pinjam"),
+                tanggal_kembali=body.get("tanggal_kembali"),
+                keterangan=body.get("keterangan")
+            )
+
+            service = PengajuanService()
+            result = service.approve_dan_pinjam(dto_pengajuan, dto_peminjaman)
+
+            return JsonResponse({"message": result})
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+
+    return JsonResponse({"error": "Method not allowed"}, status=405)
+
+# =============================================================================
+#   4. VIews Peminjaman 
+# =============================================================================
+
+@csrf_exempt
+def tambah_peminjaman_view(request):
+    if request.method == "POST":
+        try:
+            body = json.loads(request.body)
+
+            dto = PeminjamanDTO(
+                id_user=body.get("id_user"),
+                id_laptop_inventori=body.get("id_laptop_inventori"),
+                tanggal_pinjam=body.get("tanggal_pinjam"),
+                tanggal_kembali=body.get("tanggal_kembali"),
+                status=body.get("status"),
+                keterangan=body.get("keterangan")
+            )
+
+            service = PeminjamanService()
+            result = service.tambah_peminjaman(dto)
+
+            return JsonResponse({"message": result})
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+
+    return JsonResponse({"error": "Method not allowed"}, status=405)
+
+def list_peminjaman_view(request):
+    if request.method == "GET":
+        try:
+            service = PeminjamanService()
+            data = service.ambil_semua_peminjaman()
+
+            return JsonResponse({
+                "data": [d.__dict__ for d in data]
+            })
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+
+    return JsonResponse({"error": "Method not allowed"}, status=405)
+
+def detail_peminjaman_view(request, id_peminjaman):
+    if request.method == "GET":
+        try:
+            service = PeminjamanService()
+            data = service.cari_peminjaman(id_peminjaman)
+
+            if not data:
+                return JsonResponse({"error": "Data tidak ditemukan"}, status=404)
+
+            return JsonResponse(data.__dict__)
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+
+    return JsonResponse({"error": "Method not allowed"}, status=405)
+
+@csrf_exempt
+def update_peminjaman_view(request):
+    if request.method == "PUT":
+        try:
+            body = json.loads(request.body)
+            
+            dto = PeminjamanDTO(
+                id_peminjaman=body.get("id_peminjaman"),
+                tanggal_pinjam=body.get("tanggal_pinjam"),
+                tanggal_kembali=body.get("tanggal_kembali"),
+                status=body.get("status"),
+                keterangan=body.get("keterangan")
+            )
+            
+            service = PeminjamanService()
+            result = service.update_pengajuan(dto)
+            
+            return JsonResponse({"message": result})
+        except Exception as e:  
+            return JsonResponse({"error": str(e)}, status=500)
+
+    return JsonResponse({"error": "Method not allowed"}, status=405)
+
+@csrf_exempt
+def hapus_peminjaman_view(request, id_peminjaman):
+    if request.method == "DELETE":
+        try:
+            service = PeminjamanService()
+            result = service.hapus_peminjaman(id_peminjaman)
+            
+            return JsonResponse({"message": result})
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+
+    return JsonResponse({"error": "Method not allowed"}, status=405)
+
+@csrf_exempt
+def pinjam_laptop_view(request):
+    if request.method == "POST":
+        try:
+            body = json.loads(request.body)
+
+            dto = PeminjamanDTO(
+                id_user=body.get("id_user"),
+                id_laptop_inventori=body.get("id_laptop_inventori"),
+                id_pengajuan=body.get("id_pengajuan"),
+                tanggal_pinjam=body.get("tanggal_pinjam"),
+                tanggal_kembali=body.get("tanggal_kembali"),
+                keterangan=body.get("keterangan")
+            )
+
+            service = PeminjamanService()
+            result = service.pinjam_laptop(dto)
+
+            return JsonResponse({"message": result})
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+
+@csrf_exempt
+def pengembalian_laptop_view(request):
+    if request.method == "POST":
+        try:
+            body = json.loads(request.body)
+
+            dto = PeminjamanDTO(
+                id_peminjaman=body.get("id_peminjaman"),
+                lokasi=body.get("lokasi"),
+                keterangan=body.get("keterangan")
+            )
+
+            service = PeminjamanService()
+            result = service.pengembalian_laptop(dto)
+
+            return JsonResponse({"message": result})
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+
+def sync_status_laptop_view(request):
+    if request.method == "POST":
+        try:
+            service = PeminjamanService()
+            result = service.sync_status_laptop()
+
+            return JsonResponse({"message": result})
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+        
+def laptop_by_lokasi_view(request):
+    if request.method == "GET":
+        try:
+            service = PeminjamanService()
+            data = service.ambil_laptop_by_lokasi()
+
+            return JsonResponse({"data": data})
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)

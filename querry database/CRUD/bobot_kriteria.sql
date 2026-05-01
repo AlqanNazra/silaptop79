@@ -17,7 +17,7 @@ ADD CONSTRAINT unique_kriteria_role UNIQUE (id_kriteria, role);
 CREATE OR REPLACE FUNCTION tambah_bobot_kriteria(
     f_id_kriteria VARCHAR,
     f_role VARCHAR,
-    f_nilai_bobot FLOAT,
+    f_nilai_bobot FLOAT
 )
 RETURNS VARCHAR AS $$
 DECLARE
@@ -57,6 +57,8 @@ CREATE OR REPLACE FUNCTION cari_bobot_kriteria_by_roles(
 RETURNS TABLE (
     id_bobot VARCHAR,
     id_kriteria VARCHAR,
+    nama_kriteria VARCHAR,
+    tipe_kriteria VARCHAR,
     role VARCHAR,
     nilai_bobot FLOAT
 ) AS $$
@@ -65,9 +67,12 @@ BEGIN
     SELECT 
         b.id_bobot,
         b.id_kriteria,
+        k.nama_kriteria,
+        k.tipe_kriteria,
         b.role,
         b.nilai_bobot
     FROM dss_bobotkriteria b
+    JOIN dss_kriteria k ON k.id_kriteria = b.id_kriteria
     WHERE b.role = ANY(f_roles);
 END;
 $$ LANGUAGE plpgsql;

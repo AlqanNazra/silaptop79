@@ -124,7 +124,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION approve_pengajuan(
     f_id_pengajuan VARCHAR,
     f_status VARCHAR,
-    f_approved_by VARCHAR
+    f_approved_by VARCHAR,
 )
 RETURNS TEXT AS $$
 BEGIN 
@@ -136,7 +136,7 @@ BEGIN
     SET 
         status = f_status,
         tanggal_approval = CURRENT_TIMESTAMP,
-        approved_by_id = f_approved_by
+        approved_by = f_approved_by
     WHERE id_pengajuan = f_id_pengajuan;
 
     RETURN 'Pengajuan berhasil diupdate menjadi ' || f_status;

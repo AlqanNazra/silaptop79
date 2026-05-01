@@ -1,11 +1,10 @@
-from ..repositories.interface.interface_laptop_pengadaan import ILaptopPengadaanRepositoryImpl
-from ...dss.repositories.dto.dto_laptop_pengadaan import FilterPengadaanDTO
-from ..repositories.dto.dto_laptop_pengadaan import LaptopPengadaanDTO
+from dss.repositories.repositori_laptop_pengadaan import LaptopPengadaanRepository
+from dss.repositories.dto.dto_laptop_pengadaan import FilterPengadaanDTO
+from dss.repositories.dto.dto_laptop_pengadaan import LaptopPengadaanDTO
 
-from ...inventori.repositories.dto.dto_laptop_inventori import LaptopInventoriDetailDTO
-from ...inventori.repositories.dto.dto_laptop_inventori import FilterInventoriDTO
-from ...inventori.repositories.interfaces.interface_laptop_inventori import ILaptopInventoriRepository
-
+from inventori.repositories.dto.dto_laptop_inventori import LaptopInventoriDetailDTO
+from inventori.repositories.dto.dto_laptop_inventori import FilterInventoriDTO
+from inventori.repositories.repositori_laptop_inventori import LaptopInventoriRepository
 
 from collections import defaultdict
 from typing import Union, Optional
@@ -15,8 +14,8 @@ class Servicepreposesdata:
     
     def __init__(self, conn):
         self.conn = conn
-        self.repoLP = ILaptopPengadaanRepositoryImpl(conn)
-        self.repoLI = ILaptopInventoriRepository(conn) 
+        self.repoLP = LaptopPengadaanRepository(conn)
+        self.repoLI = LaptopInventoriRepository(conn) 
     def ekstrak_processor(self, text):
             if not text:
                 return None, None, None
@@ -121,7 +120,7 @@ class Servicepreposesdata:
                             "message": "Untuk pengadaan, gunakan FilterPengadaanDTO"
                         }
                     filtered_data = self.repoLP.filter_pengadaan(data)
-                    result = [item.to_dict() for item in filtered_data]
+                    result = filtered_data
                     processed = self.preprocessing_processor(result)
                     
                     return {
@@ -139,7 +138,7 @@ class Servicepreposesdata:
                             "message": "Untuk inventori, gunakan FilterInventoriDTO"
                         }
                     filtered_data = self.repoLI.filter_inventori(data)
-                    result = [item.to_dict() for item in filtered_data]
+                    result = filtered_data
                     processed = self.preprocessing_processor(result)
                     
                     return {
@@ -178,17 +177,27 @@ class Servicepreposesdata:
 
     def preprocessing(self, data_list):
         hasil = []
+
         for item in data_list:
-            series, model, gen = self.ekstrak_processor(item["processor"])
+            series, model, gen = self.ekstrak_processor(
+                item.get("nama_processor") or item.get("processor")
+            )
             skor_processor = self.mapping_processor(series, gen)
 
             hasil.append({
-                "id": item["id"],
+                "id": item.get("id_laptop_inventori") or item.get("id_laptop_pengadaan"),
+
                 "processor": skor_processor,
-                "ram": item["ram"],
-                "storage": item["storage"],
-                "berat": item["berat"],
-                "layar": item["ukuran_layar"],
-                "baterai" : item["baterai"]
+
+                "ram": item.get("ram_kapasitas") or item.get("ram") or 0,
+
+                "storage": item.get("storage_kapasitas") or item.get("storage") or 0,
+
+                "berat": item.get("berat", 0),
+
+                "layar": item.get("ukuran_layar", 0),
+
+                "baterai": item.get("baterai", 0)
             })
+
         return hasil

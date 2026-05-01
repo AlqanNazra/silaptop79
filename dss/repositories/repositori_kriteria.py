@@ -13,21 +13,21 @@ class KriteriaRepository(IKriteriaRepositoryImpl):
     # CREATE
     # =========================
     def tambah_kriteria(self, data: KriteriaDTO):
-        query = """
-        SELECT tambah_kriteria(%s, %s);
-        """
+        print("➡️ QUERY TAMBAH KRITERIA DTO")
+
+        query = "SELECT tambah_kriteria(%s, %s, %s);"
 
         with self.conn.cursor() as cur:
             cur.execute(query, (
                 data.nama_kriteria,
                 data.tipe_kriteria,
+                data.golongan_kriteria
             ))
 
-            id_kriteria = cur.fetchone()[0]
+            result = cur.fetchone()
+            print("RESULT KRITERIA:", result)
 
-            self.conn.commit()
-
-            return id_kriteria
+            return result[0]
 
     # =========================
     # READ
@@ -59,3 +59,12 @@ class KriteriaRepository(IKriteriaRepositoryImpl):
             self.conn.commit()
 
             return result[0] if result else None
+        
+    def ambil_semua_role(self):
+        query = "SELECT role FROM dss_bobotkriteria;"
+
+        with self.conn.cursor() as cur:
+            cur.execute(query)
+            rows = cur.fetchall()
+
+            return [row[0] for row in rows]

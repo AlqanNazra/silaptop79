@@ -1,53 +1,58 @@
-from ..repositories.interface.interface_bobot_kriteria import IBobotKriteriaRepositoryImpl
-from ..repositories.interface.interface_kriteria import IKriteriaRepositoryImpl
+# from ..repositories.interface.interface_bobot_kriteria import IBobotKriteriaRepositoryImpl
+# from ..repositories.interface.interface_kriteria import IKriteriaRepositoryImpl
 from ..repositories.dto.dto_bobot_kriteria import BobotKriteriaDTO
 from ..repositories.dto.dto_kriteria import KriteriaDTO
 from collections import defaultdict
 
+from ..repositories.repositori_kriteria import KriteriaRepository
+from ..repositories.repositori_bobot_kriteria import BobotKriteriaRepository
 
 class ServiceBobotKriteria:
 
     def __init__(self, conn):
         self.conn = conn
-        self.repoBK = IBobotKriteriaRepositoryImpl(conn)
-        self.repoK = IKriteriaRepositoryImpl(conn)
+        # self.repoBK = IBobotKriteriaRepositoryImpl(conn)
+        # self.repoK = IKriteriaRepositoryImpl(conn)
+        self.repoK = KriteriaRepository(conn)
+        self.repoBK = BobotKriteriaRepository(conn)
+
 
     def input_bobot_batch(self, role, list_kriteria):
+        print("🔥 SERVICE MASUK")
+
         try:
+            total = sum([k["bobot"] for k in list_kriteria])
+
+            # if abs(total - 1) > 0.00001:
+            #     raise Exception("Total bobot harus = 1")
+
             with self.conn:
-                total = sum([k["bobot"] for k in list_kriteria])
-                if round(total, 5) != 1:
-                    raise Exception("Total bobot harus = 1")
-
-                nama_list = [k["nama"] for k in list_kriteria]
-                if len(nama_list) != len(set(nama_list)):
-                    raise Exception("Kriteria duplikat")
-
                 for item in list_kriteria:
-                    kriteria_dto = KriteriaDTO(
-                        nama_kriteria=item["nama"],
-                        tipe_kriteria=item["tipe"]
+
+                    dto = KriteriaDTO(
+                        nama_kriteria=item["nama"].strip(),
+                        tipe_kriteria=item["tipe"],
+                        golongan_kriteria=item["golongan"]
                     )
 
-                    id_kriteria = self.repoK.tambah_kriteria(kriteria_dto)
+                    id_kriteria = self.repoK.tambah_kriteria(dto)
 
-
-                    bobot_dto = BobotKriteriaDTO(
+                    print("ID KRITERIA:", id_kriteria)
+                    
+                    dtobobot = BobotKriteriaDTO(
                         id_kriteria=id_kriteria,
                         role=role,
-                        nilai_bobot=item["bobot"],
-                        nilai_swara= "Null"
+                        nilai_bobot = item ["bobot"],
+                        nilai_swara= None
                     )
 
-                    self.repoBK.tambah_bobot_kriteria(bobot_dto)
+                    self.repoBK.tambah_bobot_kriteria(dtobobot)
 
             return {"status": "success", "message": "Berhasil input batch"}
 
         except Exception as e:
+            print("❌ SERVICE ERROR:", e)
             return {"status": "error", "message": str(e)}
-    # =========================
-    # Kriteria
-    # =========================
     
     def ambil_kriteria(self):
         try:
@@ -85,9 +90,7 @@ class ServiceBobotKriteria:
                 "status": "error",
                 "message": str(e)
             }
-    # =========================
-    # Bobot Kriteria
-    # =========================
+
     def ambil_bobot_by_kriteria(self, id_bobot, id_kriteria):
         try:
             data = self.repoBK.ambil_bobot_by_kriteria(id_bobot, id_kriteria)
@@ -152,6 +155,25 @@ class ServiceBobotKriteria:
                     "status": "success",
                     "message": result
                 }
+
+        except Exception as e:
+            return {
+                "status": "error",
+                "message": str(e)
+            }
+
+    def get_unique_roles(self):
+        try:
+            roles = self.repoBK.ambil_semua_role()
+            clean_roles = list(set(
+                r.strip() for r in roles if r
+            ))
+            clean_roles.sort()
+
+            return {
+                "status": "success",
+                "data": clean_roles
+            }
 
         except Exception as e:
             return {

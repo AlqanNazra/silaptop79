@@ -1,7 +1,7 @@
 import psycopg2
 from psycopg2.extras import RealDictCursor
-from dto.dto_laptop_pengadaan import LaptopPengadaanDTO
-from interface.interface_laptop_pengadaan import ILaptopPengadaanRepositoryImpl
+from .dto.dto_laptop_pengadaan import LaptopPengadaanDTO
+from .interface.interface_laptop_pengadaan import ILaptopPengadaanRepositoryImpl
 
 
 class LaptopPengadaanRepository(ILaptopPengadaanRepositoryImpl):
@@ -114,4 +114,4 @@ class LaptopPengadaanRepository(ILaptopPengadaanRepositoryImpl):
         with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute(query, params)
             rows = cur.fetchall()
-            return [self._map_to_dto(row) for row in rows]
+            return rows

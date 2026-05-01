@@ -1,4 +1,5 @@
 from inventori.repositories.interface_laptop_inventori import ILaptopInventoriRepository
+from psycopg2.extras import RealDictCursor
 
 class LaptopInventoriRepository(ILaptopInventoriRepository):
     def __init__(self, connection):
@@ -12,8 +13,9 @@ class LaptopInventoriRepository(ILaptopInventoriRepository):
                   dto.lokasi, dto.id_processor, dto.id_ram, dto.id_storage, dto.ukuran_layar))
             return cur.fetchone()['tambah_laptop_inventori']
 
+
     def ambil_laptop(self):
-        with self.conn.cursor() as cur:
+        with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute("SELECT * FROM ambil_laptop_inventori()")
             return cur.fetchall()
 
@@ -43,3 +45,23 @@ class LaptopInventoriRepository(ILaptopInventoriRepository):
         with self.conn.cursor() as cur:
             cur.execute("SELECT hapus_laptop_inventori(%s)", (id_laptop,))
             return cur.fetchone()['hapus_laptop_inventori']
+
+    def filter_inventori(self, filter_dto):
+        query = """
+            SELECT * FROM GetFilteredLaptopinventori(
+                %s, %s, %s, %s,
+                %s, %s, %s,
+                %s, %s, %s,
+                %s, %s, %s,
+                %s, %s, %s, %s,
+                %s, %s, %s, %s
+            );
+        """
+
+        params = filter_dto.get_params()
+
+        with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
+            cur.execute(query, params)
+            rows = cur.fetchall()
+
+            return rows

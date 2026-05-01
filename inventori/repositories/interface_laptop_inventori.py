@@ -28,3 +28,7 @@ class ILaptopInventoriRepository(ABC):
     @abstractmethod
     def hapus_laptop(self, id_laptop):
         pass
+
+    @abstractmethod
+    def filter_inventori(self, filter_dto):
+        pass
