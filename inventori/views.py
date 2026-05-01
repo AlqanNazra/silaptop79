@@ -57,7 +57,7 @@ def processor_list_create(request):
                 arsitektur=body.get("arsitektur"),
                 keterangan=body.get("keterangan")
             )
-            res = service.tambah_processor(dto)
+            res = service.execute(dto)
             return success_response(None, res, 201)
     except Exception as e:
         return error_response(str(e), 500)

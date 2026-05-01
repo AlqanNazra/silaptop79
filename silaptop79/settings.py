@@ -23,13 +23,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-68e461gv0a9s&i4vs1fd%^z_xy^hu**#6m%u)cqmtf1h^*(5nl'
 
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*', 'testserver', 'localhost', '127.0.0.1']
 
 
-# Application definition
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -59,11 +57,7 @@ ROOT_URLCONF = 'silaptop79.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-<<<<<<< HEAD
         'DIRS': [BASE_DIR / 'templates'],
-=======
-        'DIRS': ['templates'],
->>>>>>> origin/dev-alqan
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
