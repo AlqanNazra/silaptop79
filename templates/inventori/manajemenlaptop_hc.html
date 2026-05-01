@@ -1,0 +1,584 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventori Laptop Perusahaan - SiLaptop79</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1.1">
+
+    <style>
+        /* Base and Layout Styles */
+        body {
+            /* Slight gray/blue background */
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .dashboard-wrapper {
+            display: flex;
+            width: 100%;
+        }
+
+        .sidebar {
+            flex-shrink: 0;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.03);
+        }
+
+        .main-dashboard-content {
+            flex: 1;
+            margin-left: 260px;
+            /* Sidebar width adjustment if fixed */
+            padding: 40px 60px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 800;
+            color: #1e293b;
+            margin-top: 0;
+            margin-bottom: 40px;
+            letter-spacing: -0.5px;
+        }
+
+        /* Top Actions (Search & Add Button) */
+        .top-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            gap: 24px;
+        }
+
+        .search-box {
+            flex: 1;
+            max-width: 600px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 20px;
+            /* Pillow shape for search input */
+            background-color: #d1d5db;
+            /* Greyish background */
+            font-size: 14px;
+            color: #374151;
+            outline: none;
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .search-box input::placeholder {
+            color: #6b7280;
+            font-weight: 500;
+        }
+
+        .search-box input:focus {
+            background-color: #cbd5e1;
+            box-shadow: 0 0 0 3px rgba(11, 87, 198, 0.1);
+        }
+
+        .btn-primary {
+            background-color: #0b57c6;
+            color: white;
+            padding: 14px 24px;
+            border: none;
+            border-radius: 8px;
+            /* Slightly rounded button */
+            font-size: 14px;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(11, 87, 198, 0.2);
+            transition: background 0.2s;
+        }
+
+        .btn-primary:hover {
+            background-color: #09459e;
+        }
+
+        /* Table Wrapper */
+        .table-card {
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+            overflow: hidden;
+            border: 1px solid #f1f5f9;
+        }
+
+        /* Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+        }
+
+        th {
+            text-align: left;
+            padding: 20px 24px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        td {
+            padding: 16px 24px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+            font-size: 14px;
+            color: #475569;
+        }
+
+        tbody tr {
+            transition: background 0.2s;
+        }
+
+        tbody tr:hover {
+        }
+
+        /* Number Column */
+        .col-no {
+            width: 60px;
+            font-weight: 500;
+            color: #64748b;
+        }
+
+        /* Laptop Item Cell */
+        .laptop-cell {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .laptop-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            background-color: #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #94a3b8;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .laptop-text {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .laptop-name {
+            font-weight: 700;
+            color: #1e293b;
+            font-size: 14px;
+        }
+
+        .laptop-brand {
+            font-size: 12px;
+            color: #94a3b8;
+            font-weight: 500;
+        }
+
+        .col-sn {
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+            font-size: 13px;
+            color: #64748b;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+        }
+
+        /* Status Pills */
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .status-pill .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+
+        .status-available {
+            background-color: #dcfce7;
+            color: #16a34a;
+        }
+
+        .status-available .dot {
+            background-color: #16a34a;
+        }
+
+        .status-dipinjam {
+            background-color: #dbeafe;
+            color: #2563eb;
+        }
+
+        .status-dipinjam .dot {
+            background-color: #2563eb;
+        }
+
+        .status-rusak {
+            background-color: #fee2e2;
+            color: #dc2626;
+        }
+
+        .status-rusak .dot {
+            background-color: #dc2626;
+        }
+
+        /* Pagination Footer */
+        .pagination-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px;
+            border-top: 1px solid #f1f5f9;
+        }
+
+        .pagination-text {
+            font-size: 13px;
+            color: #475569;
+            font-weight: 500;
+        }
+
+        .pagination-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #475569;
+        }
+
+        .page-item {
+            cursor: pointer;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background 0.2s;
+        }
+
+        .page-item:hover {
+            background-color: #e2e8f0;
+        }
+
+        .page-item.active {
+            background-color: #0b57c6;
+            color: white;
+        }
+
+        .page-nav {
+            cursor: pointer;
+            color: #94a3b8;
+            transition: color 0.2s;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .page-nav:hover {
+            color: #475569;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="dashboard-wrapper">
+        <!-- Load Sidebar from Components -->
+        {% include 'components/sidebar.html' with active_page='data_laptop' %}
+
+        <!-- Main Dashboard Content -->
+        <div class="main-dashboard-content">
+
+            <h1 class="page-title">Inventori Laptop Perusahaan</h1>
+
+            <!-- Top Actions -->
+            <div class="top-actions">
+                <div class="search-box">
+                    <input type="text" placeholder="Cari serial number atau merk...">
+                </div>
+                <a href="{% url 'tambahlaptop_hc' %}" class="btn-primary" style="text-decoration: none; text-align: center;">
+                    <i class="fa-solid fa-plus"></i> Tambah Laptop Baru
+                </a>
+            </div>
+
+            <!-- Table Card -->
+            <div class="table-card">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="col-no">NO</th>
+                            <th>NAMA LAPTOP</th>
+                            <th>SERIAL NUMBER</th>
+                            <th>STATUS</th>
+                            <th style="width: 80px;">AKSI</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Data 1 -->
+                        <tr>
+                            <td class="col-no">01</td>
+                            <td>
+                                <div class="laptop-cell">
+                                    <div class="laptop-icon"><i class="fa-solid fa-laptop"></i></div>
+                                    <div class="laptop-text">
+                                        <span class="laptop-name">MacBook Pro M2 14"</span>
+                                        <span class="laptop-brand">Apple Inc.</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="col-sn">SN-APL-2023-0041</td>
+                            <td>
+                                <div class="status-pill status-available">
+                                    <span class="dot"></span>Available
+                                </div>
+                            </td>
+                            <td><button class="btn-detail">Detail</button></td>
+                        </tr>
+
+                        <!-- Data 2 -->
+                        <tr>
+                            <td class="col-no">02</td>
+                            <td>
+                                <div class="laptop-cell">
+                                    <div class="laptop-icon"><i class="fa-solid fa-laptop"></i></div>
+                                    <div class="laptop-text">
+                                        <span class="laptop-name">ThinkPad X1 Carbon Gen 10</span>
+                                        <span class="laptop-brand">Lenovo</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="col-sn">SN-LEN-X1-99201</td>
+                            <td>
+                                <div class="status-pill status-dipinjam">
+                                    <span class="dot"></span>Dipinjam
+                                </div>
+                            </td>
+                            <td><button class="btn-detail">Detail</button></td>
+                        </tr>
+
+                        <!-- Data 3 -->
+                        <tr>
+                            <td class="col-no">03</td>
+                            <td>
+                                <div class="laptop-cell">
+                                    <div class="laptop-icon"><i class="fa-solid fa-laptop"></i></div>
+                                    <div class="laptop-text">
+                                        <span class="laptop-name">Dell XPS 15 9520</span>
+                                        <span class="laptop-brand">Dell Technologies</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="col-sn">SN-DELL-XPS-8812</td>
+                            <td>
+                                <div class="status-pill status-rusak">
+                                    <span class="dot"></span>Rusak
+                                </div>
+                            </td>
+                            <td><button class="btn-detail">Detail</button></td>
+                        </tr>
+
+                        <!-- Data 4 -->
+                        <tr>
+                            <td class="col-no">04</td>
+                            <td>
+                                <div class="laptop-cell">
+                                    <div class="laptop-icon"><i class="fa-solid fa-laptop"></i></div>
+                                    <div class="laptop-text">
+                                        <span class="laptop-name">ASUS ROG Zephyrus G14</span>
+                                        <span class="laptop-brand">ASUSTeK Computer Inc.</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="col-sn">SN-ASU-ROG-00219</td>
+                            <td>
+                                <div class="status-pill status-available">
+                                    <span class="dot"></span>Available
+                                </div>
+                            </td>
+                            <td><button class="btn-detail">Detail</button></td>
+                        </tr>
+
+                        <!-- Data 5 -->
+                        <tr>
+                            <td class="col-no">05</td>
+                            <td>
+                                <div class="laptop-cell">
+                                    <div class="laptop-icon"><i class="fa-solid fa-laptop"></i></div>
+                                    <div class="laptop-text">
+                                        <span class="laptop-name">HP Spectre x360</span>
+                                        <span class="laptop-brand">HP Inc.</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="col-sn">SN-HP-SPC-112001</td>
+                            <td>
+                                <div class="status-pill status-dipinjam">
+                                    <span class="dot"></span>Dipinjam
+                                </div>
+                            </td>
+                            <td><button class="btn-detail">Detail</button></td>
+                        </tr>
+
+                        <!-- Data 6 -->
+                        <tr>
+                            <td class="col-no">06</td>
+                            <td>
+                                <div class="laptop-cell">
+                                    <div class="laptop-icon"><i class="fa-solid fa-laptop"></i></div>
+                                    <div class="laptop-text">
+                                        <span class="laptop-name">Dell XPS 15 9520</span>
+                                        <span class="laptop-brand">Dell Technologies</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="col-sn">SN-DELL-XPS-8812</td>
+                            <td>
+                                <div class="status-pill status-rusak">
+                                    <span class="dot"></span>Rusak
+                                </div>
+                            </td>
+                            <td><button class="btn-detail">Detail</button></td>
+                        </tr>
+
+                        <!-- Data 7 -->
+                        <tr>
+                            <td class="col-no">07</td>
+                            <td>
+                                <div class="laptop-cell">
+                                    <div class="laptop-icon"><i class="fa-solid fa-laptop"></i></div>
+                                    <div class="laptop-text">
+                                        <span class="laptop-name">ThinkPad X1 Carbon Gen 10</span>
+                                        <span class="laptop-brand">Lenovo</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="col-sn">SN-LEN-X1-99201</td>
+                            <td>
+                                <div class="status-pill status-dipinjam">
+                                    <span class="dot"></span>Dipinjam
+                                </div>
+                            </td>
+                            <td><button class="btn-detail">Detail</button></td>
+                        </tr>
+
+                        <!-- Data 8 -->
+                        <tr>
+                            <td class="col-no">08</td>
+                            <td>
+                                <div class="laptop-cell">
+                                    <div class="laptop-icon"><i class="fa-solid fa-laptop"></i></div>
+                                    <div class="laptop-text">
+                                        <span class="laptop-name">ThinkPad X1 Carbon Gen 10</span>
+                                        <span class="laptop-brand">Lenovo</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="col-sn">SN-LEN-X1-99201</td>
+                            <td>
+                                <div class="status-pill status-dipinjam">
+                                    <span class="dot"></span>Dipinjam
+                                </div>
+                            </td>
+                            <td><button class="btn-detail">Detail</button></td>
+                        </tr>
+
+                        <!-- Data 9 -->
+                        <tr>
+                            <td class="col-no">09</td>
+                            <td>
+                                <div class="laptop-cell">
+                                    <div class="laptop-icon"><i class="fa-solid fa-laptop"></i></div>
+                                    <div class="laptop-text">
+                                        <span class="laptop-name">ASUS ROG Zephyrus G14</span>
+                                        <span class="laptop-brand">ASUSTeK Computer Inc.</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="col-sn">SN-ASU-ROG-00219</td>
+                            <td>
+                                <div class="status-pill status-available">
+                                    <span class="dot"></span>Available
+                                </div>
+                            </td>
+                            <td><button class="btn-detail">Detail</button></td>
+                        </tr>
+
+                        <!-- Data 10 -->
+                        <tr>
+                            <td class="col-no">10</td>
+                            <td>
+                                <div class="laptop-cell">
+                                    <div class="laptop-icon"><i class="fa-solid fa-laptop"></i></div>
+                                    <div class="laptop-text">
+                                        <span class="laptop-name">HP Spectre x360</span>
+                                        <span class="laptop-brand">HP Inc.</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="col-sn">SN-HP-SPC-112001</td>
+                            <td>
+                                <div class="status-pill status-dipinjam">
+                                    <span class="dot"></span>Dipinjam
+                                </div>
+                            </td>
+                            <td><button class="btn-detail">Detail</button></td>
+                        </tr>
+
+                    </tbody>
+                </table>
+
+                <!-- Pagination footer -->
+                <div class="pagination-container">
+                    <span class="pagination-text">Menampilkan 1-10 dari 128 aset</span>
+                    <div class="pagination-controls">
+                        <button class="page-btn"><i class="fa-solid fa-angle-left"></i></button>
+                        <button class="page-btn active">1</button>
+                        <button class="page-btn">2</button>
+                        <button class="page-btn">3</button>
+                        <span style="color:#64748b; font-size:12px; margin:0 4px;">...</span>
+                        <button class="page-btn">12</button>
+                        <button class="page-btn"><i class="fa-solid fa-angle-right"></i></button>
+                    </div>
+                </div>
+
+            </div> <!-- End Table Card -->
+
+        </div> <!-- End Main Content -->
+    </div> <!-- End Wrapper -->
+
+</body>
+
+</html>
