@@ -129,8 +129,7 @@
             border-collapse: collapse;
         }
 
-        thead {
-        }
+        thead {}
 
         th {
             text-align: left;
@@ -155,8 +154,7 @@
             transition: background 0.2s;
         }
 
-        tbody tr:hover {
-        }
+        tbody tr:hover {}
 
         /* Number Column */
         .col-no {
@@ -329,7 +327,8 @@
                 <div class="search-box">
                     <input type="text" placeholder="Cari serial number atau merk...">
                 </div>
-                <a href="{% url 'tambahlaptop_hc' %}" class="btn-primary" style="text-decoration: none; text-align: center;">
+                <a href="{% url 'tambahlaptop_hc' %}" class="btn-primary"
+                    style="text-decoration: none; text-align: center;">
                     <i class="fa-solid fa-plus"></i> Tambah Laptop Baru
                 </a>
             </div>
@@ -365,7 +364,11 @@
                                     <span class="dot"></span>Available
                                 </div>
                             </td>
-                            <td><button class="btn-detail">Detail</button></td>
+                            <td>
+                                <a href="{% url 'detaillaptop_hc' %}" style="text-decoration: none;">
+                                    <button class="btn-detail" style="cursor: pointer;">Detail</button>
+                                </a>
+                            </td>
                         </tr>
 
                         <!-- Data 2 -->

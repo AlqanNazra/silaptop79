@@ -292,8 +292,7 @@
             color: #475569;
         }
 
-        tbody tr:hover {
-        }
+        tbody tr:hover {}
 
         /* Rank Column */
         .rank-cell {
@@ -426,8 +425,7 @@
             transition: all 0.2s;
         }
 
-        .page-btn:hover {
-        }
+        .page-btn:hover {}
 
         .page-btn.active {
             background-color: #0b57c6;
@@ -447,22 +445,26 @@
         <div class="main-dashboard-content">
 
             <!-- Header Section -->
-            <div class="page-header-wrapper">
-                <div class="page-title-section">
+            <div class="page-header-wrapper" style="align-items: flex-end;">
+                <div class="page-title-section" style="max-width: 100%; width: 100%;">
                     <span class="supra-title">Hasil Analisis</span>
                     <h1 class="page-title">Rekomendasi Laptop SAW</h1>
-                    <p class="page-subtitle">Berdasarkan kriteria performa, portabilitas, dan anggaran yang Anda
-                        tentukan, berikut adalah hasil perankingkan menggunakan metode Simple Additive Weighting.</p>
-                </div>
 
-                <div class="header-actions">
-                    <button class="btn-action btn-pdf">
-                        <i class="fa-solid fa-download"></i> Cetak PDF
-                    </button>
-                    <!-- Link back to input or recalc route -->
-                    <a href="{% url 'inputkriteria_hc' %}" class="btn-action btn-recalc">
-                        <i class="fa-solid fa-arrow-rotate-right"></i> Hitung Ulang
-                    </a>
+                    <div style="display: flex; justify-content: space-between; align-items: center; gap: 40px;">
+                        <p class="page-subtitle" style="flex: 1;">
+                            Berdasarkan kriteria performa, portabilitas, dan anggaran yang Anda tentukan,
+                            berikut adalah hasil perankingkan menggunakan metode Simple Additive Weighting.
+                        </p>
+
+                        <div class="header-actions" style="flex-shrink: 0;">
+                            <button class="btn-action btn-pdf">
+                                <i class="fa-solid fa-download"></i> Cetak PDF
+                            </button>
+                            <a href="{% url 'inputkriteria_hc' %}" class="btn-action btn-recalc">
+                                <i class="fa-solid fa-arrow-rotate-right"></i> Hitung Ulang
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -544,7 +546,10 @@
                             <td>Apple M2 Chip</td>
                             <td><span class="ram-badge">16GB</span></td>
                             <td><span class="score-val high">0.982</span></td>
-                            <td><button class="btn-detail">Detail</button></td>
+                            <td>
+                                <a href="{% url 'detailrekomendasi_hc' %}" class="btn-detail"
+                                    style="text-decoration: none;">Detail</a>
+                            </td>
                         </tr>
 
                         <!-- Row 2 -->
@@ -670,7 +675,10 @@
                             <td>Intel Core i5-1235U</td>
                             <td><span class="ram-badge">8GB</span></td>
                             <td><span class="score-val">0.780</span></td>
-                            <td><button class="btn-detail">Detail</button></td>
+                            <td>
+                                <a href="{% url 'detailrekomendasiscrapping_hc' %}" class="btn-detail"
+                                    style="text-decoration: none;">Detail</a>
+                            </td>
                         </tr>
 
                     </tbody>
