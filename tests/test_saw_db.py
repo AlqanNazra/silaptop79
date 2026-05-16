@@ -68,12 +68,12 @@ def test_ambil_data_pengadaan(service):
 # =========================
 
 def test_dss_saw_inventori(service):
-    filter_dto = FilterInventoriDTO()  # kosong = ambil semua
+    filter_dto = FilterInventoriDTO()  
     result = service.proses_dss_saw(
-        sumber_data="inventori",   # ✅ BENAR
+        sumber_data="inventori",   
         filter_data=filter_dto,
         role=["Backend Developer", "Frontend Developer"],
-        # id_bobot=None
+        debug=False
     )
 
     print("\n=== DSS INVENTORI ===")
@@ -90,9 +90,9 @@ def test_dss_saw_inventori(service):
 # TEST FULL DSS (PENGADAAN)
 # =========================
 def test_dss_saw_pengadaan(service):
-    filter_dto = FilterPengadaanDTO()  # kosong
+    filter_dto = FilterPengadaanDTO()  
     result = service.proses_dss_saw(
-        sumber_data="pengadaan",   # ✅ BENAR
+        sumber_data="pengadaan",   
         filter_data=filter_dto,
         role=["Backend Developer", "Frontend Developer"],
         debug=False

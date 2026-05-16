@@ -1,7 +1,7 @@
 import psycopg2
 from psycopg2.extras import RealDictCursor
-from dto.dto_ram import RamDTO
-from interfaces.interface_ram import IRamRepository
+from .dto.dto_ram import RamDTO
+from .interfaces.interface_ram import IRamRepository
 
 
 class RamRepository(IRamRepository):
@@ -30,13 +30,10 @@ class RamRepository(IRamRepository):
     # READ
     # =========================
     def ambil_ram(self):
-        query = "SELECT * FROM ambil_ram();"
-
         with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
-            cur.execute(query)
-            rows = cur.fetchall()
-
-            return [self._map_to_dto(row) for row in rows]
+            cur.execute("SELECT * FROM ambil_ram();")
+            return cur.fetchall()
+        
 
     # =========================
     # UPDATE

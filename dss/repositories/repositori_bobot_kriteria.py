@@ -8,6 +8,21 @@ class BobotKriteriaRepository(IBobotKriteriaRepositoryImpl):
     def __init__(self, conn):
         self.conn = conn
 
+    def _get_dict_cursor(self):
+        try:
+            return self.conn.cursor(cursor_factory=RealDictCursor)
+        except TypeError:
+            return self.conn.cursor()
+
+    def _format_result(self, cur, rows_or_row, fetch_all=True):
+        if hasattr(cur, 'description') and cur.description and not type(cur).__name__ == 'RealDictCursor':
+            columns = [col[0] for col in cur.description]
+            if fetch_all:
+                return [dict(zip(columns, row)) for row in rows_or_row]
+            else:
+                return dict(zip(columns, rows_or_row)) if rows_or_row else None
+        return rows_or_row
+
     # =========================
     # CREATE
     # =========================
@@ -31,30 +46,30 @@ class BobotKriteriaRepository(IBobotKriteriaRepositoryImpl):
     def cari_bobot_kriteria(self, id_bobot):
         query = "SELECT * FROM cari_bobot_kriteria(%s);"
 
-        with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
+        with self._get_dict_cursor() as cur: # 🔄 Menggunakan helper
             cur.execute(query, (id_bobot,))
             row = cur.fetchone()
 
-            return row
+            return self._format_result(cur, row, fetch_all=False) # 🔄 Format hasil
         
     def ambil_bobot_by_kriteria(self, id_bobot, id_kriteria):
         query = "SELECT * FROM ambil_bobot_by_kriteria(%s, %s);"
 
-        with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
+        with self._get_dict_cursor() as cur: # 🔄 Menggunakan helper
             cur.execute(query, (id_bobot, id_kriteria))
             rows = cur.fetchall()
 
-            return rows
+            return self._format_result(cur, rows, fetch_all=True) # 🔄 Format hasil
         
     def cari_bobot_kriteria_by_roles(self, roles: list):
         print("FUNCTION REPO KE PANGGIL")  # 🔥 WAJIB MUNCUL
         query = "SELECT * FROM cari_bobot_kriteria_by_roles(%s);"
 
-        with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
+        with self._get_dict_cursor() as cur: # 🔄 Menggunakan helper
             cur.execute(query, (roles,))  # psycopg2 otomatis handle array
             rows = cur.fetchall()
 
-            return rows
+            return self._format_result(cur, rows, fetch_all=True) # 🔄 Format hasil
 
     # =========================
     # READ ALL
@@ -62,11 +77,11 @@ class BobotKriteriaRepository(IBobotKriteriaRepositoryImpl):
     def ambil_semua_data_detail_bobot(self):
         query = "SELECT * FROM ambil_semua_data_detail_bobot();"
 
-        with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
+        with self._get_dict_cursor() as cur: # 🔄 Menggunakan helper
             cur.execute(query)
             rows = cur.fetchall()
 
-            return rows
+            return self._format_result(cur, rows, fetch_all=True) # 🔄 Format hasil
 
     # =========================
     # UPDATE

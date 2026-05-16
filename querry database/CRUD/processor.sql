@@ -58,7 +58,7 @@ $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION ambil_processor()
 RETURNS TABLE (
-    id_processor BIGINT,
+    id_processor VARCHAR,
     nama_processor VARCHAR,
     manufacturer VARCHAR,
     model VARCHAR,

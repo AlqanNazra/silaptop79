@@ -1,4 +1,4 @@
-from inventori.repositories.interface_laptop_inventori import ILaptopInventoriRepository
+from inventori.repositories.interfaces.interface_laptop_inventori import ILaptopInventoriRepository
 from psycopg2.extras import RealDictCursor
 
 class LaptopInventoriRepository(ILaptopInventoriRepository):

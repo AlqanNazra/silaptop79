@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 
 # =============================================
 # 1. USERS
@@ -139,3 +140,211 @@ class RiwayatAktivitas(models.Model):
     keterangan = models.TextField(null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
+    
+    # =====================================================
+# ROLE
+# =====================================================
+
+class Role(models.Model):
+
+    id_role = models.CharField(
+        primary_key=True,
+        max_length=20
+    )
+
+    nama_role = models.CharField(
+        max_length=100,
+        unique=True
+    )
+
+    created_at = models.DateTimeField(
+        default=timezone.now
+    )
+
+    class Meta:
+        db_table = "inventori_role"
+
+    def __str__(self):
+        return self.nama_role
+
+
+# =====================================================
+# TEKNOLOGI
+# =====================================================
+
+class Teknologi(models.Model):
+
+    id_teknologi = models.CharField(
+        primary_key=True,
+        max_length=20
+    )
+
+    nama_teknologi = models.CharField(
+        max_length=100,
+        unique=True
+    )
+
+    kategori = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True
+    )
+
+    created_at = models.DateTimeField(
+        default=timezone.now
+    )
+
+    class Meta:
+        db_table = "inventori_teknologi"
+
+    def __str__(self):
+        return self.nama_teknologi
+
+
+# =====================================================
+# ROLE TEKNOLOGI
+# =====================================================
+
+class RoleTeknologi(models.Model):
+
+    id_role_teknologi = models.CharField(
+        primary_key=True,
+        max_length=30
+    )
+
+    role = models.ForeignKey(
+        Role,
+        on_delete=models.CASCADE
+    )
+
+    teknologi = models.ForeignKey(
+        Teknologi,
+        on_delete=models.CASCADE
+    )
+
+    is_default = models.BooleanField(
+        default=True
+    )
+
+    created_at = models.DateTimeField(
+        default=timezone.now
+    )
+
+    class Meta:
+
+        db_table = "role_teknologi"
+
+        unique_together = (
+            "role",
+            "teknologi"
+        )
+
+    def __str__(self):
+
+        return (
+            f"{self.role.nama_role}"
+            f" - "
+            f"{self.teknologi.nama_teknologi}"
+        )
+
+
+# =====================================================
+# PROYEK
+# =====================================================
+
+class Proyek(models.Model):
+
+    id_proyek = models.CharField(
+        primary_key=True,
+        max_length=20
+    )
+
+    nama_proyek = models.CharField(
+        max_length=255
+    )
+
+    user_perusahaan = models.CharField(
+        max_length=255
+    )
+
+    mulai_proyek = models.DateField()
+
+    akhir_proyek = models.DateField()
+
+    created_at = models.DateTimeField(
+        default=timezone.now
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True
+    )
+
+    class Meta:
+        db_table = "inventori_proyek"
+
+    def __str__(self):
+        return self.nama_proyek
+
+
+# =====================================================
+# PROJECT ROLE
+# =====================================================
+
+class ProjectRole(models.Model):
+
+    id_project_role = models.CharField(
+        primary_key=True,
+        max_length=50
+    )
+
+    proyek = models.ForeignKey(
+        Proyek,
+        on_delete=models.CASCADE
+    )
+
+    role = models.ForeignKey(
+        Role,
+        on_delete=models.CASCADE
+    )
+
+    persentase_role = models.FloatField()
+
+    class Meta:
+
+        db_table = "inventori_project_role"
+
+        unique_together = (
+            "proyek",
+            "role"
+        )
+
+
+# =====================================================
+# PROJECT TECHNOLOGY
+# =====================================================
+
+class ProjectTechnology(models.Model):
+
+    id_project_technology = models.CharField(
+        primary_key=True,
+        max_length=50
+    )
+
+    proyek = models.ForeignKey(
+        Proyek,
+        on_delete=models.CASCADE
+    )
+
+    teknologi = models.ForeignKey(
+        Teknologi,
+        on_delete=models.CASCADE
+    )
+
+    class Meta:
+
+        db_table = "inventori_project_teknologi"
+
+        unique_together = (
+            "proyek",
+            "teknologi"
+        )

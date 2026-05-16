@@ -2,6 +2,7 @@ import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
+from django.shortcuts import render
 
 from inventori.dto.dto_processor import ProcessorDTO
 from inventori.services.processor.create import CreateProcessorService
@@ -19,6 +20,9 @@ from inventori.services.service_pengajuan import PengajuanService
 from inventori.services.service_peminjaman import PeminjamanService
 from inventori.repositories.dto.dto_pengajuan import PengajuanDTO
 from inventori.repositories.dto.dto_peminjaman import PeminjamanDTO
+
+from inventori.services.service_ram import RamService
+from inventori.services.service_storage import StorageService
 # =============================================
 # HELPER: Response standar
 # =============================================
@@ -145,7 +149,6 @@ def laptop_detail(request, id_laptop):
     try:
         if request.method == "GET":
             service = ReadLaptopInventoriService()
-            # Ambil detail spek laptop
             data = service.ambil_spek_by_id(id_laptop)
             if not data:
                 return error_response("Laptop tidak ditemukan", 404)
@@ -452,3 +455,44 @@ def laptop_by_lokasi_view(request):
 
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)
+        
+def laptop_dashboard(request):
+    service = ReadLaptopInventoriService()
+    data = service.ambil_semua()
+
+    data_list = [dict(row) for row in data] if data else []
+
+    # NORMALISASI DATA (anti error)
+    for row in data_list:
+        row["status"] = (row.get("status") or "").lower()
+        row["nama_laptop"] = row.get("nama_laptop") or "-"
+        row["model"] = row.get("model") or "-"
+        row["no_inventori"] = row.get("no_inventori") or "-"
+
+    return render(request, "dashboard/laptop_dashboard.html", {
+        "laptops": data_list
+    })
+
+def tambahlaptop_hc_view(request):
+    service_storage = StorageService()
+    service_ram = RamService()
+    service_processor = ReadProcessorService()
+
+    data_storage = service_storage.service_ambil_storage()
+    data_ram = service_ram.service_ambil_ram()
+    data_processor = service_processor.ambil_processor()
+
+    for row in data_processor:
+        row["display"] = f"{row.get('nama_processor','-')}"
+
+    for row in data_ram:
+        row["display"] = f"{row.get('kapasitas_gb','-')} GB {row.get('tipe','-')}"
+
+    for row in data_storage:
+        row["display"] = f"{row.get('kapasitas_gb','-')} GB {row.get('tipe','-')}"
+
+    return render(request, "inventori/tambahlaptop_hc.html", {
+        "processor": data_processor,
+        "ram": data_ram,
+        "storage": data_storage
+    })
