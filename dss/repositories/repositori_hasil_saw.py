@@ -1,6 +1,6 @@
 import psycopg2
 from psycopg2.extras import RealDictCursor
-from dto.dto_hasil_saw import HasilSAWDTO
+from dss.dto.dto_hasil_saw import HasilSAWDTO
 from interface.interface_hasil_saw import IHasilSawRepositoryImpl 
 
 

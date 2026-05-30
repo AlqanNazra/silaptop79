@@ -1,6 +1,6 @@
 import psycopg2
 from psycopg2.extras import RealDictCursor
-from dto.dto_riwayat_aktivitas import RiwayatAktivitasDTO
+from inventori.dto.dto_riwayat_aktivitas import RiwayatAktivitasDTO
 
 
 class RiwayatAktivitasRepository:

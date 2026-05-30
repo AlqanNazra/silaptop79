@@ -275,7 +275,7 @@
             <h1 class="page-title">Tambah Laptop Baru</h1>
             <p class="page-subtitle">Silakan lengkapi formulir di bawah ini untuk menambahkan aset perangkat keras baru ke dalam sistem inventaris digital Prism Logic.</p>
 
-            <form action="#" method="POST" enctype="multipart/form-data">
+            <form action="{% url 'inventori:tambahlaptop_hc' %}" method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
                 <div class="grid-container">
                     
@@ -331,18 +331,18 @@
                                     <label>Processor</label>
                                     <select class="form-control" name="id_processor">
                                         <option value="" disabled selected>Pilih Processor</option>
-                                        <!-- Add processor logic later -->
-                                        <option value="M3 Max">Apple M3 Max</option>
-                                        <option value="i9">Intel Core i9</option>
+                                        {% for proc in processors %}
+                                        <option value="{{ proc.id_processor }}">{{ proc.nama_processor }} ({{ proc.manufacturer }})</option>
+                                        {% endfor %}
                                     </select>
                                 </div>
                                 <div class="form-group">
                                     <label>RAM</label>
                                     <select class="form-control" name="id_ram">
                                         <option value="" disabled selected>Pilih RAM</option>
-                                        <!-- Add RAM logic later -->
-                                        <option value="16GB">16 GB</option>
-                                        <option value="32GB">32 GB</option>
+                                        {% for ram in rams %}
+                                        <option value="{{ ram.id_ram }}">{{ ram.kapasitas_gb }} GB {{ ram.tipe }}</option>
+                                        {% endfor %}
                                     </select>
                                 </div>
                             </div>
@@ -352,9 +352,9 @@
                                     <label>Storage</label>
                                     <select class="form-control" name="id_storage">
                                         <option value="" disabled selected>Pilih Kapasitas</option>
-                                        <!-- Add Storage logic later -->
-                                        <option value="512GB">512 GB SSD</option>
-                                        <option value="1TB">1 TB SSD</option>
+                                        {% for storage in storages %}
+                                        <option value="{{ storage.id_storage }}">{{ storage.kapasitas_gb }} GB {{ storage.tipe }}</option>
+                                        {% endfor %}
                                     </select>
                                 </div>
                                 <div class="form-group">
@@ -440,7 +440,7 @@
                             <button type="submit" class="btn btn-primary">
                                 <i class="fa-solid fa-lock"></i> Simpan Data
                             </button>
-                            <a href="{% url 'home' %}" class="btn btn-cancel" style="text-decoration: none;">
+                            <a href="{% url 'inventori:manajemenlaptop_hc' %}" class="btn btn-cancel" style="text-decoration: none;">
                                 <i class="fa-solid fa-xmark"></i> Batal
                             </a>
 

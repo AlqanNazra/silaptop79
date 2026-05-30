@@ -1,10 +1,9 @@
 import psycopg2
 from psycopg2.extras import RealDictCursor
-from dto.dto_pengajuan import PengajuanDTO
-from interfaces.interface_pengajuan import IPengajuanRepository
+from inventori.dto.dto_pengajuan import PengajuanDTO
 
 
-class PengajuanRepository(IPengajuanRepository):
+class PengajuanRepository:
 
     def __init__(self, conn):
         self.conn = conn

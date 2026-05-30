@@ -339,7 +339,7 @@
             <h1 class="page-title">Konfigurasi Parameter SAW</h1>
             <p class="page-subtitle">Lakukan penyesuaian kriteria dan bobot untuk mendapatkan rekomendasi laptop terbaik menggunakan metode Simple Additive Weighting (SAW).</p>
 
-            <form action="#" method="POST">
+            <form action="{% url 'inputkriteria_hc' %}" method="POST">
                 {% csrf_token %}
 
                 <!-- Section A: Pemilihan Role -->

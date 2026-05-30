@@ -1,7 +1,7 @@
 import pytest
 import json
 from tabulate import tabulate
-from db import get_connection
+from core.db import get_connection
 from dss.services.service_swara import ServiceSwara
 
 

@@ -27,6 +27,10 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*', 'testserver', 'localhost', '127.0.0.1']
 
+# Authentication Settings
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/dashboardhc/'
+LOGOUT_REDIRECT_URL = '/login/'
 
 
 INSTALLED_APPS = [
@@ -80,7 +84,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'TA',
         'USER': 'postgres',
-        'PASSWORD': 'alqan',
+        'PASSWORD': 'password_baru',
         'HOST': '127.0.0.1',
         'PORT': '5432',
     }

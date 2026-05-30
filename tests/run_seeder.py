@@ -1,4 +1,4 @@
-from db import get_connection
+from core.db import get_connection
 from tests.seeder_dss import SeederSAWReady
 
 if __name__ == "__main__":

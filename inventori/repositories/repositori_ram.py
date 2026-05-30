@@ -1,10 +1,9 @@
 import psycopg2
 from psycopg2.extras import RealDictCursor
-from dto.dto_ram import RamDTO
-from interfaces.interface_ram import IRamRepository
+from inventori.dto.dto_ram import RamDTO
 
 
-class RamRepository(IRamRepository):
+class RamRepository:
 
     def __init__(self, conn):
         self.conn = conn

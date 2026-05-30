@@ -1,6 +1,6 @@
 import psycopg2
 from psycopg2.extras import RealDictCursor
-from dto.dto_dss_proses import DssProsesDTO
+from dss.dto.dto_dss_proses import DssProsesDTO
 from interface.interface_dss_proses import IDssProssesRepositoryImpl 
 
 
