@@ -32,7 +32,8 @@
 
         .main-dashboard-content {
             flex: 1;
-            margin-left: 260px; /* Adjust if sidebar width is different */
+            margin-left: 260px;
+            /* Adjust if sidebar width is different */
             padding: 40px 60px;
             box-sizing: border-box;
         }
@@ -86,9 +87,17 @@
         }
 
         /* Specific Card Accents */
-        .card.general { border-left: 4px solid #0b57c6; }
-        .card.technical { border-left: 4px solid #16a34a; }
-        .card.administrative { border-left: 4px solid #dc2626; }
+        .card.general {
+            border-left: 4px solid #0b57c6;
+        }
+
+        .card.technical {
+            border-left: 4px solid #16a34a;
+        }
+
+        .card.administrative {
+            border-left: 4px solid #dc2626;
+        }
 
         .icon-box {
             width: 24px;
@@ -100,9 +109,18 @@
             font-size: 12px;
             color: white;
         }
-        .icon-blue { background-color: #0b57c6; }
-        .icon-green { background-color: #16a34a; }
-        .icon-red { background-color: #dc2626; }
+
+        .icon-blue {
+            background-color: #0b57c6;
+        }
+
+        .icon-green {
+            background-color: #16a34a;
+        }
+
+        .icon-red {
+            background-color: #dc2626;
+        }
 
         /* Forms */
         .form-row {
@@ -139,7 +157,8 @@
             color: #334155;
             transition: all 0.2s;
             box-sizing: border-box;
-            appearance: none; /* remove default arrow */
+            appearance: none;
+            /* remove default arrow */
         }
 
         select.form-control {
@@ -191,7 +210,7 @@
             font-weight: 600;
             color: #334155;
         }
-        
+
         .upload-subtitle {
             font-size: 12px;
             color: #94a3b8;
@@ -267,21 +286,22 @@
 
     <div class="dashboard-wrapper">
         <!-- Load Sidebar from Components -->
-        {% include 'components/sidebar.html' with active_page='data_laptop' %}
+        {% include 'components/sidebar.html' with active_page='manajemen_laptop' %}
 
         <!-- Main Dashboard Content -->
         <div class="main-dashboard-content">
 
             <h1 class="page-title">Tambah Laptop Baru</h1>
-            <p class="page-subtitle">Silakan lengkapi formulir di bawah ini untuk menambahkan aset perangkat keras baru ke dalam sistem inventaris digital Prism Logic.</p>
+            <p class="page-subtitle">Silakan lengkapi formulir di bawah ini untuk menambahkan aset perangkat keras baru
+                ke dalam sistem inventaris digital Prism Logic.</p>
 
             <form action="{% url 'inventori:tambahlaptop_hc' %}" method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
                 <div class="grid-container">
-                    
+
                     <!-- Left Column -->
                     <div class="left-col">
-                        
+
                         <!-- General Information -->
                         <div class="card general">
                             <div class="card-header">
@@ -290,11 +310,12 @@
                                 </div>
                                 <h3>General Information</h3>
                             </div>
-                            
+
                             <div class="form-row full">
                                 <div class="form-group">
                                     <label>Laptop Name</label>
-                                    <input type="text" class="form-control" name="nama_laptop" placeholder="Contoh: MacBook Pro 14 M3 Max">
+                                    <input type="text" class="form-control" name="nama_laptop"
+                                        placeholder="Contoh: MacBook Pro 14 M3 Max">
                                 </div>
                             </div>
 
@@ -312,7 +333,8 @@
                                 </div>
                                 <div class="form-group">
                                     <label>Serial Number</label>
-                                    <input type="text" class="form-control" name="serial_number" placeholder="SN-XXXX-XXXX-XXXX">
+                                    <input type="text" class="form-control" name="serial_number"
+                                        placeholder="SN-XXXX-XXXX-XXXX">
                                 </div>
                             </div>
                         </div> <!-- End Card -->
@@ -359,14 +381,16 @@
                                 </div>
                                 <div class="form-group">
                                     <label>Screen Size</label>
-                                    <input type="text" class="form-control" name="ukuran_layar" placeholder="Misal: 14-inch Liquid Retina XDR">
+                                    <input type="text" class="form-control" name="ukuran_layar"
+                                        placeholder="Misal: 14-inch Liquid Retina XDR">
                                 </div>
                             </div>
 
                             <div class="form-row">
                                 <div class="form-group">
                                     <label>Battery Capacity (mAH)</label>
-                                    <input type="text" class="form-control" name="battery_capacity" placeholder="Misal: 3000 mAH">
+                                    <input type="text" class="form-control" name="battery_capacity"
+                                        placeholder="Misal: 3000 mAH">
                                 </div>
                                 <div class="form-group">
                                     <label>Weight (Kg)</label>
@@ -407,11 +431,13 @@
                             <div class="form-row">
                                 <div class="form-group">
                                     <label>Purchase Date</label>
-                                    <input type="date" class="form-control" name="purchase_date" style="color: #64748b;">
+                                    <input type="date" class="form-control" name="purchase_date"
+                                        style="color: #64748b;">
                                 </div>
                                 <div class="form-group">
                                     <label>Warranty Expiry</label>
-                                    <input type="date" class="form-control" name="warranty_expiry" style="color: #64748b;">
+                                    <input type="date" class="form-control" name="warranty_expiry"
+                                        style="color: #64748b;">
                                 </div>
                             </div>
                         </div> <!-- End Card -->
@@ -429,18 +455,25 @@
                                 <span class="upload-title">Klik untuk Unggah Foto</span>
                                 <span class="upload-subtitle">PNG, JPG up to 5MB</span>
                             </label>
-                            <input id="file-upload" type="file" name="laptop_photo" accept=".png, .jpg, .jpeg" style="display: none;">
+                            <input id="file-upload" type="file" name="laptop_photo" accept=".png, .jpg, .jpeg"
+                                style="display: none;">
                         </div>
 
                         <!-- Status Konfirmasi -->
                         <div class="card" style="border-top: 4px solid #0b57c6;">
                             <h4 class="status-title">Status Konfirmasi</h4>
-                            <p class="status-desc">Pastikan semua data spesifikasi teknis sudah sesuai dengan unit fisik.</p>
+                            <p class="status-desc">Pastikan semua data spesifikasi teknis sudah sesuai dengan unit
+                                fisik.</p>
 
                             <button type="submit" class="btn btn-primary">
                                 <i class="fa-solid fa-lock"></i> Simpan Data
                             </button>
+<<<<<<< HEAD
                             <a href="{% url 'inventori:manajemenlaptop_hc' %}" class="btn btn-cancel" style="text-decoration: none;">
+=======
+                            <a href="{% url 'manajemen_laptop' %}" class="btn btn-cancel"
+                                style="text-decoration: none;">
+>>>>>>> origin/dev-lina
                                 <i class="fa-solid fa-xmark"></i> Batal
                             </a>
 
@@ -459,4 +492,5 @@
     </div> <!-- End Wrapper -->
 
 </body>
+
 </html>

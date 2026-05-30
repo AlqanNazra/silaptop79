@@ -292,8 +292,7 @@
             color: #475569;
         }
 
-        tbody tr:hover {
-        }
+        tbody tr:hover {}
 
         /* Rank Column */
         .rank-cell {
@@ -426,8 +425,7 @@
             transition: all 0.2s;
         }
 
-        .page-btn:hover {
-        }
+        .page-btn:hover {}
 
         .page-btn.active {
             background-color: #0b57c6;
@@ -447,22 +445,26 @@
         <div class="main-dashboard-content">
 
             <!-- Header Section -->
-            <div class="page-header-wrapper">
-                <div class="page-title-section">
+            <div class="page-header-wrapper" style="align-items: flex-end;">
+                <div class="page-title-section" style="max-width: 100%; width: 100%;">
                     <span class="supra-title">Hasil Analisis</span>
                     <h1 class="page-title">Rekomendasi Laptop SAW</h1>
-                    <p class="page-subtitle">Berdasarkan kriteria performa, portabilitas, dan anggaran yang Anda
-                        tentukan, berikut adalah hasil perankingkan menggunakan metode Simple Additive Weighting.</p>
-                </div>
 
-                <div class="header-actions">
-                    <button class="btn-action btn-pdf">
-                        <i class="fa-solid fa-download"></i> Cetak PDF
-                    </button>
-                    <!-- Link back to input or recalc route -->
-                    <a href="{% url 'inputkriteria_hc' %}" class="btn-action btn-recalc">
-                        <i class="fa-solid fa-arrow-rotate-right"></i> Hitung Ulang
-                    </a>
+                    <div style="display: flex; justify-content: space-between; align-items: center; gap: 40px;">
+                        <p class="page-subtitle" style="flex: 1;">
+                            Berdasarkan kriteria performa, portabilitas, dan anggaran yang Anda tentukan,
+                            berikut adalah hasil perankingkan menggunakan metode Simple Additive Weighting.
+                        </p>
+
+                        <div class="header-actions" style="flex-shrink: 0;">
+                            <button class="btn-action btn-pdf">
+                                <i class="fa-solid fa-download"></i> Cetak PDF
+                            </button>
+                            <a href="{% url 'inputkriteria_hc' %}" class="btn-action btn-recalc">
+                                <i class="fa-solid fa-arrow-rotate-right"></i> Hitung Ulang
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -524,45 +526,154 @@
                     </thead>
                     <tbody>
 
-                        {% if hasil_ranking %}
-                            {% for item in hasil_ranking %}
-                            <tr>
-                                <td style="text-align: center;">
-                                    <div style="display: flex; justify-content: center;">
-                                        <div class="rank-cell {% if forloop.counter == 1 %}rank-1{% endif %}">
-                                            {{ forloop.counter }}
-                                        </div>
+                        <!-- Row 1: Top Result -->
+                        <tr>
+                            <td style="text-align: center;">
+                                <div style="display: flex; justify-content: center;">
+                                    <div class="rank-cell rank-1">
+                                        1
                                     </div>
-                                </td>
-                                <td>
-                                    <span class="nama-laptop">{{ item.nama_laptop }}</span>
-                                </td>
-                                <td>
-                                    <span class="source-badge {% if item.sumber == 'internal' %}source-internal{% else %}source-external{% endif %}">
-                                        {% if item.sumber == 'internal' %}
-                                        <i class="fa-solid fa-building"></i> Internal Kantor
-                                        {% else %}
-                                        <i class="fa-solid fa-globe"></i> Database Luar
-                                        {% endif %}
-                                    </span>
-                                </td>
-                                <td>{{ item.processor|default:"-" }}</td>
-                                <td><span class="ram-badge">{{ item.ram_gb|default:"-" }}GB</span></td>
-                                <td><span class="score-val {% if forloop.counter == 1 %}high{% endif %}">{{ item.skor|floatformat:3 }}</span></td>
-                                <td><button class="btn-detail">Detail</button></td>
-                            </tr>
-                            {% endfor %}
-                        {% else %}
-                            <tr>
-                                <td colspan="7" style="text-align:center; padding: 32px; color: #64748B;">
-                                    {% if error_msg %}
-                                        <span style="color: red;">Error: {{ error_msg }}</span>
-                                    {% else %}
-                                        Tidak ada data rekomendasi.
-                                    {% endif %}
-                                </td>
-                            </tr>
-                        {% endif %}
+                                </div>
+                            </td>
+                            <td>
+                                <span class="nama-laptop">MacBook Air M2 (2023)</span>
+                            </td>
+                            <td>
+                                <span class="source-badge source-internal">
+                                    <i class="fa-solid fa-building"></i> Internal Kantor
+                                </span>
+                            </td>
+                            <td>Apple M2 Chip</td>
+                            <td><span class="ram-badge">16GB</span></td>
+                            <td><span class="score-val high">0.982</span></td>
+                            <td><button class="btn-detail">Detail</button></td>
+                        </tr>
+
+                        <!-- Row 2 -->
+                        <tr>
+                            <td style="text-align: center;">
+                                <div style="display: flex; justify-content: center;">
+                                    <div class="rank-cell">2</div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="nama-laptop" style="margin-bottom:0;">Lenovo Yoga Slim 7i Pro</span>
+                            </td>
+                            <td>
+                                <span class="source-badge source-internal">
+                                    <i class="fa-solid fa-building"></i> Internal Kantor
+                                </span>
+                            </td>
+                            <td>Intel Core i7-12700H</td>
+                            <td><span class="ram-badge">16GB</span></td>
+                            <td><span class="score-val">0.921</span></td>
+                            <td><button class="btn-detail">Detail</button></td>
+                        </tr>
+
+                        <!-- Row 3 -->
+                        <tr>
+                            <td style="text-align: center;">
+                                <div style="display: flex; justify-content: center;">
+                                    <div class="rank-cell">3</div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="nama-laptop" style="margin-bottom:0;">HP Pavilion Plus 14</span>
+                            </td>
+                            <td>
+                                <span class="source-badge source-internal">
+                                    <i class="fa-solid fa-building"></i> Internal Kantor
+                                </span>
+                            </td>
+                            <td>Intel Core i5-12500H</td>
+                            <td><span class="ram-badge">16GB</span></td>
+                            <td><span class="score-val">0.945</span></td>
+                            <td><button class="btn-detail">Detail</button></td>
+                        </tr>
+
+                        <!-- Row 4 -->
+                        <tr>
+                            <td style="text-align: center;">
+                                <div style="display: flex; justify-content: center;">
+                                    <div class="rank-cell">4</div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="nama-laptop" style="margin-bottom:0;">Acer Swift Edge 16</span>
+                            </td>
+                            <td>
+                                <span class="source-badge source-internal">
+                                    <i class="fa-solid fa-building"></i> Internal Kantor
+                                </span>
+                            </td>
+                            <td>AMD Ryzen 7 6800U</td>
+                            <td><span class="ram-badge">16GB</span></td>
+                            <td><span class="score-val">0.865</span></td>
+                            <td><button class="btn-detail">Detail</button></td>
+                        </tr>
+
+                        <!-- Row 5 -->
+                        <tr>
+                            <td style="text-align: center;">
+                                <div style="display: flex; justify-content: center;">
+                                    <div class="rank-cell">5</div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="nama-laptop" style="margin-bottom:0;">ASUS Zenbook S</span>
+                            </td>
+                            <td>
+                                <span class="source-badge source-internal">
+                                    <i class="fa-solid fa-building"></i> Internal Kantor
+                                </span>
+                            </td>
+                            <td>AMD Ryzen 7 6800U</td>
+                            <td><span class="ram-badge">16GB</span></td>
+                            <td><span class="score-val">0.812</span></td>
+                            <td><button class="btn-detail">Detail</button></td>
+                        </tr>
+
+                        <!-- Row 6 -->
+                        <tr>
+                            <td style="text-align: center;">
+                                <div style="display: flex; justify-content: center;">
+                                    <div class="rank-cell">6</div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="nama-laptop" style="margin-bottom:0;">Dell XPS 13 Plus</span>
+                            </td>
+                            <td>
+                                <span class="source-badge source-internal">
+                                    <i class="fa-solid fa-building"></i> Internal Kantor
+                                </span>
+                            </td>
+                            <td>AMD Ryzen 7 6800U</td>
+                            <td><span class="ram-badge">16GB</span></td>
+                            <td><span class="score-val">0.788</span></td>
+                            <td><button class="btn-detail">Detail</button></td>
+                        </tr>
+
+                        <!-- Row 7 (External Source Example) -->
+                        <tr>
+                            <td style="text-align: center;">
+                                <div style="display: flex; justify-content: center;">
+                                    <div class="rank-cell">7</div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="nama-laptop" style="margin-bottom:0;">Microsoft Surface Laptop 5</span>
+                            </td>
+                            <td>
+                                <span class="source-badge source-external">
+                                    <i class="fa-solid fa-globe"></i> Database Luar
+                                </span>
+                            </td>
+                            <td>Intel Core i5-1235U</td>
+                            <td><span class="ram-badge">8GB</span></td>
+                            <td><span class="score-val">0.780</span></td>
+                            <td><button class="btn-detail">Detail</button></td>
+                        </tr>
 
                     </tbody>
                 </table>

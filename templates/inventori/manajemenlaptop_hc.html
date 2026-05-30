@@ -129,8 +129,7 @@
             border-collapse: collapse;
         }
 
-        thead {
-        }
+        thead {}
 
         th {
             text-align: left;
@@ -155,8 +154,7 @@
             transition: background 0.2s;
         }
 
-        tbody tr:hover {
-        }
+        tbody tr:hover {}
 
         /* Number Column */
         .col-no {
@@ -340,18 +338,11 @@
 
             <!-- Top Actions -->
             <div class="top-actions">
-                <form method="GET" action="" style="display:flex; gap:16px; flex:1; max-width: 600px;">
-                    <div class="search-box" style="flex:1;">
-                        <input type="text" name="q" value="{{ search_query }}" placeholder="Cari nama laptop atau nomor inventori...">
-                    </div>
-                    <select name="status" class="search-box" style="max-width:160px; padding:14px 16px; border:none; border-radius:20px; background-color:#d1d5db; font-family:'Inter',sans-serif; font-size:14px; color:#374151; outline:none;" onchange="this.form.submit()">
-                        <option value="">Semua Status</option>
-                        <option value="tersedia" {% if status_filter == 'tersedia' %}selected{% endif %}>Tersedia</option>
-                        <option value="dipinjam" {% if status_filter == 'dipinjam' %}selected{% endif %}>Dipinjam</option>
-                        <option value="rusak" {% if status_filter == 'rusak' %}selected{% endif %}>Rusak</option>
-                    </select>
-                </form>
-                <a href="{% url 'inventori:tambahlaptop_hc' %}" class="btn-primary" style="text-decoration: none; text-align: center; white-space:nowrap;">
+                <div class="search-box">
+                    <input type="text" placeholder="Cari serial number atau merk...">
+                </div>
+                <a href="{% url 'tambahlaptop_hc' %}" class="btn-primary"
+                    style="text-decoration: none; text-align: center;">
                     <i class="fa-solid fa-plus"></i> Tambah Laptop Baru
                 </a>
             </div>
@@ -369,52 +360,216 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% if laptops %}
-                            {% for laptop in laptops %}
-                            <tr>
-                                <td class="col-no">{{ forloop.counter|stringformat:"02d" }}</td>
-                                <td>
-                                    <div class="laptop-cell">
-                                        <div class="laptop-icon"><i class="fa-solid fa-laptop"></i></div>
-                                        <div class="laptop-text">
-                                            <span class="laptop-name">{{ laptop.nama_laptop }}</span>
-                                            <span class="laptop-brand">{{ laptop.model|default:"-" }}</span>
-                                        </div>
+                        <!-- Data 1 -->
+                        <tr>
+                            <td class="col-no">01</td>
+                            <td>
+                                <div class="laptop-cell">
+                                    <div class="laptop-icon"><i class="fa-solid fa-laptop"></i></div>
+                                    <div class="laptop-text">
+                                        <span class="laptop-name">MacBook Pro M2 14"</span>
+                                        <span class="laptop-brand">Apple Inc.</span>
                                     </div>
-                                </td>
-                                <td class="col-sn">{{ laptop.no_inventori|default:"-" }}</td>
-                                <td>
-                                    {% if laptop.status == 'tersedia' %}
-                                        <div class="status-pill status-available">
-                                            <span class="dot"></span>Tersedia
-                                        </div>
-                                    {% elif laptop.status == 'dipinjam' %}
-                                        <div class="status-pill status-dipinjam">
-                                            <span class="dot"></span>Dipinjam
-                                        </div>
-                                    {% else %}
-                                        <div class="status-pill status-rusak">
-                                            <span class="dot"></span>{{ laptop.status|title }}
-                                        </div>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    <a href="{% url 'inventori:detail_laptop' laptop.id_laptop_inventori %}" class="btn-detail">Detail</a>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        {% else %}
-                            <tr>
-                                <td colspan="5" style="text-align:center; padding:48px; color:#94a3b8;">
-                                    <i class="fa-solid fa-laptop" style="font-size:32px; margin-bottom:12px; display:block;"></i>
-                                    {% if search_query %}
-                                        Tidak ada laptop dengan kata kunci "{{ search_query }}"
-                                    {% else %}
-                                        Belum ada data laptop. <a href="{% url 'inventori:tambahlaptop_hc' %}">Tambah sekarang</a>.
-                                    {% endif %}
-                                </td>
-                            </tr>
-                        {% endif %}
+                                </div>
+                            </td>
+                            <td class="col-sn">SN-APL-2023-0041</td>
+                            <td>
+                                <div class="status-pill status-available">
+                                    <span class="dot"></span>Available
+                                </div>
+                            </td>
+                            <td><button class="btn-detail">Detail</button></td>
+                        </tr>
+
+                        <!-- Data 2 -->
+                        <tr>
+                            <td class="col-no">02</td>
+                            <td>
+                                <div class="laptop-cell">
+                                    <div class="laptop-icon"><i class="fa-solid fa-laptop"></i></div>
+                                    <div class="laptop-text">
+                                        <span class="laptop-name">ThinkPad X1 Carbon Gen 10</span>
+                                        <span class="laptop-brand">Lenovo</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="col-sn">SN-LEN-X1-99201</td>
+                            <td>
+                                <div class="status-pill status-dipinjam">
+                                    <span class="dot"></span>Dipinjam
+                                </div>
+                            </td>
+                            <td><button class="btn-detail">Detail</button></td>
+                        </tr>
+
+                        <!-- Data 3 -->
+                        <tr>
+                            <td class="col-no">03</td>
+                            <td>
+                                <div class="laptop-cell">
+                                    <div class="laptop-icon"><i class="fa-solid fa-laptop"></i></div>
+                                    <div class="laptop-text">
+                                        <span class="laptop-name">Dell XPS 15 9520</span>
+                                        <span class="laptop-brand">Dell Technologies</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="col-sn">SN-DELL-XPS-8812</td>
+                            <td>
+                                <div class="status-pill status-rusak">
+                                    <span class="dot"></span>Rusak
+                                </div>
+                            </td>
+                            <td><button class="btn-detail">Detail</button></td>
+                        </tr>
+
+                        <!-- Data 4 -->
+                        <tr>
+                            <td class="col-no">04</td>
+                            <td>
+                                <div class="laptop-cell">
+                                    <div class="laptop-icon"><i class="fa-solid fa-laptop"></i></div>
+                                    <div class="laptop-text">
+                                        <span class="laptop-name">ASUS ROG Zephyrus G14</span>
+                                        <span class="laptop-brand">ASUSTeK Computer Inc.</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="col-sn">SN-ASU-ROG-00219</td>
+                            <td>
+                                <div class="status-pill status-available">
+                                    <span class="dot"></span>Available
+                                </div>
+                            </td>
+                            <td><button class="btn-detail">Detail</button></td>
+                        </tr>
+
+                        <!-- Data 5 -->
+                        <tr>
+                            <td class="col-no">05</td>
+                            <td>
+                                <div class="laptop-cell">
+                                    <div class="laptop-icon"><i class="fa-solid fa-laptop"></i></div>
+                                    <div class="laptop-text">
+                                        <span class="laptop-name">HP Spectre x360</span>
+                                        <span class="laptop-brand">HP Inc.</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="col-sn">SN-HP-SPC-112001</td>
+                            <td>
+                                <div class="status-pill status-dipinjam">
+                                    <span class="dot"></span>Dipinjam
+                                </div>
+                            </td>
+                            <td><button class="btn-detail">Detail</button></td>
+                        </tr>
+
+                        <!-- Data 6 -->
+                        <tr>
+                            <td class="col-no">06</td>
+                            <td>
+                                <div class="laptop-cell">
+                                    <div class="laptop-icon"><i class="fa-solid fa-laptop"></i></div>
+                                    <div class="laptop-text">
+                                        <span class="laptop-name">Dell XPS 15 9520</span>
+                                        <span class="laptop-brand">Dell Technologies</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="col-sn">SN-DELL-XPS-8812</td>
+                            <td>
+                                <div class="status-pill status-rusak">
+                                    <span class="dot"></span>Rusak
+                                </div>
+                            </td>
+                            <td><button class="btn-detail">Detail</button></td>
+                        </tr>
+
+                        <!-- Data 7 -->
+                        <tr>
+                            <td class="col-no">07</td>
+                            <td>
+                                <div class="laptop-cell">
+                                    <div class="laptop-icon"><i class="fa-solid fa-laptop"></i></div>
+                                    <div class="laptop-text">
+                                        <span class="laptop-name">ThinkPad X1 Carbon Gen 10</span>
+                                        <span class="laptop-brand">Lenovo</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="col-sn">SN-LEN-X1-99201</td>
+                            <td>
+                                <div class="status-pill status-dipinjam">
+                                    <span class="dot"></span>Dipinjam
+                                </div>
+                            </td>
+                            <td><button class="btn-detail">Detail</button></td>
+                        </tr>
+
+                        <!-- Data 8 -->
+                        <tr>
+                            <td class="col-no">08</td>
+                            <td>
+                                <div class="laptop-cell">
+                                    <div class="laptop-icon"><i class="fa-solid fa-laptop"></i></div>
+                                    <div class="laptop-text">
+                                        <span class="laptop-name">ThinkPad X1 Carbon Gen 10</span>
+                                        <span class="laptop-brand">Lenovo</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="col-sn">SN-LEN-X1-99201</td>
+                            <td>
+                                <div class="status-pill status-dipinjam">
+                                    <span class="dot"></span>Dipinjam
+                                </div>
+                            </td>
+                            <td><button class="btn-detail">Detail</button></td>
+                        </tr>
+
+                        <!-- Data 9 -->
+                        <tr>
+                            <td class="col-no">09</td>
+                            <td>
+                                <div class="laptop-cell">
+                                    <div class="laptop-icon"><i class="fa-solid fa-laptop"></i></div>
+                                    <div class="laptop-text">
+                                        <span class="laptop-name">ASUS ROG Zephyrus G14</span>
+                                        <span class="laptop-brand">ASUSTeK Computer Inc.</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="col-sn">SN-ASU-ROG-00219</td>
+                            <td>
+                                <div class="status-pill status-available">
+                                    <span class="dot"></span>Available
+                                </div>
+                            </td>
+                            <td><button class="btn-detail">Detail</button></td>
+                        </tr>
+
+                        <!-- Data 10 -->
+                        <tr>
+                            <td class="col-no">10</td>
+                            <td>
+                                <div class="laptop-cell">
+                                    <div class="laptop-icon"><i class="fa-solid fa-laptop"></i></div>
+                                    <div class="laptop-text">
+                                        <span class="laptop-name">HP Spectre x360</span>
+                                        <span class="laptop-brand">HP Inc.</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="col-sn">SN-HP-SPC-112001</td>
+                            <td>
+                                <div class="status-pill status-dipinjam">
+                                    <span class="dot"></span>Dipinjam
+                                </div>
+                            </td>
+                            <td><button class="btn-detail">Detail</button></td>
+                        </tr>
+
                     </tbody>
                 </table>
 

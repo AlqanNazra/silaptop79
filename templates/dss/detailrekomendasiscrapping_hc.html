@@ -1,0 +1,223 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detail Rekomendasi Scrapping - SiLaptop79</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        ul,
+        li {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        body {
+            background-color: #f8fafc;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+        }
+
+        .dashboard-wrapper {
+            display: flex;
+            width: 100%;
+        }
+
+        .main-content {
+            flex: 1;
+            margin-left: 260px;
+            padding: 30px 50px;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        /* Top Nav */
+        .top-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .breadcrumb {
+            font-size: 13px;
+            color: #64748b;
+            margin-bottom: 4px;
+        }
+
+        .breadcrumb span {
+            color: #0b57c6;
+            font-weight: 600;
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 800;
+            color: #1e293b;
+            margin: 0;
+        }
+
+        .btn-nav {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            text-decoration: none;
+            background: #e2e8f0;
+            color: #475569;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Price Card Section */
+        .price-card {
+            background: #fff;
+            border-radius: 20px;
+            padding: 40px;
+            border: 1px solid #f1f5f9;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+            margin-bottom: 24px;
+        }
+
+        .laptop-name {
+            font-size: 24px;
+            font-weight: 800;
+            color: #1e293b;
+            margin: 0;
+        }
+
+        .laptop-sub {
+            color: #94a3b8;
+            font-weight: 500;
+            margin: 5px 0 25px 0;
+            font-size: 14px;
+        }
+
+        .price-label {
+            display: block;
+            font-size: 18px;
+            font-weight: 800;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+
+        .price-value {
+            font-size: 42px;
+            font-weight: 500;
+            color: #0b57c6;
+            opacity: 0.8;
+            letter-spacing: -1px;
+        }
+
+        /* Specs Section */
+        .specs-card {
+            background: #fff;
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid #f1f5f9;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+        }
+
+        .specs-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 18px;
+            font-weight: 800;
+            color: #1e293b;
+            margin-bottom: 25px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #0b57c6;
+            width: fit-content;
+        }
+
+        .specs-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+        }
+
+        .spec-item label {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+
+        .spec-item span {
+            font-size: 14px;
+            font-weight: 700;
+            color: #334155;
+            line-height: 1.4;
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-wrapper">
+        {% include 'components/sidebar.html' with active_page='hasil_rekomendasi' %}
+
+        <div class="main-content">
+            <div class="top-nav">
+                <div>
+                    <div class="breadcrumb">DSS Results / <span>MacBook Pro 16" M3</span></div>
+                    <h1 class="page-title">Detail Rekomendasi</h1>
+                </div>
+                <a href="{% url 'hasilrekomendasi_hc' %}" class="btn-nav">
+                    <i class="fa-solid fa-arrow-left"></i> Kembali ke Hasil
+                </a>
+            </div>
+
+            <div class="price-card">
+                <h2 class="laptop-name">MacBook Pro 16" M3</h2>
+                <p class="laptop-sub">Apple Silicon M3 Max Chip - Space Black</p>
+
+                <span class="price-label">Price</span>
+                <div class="price-value">Rp 15.000.0000</div>
+            </div>
+
+            <div class="specs-card">
+                <div class="specs-header">
+                    <i class="fa-solid fa-microchip" style="color: #0b57c6;"></i> Spesifikasi Laptop
+                </div>
+                <div class="specs-grid">
+                    <div class="spec-item">
+                        <label>Processor</label>
+                        <span>Apple M3 Max (14-core)</span>
+                    </div>
+                    <div class="spec-item">
+                        <label>Processor</label>
+                        <span>Apple M3 Max (14-core)</span>
+                    </div>
+                    <div class="spec-item">
+                        <label>Storage</label>
+                        <span>1TB SSD NVMe</span>
+                    </div>
+                    <div class="spec-item">
+                        <label>Memory RAM</label>
+                        <span>36GB Unified Memory</span>
+                    </div>
+                    <div class="spec-item">
+                        <label>Battery Capacity</label>
+                        <span>7200 mAh</span>
+                    </div>
+                    <div class="spec-item">
+                        <label>GPU</label>
+                        <span>30-Core GPU</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

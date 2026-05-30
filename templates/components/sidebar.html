@@ -1,13 +1,11 @@
 <aside class="sidebar">
     <div class="sidebar-header">
         <div class="logo-wrapper">
-            <!-- Logo Tujuh Sembilan -->
             <svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <rect x="25" y="20" width="8" height="28" rx="4" fill="#EF4444" />
                 <rect x="40" y="30" width="8" height="18" rx="4" fill="#EAB308" />
                 <rect x="55" y="20" width="8" height="28" rx="4" fill="#3B82F6" />
                 <rect x="70" y="30" width="8" height="18" rx="4" fill="#10B981" />
-
                 <rect x="25" y="55" width="8" height="25" rx="4" fill="#EAB308" />
                 <rect x="40" y="55" width="8" height="25" rx="4" fill="#3B82F6" />
                 <rect x="55" y="55" width="8" height="25" rx="4" fill="#10B981" />
@@ -21,7 +19,8 @@
         <p class="menu-label">MAIN MENU</p>
         <ul class="menu-list">
             <li>
-                <a href="/dashboardhc/" class="menu-item {% if active_page == 'dashboard' %}active{% endif %}">
+                <a href="{% url 'dashboardhc' %}"
+                    class="menu-item {% if active_page == 'dashboard' %}active{% endif %}">
                     <svg class="menu-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <rect x="3" y="3" width="7" height="7"></rect>
@@ -32,8 +31,9 @@
                     <span>Dashboard</span>
                 </a>
             </li>
+
             <li>
-                <a href="/pengajuanlaptop_hc/"
+                <a href="{% url 'pengajuanlaptop_hc' %}"
                     class="menu-item {% if active_page == 'pengajuan_laptop' %}active{% endif %}">
                     <svg class="menu-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -45,8 +45,11 @@
                     <span>Pengajuan Laptop</span>
                 </a>
             </li>
+
             <li>
-                <a href="/" class="menu-item {% if active_page == 'data_laptop' %}active{% endif %}">
+                <a href="{% url 'manajemen_laptop' %}"
+                    class="menu-item {% if request.resolver_match.url_name == 'manajemen_laptop' or request.resolver_match.url_name == 'tambahlaptop_hc' or request.resolver_match.url_name == 'detaillaptop_hc' or request.resolver_match.url_name == 'editdatalaptop_hc' or request.resolver_match.url_name == 'riwayatpeminjamanlaptop_hc' %}active{% endif %}">
+
                     <svg class="menu-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
@@ -56,8 +59,9 @@
                     <span>Data Laptop</span>
                 </a>
             </li>
+
             <li>
-                <a href="/inputkriteria_hc/"
+                <a href="{% url 'inputkriteria_hc' %}"
                     class="menu-item {% if active_page == 'input_kriteria' %}active{% endif %}">
                     <svg class="menu-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -74,8 +78,10 @@
                     <span>Input Kriteria</span>
                 </a>
             </li>
+
             <li>
-                <a href="/hasilrekomendasi_hc/" class="menu-item {% if active_page == 'hasil_rekomendasi' %}active{% endif %}">
+                <a href="{% url 'hasilrekomendasi_hc' %}"
+                    class="menu-item {% if active_page == 'hasil_rekomendasi' %}active{% endif %}">
                     <svg class="menu-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="18" y1="20" x2="18" y2="10"></line>
