@@ -1,0 +1,549 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulir Pengembalian Perangkat - SiLaptop79 Talent</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1.1">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: #F8FAFC;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .dashboard-wrapper {
+            display: flex;
+            width: 100%;
+        }
+
+        .sidebar {
+            flex-shrink: 0;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.03);
+        }
+
+        .main-content {
+            flex: 1;
+            margin-left: 260px;
+            padding: 40px 48px;
+            box-sizing: border-box;
+        }
+
+        /* ============================
+           PAGE HEADER
+           ============================ */
+        .page-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+
+        .page-top h1 {
+            font-size: 26px;
+            font-weight: 800;
+            color: #0F172A;
+            margin: 0;
+            letter-spacing: -0.5px;
+        }
+
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background-color: #E2E8F0;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #334155;
+            text-decoration: none;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-back:hover {
+            background-color: #CBD5E1;
+            transform: translateY(-1px);
+        }
+
+        /* ============================
+           FORM CARD WRAPPER
+           ============================ */
+        .form-card {
+            background-color: #FFFFFF;
+            border-radius: 24px;
+            border: 1px solid #E2E8F0;
+            padding: 40px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.01);
+            margin-bottom: 32px;
+        }
+
+        /* Active device box inside form */
+        .device-info-box {
+            background-color: #FFFFFF;
+            border: 1px solid #E2E8F0;
+            border-radius: 16px;
+            padding: 24px 32px;
+            margin-bottom: 36px;
+        }
+
+        .badge-active-device {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background-color: #FEE2E2;
+            color: #991B1B;
+            border: 1px solid #FCA5A5;
+            padding: 5px 12px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.2px;
+        }
+
+        .badge-active-device svg {
+            color: #991B1B;
+        }
+
+        .device-title {
+            font-size: 24px;
+            font-weight: 800;
+            color: #0F172A;
+            margin: 16px 0 12px 0;
+            letter-spacing: -0.5px;
+        }
+
+        .serial-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: #94A3B8;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .serial-badge {
+            display: inline-block;
+            background-color: #EFF6FF;
+            color: #2563EB;
+            font-size: 13px;
+            font-weight: 700;
+            padding: 6px 14px;
+            border-radius: 6px;
+            letter-spacing: 0.5px;
+        }
+
+        /* ============================
+           KONDISI PERANGKAT SECTION
+           ============================ */
+        .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #0F172A;
+            margin: 0 0 16px 0;
+        }
+
+        .conditions-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 36px;
+        }
+
+        .condition-card {
+            background-color: #FFFFFF;
+            border: 1.5px solid #E2E8F0;
+            border-radius: 12px;
+            padding: 24px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .condition-card:hover {
+            border-color: #CBD5E1;
+            background-color: #F8FAFC;
+        }
+
+        .condition-card.active-good {
+            border-color: #10B981;
+            background-color: #F0FDF4;
+        }
+
+        .condition-card.active-damaged {
+            border-color: #EF4444;
+            background-color: #FEF2F2;
+        }
+
+        .condition-card.active-faulty {
+            border-color: #3B82F6;
+            background-color: #EFF6FF;
+        }
+
+        .condition-icon {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+            border-radius: 50%;
+        }
+
+        .condition-card.good .condition-icon {
+            background-color: #EFF6FF;
+            color: #2563EB;
+        }
+        
+        .condition-card.active-good .condition-icon {
+            background-color: #D1FAE5;
+            color: #10B981;
+        }
+
+        .condition-card.damaged .condition-icon {
+            background-color: #FEF2F2;
+            color: #EF4444;
+        }
+
+        .condition-card.faulty .condition-icon {
+            background-color: #EFF6FF;
+            color: #2563EB;
+        }
+
+        .condition-name {
+            font-size: 15px;
+            font-weight: 700;
+            color: #1E293B;
+            margin: 0 0 8px 0;
+        }
+
+        .condition-desc {
+            font-size: 13px;
+            color: #64748B;
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        /* ============================
+           INPUT GRID
+           ============================ */
+        .form-row {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 32px;
+            margin-bottom: 32px;
+        }
+
+        .form-column {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1E293B;
+        }
+
+        select,
+        input[type="date"],
+        textarea {
+            width: 100%;
+            padding: 13px 16px;
+            border: 1.5px solid #E2E8F0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            color: #334155;
+            background-color: #F8FAFC;
+            outline: none;
+            box-sizing: border-box;
+            transition: all 0.2s;
+        }
+
+        select {
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            padding-right: 40px;
+        }
+
+        select:focus,
+        input[type="date"]:focus,
+        textarea:focus {
+            border-color: #0b57c6;
+            background-color: #FFFFFF;
+            box-shadow: 0 0 0 3px rgba(11, 87, 198, 0.1);
+        }
+
+        textarea {
+            resize: none;
+            height: 145px;
+            line-height: 1.6;
+        }
+
+        /* Checkbox */
+        .confirm-wrapper {
+            background-color: #F8FAFC;
+            border-radius: 12px;
+            padding: 18px 24px;
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+            margin-bottom: 32px;
+            border: 1px solid #F1F5F9;
+        }
+
+        .checkbox-container {
+            display: block;
+            position: relative;
+            padding-left: 28px;
+            margin-bottom: 0;
+            cursor: pointer;
+            font-size: 13.5px;
+            color: #475569;
+            user-select: none;
+            line-height: 1.5;
+        }
+
+        .checkbox-container input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
+        }
+
+        .checkmark {
+            position: absolute;
+            top: 2px;
+            left: 0;
+            height: 18px;
+            width: 18px;
+            background-color: #FFFFFF;
+            border: 2px solid #CBD5E1;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .checkbox-container:hover input ~ .checkmark {
+            border-color: #94A3B8;
+        }
+
+        .checkbox-container input:checked ~ .checkmark {
+            background-color: #0b57c6;
+            border-color: #0b57c6;
+        }
+
+        .checkmark:after {
+            content: "";
+            position: absolute;
+            display: none;
+        }
+
+        .checkbox-container input:checked ~ .checkmark:after {
+            display: block;
+        }
+
+        .checkbox-container .checkmark:after {
+            left: 5px;
+            top: 2px;
+            width: 4px;
+            height: 8px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+
+        /* Submit Area */
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
+            background-color: #0066CC;
+            color: #FFFFFF;
+            font-size: 15px;
+            font-weight: 700;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(0, 102, 204, 0.25);
+        }
+
+        .submit-btn:hover {
+            background-color: #0056B3;
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-wrapper">
+        {% include 'talent/components/sidebar.html' with active_page='pengembalian' %}
+
+        <div class="main-content">
+
+            <!-- Page Header -->
+            <div class="page-top">
+                <h1>Formulir Pengembalian Perangkat</h1>
+                <a href="{% url 'dashboard_talent' %}" class="btn-back">
+                    Kembali ke Dashboard
+                </a>
+            </div>
+
+            <!-- Form Card Wrapper -->
+            <div class="form-card">
+                <form action="{% url 'riwayatpeminjamanlaptop_talent' %}" method="GET">
+                    
+                    <!-- Active Device Details -->
+                    <div class="device-info-box">
+                        <div class="badge-active-device">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                            </svg>
+                            Perangkat Aktif
+                        </div>
+                        <h2 class="device-title">MacBook Pro 16" (M3 Max)</h2>
+                        <span class="serial-label">NOMOR SERI</span>
+                        <span class="serial-badge">PL-LAP-7742</span>
+                    </div>
+
+                    <!-- Kondisi Perangkat Selection -->
+                    <h3 class="section-title">Kondisi Perangkat</h3>
+                    <input type="hidden" name="kondisi" id="input-kondisi" value="good">
+
+                    <div class="conditions-grid">
+                        <!-- Good -->
+                        <div class="condition-card good active-good" onclick="selectCondition('good')">
+                            <div class="condition-icon">
+                                <svg class="icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                            </div>
+                            <h4 class="condition-name">Good/Baik</h4>
+                            <p class="condition-desc">Berfungsi normal tanpa ada cacat fisik yang signifikan.</p>
+                        </div>
+
+                        <!-- Damaged -->
+                        <div class="condition-card damaged" onclick="selectCondition('damaged')">
+                            <div class="condition-icon">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                                    <line x1="8" y1="8" x2="16" y2="16"/>
+                                </svg>
+                            </div>
+                            <h4 class="condition-name">Damaged/Rusak</h4>
+                            <p class="condition-desc">Terdapat kerusakan fisik pada bodi, layar, atau keyboard.</p>
+                        </div>
+
+                        <!-- Faulty -->
+                        <div class="condition-card faulty" onclick="selectCondition('faulty')">
+                            <div class="condition-icon">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                </svg>
+                            </div>
+                            <h4 class="condition-name">Faulty/Bermasalah</h4>
+                            <p class="condition-desc">Kerusakan pada sistem internal, baterai, atau port koneksi.</p>
+                        </div>
+                    </div>
+
+                    <!-- Dropdowns and Details -->
+                    <div class="form-row">
+                        <!-- Left Column -->
+                        <div class="form-column">
+                            <div class="form-group">
+                                <label for="alasan">Alasan Pengembalian</label>
+                                <select id="alasan" name="alasan" required>
+                                    <option value="" disabled selected>Pilih Alasan...</option>
+                                    <option value="Selesai Kontrak/Proyek">Selesai Kontrak/Proyek</option>
+                                    <option value="Kerusakan Perangkat">Kerusakan Perangkat</option>
+                                    <option value="Penggantian Unit Baru">Penggantian Unit Baru</option>
+                                    <option value="Lainnya">Lainnya</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="jadwal">Jadwal Penyerahan</label>
+                                <input type="date" id="jadwal" name="jadwal" required>
+                            </div>
+                        </div>
+
+                        <!-- Right Column -->
+                        <div class="form-column">
+                            <div class="form-group">
+                                <label for="catatan">Catatan Tambahan</label>
+                                <textarea id="catatan" name="catatan" placeholder="Tuliskan catatan tambahan mengenai kondisi atau riwayat perangkat..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Confirmation Checklist -->
+                    <div class="confirm-wrapper">
+                        <label class="checkbox-container">
+                            Saya mengonfirmasi bahwa seluruh data pribadi telah dibersihkan (wiped) dari perangkat ini. Saya memahami bahwa perusahaan tidak bertanggung jawab atas data yang tertinggal setelah proses pengembalian selesai.
+                            <input type="checkbox" required>
+                            <span class="checkmark"></span>
+                        </label>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" class="submit-btn">
+                        Ajukan Pengembalian
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="22" y1="2" x2="11" y2="13"></line>
+                            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                        </svg>
+                    </button>
+
+                </form>
+            </div><!-- End Form Card -->
+
+        </div><!-- End Main Content -->
+    </div><!-- End Wrapper -->
+
+    <script>
+        function selectCondition(type) {
+            // Update active state of cards
+            document.querySelectorAll('.condition-card').forEach(card => {
+                card.classList.remove('active-good', 'active-damaged', 'active-faulty');
+            });
+
+            // Set hidden input value
+            document.getElementById('input-kondisi').value = type;
+
+            // Add corresponding class
+            const selectedCard = document.querySelector(`.condition-card.${type}`);
+            selectedCard.classList.add(`active-${type}`);
+        }
+    </script>
+</body>
+
+</html>

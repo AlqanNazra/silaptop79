@@ -1,0 +1,520 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - SiLaptop79 Talent</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1.1">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: #F8FAFC;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .dashboard-wrapper {
+            display: flex;
+            width: 100%;
+        }
+
+        .sidebar {
+            flex-shrink: 0;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.03);
+        }
+
+        .main-dashboard-content {
+            flex: 1;
+            margin-left: 260px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Page Header */
+        .page-header {
+            padding: 32px 40px 24px 40px;
+            background-color: #FFFFFF;
+            border-bottom: 1px solid #E2E8F0;
+        }
+
+        .page-header h1 {
+            margin: 0;
+            font-size: 22px;
+            font-weight: 700;
+            color: #0F172A;
+        }
+
+        .page-header p {
+            margin: 6px 0 0 0;
+            font-size: 13px;
+            color: #64748B;
+        }
+
+        /* Content Area */
+        .content-padding {
+            padding: 32px 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+        }
+
+        /* ============================
+           HERO CARD
+           ============================ */
+        .hero-card {
+            background-color: #0F172A;
+            border-radius: 20px;
+            padding: 48px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #FFFFFF;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 15px -3px rgba(15, 23, 42, 0.15);
+        }
+
+        .hero-card::before {
+            content: '';
+            position: absolute;
+            width: 350px;
+            height: 350px;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, transparent 70%);
+            top: -80px;
+            right: -50px;
+            border-radius: 50%;
+        }
+
+        .hero-text-block {
+            position: relative;
+            z-index: 2;
+            max-width: 65%;
+        }
+
+        .hero-text-block h2 {
+            margin: 0 0 14px 0;
+            font-size: 32px;
+            font-weight: 800;
+            line-height: 1.25;
+            letter-spacing: -0.5px;
+        }
+
+        .hero-text-block p {
+            margin: 0 0 32px 0;
+            font-size: 14px;
+            color: #94A3B8;
+            line-height: 1.7;
+            max-width: 480px;
+        }
+
+        .btn-hero {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background-color: #0284C7;
+            color: #FFFFFF;
+            padding: 13px 26px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .btn-hero:hover {
+            background-color: #0369A1;
+            transform: translateY(-1px);
+        }
+
+        .hero-graphic {
+            position: relative;
+            z-index: 1;
+            width: 160px;
+            height: 180px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01));
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            backdrop-filter: blur(10px);
+        }
+
+        .hero-graphic svg {
+            color: #0EA5E9;
+        }
+
+        .hero-graphic-label {
+            font-size: 10px;
+            font-weight: 700;
+            color: #475569;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .hero-graphic-label span {
+            color: #10B981;
+        }
+
+        /* ============================
+           ACTIVITY SECTION
+           ============================ */
+        .activity-section {}
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .section-title h3 {
+            margin: 0 0 4px 0;
+            font-size: 20px;
+            font-weight: 700;
+            color: #0F172A;
+        }
+
+        .section-title p {
+            margin: 0;
+            font-size: 13px;
+            color: #64748B;
+        }
+
+        .btn-export {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background-color: #FFFFFF;
+            border: 1px solid #E2E8F0;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #0F172A;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .btn-export:hover {
+            border-color: #CBD5E1;
+            background-color: #F8FAFC;
+        }
+
+        /* ============================
+           STATS CARDS ROW
+           ============================ */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-box {
+            background-color: #FFFFFF;
+            border: 1px solid #E2E8F0;
+            border-radius: 12px;
+            padding: 20px 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-box::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            border-radius: 12px 0 0 12px;
+        }
+
+        .stat-box.waiting::before { background-color: #CBD5E1; }
+        .stat-box.rejected::before { background-color: #EF4444; }
+        .stat-box.approved::before { background-color: #22C55E; }
+        .stat-box.done::before { background-color: #22C55E; }
+
+        .stat-box-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .stat-box.waiting .stat-box-label { color: #64748B; }
+        .stat-box.rejected .stat-box-label { color: #EF4444; }
+        .stat-box.approved .stat-box-label { color: #22C55E; }
+        .stat-box.done .stat-box-label { color: #22C55E; }
+
+        .stat-box-value {
+            font-size: 36px;
+            font-weight: 800;
+            color: #0F172A;
+            margin: 0 0 4px 0;
+            line-height: 1;
+        }
+
+        .stat-box-desc {
+            font-size: 12px;
+            color: #94A3B8;
+            font-weight: 500;
+        }
+
+        /* ============================
+           TABLE
+           ============================ */
+        .table-card {
+            background-color: #FFFFFF;
+            border-radius: 16px;
+            border: 1px solid #E2E8F0;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        }
+
+        .table-card table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table-card th {
+            text-align: left;
+            padding: 16px 24px;
+            font-size: 10px;
+            font-weight: 700;
+            color: #94A3B8;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            border-bottom: 1px solid #F1F5F9;
+            background-color: #FAFAFA;
+        }
+
+        .table-card td {
+            padding: 18px 24px;
+            font-size: 14px;
+            color: #334155;
+            border-bottom: 1px solid #F1F5F9;
+            vertical-align: middle;
+        }
+
+        .table-card tr:last-child td {
+            border-bottom: none;
+        }
+
+        .table-card tr:hover td {
+            background-color: #FAFBFF;
+        }
+
+        .laptop-cell {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .laptop-icon-sm {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            background-color: #EFF6FF;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #3B82F6;
+            flex-shrink: 0;
+        }
+
+        .laptop-name-cell {
+            font-weight: 600;
+            color: #1E293B;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-wrapper">
+        {% include 'talent/components/sidebar.html' with active_page='dashboard' %}
+
+        <div class="main-dashboard-content">
+
+            <!-- Header -->
+            <div class="page-header">
+                <h1>Dashboard Talent</h1>
+                <p>Kelola pengajuan dan peminjaman laptop Anda.</p>
+            </div>
+
+            <!-- Content -->
+            <div class="content-padding">
+
+                <!-- Hero Card -->
+                <div class="hero-card">
+                    <div class="hero-text-block">
+                        <h2>Selamat Datang, Talent!</h2>
+                        <p>Pantau Inventaris Perangkat Anda, Ajukan Peminjaman Laptop, dan Ajukan Pengembalian Peminjaman Laptop</p>
+                        <a href="{% url 'pengajuanlaptop_talent' %}" class="btn-hero">
+                            Ajukan Laptop
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                                <polyline points="12 5 19 12 12 19"></polyline>
+                            </svg>
+                        </a>
+                    </div>
+                    <div class="hero-graphic">
+                        <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="4" width="18" height="12" rx="2" ry="2"></rect>
+                            <line x1="2" y1="20" x2="22" y2="20"></line>
+                            <circle cx="12" cy="16" r="1" fill="currentColor"></circle>
+                        </svg>
+                        <div class="hero-graphic-label">SISTEM <span>AKTIF</span></div>
+                    </div>
+                </div>
+
+                <!-- Activity Section -->
+                <div class="activity-section">
+                    <div class="section-header">
+                        <div class="section-title">
+                            <h3>Aktivitas Pengajuan</h3>
+                            <p>Riwayat Pengajuan laptop oleh pengguna sistem.</p>
+                        </div>
+                        <a href="#" class="btn-export">
+                            Ekspor Data
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7 10 12 15 17 10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                        </a>
+                    </div>
+
+                    <!-- Stats Row -->
+                    <div class="stats-row">
+                        <!-- Menunggu -->
+                        <div class="stat-box waiting">
+                            <div class="stat-box-label">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                    <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+                                    <line x1="3" y1="9" x2="21" y2="9"></line>
+                                    <line x1="9" y1="21" x2="9" y2="9"></line>
+                                </svg>
+                                MENUNGGU
+                            </div>
+                            <p class="stat-box-value">0</p>
+                            <p class="stat-box-desc">Pengajuan laptop diproses</p>
+                        </div>
+
+                        <!-- Ditolak -->
+                        <div class="stat-box rejected">
+                            <div class="stat-box-label">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <line x1="15" y1="9" x2="9" y2="15"></line>
+                                    <line x1="9" y1="9" x2="15" y2="15"></line>
+                                </svg>
+                                DITOLAK
+                            </div>
+                            <p class="stat-box-value">01</p>
+                            <p class="stat-box-desc">Total Pengajuan Ditolak</p>
+                        </div>
+
+                        <!-- Disetujui -->
+                        <div class="stat-box approved">
+                            <div class="stat-box-label">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                    <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+                                    <polyline points="16 2 16 8 8 8"></polyline>
+                                    <line x1="9" y1="15" x2="15" y2="15"></line>
+                                </svg>
+                                DISETUJUI
+                            </div>
+                            <p class="stat-box-value">01</p>
+                            <p class="stat-box-desc">Total Pengajuan Disetujui</p>
+                        </div>
+
+                        <!-- Selesai -->
+                        <div class="stat-box done">
+                            <div class="stat-box-label">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                                </svg>
+                                SELESAI
+                            </div>
+                            <p class="stat-box-value">02</p>
+                            <p class="stat-box-desc">Total riwayat pengembalian</p>
+                        </div>
+                    </div>
+
+                    <!-- Table -->
+                    <div class="table-card">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>KEBUTUHAN ROLE</th>
+                                    <th>PERUSAHAAN</th>
+                                    <th>TANGGAL PENMGAJUAN</th>
+                                    <th>TANGGAL PEMBERIAN</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <div class="laptop-cell">
+                                            <div class="laptop-icon-sm">
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <rect x="2" y="3" width="20" height="14" rx="2"></rect>
+                                                    <line x1="8" y1="21" x2="16" y2="21"></line>
+                                                    <line x1="12" y1="17" x2="12" y2="21"></line>
+                                                </svg>
+                                            </div>
+                                            <span class="laptop-name-cell">MacBook Air M2</span>
+                                        </div>
+                                    </td>
+                                    <td>Padepokan</td>
+                                    <td>24 Mar 2026</td>
+                                    <td>24 Mar 2026</td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="laptop-cell">
+                                            <div class="laptop-icon-sm">
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <rect x="2" y="3" width="20" height="14" rx="2"></rect>
+                                                    <line x1="8" y1="21" x2="16" y2="21"></line>
+                                                    <line x1="12" y1="17" x2="12" y2="21"></line>
+                                                </svg>
+                                            </div>
+                                            <span class="laptop-name-cell">MacBook Air M2</span>
+                                        </div>
+                                    </td>
+                                    <td>Telkom</td>
+                                    <td>24 Mar 2026</td>
+                                    <td>24 Mar 2026</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div><!-- End Content Padding -->
+        </div><!-- End Main Content -->
+    </div><!-- End Wrapper -->
+</body>
+
+</html>

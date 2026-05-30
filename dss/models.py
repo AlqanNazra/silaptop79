@@ -133,3 +133,31 @@ class LaptopPengadaan(models.Model):
 
     def __str__(self):
         return self.nama_laptop
+
+
+# =============================================
+# 8. ALTERNATIF DSS (ADDED FOR SEEDER/COMPATIBILITY)
+# =============================================
+class AlternatifDSS(models.Model):
+    id_alternatif = models.CharField(primary_key=True, max_length=100)
+    dss = models.ForeignKey(DSSProses, on_delete=models.CASCADE)
+    id_laptop_pengadaan = models.CharField(max_length=100, null=True, blank=True)
+    laptop_inventori = models.ForeignKey(LaptopInventori, on_delete=models.CASCADE, null=True, blank=True)
+    sumber_data = models.CharField(max_length=100)
+
+    class Meta:
+        db_table = 'dss_alternatifdss'
+
+
+# =============================================
+# 9. DETAIL HASIL SAW (ADDED FOR SEEDER/COMPATIBILITY)
+# =============================================
+class DetailHasilSAW(models.Model):
+    id_detail = models.CharField(primary_key=True, max_length=100)
+    hasil = models.ForeignKey(HasilSAW, on_delete=models.CASCADE)
+    nilai_normalisasi = models.FloatField()
+    nilai_preferensi = models.FloatField()
+    ranking = models.IntegerField()
+
+    class Meta:
+        db_table = 'dss_detailhasilsaw'
