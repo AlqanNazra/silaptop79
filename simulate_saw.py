@@ -22,25 +22,15 @@ import sys
 import django
 from collections import defaultdict
 
-# ── Setup Django (dibutuhkan agar import app bisa jalan) ──────────────────────
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, BASE_DIR)
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "silaptop79.settings")
 django.setup()
 
-# ── Import modul ASLI dari aplikasi ───────────────────────────────────────────
 from dss.services.service_swara import ServiceSwara
 from dss.services.service_saw import Servicesaw
 
-# =============================================================================
-# DATA DUMMY
-# =============================================================================
-
-# 20 laptop alternatif — nilai sengaja dibuat overlapping agar ranking berubah
-# antar skenario (saling bersaing di beberapa kriteria).
-# Kolom: processor(score), ram(GB), storage(GB), berat(kg), layar(inch), baterai(Wh)
 DUMMY_LAPTOPS = [
-    # id    nama                       proc  ram  stor  berat  layar  baterai
     {"id": "L01", "nama": "ASUS ROG G1",        "processor": 14, "ram": 32, "storage": 1024, "berat": 2.5, "layar": 16.0, "baterai": 4500},
     {"id": "L02", "nama": "Lenovo ThinkPad X1", "processor": 13, "ram": 16, "storage": 512,  "berat": 1.3, "layar": 14.0, "baterai": 7200},
     {"id": "L03", "nama": "Dell XPS 15",        "processor": 14, "ram": 16, "storage": 512,  "berat": 1.8, "layar": 15.6, "baterai": 6500},
