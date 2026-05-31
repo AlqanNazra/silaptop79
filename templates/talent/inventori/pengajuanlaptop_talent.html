@@ -1,0 +1,439 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pengajuan Laptop - SiLaptop79 Talent</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1.1">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: #F8FAFC;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .dashboard-wrapper {
+            display: flex;
+            width: 100%;
+        }
+
+        .sidebar {
+            flex-shrink: 0;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.03);
+        }
+
+        .main-content {
+            flex: 1;
+            margin-left: 260px;
+            padding: 48px 60px;
+            box-sizing: border-box;
+        }
+
+        /* ============================
+           PAGE HEADER
+           ============================ */
+        .page-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 36px;
+        }
+
+        .page-top-left h1 {
+            font-size: 28px;
+            font-weight: 800;
+            color: #0F172A;
+            margin: 0 0 8px 0;
+            letter-spacing: -0.5px;
+        }
+
+        .page-top-left p {
+            font-size: 14px;
+            color: #64748B;
+            margin: 0;
+            max-width: 420px;
+            line-height: 1.6;
+        }
+
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 11px 22px;
+            background-color: #F1F5F9;
+            border: 1px solid #E2E8F0;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #334155;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-back:hover {
+            background-color: #E2E8F0;
+            border-color: #CBD5E1;
+        }
+
+        /* ============================
+           FORM CARD
+           ============================ */
+        .form-card {
+            background-color: #FFFFFF;
+            border-radius: 20px;
+            border: 1px solid #E2E8F0;
+            padding: 40px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+        }
+
+        /* ============================
+           FORM ROWS
+           ============================ */
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 28px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1E293B;
+        }
+
+        select,
+        textarea,
+        input[type="text"] {
+            width: 100%;
+            padding: 13px 16px;
+            border: 1px solid #E2E8F0;
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            color: #334155;
+            background-color: #F8FAFC;
+            outline: none;
+            box-sizing: border-box;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+
+        select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            padding-right: 40px;
+        }
+
+        select:focus,
+        textarea:focus,
+        input[type="text"]:focus {
+            border-color: #3B82F6;
+            background-color: #FFFFFF;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        textarea {
+            resize: none;
+            height: 110px;
+            line-height: 1.6;
+        }
+
+        textarea::placeholder,
+        input::placeholder {
+            color: #94A3B8;
+        }
+
+        /* ============================
+           JENIS PENGAJUAN TOGGLE
+           ============================ */
+        .jenis-toggle {
+            display: flex;
+            gap: 8px;
+        }
+
+        .jenis-btn {
+            padding: 9px 22px;
+            border-radius: 8px;
+            border: 1.5px solid #E2E8F0;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            background-color: #FFFFFF;
+            color: #64748B;
+            transition: all 0.2s;
+        }
+
+        .jenis-btn.active {
+            background-color: #EFF6FF;
+            border-color: #3B82F6;
+            color: #2563EB;
+        }
+
+        .jenis-btn:hover:not(.active) {
+            background-color: #F8FAFC;
+            border-color: #CBD5E1;
+        }
+
+        /* ============================
+           URGENSI CARDS
+           ============================ */
+        .urgensi-group {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .urgensi-card {
+            padding: 18px 20px;
+            border: 1.5px solid #E2E8F0;
+            border-radius: 12px;
+            cursor: pointer;
+            background-color: #FFFFFF;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .urgensi-card:hover {
+            border-color: #CBD5E1;
+            background-color: #F8FAFC;
+        }
+
+        .urgensi-card.active {
+            border-color: #3B82F6;
+            background-color: #EFF6FF;
+        }
+
+        .urgensi-card.active-red {
+            border-color: #EF4444;
+            background-color: #FFF5F5;
+        }
+
+        .urgensi-card .urgensi-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #1E293B;
+            margin-bottom: 4px;
+        }
+
+        .urgensi-card.active-red .urgensi-title {
+            color: #EF4444;
+        }
+
+        .urgensi-card .urgensi-sub {
+            font-size: 12px;
+            color: #94A3B8;
+            font-weight: 500;
+        }
+
+        .urgensi-card.active-red .urgensi-sub {
+            color: #EF4444;
+            font-weight: 600;
+        }
+
+        /* ============================
+           DIVIDER
+           ============================ */
+        .form-divider {
+            border: none;
+            border-top: 1px solid #F1F5F9;
+            margin: 0 0 28px 0;
+        }
+
+        /* ============================
+           SUBMIT BUTTON
+           ============================ */
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 36px;
+        }
+
+        .btn-cancel {
+            padding: 12px 24px;
+            background-color: #F1F5F9;
+            border: 1px solid #E2E8F0;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #64748B;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .btn-cancel:hover {
+            background-color: #E2E8F0;
+        }
+
+        .btn-submit {
+            padding: 12px 28px;
+            background-color: #0284C7;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #FFFFFF;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
+        }
+
+        .btn-submit:hover {
+            background-color: #0369A1;
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-wrapper">
+        {% include 'talent/components/sidebar.html' with active_page='pengajuan_laptop' %}
+
+        <div class="main-content">
+
+            <!-- Page Top Header -->
+            <div class="page-top">
+                <div class="page-top-left">
+                    <h1>Halaman Formulir Pengajuan Laptop Baru</h1>
+                    <p>Lengkapi formulir di bawah ini untuk memulai proses pengadaan perangkat laptop baru di departemen Anda.</p>
+                </div>
+                <a href="{% url 'dashboard_talent' %}" class="btn-back">
+                    Kembali ke Dashboard
+                </a>
+            </div>
+
+            <!-- Form Card -->
+            <div class="form-card">
+
+                <!-- Departemen & Role -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="departemen">Departemen</label>
+                        <select id="departemen" name="departemen">
+                            <option value="" disabled selected>Pilih Departemen</option>
+                            <option value="it">IT</option>
+                            <option value="hr">Human Resources</option>
+                            <option value="finance">Finance</option>
+                            <option value="marketing">Marketing</option>
+                            <option value="ops">Operations</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="role">Role</label>
+                        <select id="role" name="role">
+                            <option value="" disabled selected>Pilih Role</option>
+                            <option value="developer">Developer</option>
+                            <option value="designer">Designer</option>
+                            <option value="analyst">Analyst</option>
+                            <option value="manager">Manager</option>
+                        </select>
+                    </div>
+                </div>
+
+                <hr class="form-divider">
+
+                <!-- Jenis Pengajuan -->
+                <div class="form-group" style="margin-bottom: 28px;">
+                    <label>Jenis Pengajuan</label>
+                    <div class="jenis-toggle">
+                        <button class="jenis-btn active" onclick="setJenis(this)">Peminjaman Baru</button>
+                        <button class="jenis-btn" onclick="setJenis(this)">Penggantian</button>
+                    </div>
+                </div>
+
+                <hr class="form-divider">
+
+                <!-- Spesifikasi -->
+                <div class="form-group" style="margin-bottom: 28px;">
+                    <label for="spesifikasi">Spesifikasi yang dibutuhkan</label>
+                    <textarea id="spesifikasi" name="spesifikasi"
+                        placeholder="Contoh: RAM 16GB, SSD 512GB, Intel i7 atau MacBook M2..."></textarea>
+                </div>
+
+                <!-- Alasan -->
+                <div class="form-group" style="margin-bottom: 28px;">
+                    <label for="alasan">Alasan Pengajuan</label>
+                    <textarea id="alasan" name="alasan"
+                        placeholder="Jelaskan urgensi atau alasan kebutuhan perangkat..."></textarea>
+                </div>
+
+                <hr class="form-divider">
+
+                <!-- Urgensi -->
+                <div class="form-group">
+                    <label>Urgensi</label>
+                    <div class="urgensi-group">
+                        <div class="urgensi-card active" onclick="setUrgensi(this, false)">
+                            <div class="urgensi-title">Standar</div>
+                            <div class="urgensi-sub">7 Hari Kerja</div>
+                        </div>
+                        <div class="urgensi-card" onclick="setUrgensi(this, false)">
+                            <div class="urgensi-title">Tinggi</div>
+                            <div class="urgensi-sub">48 Jam</div>
+                        </div>
+                        <div class="urgensi-card" onclick="setUrgensi(this, true)">
+                            <div class="urgensi-title">Kritis</div>
+                            <div class="urgensi-sub">Segera</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="form-actions">
+                    <a href="{% url 'dashboard_talent' %}" class="btn-cancel">Batal</a>
+                    <button class="btn-submit" type="submit">Kirim Pengajuan</button>
+                </div>
+
+            </div><!-- End Form Card -->
+
+        </div><!-- End Main Content -->
+    </div><!-- End Wrapper -->
+
+    <script>
+        function setJenis(el) {
+            document.querySelectorAll('.jenis-btn').forEach(b => b.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        function setUrgensi(el, isKritis) {
+            document.querySelectorAll('.urgensi-card').forEach(c => {
+                c.classList.remove('active', 'active-red');
+            });
+            if (isKritis) {
+                el.classList.add('active-red');
+            } else {
+                el.classList.add('active');
+            }
+        }
+    </script>
+</body>
+
+</html>

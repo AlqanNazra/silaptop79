@@ -105,8 +105,8 @@
                 </svg>
             </div>
             <div class="user-info">
-                <p class="user-name">{% if user.is_authenticated %}{{ user.username }}{% else %}Guest{% endif %}</p>
-                <p class="user-role">{% if user.is_superuser %}Administrator{% else %}Staff{% endif %}</p>
+                <p class="user-name">{% if user.is_authenticated %}{{ user.nama }}{% else %}Admin{% endif %}</p>
+                <p class="user-role">{% if user.is_authenticated %}{{ user.role }}{% else %}Human Capital{% endif %}</p>
             </div>
             <form action="{% url 'logout' %}" method="post" style="margin: 0; padding: 0;">
                 {% csrf_token %}

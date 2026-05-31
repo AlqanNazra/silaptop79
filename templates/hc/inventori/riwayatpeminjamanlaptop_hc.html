@@ -282,15 +282,21 @@
         }
 
         .page-num {
-            width: 30px;
-            height: 30px;
+            width: 36px;
+            height: 36px;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 6px;
-            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            border: 1.5px solid #e2e8f0;
             cursor: pointer;
             font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .page-num:hover {
+            background-color: #f8fafc;
+            border-color: #cbd5e1;
         }
 
         .page-num.active {
@@ -303,7 +309,7 @@
 
 <body>
 
-    {% include 'components/sidebar.html' with active_page='manajemen_laptop' %}
+    {% include 'hc/components/sidebar.html' with active_page='manajemen_laptop' %}
 
     <div class="main-content">
         <div class="top-nav">

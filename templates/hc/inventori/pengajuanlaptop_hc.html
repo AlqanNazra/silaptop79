@@ -426,7 +426,7 @@
 
     <div class="dashboard-wrapper">
         <!-- Load Sidebar with pengajuan_laptop Active -->
-        {% include 'components/sidebar.html' with active_page='pengajuan_laptop' %}
+        {% include 'hc/components/sidebar.html' with active_page='pengajuan_laptop' %}
 
         <!-- Main Content -->
         <div class="main-dashboard-content">
@@ -740,11 +740,19 @@
                 <div class="pagination-container">
                     <span class="pagination-text">Menampilkan {{ total_pengajuan }} pengajuan</span>
                     <div class="pagination-controls">
-                        <button class="page-btn"><i class="fa-solid fa-angle-left"></i></button>
+                        <button class="page-btn">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="15 18 9 12 15 6"></polyline>
+                            </svg>
+                        </button>
                         <button class="page-btn active">1</button>
                         <button class="page-btn">2</button>
                         <button class="page-btn">3</button>
-                        <button class="page-btn"><i class="fa-solid fa-angle-right"></i></button>
+                        <button class="page-btn">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
+                        </button>
                     </div>
                 </div>
 
