@@ -1,13 +1,6 @@
 from django.contrib import admin
 from django.urls import path, include
-<<<<<<< HEAD
-<<<<<<< HEAD
 from django.contrib.auth import views as auth_views
-from core.views import home_view, dashboard_hc_view, tambahlaptop_hc_view
-=======
-=======
-from django.views.generic import TemplateView
->>>>>>> origin/dev-lina
 from core.views import (
     # HC Views
     dashboard_hc_view, 
@@ -52,20 +45,15 @@ from core.views import (
     detailrekomendasi_talent_view,
     detailrekomendasiscrapping_talent_view,
 )
->>>>>>> origin/dev-lina
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('dss/', include('dss.urls')),
     path('inventori/', include('inventori.urls')),
-<<<<<<< HEAD
-    path('', home_view, name='home'),
-    path('dashboardhc/', dashboard_hc_view, name='dashboardhc'), # Ini Dashboard baru
-    path('tambahlaptop_hc/', tambahlaptop_hc_view, name='tambahlaptop_hc'),
+    
+    # Authentication
     path('login/', auth_views.LoginView.as_view(template_name='auth/login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
-]
-=======
 
     # Landing Page (Directly to HC Dashboard as requested)
     path('', dashboard_hc_view, name='index'),
@@ -86,14 +74,6 @@ urlpatterns = [
     path('hc/detail-rekomendasi/', detailrekomendasi_hc_view, name='detailrekomendasi_hc'),
     path('hc/detail-scrapping/', detailrekomendasiscrapping_hc_view, name='detailrekomendasiscrapping_hc'),
 
-<<<<<<< HEAD
-    path('input-kriteria/', inputkriteria_hc_view, name='inputkriteria_hc'),
-    path('hasil-rekomendasi/', hasilrekomendasi_hc_view, name='hasilrekomendasi_hc'),
-    path('detail-rekomendasi/', detailrekomendasi_hc_view, name='detailrekomendasi_hc'),
-    path('detail-scrapping/', detailrekomendasiscrapping_hc_view, name='detailrekomendasiscrapping_hc'),
-]
->>>>>>> origin/dev-lina
-=======
     # ==========================================
     # INFORMATION TECHNOLOGY (IT) ROUTES
     # ==========================================
@@ -127,4 +107,3 @@ urlpatterns = [
     path('talent/detail-rekomendasi/', detailrekomendasi_talent_view, name='detailrekomendasi_talent'),
     path('talent/detail-scrapping/', detailrekomendasiscrapping_talent_view, name='detailrekomendasiscrapping_talent'),
 ]
->>>>>>> origin/dev-lina
