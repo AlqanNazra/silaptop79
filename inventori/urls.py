@@ -9,8 +9,12 @@ urlpatterns = [
     # =========================================================
     path('', views.manajemen_laptop_page, name='manajemenlaptop_hc'),
     path('tambah/', views.tambah_laptop_page, name='tambahlaptop_hc'),
-    path('detail/<str:id_laptop>/', views.detail_laptop_page, name='detail_laptop'),
+    path('detail/<str:id_laptop>/', views.detail_laptop_page, name='detaillaptop_hc'), # Updated name
     path('pengajuan/', views.pengajuan_page_view, name='pengajuanlaptop_hc'),
+    
+    path('pengajuan/detail/', views.detailpengajuan_hc_view, name='detailpengajuan_hc'),
+    path('riwayat-peminjaman/', views.riwayatpeminjamanlaptop_hc_view, name='riwayatpeminjamanlaptop_hc'),
+    path('edit/<str:id_laptop>/', views.editdatalaptop_hc_view, name='editdatalaptop_hc'),
 
     # =========================================================
     # API ENDPOINTS (JSON Response)

@@ -201,6 +201,18 @@ def detail_laptop_page(request, id_laptop):
     }
     return render(request, 'inventori/detail.html', context)
 
+@login_required
+def detailpengajuan_hc_view(request):
+    return render(request, 'inventori/detailpengajuan_hc.html')
+
+@login_required
+def riwayatpeminjamanlaptop_hc_view(request):
+    return render(request, 'inventori/riwayatpeminjamanlaptop_hc.html')
+
+@login_required
+def editdatalaptop_hc_view(request, id_laptop):
+    return render(request, 'inventori/editdatalaptop_hc.html')
+
 
 # =============================================================================
 #   1. PROCESSOR CRUD API (JSON)
