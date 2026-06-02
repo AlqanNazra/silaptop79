@@ -41,28 +41,31 @@ def detailrekomendasi_hc_view(request):
 def detailrekomendasiscrapping_hc_view(request):
     return render(request, 'hc/dss/detailrekomendasiscrapping_hc.html')
 
+def notifikasi_hc_view(request):
+    return render(request, 'hc/inventori/notifikasi_hc.html')
+
 
 # ==========================================
 # 2. INFORMATION TECHNOLOGY (IT) VIEWS (START FROM SCRATCH)
 # ==========================================
 
 def dashboard_it_view(request):
-    return HttpResponse("<h3>IT Dashboard - Mulai dari Awal</h3><p>Silakan buat file template Anda di <code>templates/it/dashboard/dashboard_it.html</code></p>")
+    return render(request, 'it/dashboard/dashboard_it.html')
 
 def manajemenlaptop_it_view(request):
-    return HttpResponse("<h3>IT Manajemen Laptop - Mulai dari Awal</h3>")
+    return render(request, 'it/inventori/manajemenlaptop_it.html')
 
 def pengajuanlaptop_it_view(request):
-    return HttpResponse("<h3>IT Pengajuan Laptop - Mulai dari Awal</h3>")
+    return render(request, 'it/inventori/pengajuanlaptop_it.html')
 
 def detailpengajuan_it_view(request):
     return HttpResponse("<h3>IT Detail Pengajuan - Mulai dari Awal</h3>")
 
 def tambahlaptop_it_view(request):
-    return HttpResponse("<h3>IT Tambah Laptop - Mulai dari Awal</h3>")
+    return render(request, 'it/inventori/tambahlaptop_it.html')
 
 def detaillaptop_it_view(request):
-    return HttpResponse("<h3>IT Detail Laptop - Mulai dari Awal</h3>")
+    return render(request, 'it/inventori/detaillaptop_it.html')
 
 def riwayatpeminjamanlaptop_it_view(request):
     return HttpResponse("<h3>IT Riwayat Peminjaman - Mulai dari Awal</h3>")
@@ -71,16 +74,19 @@ def editdatalaptop_it_view(request):
     return HttpResponse("<h3>IT Edit Laptop - Mulai dari Awal</h3>")
 
 def inputkriteria_it_view(request):
-    return HttpResponse("<h3>IT Input Kriteria - Mulai dari Awal</h3>")
+    return render(request, 'it/dss/inputkriteria_it.html')
 
 def hasilrekomendasi_it_view(request):
-    return HttpResponse("<h3>IT Hasil Rekomendasi - Mulai dari Awal</h3>")
+    return render(request, 'it/dss/hasilrekomendasi_it.html')
 
 def detailrekomendasi_it_view(request):
     return HttpResponse("<h3>IT Detail Rekomendasi - Mulai dari Awal</h3>")
 
 def detailrekomendasiscrapping_it_view(request):
     return HttpResponse("<h3>IT Detail Scraping - Mulai dari Awal</h3>")
+
+def notifikasi_it_view(request):
+    return render(request, 'it/inventori/notifikasi_it.html')
 
 
 # ==========================================
@@ -102,27 +108,4 @@ def pengembalianlaptop_talent_view(request):
 def detaillaptop_talent_view(request):
     return render(request, 'talent/inventori/detaillaptop_talent.html')
 
-# --- Stub views (belum ada template, akan dikembangkan nanti) ---
-def manajemenlaptop_talent_view(request):
-    return HttpResponse("<h3>Talent Manajemen Laptop - Coming Soon</h3>")
 
-def detailpengajuan_talent_view(request):
-    return HttpResponse("<h3>Talent Detail Pengajuan - Coming Soon</h3>")
-
-def tambahlaptop_talent_view(request):
-    return HttpResponse("<h3>Talent Tambah Laptop - Coming Soon</h3>")
-
-def editdatalaptop_talent_view(request):
-    return HttpResponse("<h3>Talent Edit Laptop - Coming Soon</h3>")
-
-def inputkriteria_talent_view(request):
-    return HttpResponse("<h3>Talent Input Kriteria - Coming Soon</h3>")
-
-def hasilrekomendasi_talent_view(request):
-    return HttpResponse("<h3>Talent Hasil Rekomendasi - Coming Soon</h3>")
-
-def detailrekomendasi_talent_view(request):
-    return HttpResponse("<h3>Talent Detail Rekomendasi - Coming Soon</h3>")
-
-def detailrekomendasiscrapping_talent_view(request):
-    return HttpResponse("<h3>Talent Detail Scraping - Coming Soon</h3>")

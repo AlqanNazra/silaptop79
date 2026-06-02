@@ -1,17 +1,9 @@
+{% load static %}
 <aside class="sidebar">
     <div class="sidebar-header">
-        <div class="logo-wrapper">
-            <svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect x="25" y="20" width="8" height="28" rx="4" fill="#EF4444" />
-                <rect x="40" y="30" width="8" height="18" rx="4" fill="#EAB308" />
-                <rect x="55" y="20" width="8" height="28" rx="4" fill="#3B82F6" />
-                <rect x="70" y="30" width="8" height="18" rx="4" fill="#10B981" />
-                <rect x="25" y="55" width="8" height="25" rx="4" fill="#EAB308" />
-                <rect x="40" y="55" width="8" height="25" rx="4" fill="#3B82F6" />
-                <rect x="55" y="55" width="8" height="25" rx="4" fill="#10B981" />
-                <rect x="70" y="55" width="8" height="25" rx="4" fill="#EF4444" />
-            </svg>
-            <span class="logo-text">SILAPTOP79</span>
+        <div class="logo-wrapper" style="gap: 8px;">
+            <img src="{% static 'img/logo_tujuh_sembilan.png' %}" alt="Logo Tujuh Sembilan" style="height: 24px; width: auto; object-fit: contain; flex-shrink: 0;">
+            <span class="logo-text" style="font-size: 1.1rem;">SILAPTOP79</span>
         </div>
     </div>
 
