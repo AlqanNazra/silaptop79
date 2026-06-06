@@ -1,0 +1,495 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tambah Laptop Baru - SiLaptop79</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1.1">
+
+    <style>
+        /* Base and Layout Styles */
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .dashboard-wrapper {
+            display: flex;
+            width: 100%;
+        }
+
+        .main-dashboard-content {
+            flex: 1;
+            margin-left: 260px;
+            /* Adjust if sidebar width is different */
+            padding: 40px 60px;
+            box-sizing: border-box;
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 800;
+            color: #1e293b;
+            margin-top: 0;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .page-subtitle {
+            font-size: 14px;
+            color: #64748b;
+            margin-bottom: 40px;
+            max-width: 600px;
+            line-height: 1.5;
+        }
+
+        /* Layout Grid */
+        .grid-container {
+            display: grid;
+            grid-template-columns: minmax(0, 2fr) minmax(300px, 1fr);
+            gap: 24px;
+        }
+
+        /* Cards */
+        .card {
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+            padding: 24px;
+            border: 1px solid #f1f5f9;
+            margin-bottom: 24px;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .card-header h3 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        /* Specific Card Accents */
+        .card.general {
+            border-left: 4px solid #0b57c6;
+        }
+
+        .card.technical {
+            border-left: 4px solid #16a34a;
+        }
+
+        .card.administrative {
+            border-left: 4px solid #dc2626;
+        }
+
+        .icon-box {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: white;
+        }
+
+        .icon-blue {
+            background-color: #0b57c6;
+        }
+
+        .icon-green {
+            background-color: #16a34a;
+        }
+
+        .icon-red {
+            background-color: #dc2626;
+        }
+
+        /* Forms */
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-row.full {
+            grid-template-columns: 1fr;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            background-color: #f1f5f9;
+            border: 1px solid transparent;
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            color: #334155;
+            transition: all 0.2s;
+            box-sizing: border-box;
+            appearance: none;
+            /* remove default arrow */
+        }
+
+        select.form-control {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+            background-size: 14px;
+            padding-right: 40px;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #cbd5e1;
+            background-color: #e2e8f0;
+        }
+
+        .form-control::placeholder {
+            color: #94a3b8;
+        }
+
+        /* Upload Box */
+        .upload-box {
+            border: 2px dashed #cbd5e1;
+            border-radius: 12px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .upload-box:hover {
+            border-color: #94a3b8;
+            background-color: #f1f5f9;
+        }
+
+        .upload-box i {
+            font-size: 24px;
+            color: #64748b;
+            margin-bottom: 8px;
+        }
+
+        .upload-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #334155;
+        }
+
+        .upload-subtitle {
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+        /* Status Konfirmasi Card */
+        .status-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-top: 0;
+            margin-bottom: 8px;
+        }
+
+        .status-desc {
+            font-size: 12px;
+            color: #64748b;
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .btn-primary {
+            background-color: #0b57c6;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #09459e;
+        }
+
+        .btn-cancel {
+            background-color: #e2e8f0;
+            color: #b91c1c;
+        }
+
+        .btn-cancel:hover {
+            background-color: #cbd5e1;
+        }
+
+        .sec-note {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background-color: #f0fdf4;
+            padding: 10px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            color: #16a34a;
+            border: 1px solid #bbf7d0;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="dashboard-wrapper">
+        <!-- Load Sidebar from Components -->
+        {% include 'it/components/sidebar.html' with active_page='manajemen_laptop' %}
+
+        <!-- Main Dashboard Content -->
+        <div class="main-dashboard-content">
+
+            <h1 class="page-title">Tambah Laptop Baru</h1>
+            <p class="page-subtitle">Silakan lengkapi formulir di bawah ini untuk menambahkan aset perangkat keras baru
+                ke dalam sistem inventaris digital Prism Logic.</p>
+
+            <form action="{% url 'inventori:tambahlaptop_it' %}" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="grid-container">
+
+                    <!-- Left Column -->
+                    <div class="left-col">
+
+                        <!-- General Information -->
+                        <div class="card general">
+                            <div class="card-header">
+                                <div class="icon-box icon-blue">
+                                    <i class="fa-solid fa-info"></i>
+                                </div>
+                                <h3>General Information</h3>
+                            </div>
+
+                            <div class="form-row full">
+                                <div class="form-group">
+                                    <label>Laptop Name</label>
+                                    <input type="text" class="form-control" name="nama_laptop"
+                                        placeholder="Contoh: MacBook Pro 14 M3 Max">
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Brand</label>
+                                    <select class="form-control" name="brand">
+                                        <option value="" disabled selected>Pilih Brand</option>
+                                        <option value="Apple">Apple</option>
+                                        <option value="Lenovo">Lenovo</option>
+                                        <option value="Dell">Dell</option>
+                                        <option value="HP">HP</option>
+                                        <option value="Asus">Asus</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Serial Number</label>
+                                    <input type="text" class="form-control" name="serial_number"
+                                        placeholder="SN-XXXX-XXXX-XXXX">
+                                </div>
+                            </div>
+                        </div> <!-- End Card -->
+
+                        <!-- Technical Specifications -->
+                        <div class="card technical">
+                            <div class="card-header">
+                                <div class="icon-box icon-green">
+                                    <i class="fa-solid fa-microchip"></i>
+                                </div>
+                                <h3>Technical Specifications</h3>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Processor</label>
+                                    <select class="form-control" name="id_processor">
+                                        <option value="" disabled selected>Pilih Processor</option>
+                                        {% for proc in processors %}
+                                        <option value="{{ proc.id_processor }}">{{ proc.nama_processor }} ({{
+                                            proc.manufacturer }})</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>RAM</label>
+                                    <select class="form-control" name="id_ram">
+                                        <option value="" disabled selected>Pilih RAM</option>
+                                        {% for ram in rams %}
+                                        <option value="{{ ram.id_ram }}">{{ ram.kapasitas_gb }} GB {{ ram.tipe }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Storage</label>
+                                    <select class="form-control" name="id_storage">
+                                        <option value="" disabled selected>Pilih Kapasitas</option>
+                                        {% for storage in storages %}
+                                        <option value="{{ storage.id_storage }}">{{ storage.kapasitas_gb }} GB {{
+                                            storage.tipe }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Screen Size</label>
+                                    <input type="text" class="form-control" name="ukuran_layar"
+                                        placeholder="Misal: 14-inch Liquid Retina XDR">
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Battery Capacity (mAH)</label>
+                                    <input type="text" class="form-control" name="battery_capacity"
+                                        placeholder="Misal: 3000 mAH">
+                                </div>
+                                <div class="form-group">
+                                    <label>Weight (Kg)</label>
+                                    <input type="text" class="form-control" name="weight" placeholder="Misal: 1.6 Kg">
+                                </div>
+                            </div>
+                        </div> <!-- End Card -->
+
+                        <!-- Administrative -->
+                        <div class="card administrative">
+                            <div class="card-header">
+                                <div class="icon-box icon-red">
+                                    <i class="fa-solid fa-shield-halved"></i>
+                                </div>
+                                <h3>Administrative</h3>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Department</label>
+                                    <select class="form-control" name="department">
+                                        <option value="" disabled selected>Pilih Departemen</option>
+                                        <option value="IT">IT</option>
+                                        <option value="HR">HR</option>
+                                        <option value="Finance">Finance</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Initial Status</label>
+                                    <select class="form-control" name="status">
+                                        <option value="tersedia" selected>Available</option>
+                                        <option value="dipinjam">Dipinjam</option>
+                                        <option value="rusak">Rusak</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Purchase Date</label>
+                                    <input type="date" class="form-control" name="purchase_date"
+                                        style="color: #64748b;">
+                                </div>
+                                <div class="form-group">
+                                    <label>Warranty Expiry</label>
+                                    <input type="date" class="form-control" name="warranty_expiry"
+                                        style="color: #64748b;">
+                                </div>
+                            </div>
+                        </div> <!-- End Card -->
+
+                    </div> <!-- End Left Column -->
+
+                    <!-- Right Column -->
+                    <div class="right-col">
+
+                        <!-- Laptop Photo -->
+                        <div class="card">
+                            <h4 class="status-title" style="margin-bottom: 12px;">Laptop Photo</h4>
+                            <label for="file-upload" class="upload-box">
+                                <i class="fa-solid fa-camera"></i>
+                                <span class="upload-title">Klik untuk Unggah Foto</span>
+                                <span class="upload-subtitle">PNG, JPG up to 5MB</span>
+                            </label>
+                            <input id="file-upload" type="file" name="laptop_photo" accept=".png, .jpg, .jpeg"
+                                style="display: none;">
+                        </div>
+
+                        <!-- Status Konfirmasi -->
+                        <div class="card" style="border-top: 4px solid #0b57c6;">
+                            <h4 class="status-title">Status Konfirmasi</h4>
+                            <p class="status-desc">Pastikan semua data spesifikasi teknis sudah sesuai dengan unit
+                                fisik.</p>
+
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa-solid fa-lock"></i> Simpan Data
+                            </button>
+                            <a href="{% url 'manajemen_laptop' %}" class="btn btn-cancel"
+                                style="text-decoration: none;">
+                                <i class="fa-solid fa-xmark"></i> Batal
+                            </a>
+
+                                <div class="sec-note">
+                                    <i class="fa-solid fa-shield-check" style="color: #16a34a;"></i>
+                                    Enkripsi data inventaris aktif
+                                </div>
+                        </div>
+
+                    </div> <!-- End Right Column -->
+
+                </div>
+            </form>
+
+        </div> <!-- End Main Content -->
+    </div> <!-- End Wrapper -->
+
+</body>
+
+</html>

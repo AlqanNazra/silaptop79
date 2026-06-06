@@ -15,6 +15,7 @@ from core.views import (
     editdatalaptop_hc_view,
     detailrekomendasi_hc_view,
     detailrekomendasiscrapping_hc_view,
+    notifikasi_hc_view,
 
     # IT Views
     dashboard_it_view,
@@ -29,21 +30,14 @@ from core.views import (
     editdatalaptop_it_view,
     detailrekomendasi_it_view,
     detailrekomendasiscrapping_it_view,
+    notifikasi_it_view,
 
     # Talent Views
     dashboard_talent_view,
-    manajemenlaptop_talent_view,
     pengajuanlaptop_talent_view,
-    detailpengajuan_talent_view,
-    tambahlaptop_talent_view,
-    inputkriteria_talent_view,
-    hasilrekomendasi_talent_view,
     detaillaptop_talent_view,
     riwayatpeminjamanlaptop_talent_view,
     pengembalianlaptop_talent_view,
-    editdatalaptop_talent_view,
-    detailrekomendasi_talent_view,
-    detailrekomendasiscrapping_talent_view,
 )
 from core.views import home_view, dashboard_hc_view, inputkriteria_hc_view, hasilrekomendasi_hc_view,pengajuanlaptop_hc_view
 from inventori.views import laptop_dashboard,tambahlaptop_hc_view
@@ -53,8 +47,8 @@ urlpatterns = [
     path('dss/', include('dss.urls')),
     path('inventori/', include('inventori.urls')),
     
-    # Authentication
-    path('login/', auth_views.LoginView.as_view(template_name='auth/login.html'), name='login'),
+    # Authentication (login sementara dinonaktifkan)
+    # path('login/', auth_views.LoginView.as_view(template_name='auth/login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
 
     # Landing Page (Directly to HC Dashboard as requested)
@@ -75,6 +69,7 @@ urlpatterns = [
     path('hc/hasil-rekomendasi/', hasilrekomendasi_hc_view, name='hasilrekomendasi_hc'),
     path('hc/detail-rekomendasi/', detailrekomendasi_hc_view, name='detailrekomendasi_hc'),
     path('hc/detail-scrapping/', detailrekomendasiscrapping_hc_view, name='detailrekomendasiscrapping_hc'),
+    path('hc/notifikasi/', notifikasi_hc_view, name='notifikasi_hc'),
 
     # ==========================================
     # INFORMATION TECHNOLOGY (IT) ROUTES
@@ -91,15 +86,13 @@ urlpatterns = [
     path('it/hasil-rekomendasi/', hasilrekomendasi_it_view, name='hasilrekomendasi_it'),
     path('it/detail-rekomendasi/', detailrekomendasi_it_view, name='detailrekomendasi_it'),
     path('it/detail-scrapping/', detailrekomendasiscrapping_it_view, name='detailrekomendasiscrapping_it'),
+    path('it/notifikasi/', notifikasi_it_view, name='notifikasi_it'),
 
     # ==========================================
     # TALENT ROUTES
     # ==========================================
     path('talent/', dashboard_talent_view, name='dashboard_talent'),
-    path('talent/manajemen-laptop/', manajemenlaptop_talent_view, name='manajemen_laptop_talent'),
     path('talent/pengajuan-laptop/', pengajuanlaptop_talent_view, name='pengajuanlaptop_talent'),
-    path('talent/detail-pengajuan/', detailpengajuan_talent_view, name='detailpengajuan_talent'),
-    path('talent/tambah-laptop/', tambahlaptop_talent_view, name='tambahlaptop_talent'),
     path('talent/detail-laptop/', detaillaptop_talent_view, name='detaillaptop_talent'),
     path('talent/riwayat-peminjaman/', riwayatpeminjamanlaptop_talent_view, name='riwayatpeminjamanlaptop_talent'),
     path('talent/pengembalian/', pengembalianlaptop_talent_view, name='pengembalianlaptop_talent'),

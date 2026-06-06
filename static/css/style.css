@@ -315,6 +315,12 @@ a {
     color: var(--dark);
 }
 
+.logo-img {
+    height: 32px;
+    width: auto;
+    object-fit: contain;
+}
+
 .sidebar-menu {
     padding: 1.5rem;
     flex: 1;

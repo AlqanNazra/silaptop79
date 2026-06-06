@@ -1,0 +1,303 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - IT Administrator</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1.1">
+
+    <style>
+        /* Base and Layout Styles */
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            min-height: 100vh;
+            background-color: #F8FAFC;
+        }
+
+        .dashboard-wrapper {
+            display: flex;
+            width: 100%;
+        }
+
+        .sidebar {
+            flex-shrink: 0;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.03);
+            background-color: #FFFFFF;
+        }
+
+        .main-dashboard-content {
+            flex: 1;
+            margin-left: 260px; /* Adjust based on actual sidebar width if needed */
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Content Padding Wrapper */
+        .content-padding {
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* Hero Card */
+        .hero-card {
+            background-color: #0F172A;
+            border-radius: 20px;
+            padding: 48px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            color: #FFFFFF;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 15px -3px rgba(15, 23, 42, 0.1);
+        }
+
+        .hero-text {
+            max-width: 60%;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-text h2 {
+            margin: 0;
+            font-size: 36px;
+            font-weight: 800;
+            line-height: 1.2;
+            letter-spacing: -0.5px;
+        }
+
+        .hero-text h2 .highlight {
+            color: #3B82F6;
+        }
+
+        .hero-text p {
+            margin: 20px 0 32px 0;
+            font-size: 15px;
+            color: #94A3B8;
+            line-height: 1.6;
+        }
+
+        .btn-hero {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background-color: #0284C7;
+            color: #FFFFFF;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .btn-hero:hover {
+            background-color: #0369A1;
+        }
+
+        /* Stats Row (Cards) */
+        .stats-container {
+            display: flex;
+            gap: 24px;
+        }
+
+        .action-card {
+            background-color: #0F172A;
+            border-radius: 16px;
+            padding: 40px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+        }
+
+        /* Subtle gradient background effect */
+        .action-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(circle at center, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 1) 100%);
+            z-index: 1;
+        }
+
+        .action-card-content {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .icon-box {
+            background-color: rgba(15, 23, 42, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 16px 32px;
+            border-radius: 12px;
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+
+        .icon-box svg {
+            color: #3B82F6;
+        }
+
+        .icon-box span {
+            font-size: 10px;
+            font-weight: 700;
+            color: #3B82F6;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .action-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #FFFFFF;
+            margin: 0 0 24px 0;
+        }
+
+        .btn-action-full {
+            display: inline-flex;
+            width: 100%;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background-color: #0284C7;
+            color: #FFFFFF;
+            padding: 14px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s;
+            box-sizing: border-box;
+        }
+
+        .btn-action-full:hover {
+            background-color: #0369A1;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="dashboard-wrapper">
+        <!-- Load Sidebar with Dashboard Active -->
+        {% include 'it/components/sidebar.html' with active_page='dashboard' %}
+
+        <!-- Main Dashboard Content -->
+        <div class="main-dashboard-content">
+            
+            <!-- Content Area -->
+            <div class="content-padding">
+
+                <!-- Hero Section -->
+                <div class="hero-card">
+                    <div class="hero-text">
+                        <h2>Temukan Laptop Ideal<br>Secara <span class="highlight">Presisi.</span></h2>
+                        <p>Gunakan teknologi SAW (Simple Additive Weighting) untuk<br>memproses ribuan data kriteria menjadi keputusan yang akurat dan<br>objektif.</p>
+                        <a href="{% url 'hasilrekomendasi_it' %}" class="btn-hero">
+                            Mulai Rekomendasi
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                                <polyline points="12 5 19 12 12 19"></polyline>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Action Cards Section -->
+                <div class="stats-container">
+                    
+                    <!-- Data Spek Card -->
+                    <div class="action-card">
+                        <div class="action-card-content">
+                            <div class="icon-box">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect>
+                                    <rect x="9" y="9" width="6" height="6"></rect>
+                                    <line x1="9" y1="1" x2="9" y2="4"></line>
+                                    <line x1="15" y1="1" x2="15" y2="4"></line>
+                                    <line x1="9" y1="20" x2="9" y2="23"></line>
+                                    <line x1="15" y1="20" x2="15" y2="23"></line>
+                                    <line x1="20" y1="9" x2="23" y2="9"></line>
+                                    <line x1="20" y1="14" x2="23" y2="14"></line>
+                                    <line x1="1" y1="9" x2="4" y2="9"></line>
+                                    <line x1="1" y1="14" x2="4" y2="14"></line>
+                                </svg>
+                                <span>DIAJUKAN</span>
+                            </div>
+                            <h3 class="action-title">Data Spek</h3>
+                            <a href="{% url 'manajemen_laptop_it' %}" class="btn-action-full">
+                                Tambah Data Spek
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                    <polyline points="12 5 19 12 12 19"></polyline>
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Tambah Kriteria Card -->
+                    <div class="action-card">
+                        <div class="action-card-content">
+                            <div class="icon-box">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="4" y1="21" x2="4" y2="14"></line>
+                                    <line x1="4" y1="10" x2="4" y2="3"></line>
+                                    <line x1="12" y1="21" x2="12" y2="12"></line>
+                                    <line x1="12" y1="8" x2="12" y2="3"></line>
+                                    <line x1="20" y1="21" x2="20" y2="16"></line>
+                                    <line x1="20" y1="12" x2="20" y2="3"></line>
+                                    <line x1="1" y1="14" x2="7" y2="14"></line>
+                                    <line x1="9" y1="8" x2="15" y2="8"></line>
+                                    <line x1="17" y1="16" x2="23" y2="16"></line>
+                                </svg>
+                                <span>DIAJUKAN</span>
+                            </div>
+                            <h3 class="action-title">Tambah Kriteria</h3>
+                            <a href="{% url 'inputkriteria_it' %}" class="btn-action-full">
+                                Tambah Kriteria
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                    <polyline points="12 5 19 12 12 19"></polyline>
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div> <!-- End Content Padding -->
+        </div> <!-- End Main Content -->
+    </div> <!-- End Wrapper -->
+
+</body>
+</html>
