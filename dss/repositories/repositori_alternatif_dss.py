@@ -2,6 +2,8 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 from dss.dto.dto_alternatif_dss import AlternatifDssDTO
 from interface.interface_alternatif_dss import IAlternatifDss
+from .dto.dto_alternatif_dss import AlternatifDssDTO
+from .interface.interface_alternatif_dss import IAlternatifDss
 
 
 class AlternatifDssRepository(IAlternatifDss):

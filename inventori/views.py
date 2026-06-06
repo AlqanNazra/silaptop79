@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.contrib import messages
+from django.shortcuts import render
 
 from inventori.models import LaptopInventori, Processor, RAM, Storage
 from inventori.dto.dto_processor import ProcessorDTO
@@ -24,6 +25,8 @@ from inventori.services.service_peminjaman import PeminjamanService
 from inventori.repositories.dto.dto_pengajuan import PengajuanDTO
 from inventori.repositories.dto.dto_peminjaman import PeminjamanDTO
 
+from inventori.services.service_ram import RamService
+from inventori.services.service_storage import StorageService
 # =============================================
 # HELPER: Response standar (JSON)
 # =============================================
@@ -417,4 +420,167 @@ def list_peminjaman_view(request):
             return JsonResponse({"data": [d.__dict__ for d in data]})
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)
+<<<<<<< HEAD
     return JsonResponse({"error": "Method not allowed"}, status=405)
+=======
+
+    return JsonResponse({"error": "Method not allowed"}, status=405)
+
+def detail_peminjaman_view(request, id_peminjaman):
+    if request.method == "GET":
+        try:
+            service = PeminjamanService()
+            data = service.cari_peminjaman(id_peminjaman)
+
+            if not data:
+                return JsonResponse({"error": "Data tidak ditemukan"}, status=404)
+
+            return JsonResponse(data.__dict__)
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+
+    return JsonResponse({"error": "Method not allowed"}, status=405)
+
+@csrf_exempt
+def update_peminjaman_view(request):
+    if request.method == "PUT":
+        try:
+            body = json.loads(request.body)
+            
+            dto = PeminjamanDTO(
+                id_peminjaman=body.get("id_peminjaman"),
+                tanggal_pinjam=body.get("tanggal_pinjam"),
+                tanggal_kembali=body.get("tanggal_kembali"),
+                status=body.get("status"),
+                keterangan=body.get("keterangan")
+            )
+            
+            service = PeminjamanService()
+            result = service.update_pengajuan(dto)
+            
+            return JsonResponse({"message": result})
+        except Exception as e:  
+            return JsonResponse({"error": str(e)}, status=500)
+
+    return JsonResponse({"error": "Method not allowed"}, status=405)
+
+@csrf_exempt
+def hapus_peminjaman_view(request, id_peminjaman):
+    if request.method == "DELETE":
+        try:
+            service = PeminjamanService()
+            result = service.hapus_peminjaman(id_peminjaman)
+            
+            return JsonResponse({"message": result})
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+
+    return JsonResponse({"error": "Method not allowed"}, status=405)
+
+@csrf_exempt
+def pinjam_laptop_view(request):
+    if request.method == "POST":
+        try:
+            body = json.loads(request.body)
+
+            dto = PeminjamanDTO(
+                id_user=body.get("id_user"),
+                id_laptop_inventori=body.get("id_laptop_inventori"),
+                id_pengajuan=body.get("id_pengajuan"),
+                tanggal_pinjam=body.get("tanggal_pinjam"),
+                tanggal_kembali=body.get("tanggal_kembali"),
+                keterangan=body.get("keterangan")
+            )
+
+            service = PeminjamanService()
+            result = service.pinjam_laptop(dto)
+
+            return JsonResponse({"message": result})
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+
+@csrf_exempt
+def pengembalian_laptop_view(request):
+    if request.method == "POST":
+        try:
+            body = json.loads(request.body)
+
+            dto = PeminjamanDTO(
+                id_peminjaman=body.get("id_peminjaman"),
+                lokasi=body.get("lokasi"),
+                keterangan=body.get("keterangan")
+            )
+
+            service = PeminjamanService()
+            result = service.pengembalian_laptop(dto)
+
+            return JsonResponse({"message": result})
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+
+def sync_status_laptop_view(request):
+    if request.method == "POST":
+        try:
+            service = PeminjamanService()
+            result = service.sync_status_laptop()
+
+            return JsonResponse({"message": result})
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+        
+def laptop_by_lokasi_view(request):
+    if request.method == "GET":
+        try:
+            service = PeminjamanService()
+            data = service.ambil_laptop_by_lokasi()
+
+            return JsonResponse({"data": data})
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+        
+def laptop_dashboard(request):
+    service = ReadLaptopInventoriService()
+    data = service.ambil_semua()
+
+    data_list = [dict(row) for row in data] if data else []
+
+    # NORMALISASI DATA (anti error)
+    for row in data_list:
+        row["status"] = (row.get("status") or "").lower()
+        row["nama_laptop"] = row.get("nama_laptop") or "-"
+        row["model"] = row.get("model") or "-"
+        row["no_inventori"] = row.get("no_inventori") or "-"
+
+    return render(request, "dashboard/laptop_dashboard.html", {
+        "laptops": data_list
+    })
+
+def tambahlaptop_hc_view(request):
+    service_storage = StorageService()
+    service_ram = RamService()
+    service_processor = ReadProcessorService()
+
+    data_storage = service_storage.service_ambil_storage()
+    data_ram = service_ram.service_ambil_ram()
+    data_processor = service_processor.ambil_processor()
+
+    for row in data_processor:
+        row["display"] = f"{row.get('nama_processor','-')}"
+
+    for row in data_ram:
+        row["display"] = f"{row.get('kapasitas_gb','-')} GB {row.get('tipe','-')}"
+
+    for row in data_storage:
+        row["display"] = f"{row.get('kapasitas_gb','-')} GB {row.get('tipe','-')}"
+
+    return render(request, "inventori/tambahlaptop_hc.html", {
+        "processor": data_processor,
+        "ram": data_ram,
+        "storage": data_storage
+    })
+>>>>>>> origin/dev-alqan

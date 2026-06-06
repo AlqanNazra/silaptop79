@@ -2,6 +2,8 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 from dss.dto.dto_detail_hasil_saw import DetailHasilSawDTO
 from interface.interface_detail_hasil_saw import IDetailHasilSawImpl
+from .dto.dto_detail_hasil_saw import DetailHasilSawDTO
+from .interface.interface_detail_hasil_saw import IDetailHasilSawImpl
 
 
 class DetailHasilSawRepository(IDetailHasilSawImpl):

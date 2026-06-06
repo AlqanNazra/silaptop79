@@ -353,9 +353,11 @@
                                     <label>Processor</label>
                                     <select class="form-control" name="id_processor">
                                         <option value="" disabled selected>Pilih Processor</option>
-                                        {% for proc in processors %}
-                                        <option value="{{ proc.id_processor }}">{{ proc.nama_processor }} ({{
-                                            proc.manufacturer }})</option>
+
+                                        {% for p in processor %}
+                                        <option value="{{ p.id_processor }}">
+                                            {{ p.display }}
+                                        </option>
                                         {% endfor %}
                                     </select>
                                 </div>
@@ -363,8 +365,10 @@
                                     <label>RAM</label>
                                     <select class="form-control" name="id_ram">
                                         <option value="" disabled selected>Pilih RAM</option>
-                                        {% for ram in rams %}
-                                        <option value="{{ ram.id_ram }}">{{ ram.kapasitas_gb }} GB {{ ram.tipe }}
+
+                                        {% for r in ram %}
+                                        <option value="{{ r.id_ram }}">
+                                            {{ r.display }}
                                         </option>
                                         {% endfor %}
                                     </select>
@@ -376,9 +380,11 @@
                                     <label>Storage</label>
                                     <select class="form-control" name="id_storage">
                                         <option value="" disabled selected>Pilih Kapasitas</option>
-                                        {% for storage in storages %}
-                                        <option value="{{ storage.id_storage }}">{{ storage.kapasitas_gb }} GB {{
-                                            storage.tipe }}</option>
+
+                                        {% for s in storage %}
+                                        <option value="{{ s.id_storage }}">
+                                            {{ s.display }}
+                                        </option>
                                         {% endfor %}
                                     </select>
                                 </div>
@@ -476,10 +482,10 @@
                                 <i class="fa-solid fa-xmark"></i> Batal
                             </a>
 
-                                <div class="sec-note">
-                                    <i class="fa-solid fa-shield-check" style="color: #16a34a;"></i>
-                                    Enkripsi data inventaris aktif
-                                </div>
+                            <div class="sec-note">
+                                <i class="fa-solid fa-shield-check" style="color: #16a34a;"></i>
+                                Enkripsi data inventaris aktif
+                            </div>
                         </div>
 
                     </div> <!-- End Right Column -->

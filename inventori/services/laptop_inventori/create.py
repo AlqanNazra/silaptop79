@@ -1,4 +1,4 @@
-from core.db import get_connection
+from db import get_connection
 from inventori.repositories.repositori_laptop_inventori import LaptopInventoriRepository
 
 class CreateLaptopInventoriService:

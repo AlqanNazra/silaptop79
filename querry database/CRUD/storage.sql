@@ -22,7 +22,7 @@ $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION ambil_storage()
 RETURNS TABLE (
-    id_storage BIGINT,
+    id_storage VARCHAR,
     kapasitas_gb INT,
     tipe VARCHAR
 )

@@ -15,7 +15,7 @@ class KriteriaRepository(IKriteriaRepositoryImpl):
     def tambah_kriteria(self, data: KriteriaDTO):
         print("➡️ QUERY TAMBAH KRITERIA DTO")
 
-        query = "SELECT tambah_kriteria(%s, %s, %s);"
+        query = "SELECT tambah_kriteria(%s, %s, %s,%s);"
 
         with self.conn.cursor() as cur:
             cur.execute(query, (

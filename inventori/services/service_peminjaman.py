@@ -1,10 +1,10 @@
-from core.db import get_connection
+from db import get_connection
 from inventori.repositories.repositori_peminjaman import PeminjamanRepository
 from inventori.repositories.dto.dto_peminjaman import PeminjamanDTO
 
 class PeminjamanService:
     
-    def tambah_peminjaman(self, dto: PeminjamanDTO):
+    def service_tambah_peminjaman(self, dto: PeminjamanDTO):
         conn = get_connection()
         try:
             repo = PeminjamanRepository(conn)
@@ -17,7 +17,7 @@ class PeminjamanService:
         finally:
             conn.close()
             
-    def hapus_peminjaman(self, id_peminjaman):
+    def service_hapus_peminjaman(self, id_peminjaman):
         conn = get_connection()
         try:
             repo = PeminjamanRepository(conn)
@@ -30,7 +30,7 @@ class PeminjamanService:
         finally:
             conn.close()
             
-    def ambil_semua_peminjaamn(self):
+    def service_ambil_semua_peminjaamn(self):
         conn = get_connection()
         try:
             repo = PeminjamanRepository(conn)
@@ -39,7 +39,7 @@ class PeminjamanService:
         finally:
             conn.close()
             
-    def cari_peminjaman(self,id_peminjaman):
+    def service_cari_peminjaman(self,id_peminjaman):
         conn = get_connection()
         try:
             repo = PeminjamanRepository(conn)
@@ -48,7 +48,7 @@ class PeminjamanService:
         finally:
             conn.close()
             
-    def ambil_laptop_by_lokasi(self):
+    def service_ambil_laptop_by_lokasi(self):
         conn = get_connection()
         try:
             repo = PeminjamanRepository(conn)
@@ -57,7 +57,7 @@ class PeminjamanService:
         finally:
             conn.close()
 
-    def update_peminjaman(self, dto: PeminjamanDTO):
+    def service_update_peminjaman(self, dto: PeminjamanDTO):
         conn = get_connection()
         try:
             repo = PeminjamanRepository(conn)
@@ -70,7 +70,7 @@ class PeminjamanService:
         finally:
             conn.close()
             
-    def pinjam_laptop(self, dto: PeminjamanDTO):
+    def service_pinjam_laptop(self, dto: PeminjamanDTO):
         conn = get_connection()
         try:
             repo = PeminjamanRepository(conn)
@@ -83,7 +83,7 @@ class PeminjamanService:
         finally:
             conn.close()
 
-    def pengembalian_laptop(self, dto: PeminjamanDTO):
+    def service_pengembalian_laptop(self, dto: PeminjamanDTO):
         conn = get_connection()
         try:
             repo = PeminjamanRepository(conn)
@@ -96,7 +96,7 @@ class PeminjamanService:
         finally:
             conn.close()
     
-    def sync_status_laptop(self):
+    def service_sync_status_laptop(self):
         conn = get_connection()
         try:
             repo = PeminjamanRepository(conn)

@@ -1,6 +1,8 @@
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from inventori.dto.dto_pengajuan import PengajuanDTO
+from .dto.dto_pengajuan import PengajuanDTO
+from .interfaces.interface_pengajuan import IPengajuanRepository
 
 
 class PengajuanRepository:

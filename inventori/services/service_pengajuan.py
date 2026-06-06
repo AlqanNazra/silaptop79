@@ -1,10 +1,11 @@
-from core.db import get_connection
+from db import get_connection
 from inventori.repositories.repositori_pengajuan import PengajuanRepository
+from inventori.repositories.repositori_peminjaman import PeminjamanRepository
 from inventori.repositories.dto.dto_pengajuan import PengajuanDTO
 
 class PengajuanService:
     
-    def tambah_peminjaman(self, dto: PengajuanDTO):
+    def service_tambah_peminjaman(self, dto: PengajuanDTO):
         conn = get_connection()
         try:
             repo = PengajuanRepository(conn)
@@ -17,7 +18,7 @@ class PengajuanService:
         finally:
             conn.close()
             
-    def hapus_pengajuan(self, id_pengajuan):
+    def service_hapus_pengajuan(self, id_pengajuan):
         conn = get_connection()
         try:
             repo = PengajuanRepository(conn)
@@ -30,7 +31,7 @@ class PengajuanService:
         finally:
             conn.close()
 
-    def ambil_semua_pengajuan(self):
+    def service_ambil_semua_pengajuan(self):
         conn = get_connection()
         try:
             repo = PengajuanRepository(conn)
@@ -39,7 +40,7 @@ class PengajuanService:
         finally:
             conn.close()
     
-    def cari_pengajuan_by_id(self, id_pengajuan):
+    def service_cari_pengajuan_by_id(self, id_pengajuan):
         conn = get_connection()
         try:
             repo = PengajuanRepository(conn)
@@ -48,7 +49,7 @@ class PengajuanService:
         finally:
             conn.close()
             
-    def approve_pengajuan(self, dto: PengajuanDTO):
+    def service_approve_pengajuan(self, dto: PengajuanDTO):
         conn = get_connection()
         try:
             repo = PengajuanRepository(conn)
@@ -61,7 +62,7 @@ class PengajuanService:
         finally:
             conn.close()
             
-    def approve_dan_pinjam(self, dto_pengajuan, dto_peminjaman):
+    def service_approve_dan_pinjam(self, dto_pengajuan, dto_peminjaman):
         conn = get_connection()
         try:
             pengajuan_repo = PengajuanRepository(conn)

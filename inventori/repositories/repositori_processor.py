@@ -1,5 +1,5 @@
-from inventori.repositories.interface_processor import IProcessorRepository
-
+from inventori.repositories.interfaces.interface_processor import IProcessorRepository
+from psycopg2.extras import RealDictCursor
 class ProcessorRepository(IProcessorRepository):
     def __init__(self, connection):
         self.conn = connection
@@ -13,7 +13,7 @@ class ProcessorRepository(IProcessorRepository):
             return cur.fetchone()['tambah_processor']
 
     def ambil_processor(self):
-        with self.conn.cursor() as cur:
+        with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute("SELECT * FROM ambil_processor()")
             return cur.fetchall()
 

@@ -1,6 +1,8 @@
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from inventori.dto.dto_peminjaman import PeminjamanDTO
+from .dto.dto_peminjaman import PeminjamanDTO
+from .interfaces.interface_peminjaman import IPeminjamanRepository
 
 
 class PeminjamanRepository:

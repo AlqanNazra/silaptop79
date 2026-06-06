@@ -1,8 +1,21 @@
+from datetime import datetime
+
 from dss.services.service_swara import ServiceSwara
 from dss.services.service_preposesdata import Servicepreposesdata
 
 from dss.repositories.repositori_kriteria import KriteriaRepository
 from dss.repositories.repositori_bobot_kriteria import BobotKriteriaRepository
+
+from dss.repositories.repositori_dss_proses import DssprossesRepository
+from dss.repositories.dto.dto_dss_proses import DssProsesDTO
+from dss.repositories.repositori_alternatif_dss import AlternatifDssRepository
+from dss.repositories.dto.dto_alternatif_dss import AlternatifDssDTO
+from dss.repositories.repositori_laptop_altenatif import LaptopAlternatifRepository
+from dss.repositories.dto.dto_laptop_alternatif import LaptopAlternatifDTO
+from dss.repositories.repositori_hasil_saw import HasilSawRepository
+from dss.repositories.dto.dto_hasil_saw import HasilSAWDTO
+from dss.repositories.repositori_detail_hasil_saw import DetailHasilSawRepository
+from dss.repositories.dto.dto_detail_hasil_saw import DetailHasilSawDTO
 
 from inventori.repositories.repositori_laptop_inventori import LaptopInventoriRepository
 from dss.repositories.repositori_laptop_pengadaan import LaptopPengadaanRepository
@@ -13,7 +26,11 @@ class Servicesaw:
         self.conn = conn
         self.servisBK = ServiceSwara(conn)
         self.servisPD = Servicepreposesdata(conn)
-
+        self.repodssprosses = DssprossesRepository(conn)
+        self.repoalternatifdss = AlternatifDssRepository (conn)
+        self.repolaptopalternatif = LaptopAlternatifRepository (conn)
+        self.repohasilsaw = HasilSawRepository (conn)
+        self.repodetailhasilsaw = DetailHasilSawRepository (conn)
         self.repoK = KriteriaRepository(conn)
         self.repoBK = BobotKriteriaRepository(conn)
         self.repoInventori = LaptopInventoriRepository(conn)
@@ -124,48 +141,121 @@ class Servicesaw:
             reverse=True
         )
     
-    def proses_dss_saw(self,sumber_data,filter_data,role: list,debug=False):
-        try:
-            hasil_filter = self.servisPD.filtering_data(sumber_data,filter_data)
-            if hasil_filter["status"] != "success":
-                return hasil_filter
+    def simpan_alternatif_awal(self, data_raw, id_dss, sumber_data):
+        list_alternatif = []
 
+        for item in data_raw:
+            id_alt = self.repoalternatifdss.tambah_alternatif_dss(
+                AlternatifDssDTO(
+                    id_dss=id_dss,
+                    id_laptop_inventori=item.get("id_laptop_inventori"),
+                    id_laptop_pengadaan=item.get("id_laptop_pengadaan"),
+                    sumber_data=sumber_data
+                )
+            )
+
+            item["id"] = id_alt
+            list_alternatif.append(item)
+
+        return list_alternatif
+    
+    def proses_saw_pipeline(self, list_alternatif, role):
+        data_pre = self.servisPD.preprocessing(list_alternatif)
+        data_normalisasi = self.normalisasi_saw(data_pre)
+        hasil_saw = self.hitung_saw_data(data_normalisasi, role)
+        ranking = self.ranking_saw(hasil_saw)
+
+        for i, item in enumerate(ranking, start=1):
+            item["rank"] = i
+
+        return {
+            "preprocessing": data_pre,
+            "normalisasi": data_normalisasi,
+            "hasil_saw": hasil_saw,
+            "ranking": ranking
+        }
+        
+    def simpan_hasil_saw(self, id_dss, ranking):
+        id_hasil = self.repohasilsaw.buat_hasil_saw(
+            HasilSAWDTO(id_dss=id_dss)
+        )
+
+        for item in ranking:
+            self.repodetailhasilsaw.tambah_detail_hasil_saw(
+                DetailHasilSawDTO(
+                    id_hasil=id_hasil,
+                    nilai_normalisasi=item.get("normalisasi"),
+                    nilai_rangking=item.get("skor"),  
+                    rangking=item.get("rank")
+                )
+            )
+
+        return id_hasil
+    
+    def simpan_laptop_terpilih(self, ranking, id_dss, top_n=10):
+        selected = ranking[:top_n]
+
+        for item in selected:
+            data = None
+            if "id_laptop_inventori" in item:
+                data = self.repoInventori.ambil_by_id(item["id_laptop_inventori"])
+            elif "id_laptop_pengadaan" in item:
+                data = self.repoPengadaan.ambil_by_id(item["id_laptop_pengadaan"])
+            if not data:
+                continue
+            self.repolaptopalternatif.tambah_laptop_alternatif(
+                LaptopAlternatifDTO(
+                    model_alternatif=data.get("model") or data.get("model_pengadaan"),
+                    brand_alternatif=data.get("brand") or data.get("brand_pengadaan"),
+                    id_dss=id_dss
+                )
+            )
+
+    def proses_dss_saw(self, id_user, id_bobot, sumber_data, filter_data, role: list, debug=False):
+        conn = self.conn
+
+        try:
+            conn.autocommit = False      
+            id_dss = self.repodssprosses.tambah_dss_proses(
+                DssProsesDTO(
+                    id_user=id_user,
+                    id_bobot=id_bobot,
+                    role_dss=",".join(role),
+                    jenis_dss="SAW",
+                    create_at=datetime.now()
+                )
+            )
+
+            hasil_filter = self.servisPD.filtering_data(sumber_data, filter_data)
+            if hasil_filter["status"] != "success":
+                conn.rollback()
+                return hasil_filter
             data_raw = hasil_filter["data_raw"]
-            data_pre = self.servisPD.preprocessing(data_raw)
-            data_normalisasi = self.normalisasi_saw(data_pre)
-            hasil_saw = self.hitung_saw_data(data_normalisasi,role)
-            ranking = self.ranking_saw(hasil_saw)
-            for i, item in enumerate(ranking, start=1):
-                item["rank"] = i
+
+            list_alternatif = self.simpan_alternatif_awal(
+                data_raw, id_dss, sumber_data
+            )
+            hasil = self.proses_saw_pipeline(list_alternatif, role)
+            ranking = hasil["ranking"]
+            id_hasil = self.simpan_hasil_saw(id_dss, ranking)
+
+            self.simpan_laptop_terpilih(ranking, id_dss, top_n=3)
+
+            conn.commit()
+
             if debug:
                 return {
                     "status": "success",
-                    "debug": {
-                        "data_awal": self.serialize(data_raw),
-                        "preprocessing": data_pre,
-                        "normalisasi": data_normalisasi,
-                        "hasil_saw": hasil_saw
-                    },
-                    "data": {
-                        "ranking": ranking
-                    }
+                    "debug": hasil,
+                    "data": {"ranking": ranking}
                 }
-            # return {
-            #     "status": "success",
-            #     "data": {
-            #         "data_awal": data_raw,
-            #         "data_preprocessing": data_pre,
-            #         "data_normalisasi": data_normalisasi,
-            #         "hasil_saw": hasil_saw,
-            #         "ranking": ranking
-            #     }
-            # }
+
             return {
                 "status": "success",
                 "meta": {
-                    "total_data": len(ranking),
-                    "role": role,
-                    "sumber": sumber_data
+                    "id_dss": id_dss,
+                    "id_hasil": id_hasil,
+                    "total_data": len(ranking)
                 },
                 "data": {
                     "ranking": ranking
@@ -173,108 +263,13 @@ class Servicesaw:
             }
 
         except Exception as e:
+            conn.rollback()
             return {
                 "status": "error",
                 "message": str(e)
             }
 
-    def hitung_average_golongan(self, roles: list[str]):
-        if not roles:
-            raise ValueError("Role tidak boleh kosong")
-        golongan_map = {}
+        finally:
+            conn.autocommit = True
 
-        for role in roles:
-            data = self.repoBK.cari_bobot_kriteria_by_roles(role)
-
-            if not data:
-                raise ValueError(f"Bobot tidak ditemukan untuk role {role}")
-
-            gol = data["golongan"]
-
-            if gol not in golongan_map:
-                golongan_map[gol] = []
-
-            golongan_map[gol].append(data)
-        hasil_golongan = {}
-
-        for gol, bobot_list in golongan_map.items():
-            avg = {}
-            keys = bobot_list[0].keys()
-
-            for k in keys:
-                if k == "golongan":
-                    continue
-
-                avg[k] = sum(b[k] for b in bobot_list) / len(bobot_list)
-
-            hasil_golongan[gol] = avg
-        hasil_final = {}
-        gol_keys = list(hasil_golongan.keys())
-        keys = hasil_golongan[gol_keys[0]].keys()
-
-        for k in keys:
-            hasil_final[k] = sum(hasil_golongan[g][k] for g in gol_keys) / len(gol_keys)
-
-        return hasil_final
-    
-    def hitung_weighted_golongan(self, roles: list[dict]):
-        if not roles:
-            raise ValueError("Role tidak boleh kosong")
-        golongan_map = {}
-
-        for r in roles:
-            role_name = r["role"]
-            weight = r.get("weight")
-
-            data = self.repoBK.cari_bobot_kriteria_by_roles(role_name)
-
-            if not data:
-                raise ValueError(f"Bobot tidak ditemukan untuk role {role_name}")
-
-            gol = data["golongan"]
-
-            if gol not in golongan_map:
-                golongan_map[gol] = {
-                    "bobot": [],
-                    "weights": []
-                }
-            golongan_map[gol]["bobot"].append(data)
-            golongan_map[gol]["weights"].append(weight)
-        hasil_golongan = {}
-        for gol, val in golongan_map.items():
-            bobot_list = val["bobot"]
-
-            avg = {}
-            keys = bobot_list[0].keys()
-
-            for k in keys:
-                if k == "golongan":
-                    continue
-
-                avg[k] = sum(b[k] for b in bobot_list) / len(bobot_list)
-
-            hasil_golongan[gol] = avg
-        gol_keys = list(hasil_golongan.keys())
-        weight_gol = []
-
-        for gol in gol_keys:
-            w = [w for w in golongan_map[gol]["weights"] if w is not None]
-
-            if w:
-                weight_gol.append(sum(w) / len(w)) 
-            else:
-                weight_gol.append(1)
-        total = sum(weight_gol)
-        weight_gol = [w / total for w in weight_gol]
-        hasil_final = {}
-        keys = hasil_golongan[gol_keys[0]].keys()
-
-        for k in keys:
-            total_val = 0
-
-            for i, gol in enumerate(gol_keys):
-                total_val += hasil_golongan[gol][k] * weight_gol[i]
-
-            hasil_final[k] = round(total_val, 6)
-
-        return hasil_final
+  

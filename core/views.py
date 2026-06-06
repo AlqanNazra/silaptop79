@@ -17,6 +17,7 @@ def pengajuanlaptop_hc_view(request):
 def detailpengajuan_hc_view(request):
     return render(request, 'hc/inventori/detailpengajuan_hc.html')
 
+<<<<<<< HEAD
 def tambahlaptop_hc_view(request):
     return render(request, 'hc/inventori/tambahlaptop_hc.html')
 
@@ -28,6 +29,10 @@ def riwayatpeminjamanlaptop_hc_view(request):
 
 def editdatalaptop_hc_view(request):
     return render(request, 'hc/inventori/editdatalaptop_hc.html')
+=======
+# def tambahlaptop_hc_view(request):
+#     return render(request, 'inventori/tambahlaptop_hc.html')
+>>>>>>> origin/dev-alqan
 
 def inputkriteria_hc_view(request):
     return render(request, 'hc/dss/inputkriteria_hc.html')

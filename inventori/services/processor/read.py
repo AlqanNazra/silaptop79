@@ -1,8 +1,9 @@
-from core.db import get_connection
+from db import get_connection
 from inventori.repositories.repositori_processor import ProcessorRepository
 
 class ReadProcessorService:
-    def ambil_semua(self):
+
+    def ambil_processor(self):
         conn = get_connection()
         try:
             repo = ProcessorRepository(conn)
