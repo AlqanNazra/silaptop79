@@ -13,6 +13,7 @@ from core.views import (
     detaillaptop_hc_view, 
     riwayatpeminjamanlaptop_hc_view, 
     editdatalaptop_hc_view,
+    editriwayatpeminjamanlaptop_hc_view,
     detailrekomendasi_hc_view,
     detailrekomendasiscrapping_hc_view,
     notifikasi_hc_view,
@@ -31,7 +32,11 @@ from core.views import (
     detailrekomendasi_it_view,
     detailrekomendasiscrapping_it_view,
     notifikasi_it_view,
+    manajemenpengadaan_it_view,
+    detailpengadaan_it_view,
+    editpengadaan_it_view,
 
+    # Talent Views
     # Talent Views
     dashboard_talent_view,
     pengajuanlaptop_talent_view,
@@ -63,6 +68,7 @@ urlpatterns = [
     path('hc/detail-laptop/', detaillaptop_hc_view, name='detaillaptop_hc'),
     path('hc/riwayat-peminjaman/', riwayatpeminjamanlaptop_hc_view, name='riwayatpeminjamanlaptop_hc'),
     path('hc/edit-laptop/', editdatalaptop_hc_view, name='editdatalaptop_hc'),
+    path('hc/edit-riwayat-peminjaman/', editriwayatpeminjamanlaptop_hc_view, name='editriwayatpeminjaman_hc'),
     path('hc/input-kriteria/', inputkriteria_hc_view, name='inputkriteria_hc'),
     path('hc/hasil-rekomendasi/', hasilrekomendasi_hc_view, name='hasilrekomendasi_hc'),
     path('hc/detail-rekomendasi/', detailrekomendasi_hc_view, name='detailrekomendasi_hc'),
@@ -85,6 +91,9 @@ urlpatterns = [
     path('it/detail-rekomendasi/', detailrekomendasi_it_view, name='detailrekomendasi_it'),
     path('it/detail-scrapping/', detailrekomendasiscrapping_it_view, name='detailrekomendasiscrapping_it'),
     path('it/notifikasi/', notifikasi_it_view, name='notifikasi_it'),
+    path('it/manajemen-pengadaan/', manajemenpengadaan_it_view, name='manajemen_pengadaan_it'),
+    path('it/detail-pengadaan/', detailpengadaan_it_view, name='detailpengadaan_it'),
+    path('it/edit-pengadaan/', editpengadaan_it_view, name='editpengadaan_it'),
 
     # ==========================================
     # TALENT ROUTES

@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detail Laptop - SiLaptop79</title>
+    <title>Detail Pengadaan - SiLaptop79</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
@@ -61,9 +61,9 @@
         }
 
         .btn-back-pill {
-            background-color: #e8edf9;
-            color: #0b57c6;
-            padding: 10px 24px;
+            background-color: #e2e8f0;
+            color: #334155;
+            padding: 10px 20px;
             border-radius: 8px;
             text-decoration: none;
             font-weight: 600;
@@ -72,13 +72,13 @@
         }
 
         .btn-back-pill:hover {
-            background-color: #d1dffb;
+            background-color: #cbd5e1;
         }
 
         /* Grid Layout */
         .content-grid {
             display: grid;
-            grid-template-columns: 1.5fr 1fr;
+            grid-template-columns: 1fr 320px;
             gap: 30px;
             align-items: start;
         }
@@ -164,7 +164,33 @@
             font-size: 12px;
         }
 
-        /* Specs Section */
+        /* Status Pill */
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .status-pill .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+
+        .status-approved {
+            background-color: #dcfce7;
+            color: #16a34a;
+        }
+
+        .status-approved .dot {
+            background-color: #16a34a;
+        }
+
+        /* Specs Grid */
         .specs-heading {
             font-size: 18px;
             font-weight: 800;
@@ -237,8 +263,8 @@
             flex: 1;
             background-color: #0b57c6;
             color: white;
-            padding: 14px 24px;
-            border-radius: 50px;
+            padding: 16px;
+            border-radius: 8px;
             font-weight: 700;
             font-size: 14px;
             border: none;
@@ -259,9 +285,9 @@
         .btn-grey-action {
             flex: 1;
             background-color: #e2e8f0;
-            color: #0b57c6;
-            padding: 14px 24px;
-            border-radius: 50px;
+            color: #334155;
+            padding: 16px;
+            border-radius: 8px;
             font-weight: 700;
             font-size: 14px;
             border: none;
@@ -282,15 +308,15 @@
 
 <body>
 
-    {% include 'hc/components/sidebar.html' with active_page='manajemen_laptop' %}
+    {% include 'it/components/sidebar.html' with active_page='kelola_pengadaan' %}
 
     <div class="main-content">
 
-        <div class="breadcrumb">Data Laptop / <span>MacBook Pro 16" M3</span></div>
+        <div class="breadcrumb">Kelola Data Pengadaan / <span>MacBook Pro M3 Max 14-inch</span></div>
 
         <div class="top-nav">
-            <h1 class="page-title">Detail Laptop</h1>
-            <a href="{% url 'manajemen_laptop' %}" class="btn-back-pill">Kembali ke Daftar</a>
+            <h1 class="page-title">Detail Pengadaan</h1>
+            <a href="{% url 'manajemen_pengadaan_it' %}" class="btn-back-pill">Kembali ke Daftar</a>
         </div>
 
         <div class="content-grid">
@@ -309,36 +335,42 @@
                     <!-- Screen Gloss/Reflect -->
                     <path d="M35 15L120 115H100L35 35V15Z" fill="white" opacity="0.12" />
                 </svg>
-                <div class="laptop-caption">MacBook Pro 16" M3</div>
+                <div class="laptop-caption">MacBook Pro M3 Max 14-inch</div>
             </div>
 
-            <!-- Asset Administration Card -->
+            <!-- Procurement Administration Card -->
             <div class="card admin-card">
-                <div class="admin-title">Asset Administration</div>
+                <div class="admin-title">Procurement Administration</div>
                 <div class="admin-rows-wrapper"
                     style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
                     <div class="admin-row">
-                        <span class="admin-label">ID Aset</span>
-                        <span class="asset-id-pill">PLC-LP-2024-B12-045</span>
+                        <span class="admin-label">ID Pengadaan</span>
+                        <span class="asset-id-pill">PR-LP-2026-001</span>
                     </div>
                     <div class="admin-row">
-                        <span class="admin-label">Lokasi</span>
+                        <span class="admin-label">Supplier</span>
                         <span class="admin-value" style="display: flex; align-items: center; gap: 6px;">
-                            <i class="fa-solid fa-location-dot" style="color: #0b57c6;"></i> Warehouse B-12
+                            <i class="fa-solid fa-truck" style="color: #0b57c6;"></i> Apple Inc.
                         </span>
                     </div>
                     <div class="admin-row">
-                        <span class="admin-label">Tanggal Pembelian</span>
-                        <span class="admin-value">12 Maret 2023</span>
+                        <span class="admin-label">Status</span>
+                        <span class="status-pill status-approved">
+                            <span class="dot"></span>Approved
+                        </span>
+                    </div>
+                    <div class="admin-row">
+                        <span class="admin-label">Tanggal Pengadaan</span>
+                        <span class="admin-value">12 Juni 2026</span>
                     </div>
                 </div>
             </div>
 
         </div>
 
-        <h2 class="specs-heading">Spesifikasi Laptop</h2>
+        <h2 class="specs-heading">Spesifikasi Item</h2>
 
-        <!-- Specifications 6 Cards Grid -->
+        <!-- Specifications Grid -->
         <div class="specs-grid">
 
             <!-- Card 1: Processor -->
@@ -348,7 +380,7 @@
                 </div>
                 <p class="spec-label">Processor</p>
                 <h3 class="spec-value">Apple M3 Max</h3>
-                <span class="spec-subtext">16-Core CPU Architecture</span>
+                <span class="spec-subtext">14-Core CPU Architecture</span>
             </div>
 
             <!-- Card 2: Memory RAM -->
@@ -357,7 +389,7 @@
                     <i class="fa-solid fa-memory"></i>
                 </div>
                 <p class="spec-label">Memory RAM</p>
-                <h3 class="spec-value">36GB Unified</h3>
+                <h3 class="spec-value">32GB</h3>
             </div>
 
             <!-- Card 3: Storage -->
@@ -366,7 +398,7 @@
                     <i class="fa-solid fa-database"></i>
                 </div>
                 <p class="spec-label">Storage</p>
-                <h3 class="spec-value">1TB SSD NVMe</h3>
+                <h3 class="spec-value">1TB SSD</h3>
             </div>
 
             <!-- Card 4: Battery -->
@@ -384,29 +416,24 @@
                     <i class="fa-solid fa-laptop"></i>
                 </div>
                 <p class="spec-label">Layar</p>
-                <h3 class="spec-value">16.2-inch Liquid Retina XDR</h3>
-                <span class="spec-subtext">36B Unified</span>
+                <h3 class="spec-value">14.2-inch Liquid Retina</h3>
             </div>
 
-            <!-- Card 6: GPU -->
+            <!-- Card 6: Weight -->
             <div class="spec-card">
                 <div class="spec-icon-box">
-                    <i class="fa-solid fa-bolt"></i>
+                    <i class="fa-solid fa-weight-hanging"></i>
                 </div>
-                <p class="spec-label">GPU</p>
-                <h3 class="spec-value">36GB Unified</h3>
-                <span class="spec-subtext">High-Bandwidth LPDDR5</span>
+                <p class="spec-label">Berat</p>
+                <h3 class="spec-value">1.6 Kg</h3>
             </div>
 
         </div>
 
         <!-- Action Buttons -->
         <div class="bottom-actions">
-            <a href="{% url 'editdatalaptop_hc' %}" class="btn-blue-action">
+            <a href="{% url 'editpengadaan_it' %}" class="btn-blue-action">
                 <i class="fa-solid fa-pen"></i> Edit Data
-            </a>
-            <a href="{% url 'riwayatpeminjamanlaptop_hc' %}" class="btn-grey-action">
-                <i class="fa-solid fa-clock-rotate-left"></i> Lihat Riwayat Peminjaman
             </a>
         </div>
 

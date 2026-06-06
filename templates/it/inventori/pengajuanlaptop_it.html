@@ -306,7 +306,7 @@
 <body>
 
     <div class="dashboard-wrapper">
-        {% include 'it/components/sidebar.html' with active_page='proses_laptop' %}
+        {% include 'it/components/sidebar.html' with active_page='pengajuan_laptop' %}
 
         <div class="main-dashboard-content">
 
@@ -416,7 +416,7 @@
                                     {% endif %}
                                 </td>
                                 <td align="center">
-                                    <a href="{% url 'detailproses_it' %}?id={{ pengajuan.id_pengajuan }}"
+                                    <a href="{% url 'detailpengajuan_it' %}?id={{ pengajuan.id_pengajuan }}"
                                         style="text-decoration: none;">
                                         <button class="btn-process">Proses Unit</button>
                                     </a>

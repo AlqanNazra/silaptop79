@@ -29,6 +29,9 @@ def riwayatpeminjamanlaptop_hc_view(request):
 def editdatalaptop_hc_view(request):
     return render(request, 'hc/inventori/editdatalaptop_hc.html')
 
+def editriwayatpeminjamanlaptop_hc_view(request):
+    return render(request, 'hc/inventori/editriwayatpeminjamanlaptop_hc.html')
+
 def inputkriteria_hc_view(request):
     return render(request, 'hc/dss/inputkriteria_hc.html')
 
@@ -68,10 +71,10 @@ def detaillaptop_it_view(request):
     return render(request, 'it/inventori/detaillaptop_it.html')
 
 def riwayatpeminjamanlaptop_it_view(request):
-    return HttpResponse("<h3>IT Riwayat Peminjaman - Mulai dari Awal</h3>")
+    return render(request, 'it/inventori/riwayatpeminjamanlaptop_it.html')
 
 def editdatalaptop_it_view(request):
-    return HttpResponse("<h3>IT Edit Laptop - Mulai dari Awal</h3>")
+    return render(request, 'it/inventori/editdatalaptop_it.html')
 
 def inputkriteria_it_view(request):
     return render(request, 'it/dss/inputkriteria_it.html')
@@ -87,6 +90,17 @@ def detailrekomendasiscrapping_it_view(request):
 
 def notifikasi_it_view(request):
     return render(request, 'it/inventori/notifikasi_it.html')
+
+# Procurement management views for IT
+def manajemenpengadaan_it_view(request):
+    return render(request, 'it/inventori/manajemenpengadaan_it.html')
+
+def detailpengadaan_it_view(request):
+    return render(request, 'it/inventori/detailpengadaan_it.html')
+
+def editpengadaan_it_view(request):
+    return render(request, 'it/inventori/editpengadaan_it.html')
+
 
 
 # ==========================================
