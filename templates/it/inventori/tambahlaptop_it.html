@@ -56,14 +56,22 @@
             background: #ffffff;
             border-radius: 12px;
             border: 1px solid #f1f5f9;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
             margin-bottom: 20px;
             overflow: hidden;
         }
 
-        .section-card.blue   { border-left: 4px solid #0b57c6; }
-        .section-card.green  { border-left: 4px solid #16a34a; }
-        .section-card.red    { border-left: 4px solid #dc2626; }
+        .section-card.blue {
+            border-left: 4px solid #0b57c6;
+        }
+
+        .section-card.green {
+            border-left: 4px solid #16a34a;
+        }
+
+        .section-card.red {
+            border-left: 4px solid #dc2626;
+        }
 
         .section-header {
             display: flex;
@@ -85,9 +93,17 @@
             flex-shrink: 0;
         }
 
-        .icon-blue  { background-color: #0b57c6; }
-        .icon-green { background-color: #16a34a; }
-        .icon-red   { background-color: #dc2626; }
+        .icon-blue {
+            background-color: #0b57c6;
+        }
+
+        .icon-green {
+            background-color: #16a34a;
+        }
+
+        .icon-red {
+            background-color: #dc2626;
+        }
 
         .section-title {
             font-size: 15px;
@@ -224,7 +240,8 @@
         <div class="main-dashboard-content">
 
             <h1 class="page-title">Tambah Laptop Baru</h1>
-            <p class="page-subtitle">Silakan lengkapi formulir di bawah ini untuk menambahkan aset perangkat keras baru ke dalam sistem inventaris digital Prism Logic.</p>
+            <p class="page-subtitle">Silakan lengkapi formulir di bawah ini untuk menambahkan aset perangkat keras baru
+                ke dalam sistem inventaris digital Prism Logic.</p>
 
             <form action="{% url 'tambahlaptop_it' %}" method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
@@ -281,7 +298,8 @@
                                 <select class="form-control" name="id_processor">
                                     <option value="" disabled selected>Pilih Processor</option>
                                     {% for proc in processors %}
-                                    <option value="{{ proc.id_processor }}">{{ proc.nama_processor }} ({{ proc.manufacturer }})</option>
+                                    <option value="{{ proc.id_processor }}">{{ proc.nama_processor }} ({{
+                                        proc.manufacturer }})</option>
                                     {% endfor %}
                                 </select>
                             </div>
@@ -301,7 +319,8 @@
                                 <select class="form-control" name="id_storage">
                                     <option value="" disabled selected>Pilih Kapasitas</option>
                                     {% for storage in storages %}
-                                    <option value="{{ storage.id_storage }}">{{ storage.kapasitas_gb }} GB {{ storage.tipe }}</option>
+                                    <option value="{{ storage.id_storage }}">{{ storage.kapasitas_gb }} GB {{
+                                        storage.tipe }}</option>
                                     {% endfor %}
                                 </select>
                             </div>
@@ -319,8 +338,7 @@
                             </div>
                             <div class="form-group">
                                 <label>Weight (Kg)</label>
-                                <input type="text" class="form-control" name="weight"
-                                    placeholder="Misal: 1.6 Kg">
+                                <input type="text" class="form-control" name="weight" placeholder="Misal: 1.6 Kg">
                             </div>
                         </div>
                     </div>
@@ -385,3 +403,5 @@
 </body>
 
 </html>
+
+#uibaru
