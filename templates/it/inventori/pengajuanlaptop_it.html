@@ -285,20 +285,25 @@
             background-color: #EA580C;
         }
 
-        .btn-process {
-            background-color: #0284C7;
-            color: white;
-            border: none;
-            padding: 8px 16px;
+        .btn-detail {
+            display: inline-block;
+            padding: 7px 18px;
+            border: 1px solid #e2e8f0;
             border-radius: 6px;
             font-size: 13px;
-            font-weight: 500;
+            font-weight: 600;
+            color: #334155;
+            background: white;
+            text-decoration: none;
+            transition: all 0.15s;
             cursor: pointer;
-            transition: background 0.2s;
+            font-family: 'Inter', sans-serif;
         }
 
-        .btn-process:hover {
-            background-color: #0369A1;
+        .btn-detail:hover {
+            background-color: #f1f5f9;
+            border-color: #cbd5e1;
+            color: #0f172a;
         }
     </style>
 </head>
@@ -384,7 +389,6 @@
                                 <th style="width: 50px; text-align: center;">NO</th>
                                 <th>NAMA PEMOHON</th>
                                 <th>DEPARTEMEN</th>
-                                <th>SPESIFIKASI DIMINTA</th>
                                 <th>STATUS IT</th>
                                 <th style="text-align: center;">AKSI IT</th>
                             </tr>
@@ -404,8 +408,6 @@
                                     </div>
                                 </td>
                                 <td style="color: #475569;">{{ pengajuan.kebutuhan_role|default:"-" }}</td>
-                                <td><span class="type-badge">{{ pengajuan.kebutuhan_requirement|default:"-" }}</span>
-                                </td>
                                 <td>
                                     {% if pengajuan.status_it == 'ready' %}
                                     <span class="status-badge ready">Siap Diambil</span>
@@ -416,16 +418,13 @@
                                     {% endif %}
                                 </td>
                                 <td align="center">
-                                    <a href="{% url 'detailpengajuan_it' %}?id={{ pengajuan.id_pengajuan }}"
-                                        style="text-decoration: none;">
-                                        <button class="btn-process">Proses Unit</button>
-                                    </a>
+                                    <a href="{% url 'detailpengajuan_it' %}?id={{ pengajuan.id_pengajuan }}" class="btn-detail">Detail</a>
                                 </td>
                             </tr>
                             {% endfor %}
                             {% else %}
                             <tr>
-                                <td colspan="6" style="text-align: center; padding: 32px; color: #64748B;">
+                                <td colspan="5" style="text-align: center; padding: 32px; color: #64748B;">
                                     Belum ada antrean pengerjaan laptop untuk IT.
                                 </td>
                             </tr>

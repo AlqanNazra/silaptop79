@@ -365,6 +365,28 @@
             color: #0369A1;
         }
 
+        /* Detail Button */
+        .btn-detail {
+            display: inline-block;
+            padding: 7px 18px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #334155;
+            background: white;
+            text-decoration: none;
+            transition: all 0.15s;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .btn-detail:hover {
+            background-color: #f1f5f9;
+            border-color: #cbd5e1;
+            color: #0f172a;
+        }
+
         /* Footer/Pagination */
         .table-footer {
             padding: 20px 32px;
@@ -542,7 +564,6 @@
                                 <th style="width: 50px; text-align: center;">NO</th>
                                 <th>NAMA PEMOHON</th>
                                 <th>DEPARTEMEN</th>
-                                <th>JENIS PENGAJUAN</th>
                                 <th>TANGGAL</th>
                                 <th>STATUS</th>
                                 <th style="text-align: center;">ACTIONS</th>
@@ -565,8 +586,6 @@
                                     </div>
                                 </td>
                                 <td style="color: #475569;">{{ pengajuan.kebutuhan_role|default:"-" }}</td>
-                                <td><span class="type-badge">{{ pengajuan.kebutuhan_requirement|default:"-" }}</span>
-                                </td>
                                 <td>
                                     <div class="date-col">
                                         {% if pengajuan.tanggal_pengajuan %}
@@ -587,16 +606,13 @@
                                     {% endif %}
                                 </td>
                                 <td align="center">
-                                    <a href="{% url 'detailpengajuan_hc' %}?id={{ pengajuan.id_pengajuan }}"
-                                        style="text-decoration: none;">
-                                        <button class="btn-detail" style="cursor: pointer;">Detail</button>
-                                    </a>
+                                    <a href="{% url 'detailpengajuan_hc' %}?id={{ pengajuan.id_pengajuan }}" class="btn-detail">Detail</a>
                                 </td>
                             </tr>
                             {% endfor %}
                             {% else %}
                             <tr>
-                                <td colspan="7" style="text-align: center; padding: 32px; color: #64748B;">
+                                <td colspan="6" style="text-align: center; padding: 32px; color: #64748B;">
                                     Belum ada pengajuan laptop.
                                 </td>
                             </tr>

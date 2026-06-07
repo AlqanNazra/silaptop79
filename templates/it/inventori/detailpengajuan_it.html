@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detail Pengajuan Laptop - SiLaptop79</title>
+    <title>Detail Pengajuan Laptop - IT - SiLaptop79</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -359,14 +359,14 @@
 
 <body>
     <div class="dashboard-wrapper">
-        {% include 'hc/components/sidebar.html' with active_page='pengajuan_laptop' %}
+        {% include 'it/components/sidebar.html' with active_page='pengajuan_laptop' %}
 
         <div class="main-content">
             <div class="breadcrumb">Daftar Pengajuan / <span>Detail Pengajuan</span></div>
 
             <div class="header-area">
-                <h1 class="page-title">Detail Pengajuan</h1>
-                <a href="{% url 'pengajuanlaptop_hc' %}" class="btn-back">Kembali ke Daftar</a>
+                <h1 class="page-title">Detail Pengajuan (IT)</h1>
+                <a href="{% url 'pengajuanlaptop_it' %}" class="btn-back">Kembali ke Daftar</a>
             </div>
 
             <div class="card">
@@ -419,7 +419,7 @@
             </div>
 
             <div class="action-buttons-wrapper">
-                <a href="{% url 'setujui_pengajuan_hc' %}?id={{ pengajuan.id_pengajuan }}"
+                <a href="{% url 'setujui_pengajuan_it' %}?id={{ pengajuan.id_pengajuan }}"
                     style="flex: 1; text-decoration: none;">
                     <button class="btn-action btn-approve" style="width: 100%;">
                         <i class="fa-solid fa-circle-check"></i> Isi Detail Laptop Pengajuan
