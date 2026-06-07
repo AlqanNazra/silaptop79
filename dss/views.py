@@ -7,7 +7,7 @@ from core.db import get_connection
 
 import json
 
-@login_required
+# @login_required
 def testing_swara(request):
     conn =  get_connection()
     result = None

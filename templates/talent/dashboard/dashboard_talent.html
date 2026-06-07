@@ -363,6 +363,20 @@
             <!-- Content -->
             <div class="content-padding">
 
+                <!-- Flash Messages -->
+                {% if messages %}
+                <div style="margin-bottom:20px;">
+                    {% for message in messages %}
+                    <div style="padding:12px 20px; border-radius:8px; margin-bottom:8px; font-size:14px; font-weight:500;
+                        {% if message.tags == 'success' %}background:#dcfce7; color:#15803d; border:1px solid #bbf7d0;
+                        {% elif message.tags == 'error' %}background:#fee2e2; color:#dc2626; border:1px solid #fecaca;
+                        {% else %}background:#dbeafe; color:#2563eb; border:1px solid #bfdbfe;{% endif %}">
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
                 <!-- Hero Card -->
                 <div class="hero-card">
                     <div class="hero-text-block">
@@ -415,7 +429,7 @@
                                 </svg>
                                 MENUNGGU
                             </div>
-                            <p class="stat-box-value">0</p>
+                            <p class="stat-box-value">{{ total_pending }}</p>
                             <p class="stat-box-desc">Pengajuan laptop diproses</p>
                         </div>
 
@@ -429,7 +443,7 @@
                                 </svg>
                                 DITOLAK
                             </div>
-                            <p class="stat-box-value">01</p>
+                            <p class="stat-box-value">{{ total_ditolak }}</p>
                             <p class="stat-box-desc">Total Pengajuan Ditolak</p>
                         </div>
 
@@ -443,7 +457,7 @@
                                 </svg>
                                 DISETUJUI
                             </div>
-                            <p class="stat-box-value">01</p>
+                            <p class="stat-box-value">{{ total_disetujui }}</p>
                             <p class="stat-box-desc">Total Pengajuan Disetujui</p>
                         </div>
 
@@ -456,7 +470,7 @@
                                 </svg>
                                 SELESAI
                             </div>
-                            <p class="stat-box-value">02</p>
+                            <p class="stat-box-value">{{ total_selesai }}</p>
                             <p class="stat-box-desc">Total riwayat pengembalian</p>
                         </div>
                     </div>
@@ -473,6 +487,7 @@
                                 </tr>
                             </thead>
                             <tbody>
+                                {% for p in recent_pengajuan %}
                                 <tr>
                                     <td>
                                         <div class="laptop-cell">
@@ -483,30 +498,26 @@
                                                     <line x1="12" y1="17" x2="12" y2="21"></line>
                                                 </svg>
                                             </div>
-                                            <span class="laptop-name-cell">MacBook Air M2</span>
+                                            <span class="laptop-name-cell">{{ p.kebutuhan_role }}</span>
                                         </div>
                                     </td>
-                                    <td>Padepokan</td>
-                                    <td>24 Mar 2026</td>
-                                    <td>24 Mar 2026</td>
-                                </tr>
-                                <tr>
+                                    <td>{{ p.perusahaan }}</td>
+                                    <td>{{ p.tanggal_pengajuan|date:"d M Y" }}</td>
                                     <td>
-                                        <div class="laptop-cell">
-                                            <div class="laptop-icon-sm">
-                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                    <rect x="2" y="3" width="20" height="14" rx="2"></rect>
-                                                    <line x1="8" y1="21" x2="16" y2="21"></line>
-                                                    <line x1="12" y1="17" x2="12" y2="21"></line>
-                                                </svg>
-                                            </div>
-                                            <span class="laptop-name-cell">MacBook Air M2</span>
-                                        </div>
+                                        {% if p.status == 'approved' %}
+                                            <span style="color: #10B981; font-weight: 600;">Disetujui</span>
+                                        {% elif p.status == 'rejected' %}
+                                            <span style="color: #EF4444; font-weight: 600;">Ditolak</span>
+                                        {% else %}
+                                            <span style="color: #F59E0B; font-weight: 600;">Pending</span>
+                                        {% endif %}
                                     </td>
-                                    <td>Telkom</td>
-                                    <td>24 Mar 2026</td>
-                                    <td>24 Mar 2026</td>
                                 </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" style="text-align: center; color: #94A3B8;">Belum ada riwayat pengajuan.</td>
+                                </tr>
+                                {% endfor %}
                             </tbody>
                         </table>
                     </div>

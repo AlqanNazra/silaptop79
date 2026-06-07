@@ -309,11 +309,22 @@
 
 <body>
 
-    {% include 'hc/components/sidebar.html' with active_page='manajemen_laptop' %}
+    {% include 'it/components/sidebar.html' with active_page='data_laptop' %}
 
     <div class="main-content">
         <!-- Flash Messages -->
         {% if messages %}
+        <div style="margin-bottom:20px;">
+            {% for message in messages %}
+            <div style="padding:12px 20px; border-radius:8px; margin-bottom:8px; font-size:14px; font-weight:500;
+                {% if message.tags == 'success' %}background:#dcfce7; color:#15803d; border:1px solid #bbf7d0;
+                {% elif message.tags == 'error' %}background:#fee2e2; color:#dc2626; border:1px solid #fecaca;
+                {% else %}background:#dbeafe; color:#2563eb; border:1px solid #bfdbfe;{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
 
         <div class="top-nav">
             <div>
@@ -321,7 +332,7 @@
                 <h1 class="page-title">Riwayat Peminjam</h1>
             </div>
             <div class="nav-buttons">
-                <a href="{% url 'inventori:manajemen_laptop' %}" class="btn-nav btn-grey">Kembali ke Daftar</a>
+                <a href="{% url 'manajemen_laptop_it' %}" class="btn-nav btn-grey">Kembali ke Daftar</a>
             </div>
         </div>
 
@@ -378,18 +389,17 @@
                         <td>{{ p.tanggal_kembali|date:"d M Y"|default:"-" }}</td>
                         <td>
                             {% if p.status|lower == 'kembali' or p.status|lower == 'selesai' %}
-                            <span class="badge badge-excellent">{{ p.status }}</span>
+                                <span class="badge badge-excellent">{{ p.status }}</span>
                             {% elif p.status|lower == 'dipinjam' or p.status|lower == 'aktif' %}
-                            <span class="badge badge-good">{{ p.status }}</span>
+                                <span class="badge badge-good">{{ p.status }}</span>
                             {% else %}
-                            <span class="badge badge-scratch">{{ p.status }}</span>
+                                <span class="badge badge-scratch">{{ p.status }}</span>
                             {% endif %}
                         </td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="5" style="text-align: center; color: #94a3b8; padding: 30px;">Tidak ada riwayat
-                            peminjaman.</td>
+                        <td colspan="5" style="text-align: center; color: #94a3b8; padding: 30px;">Tidak ada riwayat peminjaman.</td>
                     </tr>
                     {% endfor %}
                 </tbody>

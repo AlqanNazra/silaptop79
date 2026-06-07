@@ -290,6 +290,19 @@
 
         <!-- Main Dashboard Content -->
         <div class="main-dashboard-content">
+            <!-- Flash Messages -->
+            {% if messages %}
+            <div style="margin-bottom:20px;">
+                {% for message in messages %}
+                <div style="padding:12px 20px; border-radius:8px; margin-bottom:8px; font-size:14px; font-weight:500;
+                    {% if message.tags == 'success' %}background:#dcfce7; color:#15803d; border:1px solid #bbf7d0;
+                    {% elif message.tags == 'error' %}background:#fee2e2; color:#dc2626; border:1px solid #fecaca;
+                    {% else %}background:#dbeafe; color:#2563eb; border:1px solid #bfdbfe;{% endif %}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
 
             <h1 class="page-title">Tambah Laptop Baru</h1>
             <p class="page-subtitle">Silakan lengkapi formulir di bawah ini untuk menambahkan aset perangkat keras baru
@@ -321,8 +334,8 @@
 
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label>Brand</label>
-                                    <select class="form-control" name="brand">
+                                    <label>Brand/Model</label>
+                                    <select class="form-control" name="model">
                                         <option value="" disabled selected>Pilih Brand</option>
                                         <option value="Apple">Apple</option>
                                         <option value="Lenovo">Lenovo</option>
@@ -332,9 +345,9 @@
                                     </select>
                                 </div>
                                 <div class="form-group">
-                                    <label>Serial Number</label>
-                                    <input type="text" class="form-control" name="serial_number"
-                                        placeholder="SN-XXXX-XXXX-XXXX">
+                                    <label>Operating System</label>
+                                    <input type="text" class="form-control" name="os"
+                                        placeholder="Misal: Windows 11 Pro">
                                 </div>
                             </div>
                         </div> <!-- End Card -->
@@ -354,9 +367,9 @@
                                     <select class="form-control" name="id_processor">
                                         <option value="" disabled selected>Pilih Processor</option>
 
-                                        {% for p in processor %}
+                                        {% for p in processors %}
                                         <option value="{{ p.id_processor }}">
-                                            {{ p.display }}
+                                            {{ p.nama_processor }}
                                         </option>
                                         {% endfor %}
                                     </select>
@@ -366,9 +379,9 @@
                                     <select class="form-control" name="id_ram">
                                         <option value="" disabled selected>Pilih RAM</option>
 
-                                        {% for r in ram %}
+                                        {% for r in rams %}
                                         <option value="{{ r.id_ram }}">
-                                            {{ r.display }}
+                                            {{ r.kapasitas_gb }} GB {{ r.tipe }}
                                         </option>
                                         {% endfor %}
                                     </select>
@@ -381,9 +394,9 @@
                                     <select class="form-control" name="id_storage">
                                         <option value="" disabled selected>Pilih Kapasitas</option>
 
-                                        {% for s in storage %}
+                                        {% for s in storages %}
                                         <option value="{{ s.id_storage }}">
-                                            {{ s.display }}
+                                            {{ s.kapasitas_gb }} GB {{ s.tipe }}
                                         </option>
                                         {% endfor %}
                                     </select>
@@ -397,56 +410,16 @@
 
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label>Battery Capacity (mAH)</label>
-                                    <input type="text" class="form-control" name="battery_capacity"
-                                        placeholder="Misal: 3000 mAH">
+                                    <label>Lokasi</label>
+                                    <input type="text" class="form-control" name="lokasi" placeholder="Misal: Kantor Pusat, Lt 2">
                                 </div>
                                 <div class="form-group">
-                                    <label>Weight (Kg)</label>
-                                    <input type="text" class="form-control" name="weight" placeholder="Misal: 1.6 Kg">
-                                </div>
-                            </div>
-                        </div> <!-- End Card -->
-
-                        <!-- Administrative -->
-                        <div class="card administrative">
-                            <div class="card-header">
-                                <div class="icon-box icon-red">
-                                    <i class="fa-solid fa-shield-halved"></i>
-                                </div>
-                                <h3>Administrative</h3>
-                            </div>
-
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label>Department</label>
-                                    <select class="form-control" name="department">
-                                        <option value="" disabled selected>Pilih Departemen</option>
-                                        <option value="IT">IT</option>
-                                        <option value="HR">HR</option>
-                                        <option value="Finance">Finance</option>
+                                    <label>Kondisi Fisik</label>
+                                    <select class="form-control" name="kondisi">
+                                        <option value="baik" selected>Baik</option>
+                                        <option value="rusak_ringan">Rusak Ringan</option>
+                                        <option value="rusak_berat">Rusak Berat</option>
                                     </select>
-                                </div>
-                                <div class="form-group">
-                                    <label>Initial Status</label>
-                                    <select class="form-control" name="status">
-                                        <option value="tersedia" selected>Available</option>
-                                        <option value="dipinjam">Dipinjam</option>
-                                        <option value="rusak">Rusak</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label>Purchase Date</label>
-                                    <input type="date" class="form-control" name="purchase_date"
-                                        style="color: #64748b;">
-                                </div>
-                                <div class="form-group">
-                                    <label>Warranty Expiry</label>
-                                    <input type="date" class="form-control" name="warranty_expiry"
-                                        style="color: #64748b;">
                                 </div>
                             </div>
                         </div> <!-- End Card -->
@@ -477,7 +450,7 @@
                             <button type="submit" class="btn btn-primary">
                                 <i class="fa-solid fa-lock"></i> Simpan Data
                             </button>
-                            <a href="{% url 'manajemen_laptop' %}" class="btn btn-cancel"
+                            <a href="{% url 'inventori:manajemen_laptop' %}" class="btn btn-cancel"
                                 style="text-decoration: none;">
                                 <i class="fa-solid fa-xmark"></i> Batal
                             </a>

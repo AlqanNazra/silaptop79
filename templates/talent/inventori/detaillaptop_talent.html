@@ -293,7 +293,8 @@
         {% include 'talent/components/sidebar.html' with active_page='history_pengajuan' %}
 
         <div class="main-content">
-            <div class="breadcrumb">Riwayat Peminjaman / <span>MacBook Pro 16" M3</span></div>
+            {% if laptop %}
+            <div class="breadcrumb">Riwayat Peminjaman / <span>{{ laptop.nama_laptop }}</span></div>
 
             <div class="header-area">
                 <h1 class="page-title">Laptop Detail</h1>
@@ -309,11 +310,11 @@
                 <!-- Left Column -->
                 <div class="left-column">
                     <div class="card laptop-display">
-                        <div class="status-badge">
+                        <div class="status-badge" style="{% if laptop.status == 'tersedia' %}background-color: #DCFCE7; color: #16A34A;{% elif laptop.status == 'dipinjam' %}background-color: #DBEAFE; color: #2563EB;{% else %}background-color: #FEE2E2; color: #DC2626;{% endif %}">
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
                                 <circle cx="12" cy="12" r="10"></circle>
                             </svg>
-                            DIPINJAM
+                            {{ laptop.status|upper }}
                         </div>
                         <div class="laptop-img-wrapper">
                             <svg class="laptop-icon-lg" width="200" height="120" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
@@ -323,8 +324,8 @@
                             </svg>
                         </div>
                         <div class="laptop-info">
-                            <h2>MacBook Pro 16" M3 Max</h2>
-                            <p>Apple Silicon M3 Max Chip - Space Black</p>
+                            <h2>{{ laptop.nama_laptop }}</h2>
+                            <p>{{ laptop.model }} - {{ laptop.os }}</p>
                         </div>
                     </div>
 
@@ -337,12 +338,12 @@
                             Spesifikasi Laptop
                         </div>
                         <div class="specs-grid">
-                            <div class="spec-item"><label>Processor</label><span>Apple M3 Max (14-core)</span></div>
-                            <div class="spec-item"><label>Storage</label><span>1TB SSD NVMe</span></div>
-                            <div class="spec-item"><label>Memory RAM</label><span>36GB Unified RAM</span></div>
-                            <div class="spec-item"><label>Screen Size</label><span>16.2-inch Liquid Retina</span></div>
-                            <div class="spec-item"><label>Battery Capacity</label><span>7200 mAh</span></div>
-                            <div class="spec-item"><label>GPU</label><span>30-Core GPU</span></div>
+                            <div class="spec-item"><label>Processor</label><span>{{ laptop.id_processor.nama_processor|default:"-" }}</span></div>
+                            <div class="spec-item"><label>Storage</label><span>{{ laptop.id_storage.kapasitas_gb|default:"-" }} GB {{ laptop.id_storage.tipe|default:"" }}</span></div>
+                            <div class="spec-item"><label>Memory RAM</label><span>{{ laptop.id_ram.kapasitas_gb|default:"-" }} GB</span></div>
+                            <div class="spec-item"><label>Screen Size</label><span>{{ laptop.ukuran_layar|default:"-" }} inch</span></div>
+                            <div class="spec-item"><label>Kondisi</label><span>{{ laptop.kondisi|title }}</span></div>
+                            <div class="spec-item"><label>OS</label><span>{{ laptop.os|default:"-" }}</span></div>
                         </div>
                     </div>
                 </div>
@@ -353,8 +354,8 @@
                         <div class="admin-title">Asset Administration</div>
 
                         <div class="admin-item">
-                            <label>Asset ID</label>
-                            <div class="asset-id">PLC-LP-2024-B12-045</div>
+                            <label>Asset ID / No Inventori</label>
+                            <div class="asset-id">{{ laptop.no_inventori }}</div>
                         </div>
 
                         <div class="admin-item">
@@ -364,13 +365,8 @@
                                     <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
                                     <circle cx="12" cy="10" r="3"></circle>
                                 </svg>
-                                Warehouse B-12
+                                {{ laptop.lokasi }}
                             </div>
-                        </div>
-
-                        <div class="admin-item">
-                            <label>Purchase Date</label>
-                            <div class="loc-text" style="color: #475569;">March 12, 2024</div>
                         </div>
 
                         <div class="admin-item">
@@ -399,6 +395,18 @@
                     </div>
                 </div>
             </div>
+            {% else %}
+            <div class="header-area">
+                <h1 class="page-title">Laptop Detail</h1>
+                <a href="{% url 'riwayatpeminjamanlaptop_talent' %}" class="btn-back">
+                    Kembali ke Riwayat
+                </a>
+            </div>
+            <div class="card" style="text-align: center; padding: 60px;">
+                <h2 style="color: #64748B;">Tidak Ada Perangkat Aktif</h2>
+                <p>Saat ini Anda tidak memiliki perangkat laptop yang sedang dipinjam secara aktif.</p>
+            </div>
+            {% endif %}
         </div>
     </div>
 </body>

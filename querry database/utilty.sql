@@ -11,6 +11,7 @@ DECLARE
 BEGIN
     query_str := 'SELECT ' || quote_ident(nama_kolom) || 
                  ' FROM ' || quote_ident(nama_tabel) || 
+                 ' WHERE ' || quote_ident(nama_kolom) || ' LIKE ' || quote_literal(prefix || '%') ||
                  ' ORDER BY ' || quote_ident(nama_kolom) || ' DESC LIMIT 1';
     
     EXECUTE query_str INTO last_id;

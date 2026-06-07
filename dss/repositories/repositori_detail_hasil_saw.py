@@ -1,7 +1,5 @@
 import psycopg2
 from psycopg2.extras import RealDictCursor
-from dss.dto.dto_detail_hasil_saw import DetailHasilSawDTO
-from interface.interface_detail_hasil_saw import IDetailHasilSawImpl
 from .dto.dto_detail_hasil_saw import DetailHasilSawDTO
 from .interface.interface_detail_hasil_saw import IDetailHasilSawImpl
 
@@ -65,4 +63,9 @@ class DetailHasilSawRepository(IDetailHasilSawImpl):
             result = cur.fetchone()
             self.conn.commit()
 
-            return result[0] if result else None
+            if result:
+                if isinstance(result, dict):
+                    return list(result.values())[0]
+                else:
+                    return result[0]
+            return None

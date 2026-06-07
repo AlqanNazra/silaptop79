@@ -4,15 +4,8 @@ from django.contrib.auth import views as auth_views
 from core.views import (
     # HC Views
     dashboard_hc_view, 
-    manajemenlaptop_hc_view, 
-    pengajuanlaptop_hc_view, 
-    detailpengajuan_hc_view,
-    tambahlaptop_hc_view, 
     inputkriteria_hc_view, 
     hasilrekomendasi_hc_view, 
-    detaillaptop_hc_view, 
-    riwayatpeminjamanlaptop_hc_view, 
-    editdatalaptop_hc_view,
     detailrekomendasi_hc_view,
     detailrekomendasiscrapping_hc_view,
     notifikasi_hc_view,
@@ -38,9 +31,27 @@ from core.views import (
     detaillaptop_talent_view,
     riwayatpeminjamanlaptop_talent_view,
     pengembalianlaptop_talent_view,
+    editdatalaptop_talent_view,
+    inputkriteria_talent_view,
+    hasilrekomendasi_talent_view,
+    detailrekomendasi_talent_view,
+    detailrekomendasiscrapping_talent_view,
+
+    # Home View
+    home_view,
+    login_redirect_view,
 )
-from core.views import home_view, dashboard_hc_view, inputkriteria_hc_view, hasilrekomendasi_hc_view,pengajuanlaptop_hc_view
-from inventori.views import laptop_dashboard,tambahlaptop_hc_view
+from inventori.views import (
+    manajemen_laptop_page as manajemenlaptop_hc_view,
+    pengajuan_page_view as pengajuanlaptop_hc_view,
+    detailpengajuan_hc_view,
+    tambah_laptop_page as tambahlaptop_hc_view,
+    detail_laptop_page as detaillaptop_hc_view,
+    riwayatpeminjamanlaptop_hc_view,
+    editdatalaptop_hc_view,
+    laptop_dashboard,
+)
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -48,8 +59,9 @@ urlpatterns = [
     path('inventori/', include('inventori.urls')),
     
     # Authentication (login sementara dinonaktifkan)
-    # path('login/', auth_views.LoginView.as_view(template_name='auth/login.html'), name='login'),
+    path('login/', auth_views.LoginView.as_view(template_name='auth/login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+    path('login-redirect/', login_redirect_view, name='login_redirect'),
 
     # Landing Page (Directly to HC Dashboard as requested)
     path('', dashboard_hc_view, name='index'),
@@ -62,9 +74,9 @@ urlpatterns = [
     path('hc/pengajuan-laptop/', pengajuanlaptop_hc_view, name='pengajuanlaptop_hc'),
     path('hc/detail-pengajuan/', detailpengajuan_hc_view, name='detailpengajuan_hc'),
     path('hc/tambah-laptop/', tambahlaptop_hc_view, name='tambahlaptop_hc'),
-    path('hc/detail-laptop/', detaillaptop_hc_view, name='detaillaptop_hc'),
+    path('hc/detail-laptop/<str:id_laptop>/', detaillaptop_hc_view, name='detaillaptop_hc'),
     path('hc/riwayat-peminjaman/', riwayatpeminjamanlaptop_hc_view, name='riwayatpeminjamanlaptop_hc'),
-    path('hc/edit-laptop/', editdatalaptop_hc_view, name='editdatalaptop_hc'),
+    path('hc/edit-laptop/<str:id_laptop>/', editdatalaptop_hc_view, name='editdatalaptop_hc'),
     path('hc/input-kriteria/', inputkriteria_hc_view, name='inputkriteria_hc'),
     path('hc/hasil-rekomendasi/', hasilrekomendasi_hc_view, name='hasilrekomendasi_hc'),
     path('hc/detail-rekomendasi/', detailrekomendasi_hc_view, name='detailrekomendasi_hc'),
@@ -79,9 +91,9 @@ urlpatterns = [
     path('it/pengajuan-laptop/', pengajuanlaptop_it_view, name='pengajuanlaptop_it'),
     path('it/detail-pengajuan/', detailpengajuan_it_view, name='detailpengajuan_it'),
     path('it/tambah-laptop/', tambahlaptop_it_view, name='tambahlaptop_it'),
-    path('it/detail-laptop/', detaillaptop_it_view, name='detaillaptop_it'),
+    path('it/detail-laptop/<str:id_laptop>/', detaillaptop_it_view, name='detaillaptop_it'),
     path('it/riwayat-peminjaman/', riwayatpeminjamanlaptop_it_view, name='riwayatpeminjamanlaptop_it'),
-    path('it/edit-laptop/', editdatalaptop_it_view, name='editdatalaptop_it'),
+    path('it/edit-laptop/<str:id_laptop>/', editdatalaptop_it_view, name='editdatalaptop_it'),
     path('it/input-kriteria/', inputkriteria_it_view, name='inputkriteria_it'),
     path('it/hasil-rekomendasi/', hasilrekomendasi_it_view, name='hasilrekomendasi_it'),
     path('it/detail-rekomendasi/', detailrekomendasi_it_view, name='detailrekomendasi_it'),

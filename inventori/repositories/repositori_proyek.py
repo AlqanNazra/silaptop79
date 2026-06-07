@@ -85,8 +85,12 @@ class ProyekRepository(IProyekRepository):
             cur.execute(query, (id_proyek,))
 
             result = cur.fetchone()
-
-            return result[0]
+            if result:
+                if isinstance(result, dict):
+                    return list(result.values())[0]
+                else:
+                    return result[0]
+            return None
 
     # ===================================
     # VALIDATE
@@ -102,8 +106,12 @@ class ProyekRepository(IProyekRepository):
             cur.execute(query, (id_proyek,))
 
             result = cur.fetchone()
-
-            return result[0]
+            if result:
+                if isinstance(result, dict):
+                    return list(result.values())[0]
+                else:
+                    return result[0]
+            return None
 
     # ===================================
     # GET ROLES
@@ -163,7 +171,14 @@ class ProyekRepository(IProyekRepository):
             cur.execute(query, (id_proyek,))
 
             row = cur.fetchone()
-
+            if not row:
+                return {"total_role": 0, "total_teknologi": 0, "rata_bobot": 0}
+            if isinstance(row, dict):
+                return {
+                    "total_role": row.get("total_role") or list(row.values())[0],
+                    "total_teknologi": row.get("total_teknologi") or list(row.values())[1],
+                    "rata_bobot": row.get("rata_bobot") or list(row.values())[2]
+                }
             return {
                 "total_role": row[0],
                 "total_teknologi": row[1],

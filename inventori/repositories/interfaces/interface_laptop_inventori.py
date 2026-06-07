@@ -3,31 +3,31 @@ from abc import ABC, abstractmethod
 class ILaptopInventoriRepository(ABC):
     
     @abstractmethod
-    def tambah_laptop_inventori(self, data):
+    def tambah_laptop(self, dto):
         pass
     
     @abstractmethod
-    def ambil_spek_laptop(self, id_laptop_inventori):
+    def ambil_spek_laptop(self, id_laptop):
         pass
     
     @abstractmethod
-    def ambil_laptop_inventori(self):
+    def ambil_laptop(self):
         pass
     
     @abstractmethod
-    def ambil_hasil_saw_inventori(self, id_hasil):
+    def update_kondisi(self, id_laptop, kondisi):
         pass
     
     @abstractmethod
-    def update_kondisi_inventori(self, id_laptop_inventori, kondisi):
+    def update_status(self, id_laptop, status, lokasi):
         pass
     
     @abstractmethod
-    def hapus_laptop_inventori(self, id_laptop_inventori):
+    def hapus_laptop(self, id_laptop):
         pass
     
     @abstractmethod
-    def update_spek_inventori(self,id_laptop_inventori,id_processor,id_ram,id_storage):
+    def update_spek(self, dto):
         pass
     
     @abstractmethod

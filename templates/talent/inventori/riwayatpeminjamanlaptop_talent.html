@@ -427,7 +427,22 @@
                 </a>
             </div>
 
+            <!-- Flash Messages -->
+            {% if messages %}
+            <div style="margin-bottom:20px;">
+                {% for message in messages %}
+                <div style="padding:12px 20px; border-radius:8px; margin-bottom:8px; font-size:14px; font-weight:500;
+                    {% if message.tags == 'success' %}background:#dcfce7; color:#15803d; border:1px solid #bbf7d0;
+                    {% elif message.tags == 'error' %}background:#fee2e2; color:#dc2626; border:1px solid #fecaca;
+                    {% else %}background:#dbeafe; color:#2563eb; border:1px solid #bfdbfe;{% endif %}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
             <!-- Active Device Card -->
+            {% if active_peminjaman and active_laptop %}
             <div class="active-laptop-card">
                 <div class="badge-active-device">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
@@ -436,9 +451,9 @@
                     </svg>
                     Perangkat Aktif
                 </div>
-                <h2 class="active-device-title">MacBook Pro 16" (M3 Max)</h2>
+                <h2 class="active-device-title">{{ active_laptop.nama_laptop }} ({{ active_laptop.model }})</h2>
                 <p class="active-device-desc">
-                    Anda telah meminjam perangkat ini selama 14 hari. Jika Anda telah menyelesaikan sprint saat ini, harap mulai proses pengembalian agar tersedia bagi orang lain.
+                    Anda telah meminjam perangkat ini sejak {{ active_peminjaman.tanggal_pinjam|date:"d M Y" }}. Jika Anda telah menyelesaikan sprint saat ini, harap mulai proses pengembalian agar tersedia bagi orang lain.
                 </p>
                 <div class="active-card-actions">
                     <a href="{% url 'pengembalianlaptop_talent' %}" style="text-decoration:none;">
@@ -458,6 +473,24 @@
                     </a>
                 </div>
             </div>
+            {% else %}
+            <div class="active-laptop-card" style="border-color: #E2E8F0; box-shadow: none;">
+                <div class="badge-active-device" style="background-color: #F1F5F9; color: #475569; border-color: #CBD5E1;">
+                    Tidak Ada Perangkat Aktif
+                </div>
+                <h2 class="active-device-title" style="color: #64748B;">Tidak ada perangkat aktif</h2>
+                <p class="active-device-desc">
+                    Anda saat ini tidak memiliki perangkat laptop yang sedang dipinjam secara aktif. Silakan ajukan peminjaman jika Anda memerlukan perangkat baru.
+                </p>
+                <div class="active-card-actions">
+                    <a href="{% url 'pengajuanlaptop_talent' %}" style="text-decoration:none;">
+                        <button class="btn-return" style="background-color: #0284C7; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);">
+                            Ajukan Laptop Baru
+                        </button>
+                    </a>
+                </div>
+            </div>
+            {% endif %}
 
             <!-- History Log Perangkat Card -->
             <div class="history-card">
@@ -504,6 +537,7 @@
                             </tr>
                         </thead>
                         <tbody>
+                            {% for p in riwayat_list %}
                             <tr>
                                 <td>
                                     <div class="laptop-cell">
@@ -515,23 +549,35 @@
                                             </svg>
                                         </div>
                                         <div>
-                                            <span class="laptop-name-text">MacBook Air M2</span>
-                                            <span class="laptop-id-text">ID Aset: PL-LT-0942</span>
+                                            <span class="laptop-name-text">{{ p.nama_laptop }}</span>
+                                            <span class="laptop-id-text">No Seri: {{ p.no_inventori }}</span>
                                         </div>
                                     </div>
                                 </td>
                                 <td>
-                                    <span class="periode-main-text">12 Okt 2023 - 05 Nov 2023</span>
-                                    <span class="periode-sub-text">Selesai Tepat Waktu</span>
+                                    <span class="periode-main-text">{{ p.tanggal_pinjam|date:"d M Y" }} - {% if p.tanggal_kembali %}{{ p.tanggal_kembali|date:"d M Y" }}{% else %}Sekarang{% endif %}</span>
+                                    <span class="periode-sub-text">Ket: {{ p.keterangan|default:"-" }}</span>
                                 </td>
                                 <td>
-                                    <span class="durasi-text">24 Hari</span>
+                                    <span class="durasi-text">-</span>
                                 </td>
                                 <td>
+                                    {% if p.status == 'selesai' or p.status == 'dikembalikan' %}
                                     <span class="badge-returned">
                                         <span class="dot"></span>
                                         DIKEMBALIKAN
                                     </span>
+                                    {% elif p.status == 'dipinjam' or p.status == 'aktif' %}
+                                    <span class="badge-returned" style="background-color: #DBEAFE; color: #1E40AF;">
+                                        <span class="dot" style="background-color: #2563EB;"></span>
+                                        DIPINJAM
+                                    </span>
+                                    {% else %}
+                                    <span class="badge-returned" style="background-color: #FEE2E2; color: #991B1B;">
+                                        <span class="dot" style="background-color: #EF4444;"></span>
+                                        {{ p.status|upper }}
+                                    </span>
+                                    {% endif %}
                                 </td>
                                 <td>
                                     <a href="{% url 'detaillaptop_talent' %}" style="text-decoration:none;">
@@ -539,47 +585,17 @@
                                     </a>
                                 </td>
                             </tr>
+                            {% empty %}
                             <tr>
-                                <td>
-                                    <div class="laptop-cell">
-                                        <div class="laptop-icon-sm">
-                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
-                                                <line x1="8" y1="21" x2="16" y2="21"></line>
-                                                <line x1="12" y1="17" x2="12" y2="21"></line>
-                                            </svg>
-                                        </div>
-                                        <div>
-                                            <span class="laptop-name-text">Dell XPS 15</span>
-                                            <span class="laptop-id-text">ID Aset: PL-LT-0211</span>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <span class="periode-main-text">20 Agu 2023 - 15 Sep 2023</span>
-                                    <span class="periode-sub-text">Proyek: Nebula Fase 1</span>
-                                </td>
-                                <td>
-                                    <span class="durasi-text">26 Hari</span>
-                                </td>
-                                <td>
-                                    <span class="badge-returned">
-                                        <span class="dot"></span>
-                                        DIKEMBALIKAN
-                                    </span>
-                                </td>
-                                <td>
-                                    <a href="{% url 'detaillaptop_talent' %}" style="text-decoration:none;">
-                                        <button class="btn-table-action">Detail</button>
-                                    </a>
-                                </td>
+                                <td colspan="5" style="text-align: center; padding: 40px; color: #94A3B8;">Belum ada riwayat peminjaman laptop.</td>
                             </tr>
+                            {% endfor %}
                         </tbody>
                     </table>
                 </div>
 
                 <div class="pagination-row">
-                    <span class="pagination-text">Menampilkan 2 dari 2 riwayat</span>
+                    <span class="pagination-text">Menampilkan {{ riwayat_list|length }} riwayat</span>
                     <div class="pagination-buttons">
                         <button class="btn-pagination">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">

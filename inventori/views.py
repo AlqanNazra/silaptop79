@@ -44,7 +44,7 @@ def _parse_body(request):
 #   PAGE VIEWS (Server-Side Rendering ke Template HTML)
 # =============================================================================
 
-@login_required
+# @login_required
 def manajemen_laptop_page(request):
     """
     Halaman daftar inventori laptop.
@@ -68,10 +68,10 @@ def manajemen_laptop_page(request):
         'search_query': search_query,
         'status_filter': status_filter,
     }
-    return render(request, 'inventori/manajemenlaptop_hc.html', context)
+    return render(request, 'hc/inventori/manajemenlaptop_hc.html', context)
 
 
-@login_required
+# @login_required
 def pengajuan_page_view(request):
     """
     Halaman daftar pengajuan laptop.
@@ -79,7 +79,7 @@ def pengajuan_page_view(request):
     """
     try:
         service = PengajuanService()
-        semua_pengajuan = service.ambil_semua_pengajuan()
+        semua_pengajuan = service.service_ambil_semua_pengajuan()
         
         # Calculate stats
         total = len(semua_pengajuan)
@@ -104,10 +104,10 @@ def pengajuan_page_view(request):
             'total_ditolak': 0,
         }
 
-    return render(request, 'inventori/pengajuanlaptop_hc.html', context)
+    return render(request, 'hc/inventori/pengajuanlaptop_hc.html', context)
 
 
-@login_required
+# @login_required
 def tambah_laptop_page(request):
     """
     Halaman form tambah laptop baru.
@@ -135,7 +135,7 @@ def tambah_laptop_page(request):
             service = CreateLaptopInventoriService()
             service.execute(dto)
             messages.success(request, 'Laptop berhasil ditambahkan ke inventori!')
-            return redirect('manajemenlaptop_hc')
+            return redirect('inventori:manajemen_laptop')
         except Exception as e:
             messages.error(request, f'Gagal menambahkan laptop: {str(e)}')
 
@@ -144,10 +144,10 @@ def tambah_laptop_page(request):
         'rams': rams,
         'storages': storages,
     }
-    return render(request, 'inventori/tambahlaptop_hc.html', context)
+    return render(request, 'hc/inventori/tambahlaptop_hc.html', context)
 
 
-@login_required
+# @login_required
 def detail_laptop_page(request, id_laptop):
     """
     Halaman detail laptop berdasarkan ID.
@@ -161,7 +161,7 @@ def detail_laptop_page(request, id_laptop):
         ).get(id_laptop_inventori=id_laptop)
     except LaptopInventori.DoesNotExist:
         messages.error(request, 'Laptop tidak ditemukan.')
-        return redirect('manajemenlaptop_hc')
+        return redirect('inventori:manajemen_laptop')
 
     processors = Processor.objects.all()
     rams = RAM.objects.all()
@@ -175,7 +175,7 @@ def detail_laptop_page(request, id_laptop):
                 service = DeleteLaptopInventoriService()
                 service.execute(id_laptop)
                 messages.success(request, f'Laptop {laptop.nama_laptop} berhasil dihapus.')
-                return redirect('manajemenlaptop_hc')
+                return redirect('inventori:manajemen_laptop')
             except Exception as e:
                 messages.error(request, f'Gagal menghapus: {str(e)}')
 
@@ -192,7 +192,7 @@ def detail_laptop_page(request, id_laptop):
                     update_service.update_status(id_laptop, status, lokasi)
 
                 messages.success(request, 'Data laptop berhasil diperbarui.')
-                return redirect('detail_laptop', id_laptop=id_laptop)
+                return redirect('inventori:detaillaptop_hc', id_laptop=id_laptop)
             except Exception as e:
                 messages.error(request, f'Gagal update: {str(e)}')
 
@@ -202,19 +202,140 @@ def detail_laptop_page(request, id_laptop):
         'rams': rams,
         'storages': storages,
     }
-    return render(request, 'inventori/detail.html', context)
+    return render(request, 'hc/inventori/detaillaptop_hc.html', context)
 
-@login_required
+# @login_required
 def detailpengajuan_hc_view(request):
-    return render(request, 'inventori/detailpengajuan_hc.html')
+    id_pengajuan = request.GET.get('id')
+    if not id_pengajuan:
+        messages.error(request, 'ID Pengajuan tidak diberikan.')
+        return redirect('inventori:pengajuanlaptop_hc')
 
-@login_required
+    try:
+        service = PengajuanService()
+        pengajuan = service.service_cari_pengajuan_by_id(id_pengajuan)
+        
+        if not pengajuan:
+            messages.error(request, 'Data pengajuan tidak ditemukan.')
+            return redirect('inventori:pengajuanlaptop_hc')
+
+        if request.method == 'POST':
+            action = request.POST.get('action')
+            if action in ['approved', 'rejected']:
+                from inventori.dto.dto_pengajuan import PengajuanDTO
+                # Get user ID safely
+                user_id = request.user.id_user if hasattr(request.user, 'id_user') else None
+                
+                dto = PengajuanDTO(
+                    id_pengajuan=id_pengajuan,
+                    status=action,
+                    approved_by=user_id
+                )
+                service.service_approve_pengajuan(dto)
+                messages.success(request, f'Pengajuan berhasil di-{action}.')
+                return redirect('inventori:pengajuanlaptop_hc')
+
+        context = {
+            'pengajuan': pengajuan
+        }
+        return render(request, 'hc/inventori/detailpengajuan_hc.html', context)
+        
+    except Exception as e:
+        messages.error(request, f'Terjadi kesalahan: {str(e)}')
+        return redirect('inventori:pengajuanlaptop_hc')
+
+# @login_required
 def riwayatpeminjamanlaptop_hc_view(request):
-    return render(request, 'inventori/riwayatpeminjamanlaptop_hc.html')
+    from inventori.services.service_peminjaman import PeminjamanService
+    from inventori.models import User, LaptopInventori
+    
+    try:
+        service = PeminjamanService()
+        list_peminjaman = service.service_ambil_semua_peminjaamn()
+        
+        users_dict = {u.id_user: u.nama for u in User.objects.all()}
+        users_role_dict = {u.id_user: u.role for u in User.objects.all()}
+        laptops_dict = {l.id_laptop_inventori: l.nama_laptop for l in LaptopInventori.objects.all()}
+        
+        for p in list_peminjaman:
+            p.user_nama = users_dict.get(p.id_user, p.id_user)
+            p.user_role = users_role_dict.get(p.id_user, "-")
+            p.laptop_nama = laptops_dict.get(p.id_laptop_inventori, p.id_laptop_inventori)
+            
+        total_peminjaman = len(list_peminjaman)
+        peminjam_terakhir = "-"
+        
+        # Sort by tanggal_pinjam desc
+        sorted_p = sorted(list_peminjaman, key=lambda x: str(x.tanggal_pinjam) if x.tanggal_pinjam else "", reverse=True)
+        if sorted_p:
+            peminjam_terakhir = sorted_p[0].user_nama
+            
+        context = {
+            'list_peminjaman': list_peminjaman,
+            'total_peminjaman': total_peminjaman,
+            'peminjam_terakhir': peminjam_terakhir,
+        }
+        return render(request, 'hc/inventori/riwayatpeminjamanlaptop_hc.html', context)
+    except Exception as e:
+        messages.error(request, f'Gagal memuat riwayat: {str(e)}')
+        return redirect('inventori:manajemen_laptop')
 
-@login_required
+# @login_required
 def editdatalaptop_hc_view(request, id_laptop):
-    return render(request, 'inventori/editdatalaptop_hc.html')
+    try:
+        laptop = LaptopInventori.objects.get(id_laptop_inventori=id_laptop)
+    except LaptopInventori.DoesNotExist:
+        messages.error(request, 'Laptop tidak ditemukan.')
+        return redirect('inventori:manajemen_laptop')
+
+    if request.method == 'POST':
+        try:
+            update_service = UpdateLaptopInventoriService()
+            kondisi = request.POST.get('kondisi')
+            status = request.POST.get('status')
+            lokasi = request.POST.get('lokasi')
+
+            if kondisi:
+                update_service.update_kondisi(id_laptop, kondisi)
+            if status:
+                update_service.update_status(id_laptop, status, lokasi)
+
+            # Update spesifikasi
+            id_processor = request.POST.get('id_processor')
+            id_ram = request.POST.get('id_ram')
+            id_storage = request.POST.get('id_storage')
+            
+            if id_processor and id_ram and id_storage:
+                dto = LaptopInventoriDTO(
+                    nama_laptop=laptop.nama_laptop,
+                    model=laptop.model,
+                    os=laptop.os,
+                    kondisi=kondisi or laptop.kondisi,
+                    status=status or laptop.status,
+                    lokasi=lokasi or laptop.lokasi,
+                    id_processor=id_processor,
+                    id_ram=id_ram,
+                    id_storage=id_storage,
+                    id_laptop_inventori=id_laptop
+                )
+                update_service.update_spek(dto)
+
+            messages.success(request, 'Data laptop berhasil diperbarui.')
+            return redirect('inventori:detaillaptop_hc', id_laptop=id_laptop)
+        except Exception as e:
+            messages.error(request, f'Gagal mengupdate laptop: {str(e)}')
+
+    processors = Processor.objects.all()
+    rams = RAM.objects.all()
+    storages = Storage.objects.all()
+    
+    context = {
+        'laptop': laptop,
+        'processors': processors,
+        'rams': rams,
+        'storages': storages,
+    }
+    return render(request, 'hc/inventori/editdatalaptop_hc.html', context)
 
 
 # =============================================================================
@@ -420,10 +541,6 @@ def list_peminjaman_view(request):
             return JsonResponse({"data": [d.__dict__ for d in data]})
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)
-<<<<<<< HEAD
-    return JsonResponse({"error": "Method not allowed"}, status=405)
-=======
-
     return JsonResponse({"error": "Method not allowed"}, status=405)
 
 def detail_peminjaman_view(request, id_peminjaman):
@@ -583,4 +700,3 @@ def tambahlaptop_hc_view(request):
         "ram": data_ram,
         "storage": data_storage
     })
->>>>>>> origin/dev-alqan

@@ -1,8 +1,5 @@
 from django.urls import path
-<<<<<<< HEAD
 from .views import testing_swara
-=======
->>>>>>> origin/dev-alqan
 
 app_name = 'dss'
 

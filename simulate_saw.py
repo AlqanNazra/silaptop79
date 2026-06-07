@@ -147,7 +147,7 @@ class DummySawService(Servicesaw):
 
         max_values, min_values = {}, {}
         for key in keys:
-            if key == "id":
+            if key in ("id", "nama"):
                 continue
             vals = [item[key] for item in data_preproses if item.get(key) is not None]
             max_values[key] = max(vals) if vals else 0
@@ -157,7 +157,7 @@ class DummySawService(Servicesaw):
         for item in data_preproses:
             normal_item = {"id": item["id"]}
             for key in keys:
-                if key == "id":
+                if key in ("id", "nama"):
                     continue
                 tipe  = map_tipe.get(key, "benefit")
                 nilai = item.get(key, 0)

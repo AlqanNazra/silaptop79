@@ -7,14 +7,14 @@ urlpatterns = [
     # =========================================================
     # PAGE VIEWS (Render Template HTML)
     # =========================================================
-    path('', views.manajemen_laptop_page, name='manajemenlaptop_hc'),
-    path('tambah/', views.tambah_laptop_page, name='tambahlaptop_hc'),
-    path('detail/<str:id_laptop>/', views.detail_laptop_page, name='detaillaptop_hc'), # Updated name
-    path('pengajuan/', views.pengajuan_page_view, name='pengajuanlaptop_hc'),
+    path('manajemen-laptop/', views.manajemen_laptop_page, name='manajemen_laptop'),
+    path('tambah-laptop/', views.tambah_laptop_page, name='tambahlaptop_hc'),
+    path('detail-laptop/<str:id_laptop>/', views.detail_laptop_page, name='detaillaptop_hc'),
+    path('pengajuan-laptop/', views.pengajuan_page_view, name='pengajuanlaptop_hc'),
     
-    path('pengajuan/detail/', views.detailpengajuan_hc_view, name='detailpengajuan_hc'),
+    path('detail-pengajuan/', views.detailpengajuan_hc_view, name='detailpengajuan_hc'),
     path('riwayat-peminjaman/', views.riwayatpeminjamanlaptop_hc_view, name='riwayatpeminjamanlaptop_hc'),
-    path('edit/<str:id_laptop>/', views.editdatalaptop_hc_view, name='editdatalaptop_hc'),
+    path('edit-laptop/<str:id_laptop>/', views.editdatalaptop_hc_view, name='editdatalaptop_hc'),
 
     # =========================================================
     # API ENDPOINTS (JSON Response)

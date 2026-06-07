@@ -12,6 +12,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1.1">
@@ -109,7 +110,63 @@
             background-color: #0369A1;
         }
 
-        /* Stats Row (Cards) */
+        /* Actual Stats Row */
+        .actual-stats-container {
+            display: flex;
+            gap: 24px;
+            margin-bottom: 8px;
+        }
+
+        .stat-card {
+            background-color: #FFFFFF;
+            border-radius: 16px;
+            padding: 24px 32px;
+            border: 1px solid #E2E8F0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+            flex: 1;
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .icon-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #F1F5F9;
+            color: #0F172A;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .trend-badge {
+            font-size: 11px;
+            font-weight: 700;
+            color: #16A34A;
+        }
+
+        .stat-title {
+            font-size: 11px;
+            font-weight: 700;
+            color: #94A3B8;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin: 0 0 8px 0;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 800;
+            color: #0F172A;
+            margin: 0;
+        }
+
+        /* Stats Row (Action Cards) */
         .stats-container {
             display: flex;
             gap: 24px;
@@ -231,6 +288,33 @@
                     </div>
                 </div>
 
+                <!-- Stats Section -->
+                <div class="actual-stats-container">
+                    <!-- Total Laptop Card -->
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="icon-circle">
+                                <i class="fa-solid fa-laptop"></i>
+                            </div>
+                            <span class="trend-badge">+1% Bulan Ini</span>
+                        </div>
+                        <p class="stat-title">Total Data Laptop</p>
+                        <h3 class="stat-value">{{ total_laptop }}</h3>
+                    </div>
+
+                    <!-- Total Pengajuan Card -->
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="icon-circle">
+                                <i class="fa-solid fa-file-invoice"></i>
+                            </div>
+                            <span class="trend-badge" style="color:#0284C7;">{{ pengajuan_pending }} Pending</span>
+                        </div>
+                        <p class="stat-title">Total Pengajuan</p>
+                        <h3 class="stat-value">{{ total_pengajuan }}</h3>
+                    </div>
+                </div>
+
                 <!-- Action Cards Section -->
                 <div class="stats-container">
                     
@@ -252,9 +336,9 @@
                                 </svg>
                                 <span>DIAJUKAN</span>
                             </div>
-                            <h3 class="action-title">Data Spek</h3>
+                            <h3 class="action-title">Data Laptop</h3>
                             <a href="{% url 'manajemen_laptop_it' %}" class="btn-action-full">
-                                Tambah Data Spek
+                                Kelola Data Laptop
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <line x1="5" y1="12" x2="19" y2="12"></line>

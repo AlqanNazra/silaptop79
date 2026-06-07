@@ -25,7 +25,7 @@
             </li>
 
             <li>
-                <a href="{% url 'pengajuanlaptop_hc' %}"
+                <a href="{% url 'inventori:pengajuanlaptop_hc' %}"
                     class="menu-item {% if active_page == 'pengajuan_laptop' %}active{% endif %}">
                     <svg class="menu-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -39,7 +39,7 @@
             </li>
 
             <li>
-                <a href="{% url 'manajemen_laptop' %}"
+                <a href="{% url 'inventori:manajemen_laptop' %}"
                     class="menu-item {% if request.resolver_match.url_name == 'manajemen_laptop' or request.resolver_match.url_name == 'tambahlaptop_hc' or request.resolver_match.url_name == 'detaillaptop_hc' or request.resolver_match.url_name == 'editdatalaptop_hc' or request.resolver_match.url_name == 'riwayatpeminjamanlaptop_hc' %}active{% endif %}">
 
                     <svg class="menu-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"

@@ -29,8 +29,12 @@ ALLOWED_HOSTS = ['*', 'testserver', 'localhost', '127.0.0.1']
 
 # Authentication Settings
 LOGIN_URL = '/login/'
-LOGIN_REDIRECT_URL = '/dashboardhc/'
+LOGIN_REDIRECT_URL = '/login-redirect/'
 LOGOUT_REDIRECT_URL = '/login/'
+AUTHENTICATION_BACKENDS = [
+    'core.auth_backend.InventoriAuthBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
 
 
 INSTALLED_APPS = [

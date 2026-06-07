@@ -111,10 +111,6 @@ class HasilSAW(models.Model):
         on_delete=models.CASCADE,
         null=True,
         blank=True
-=========
-        on_delete=models.CASCADE, 
-        default= 1
->>>>>>>>> Temporary merge branch 2
     )
 
     def __str__(self):

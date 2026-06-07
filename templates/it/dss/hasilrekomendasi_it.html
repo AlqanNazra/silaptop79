@@ -528,156 +528,37 @@
                         </tr>
                     </thead>
                     <tbody>
-
-                        <!-- Row 1: Top Result -->
+                        {% for item in ranking %}
                         <tr>
                             <td style="text-align: center;">
                                 <div style="display: flex; justify-content: center;">
-                                    <div class="rank-cell rank-1">
-                                        1
+                                    <div class="rank-cell {% if forloop.counter == 1 %}rank-1{% endif %}">
+                                        {{ item.rank }}
                                     </div>
                                 </div>
                             </td>
                             <td>
-                                <span class="nama-laptop">MacBook Air M2 (2023)</span>
+                                <span class="nama-laptop" style="margin-bottom:0;">{{ item.detail.nama }}</span>
                             </td>
                             <td>
                                 <span class="source-badge source-internal">
                                     <i class="fa-solid fa-building"></i> Internal Kantor
                                 </span>
                             </td>
-                            <td>Apple M2 Chip</td>
-                            <td><span class="ram-badge">16GB</span></td>
-                            <td><span class="score-val high">0.982</span></td>
-                            <td><button class="btn-detail">Detail</button></td>
+                            <td>Intel Core i{{ item.detail.processor }} Gen</td>
+                            <td><span class="ram-badge">{{ item.detail.ram }}GB</span></td>
+                            <td><span class="score-val {% if forloop.counter == 1 %}high{% endif %}">{{ item.skor|floatformat:3 }}</span></td>
+                            <td>
+                                <a href="{% url 'detailrekomendasi_it' %}?id={{ item.id }}" style="text-decoration: none;">
+                                    <button class="btn-detail">Detail</button>
+                                </a>
+                            </td>
                         </tr>
-
-                        <!-- Row 2 -->
+                        {% empty %}
                         <tr>
-                            <td style="text-align: center;">
-                                <div style="display: flex; justify-content: center;">
-                                    <div class="rank-cell">2</div>
-                                </div>
-                            </td>
-                            <td>
-                                <span class="nama-laptop" style="margin-bottom:0;">Lenovo Yoga Slim 7i Pro</span>
-                            </td>
-                            <td>
-                                <span class="source-badge source-internal">
-                                    <i class="fa-solid fa-building"></i> Internal Kantor
-                                </span>
-                            </td>
-                            <td>Intel Core i7-12700H</td>
-                            <td><span class="ram-badge">16GB</span></td>
-                            <td><span class="score-val">0.921</span></td>
-                            <td><button class="btn-detail">Detail</button></td>
+                            <td colspan="7" style="text-align: center;">Belum ada hasil kalkulasi SAW. Silahkan input kriteria terlebih dahulu.</td>
                         </tr>
-
-                        <!-- Row 3 -->
-                        <tr>
-                            <td style="text-align: center;">
-                                <div style="display: flex; justify-content: center;">
-                                    <div class="rank-cell">3</div>
-                                </div>
-                            </td>
-                            <td>
-                                <span class="nama-laptop" style="margin-bottom:0;">HP Pavilion Plus 14</span>
-                            </td>
-                            <td>
-                                <span class="source-badge source-internal">
-                                    <i class="fa-solid fa-building"></i> Internal Kantor
-                                </span>
-                            </td>
-                            <td>Intel Core i5-12500H</td>
-                            <td><span class="ram-badge">16GB</span></td>
-                            <td><span class="score-val">0.945</span></td>
-                            <td><button class="btn-detail">Detail</button></td>
-                        </tr>
-
-                        <!-- Row 4 -->
-                        <tr>
-                            <td style="text-align: center;">
-                                <div style="display: flex; justify-content: center;">
-                                    <div class="rank-cell">4</div>
-                                </div>
-                            </td>
-                            <td>
-                                <span class="nama-laptop" style="margin-bottom:0;">Acer Swift Edge 16</span>
-                            </td>
-                            <td>
-                                <span class="source-badge source-internal">
-                                    <i class="fa-solid fa-building"></i> Internal Kantor
-                                </span>
-                            </td>
-                            <td>AMD Ryzen 7 6800U</td>
-                            <td><span class="ram-badge">16GB</span></td>
-                            <td><span class="score-val">0.865</span></td>
-                            <td><button class="btn-detail">Detail</button></td>
-                        </tr>
-
-                        <!-- Row 5 -->
-                        <tr>
-                            <td style="text-align: center;">
-                                <div style="display: flex; justify-content: center;">
-                                    <div class="rank-cell">5</div>
-                                </div>
-                            </td>
-                            <td>
-                                <span class="nama-laptop" style="margin-bottom:0;">ASUS Zenbook S</span>
-                            </td>
-                            <td>
-                                <span class="source-badge source-internal">
-                                    <i class="fa-solid fa-building"></i> Internal Kantor
-                                </span>
-                            </td>
-                            <td>AMD Ryzen 7 6800U</td>
-                            <td><span class="ram-badge">16GB</span></td>
-                            <td><span class="score-val">0.812</span></td>
-                            <td><button class="btn-detail">Detail</button></td>
-                        </tr>
-
-                        <!-- Row 6 -->
-                        <tr>
-                            <td style="text-align: center;">
-                                <div style="display: flex; justify-content: center;">
-                                    <div class="rank-cell">6</div>
-                                </div>
-                            </td>
-                            <td>
-                                <span class="nama-laptop" style="margin-bottom:0;">Dell XPS 13 Plus</span>
-                            </td>
-                            <td>
-                                <span class="source-badge source-internal">
-                                    <i class="fa-solid fa-building"></i> Internal Kantor
-                                </span>
-                            </td>
-                            <td>AMD Ryzen 7 6800U</td>
-                            <td><span class="ram-badge">16GB</span></td>
-                            <td><span class="score-val">0.788</span></td>
-                            <td><button class="btn-detail">Detail</button></td>
-                        </tr>
-
-                        <!-- Row 7 (External Source Example) -->
-                        <tr>
-                            <td style="text-align: center;">
-                                <div style="display: flex; justify-content: center;">
-                                    <div class="rank-cell">7</div>
-                                </div>
-                            </td>
-                            <td>
-                                <span class="nama-laptop" style="margin-bottom:0;">Microsoft Surface Laptop 5</span>
-                            </td>
-                            <td>
-                                <span class="source-badge source-external">
-                                    <i class="fa-solid fa-globe"></i> Database Luar
-                                </span>
-                            </td>
-                            <td>Intel Core i5-1235U</td>
-                            <td><span class="ram-badge">8GB</span></td>
-                            <td><span class="score-val">0.780</span></td>
-                            <td><button class="btn-detail">Detail</button></td>
-                        </tr>
-
+                        {% endfor %}
                     </tbody>
                 </table>
 

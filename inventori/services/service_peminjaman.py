@@ -1,4 +1,4 @@
-from db import get_connection
+from core.db import get_connection
 from inventori.repositories.repositori_peminjaman import PeminjamanRepository
 from inventori.repositories.dto.dto_peminjaman import PeminjamanDTO
 
@@ -38,6 +38,9 @@ class PeminjamanService:
             return res
         finally:
             conn.close()
+            
+    def service_ambil_semua_peminjaman(self):
+        return self.service_ambil_semua_peminjaamn()
             
     def service_cari_peminjaman(self,id_peminjaman):
         conn = get_connection()

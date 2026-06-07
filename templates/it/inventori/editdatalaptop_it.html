@@ -176,7 +176,7 @@
 
 <body>
 
-    {% include 'hc/components/sidebar.html' with active_page='manajemen_laptop' %}
+    {% include 'it/components/sidebar.html' with active_page='data_laptop' %}
 
     <div class="main-content">
         <div class="top-nav">
@@ -185,8 +185,7 @@
                 <h1 class="page-title">Edit Data Laptop</h1>
             </div>
             <div class="nav-buttons">
-                <a href="{% url 'inventori:detaillaptop_hc' laptop.id_laptop_inventori %}"
-                    class="btn-nav btn-grey">Batal</a>
+                <a href="{% url 'detaillaptop_it' laptop.id_laptop_inventori %}" class="btn-nav btn-grey">Batal</a>
                 <button type="submit" form="editForm" class="btn-nav btn-blue">
                     <i class="fa-solid fa-save"></i> Simpan Perubahan
                 </button>
@@ -207,7 +206,7 @@
         </div>
         {% endif %}
 
-        <form id="editForm" method="POST" action="{% url 'inventori:editdatalaptop_hc' laptop.id_laptop_inventori %}">
+        <form id="editForm" method="POST" action="{% url 'editdatalaptop_it' laptop.id_laptop_inventori %}">
             {% csrf_token %}
             <div class="edit-grid">
 
@@ -219,11 +218,9 @@
                         <div class="form-group">
                             <label>Status Availability</label>
                             <select name="status">
-                                <option value="tersedia" {% if laptop.status=='tersedia' %}selected{% endif %}>Tersedia
-                                </option>
-                                <option value="dipinjam" {% if laptop.status=='dipinjam' %}selected{% endif %}>Dipinjam
-                                </option>
-                                <option value="rusak" {% if laptop.status=='rusak' %}selected{% endif %}>Rusak</option>
+                                <option value="tersedia" {% if laptop.status == 'tersedia' %}selected{% endif %}>Tersedia</option>
+                                <option value="dipinjam" {% if laptop.status == 'dipinjam' %}selected{% endif %}>Dipinjam</option>
+                                <option value="rusak" {% if laptop.status == 'rusak' %}selected{% endif %}>Rusak</option>
                             </select>
                         </div>
                         <div class="form-group">
@@ -233,11 +230,9 @@
                         <div class="form-group">
                             <label>Device Condition</label>
                             <select name="kondisi">
-                                <option value="baik" {% if laptop.kondisi=='baik' %}selected{% endif %}>Baik</option>
-                                <option value="rusak_ringan" {% if laptop.kondisi=='rusak_ringan' %}selected{% endif %}>
-                                    Rusak Ringan</option>
-                                <option value="rusak_berat" {% if laptop.kondisi=='rusak_berat' %}selected{% endif %}>
-                                    Rusak Berat</option>
+                                <option value="baik" {% if laptop.kondisi == 'baik' %}selected{% endif %}>Baik</option>
+                                <option value="rusak_ringan" {% if laptop.kondisi == 'rusak_ringan' %}selected{% endif %}>Rusak Ringan</option>
+                                <option value="rusak_berat" {% if laptop.kondisi == 'rusak_berat' %}selected{% endif %}>Rusak Berat</option>
                             </select>
                         </div>
                     </div>
@@ -271,9 +266,7 @@
                                 <label>Processor</label>
                                 <select name="id_processor">
                                     {% for p in processors %}
-                                    <option value="{{ p.id_processor }}" {% if
-                                        laptop.id_processor.id_processor==p.id_processor %}selected{% endif %}>{{
-                                        p.nama_processor }}</option>
+                                    <option value="{{ p.id_processor }}" {% if laptop.id_processor.id_processor == p.id_processor %}selected{% endif %}>{{ p.nama_processor }}</option>
                                     {% endfor %}
                                 </select>
                             </div>
@@ -281,8 +274,7 @@
                                 <label>RAM</label>
                                 <select name="id_ram">
                                     {% for r in rams %}
-                                    <option value="{{ r.id_ram }}" {% if laptop.id_ram.id_ram==r.id_ram %}selected{%
-                                        endif %}>{{ r.kapasitas_gb }} GB {{ r.tipe }}</option>
+                                    <option value="{{ r.id_ram }}" {% if laptop.id_ram.id_ram == r.id_ram %}selected{% endif %}>{{ r.kapasitas_gb }} GB {{ r.tipe }}</option>
                                     {% endfor %}
                                 </select>
                             </div>
@@ -292,8 +284,7 @@
                                 <label>Storage</label>
                                 <select name="id_storage">
                                     {% for s in storages %}
-                                    <option value="{{ s.id_storage }}" {% if laptop.id_storage.id_storage==s.id_storage
-                                        %}selected{% endif %}>{{ s.kapasitas_gb }} GB {{ s.tipe }}</option>
+                                    <option value="{{ s.id_storage }}" {% if laptop.id_storage.id_storage == s.id_storage %}selected{% endif %}>{{ s.kapasitas_gb }} GB {{ s.tipe }}</option>
                                     {% endfor %}
                                 </select>
                             </div>

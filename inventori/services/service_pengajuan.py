@@ -1,4 +1,4 @@
-from db import get_connection
+from core.db import get_connection
 from inventori.repositories.repositori_pengajuan import PengajuanRepository
 from inventori.repositories.repositori_peminjaman import PeminjamanRepository
 from inventori.repositories.dto.dto_pengajuan import PengajuanDTO

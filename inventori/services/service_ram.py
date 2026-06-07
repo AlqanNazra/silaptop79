@@ -1,4 +1,4 @@
-from db import get_connection
+from core.db import get_connection
 from inventori.repositories.repositori_ram import RamRepository
 from inventori.repositories.dto.dto_ram import RamDTO
 

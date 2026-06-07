@@ -106,3 +106,5 @@ class PreprocessingService:
             })
 
         return hasil
+
+Servicepreposesdata = PreprocessingService

@@ -1,4 +1,4 @@
-from db import get_connection
+from core.db import get_connection
 from inventori.repositories.repositori_processor import ProcessorRepository
 
 class ReadProcessorService:

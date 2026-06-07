@@ -56,7 +56,12 @@ class LaptopPengadaanRepository(ILaptopPengadaanRepositoryImpl):
             result = cur.fetchone()
             self.conn.commit()
 
-            return result[0] if result else None
+            if result:
+                if isinstance(result, dict):
+                    return list(result.values())[0]
+                else:
+                    return result[0]
+            return None
         
     def update_spek_pengadaan(self, data: LaptopPengadaanDTO):
         query = """
@@ -73,7 +78,12 @@ class LaptopPengadaanRepository(ILaptopPengadaanRepositoryImpl):
             result = cur.fetchone()
             self.conn.commit()
 
-            return result[0] if result else None
+            if result:
+                if isinstance(result, dict):
+                    return list(result.values())[0]
+                else:
+                    return result[0]
+            return None
         
     def hapus_laptop_pengadaan(self, id_laptop_pengadaan):
         query = "SELECT hapus_laptop_pengadaan(%s);"
@@ -83,7 +93,12 @@ class LaptopPengadaanRepository(ILaptopPengadaanRepositoryImpl):
             result = cur.fetchone()
             self.conn.commit()
 
-            return result[0] if result else None
+            if result:
+                if isinstance(result, dict):
+                    return list(result.values())[0]
+                else:
+                    return result[0]
+            return None
         
     def ambil_hasil_saw_pengadaan(self, id_hasil):
         query = "SELECT * FROM ambil_hasil_saw_pengadaan(%s);"
