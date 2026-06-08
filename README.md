@@ -24,9 +24,9 @@
 
 ## 📖 Tentang Proyek
 
-**SILAPTOP79** adalah aplikasi manajemen aset laptop berbasis web yang dikembangkan untuk PT Padepokan Tujuh Sembilan. Sistem ini hadir untuk menggantikan proses manual dengan solusi digital yang terintegrasi — mulai dari pencatatan inventori, proses pengajuan & distribusi laptop, hingga pengambilan keputusan berbasis data menggunakan metode **MCDM (Multi Criteria Decision Making)**.
+**SILAPTOP79** adalah aplikasi manajemen aset laptop berbasis web yang dikembangkan untuk PT Padepokan Tujuh Sembilan. Sistem ini hadir untuk menggantikan proses manual dengan solusi digital yang terintegrasi mulai dari pencatatan inventori, proses pengajuan & distribusi laptop, hingga pengambilan keputusan berbasis data menggunakan metode **MCDM (Multi Criteria Decision Making)**.
 
-Proyek ini dikembangkan menggunakan pendekatan **Incremental Development** — setiap increment menghasilkan fitur yang siap digunakan dan dapat dievaluasi secara bertahap.
+Proyek ini dikembangkan menggunakan pendekatan **Incremental Development** setiap increment menghasilkan fitur yang siap digunakan dan dapat dievaluasi secara bertahap.
 
 ### 🎯 Tujuan Pengembangan
 
