@@ -5,14 +5,14 @@
 ### Sistem Informasi Laptop Padepokan 79
 
 [![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
-[![Next.js](https://img.shields.io/badge/Next.js-14+-000000?style=for-the-badge&logo=nextdotjs&logoColor=white)](https://nextjs.org)
+[![Django](https://img.shields.io/badge/Django-5.0+-092E20?style=for-the-badge&logo=django&logoColor=white)](https://djangoproject.com)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16+-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](https://postgresql.org)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5+-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://typescriptlang.org)
+[![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)](https://w3.org)
+[![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white)](https://w3.org)
 
 <br/>
 
-> Aplikasi web terpadu untuk manajemen inventori laptop, pengelolaan peminjaman/distribusi perangkat, dan sistem pengambilan keputusan berbasis MCDM di lingkungan PT Padepokan Tujuh Sembilan.
+> Aplikasi web berbasis Django untuk manajemen inventori laptop, pengelolaan peminjaman/distribusi perangkat, dan sistem pengambilan keputusan (DSS) pemilihan laptop menggunakan metode SWARA-SAW di PT Padepokan Tujuh Sembilan.
 
 <br/>
 
@@ -24,9 +24,9 @@
 
 ## 📖 Tentang Proyek
 
-**SILAPTOP79** adalah aplikasi manajemen aset laptop berbasis web yang dikembangkan untuk PT Padepokan Tujuh Sembilan. Sistem ini hadir untuk menggantikan proses manual dengan solusi digital yang terintegrasi mulai dari pencatatan inventori, proses pengajuan & distribusi laptop, hingga pengambilan keputusan berbasis data menggunakan metode **MCDM (Multi Criteria Decision Making)**.
+**SILAPTOP79** adalah aplikasi manajemen aset laptop berbasis web yang dikembangkan untuk PT Padepokan Tujuh Sembilan. Sistem ini hadir untuk menggantikan proses manual dengan solusi digital yang terintegrasi — mulai dari pencatatan inventori, proses pengajuan & distribusi laptop, hingga pengambilan keputusan pemilihan laptop berbasis data menggunakan metode **MCDM (Multi Criteria Decision Making)** dengan kombinasi pembobotan **SWARA** dan perankingan **SAW**.
 
-Proyek ini dikembangkan menggunakan pendekatan **Incremental Development** setiap increment menghasilkan fitur yang siap digunakan dan dapat dievaluasi secara bertahap.
+Proyek ini dikembangkan menggunakan pendekatan **Incremental Development** — setiap increment menghasilkan fitur yang siap digunakan dan dapat dievaluasi secara bertahap.
 
 ### 🎯 Tujuan Pengembangan
 
@@ -52,8 +52,8 @@ Pengembangan SILAPTOP79 dibagi menjadi **3 Increment** yang saling berkaitan:
 <br/>
 
 **🔐 Authentication & Authorization**
-- Login & Logout pengguna
-- Role Based Access Control (RBAC)
+- Login & Logout pengguna berbasis Django Session & Custom Auth Backend
+- Role Based Access Control (RBAC) berdasarkan Role (Talent, HC, IT, Admin)
 
 **📦 Manajemen Inventori Laptop**
 - Tambah, ubah, dan hapus data laptop
@@ -62,7 +62,7 @@ Pengembangan SILAPTOP79 dibagi menjadi **3 Increment** yang saling berkaitan:
 
 **📋 Pengajuan & Distribusi Laptop**
 - Pengajuan laptop oleh Talent
-- Validasi pengajuan oleh Human Capital
+- Validasi pengajuan oleh Human Capital (HC)
 - Distribusi dan pengembalian laptop
 - Riwayat penggunaan laptop
 
@@ -79,19 +79,19 @@ Pengembangan SILAPTOP79 dibagi menjadi **3 Increment** yang saling berkaitan:
 <br/>
 
 **🖥️ Manajemen Spesifikasi Laptop**
-- Tambah, ubah, dan hapus spesifikasi laptop
+- Integrasi detail spesifikasi laptop pada inventori
 
 **⚖️ Manajemen Kriteria**
-- Tambah, ubah, dan hapus kriteria penilaian
+- Kustomisasi parameter kriteria untuk penilaian laptop
 
 **📐 Manajemen Bobot Kriteria (SWARA)**
-- Penentuan dan perhitungan bobot kriteria
-- Penyimpanan hasil bobot SWARA
+- Penentuan dan perhitungan bobot kriteria menggunakan metode Step-wise Weight Assessment Ratio Analysis (SWARA)
+- Penyimpanan hasil bobot kriteria
 
 **🏆 Rekomendasi Laptop (SAW)**
 - Normalisasi alternatif laptop
-- Perhitungan nilai preferensi
-- Perankingan dan rekomendasi laptop
+- Perhitungan nilai preferensi menggunakan metode Simple Additive Weighting (SAW)
+- Perankingan dan rekomendasi laptop otomatis berdasarkan kebutuhan pengguna
 
 **📈 Dashboard DSS**
 - Visualisasi ranking laptop
@@ -106,24 +106,18 @@ Pengembangan SILAPTOP79 dibagi menjadi **3 Increment** yang saling berkaitan:
 
 **👤 User Management**
 - Kelola, tambah, ubah, dan nonaktifkan pengguna
-- Aktivasi pengguna, reset password, kelola role
+- Reset password, kelola role pengguna
 
 **🔔 Notification Service**
-- Notifikasi pengajuan, persetujuan, dan penolakan laptop
-- Notifikasi distribusi, pengembalian, dan perubahan status
-- Notifikasi hasil rekomendasi DSS
+- Notifikasi status pengajuan laptop di dashboard
+- Alert info notifikasi real-time jika pengajuan disetujui, ditolak, atau didistribusikan
 
 **📋 Audit Log & Monitoring**
-- Riwayat login, aktivitas, dan perubahan data pengguna
-- Riwayat pengajuan, distribusi, dan proses DSS
+- Riwayat log aktivitas peminjaman dan pengembalian
+- Riwayat perubahan data laptop dan status inventori
 
 **🔗 Integrasi Sistem**
-- Integrasi modul Inventori, DSS, Pengajuan, User Management, dan Notification
-
-**🚀 Deployment**
-- Konfigurasi environment produksi
-- UAT (User Acceptance Testing) & Integration Testing
-- Monitoring aplikasi
+- Integrasi antarmuka Django Template dengan alur data database PostgreSQL
 
 </details>
 
@@ -133,10 +127,10 @@ Pengembangan SILAPTOP79 dibagi menjadi **3 Increment** yang saling berkaitan:
 
 | Role | Deskripsi | Akses Utama |
 |------|-----------|-------------|
-| 🛡️ **Administrator** | Mengelola seluruh sistem | Semua modul |
-| 💻 **IT Infrastructure** | Mengelola inventori & DSS | Inventori, Spesifikasi, Kriteria, DSS |
-| 🏢 **Human Capital (HC)** | Memvalidasi pengajuan laptop | Validasi, Distribusi |
-| 👨‍💼 **Talent** | Mengajukan kebutuhan laptop | Pengajuan Laptop |
+| 🛡️ **Administrator** | Mengelola seluruh sistem (melalui Django Admin) | Semua modul & Manajemen User |
+| 💻 **IT Infrastructure** | Mengelola inventori & DSS | Manajemen Laptop, Kriteria, Bobot SWARA, Hasil SAW |
+| 🏢 **Human Capital (HC)** | Memvalidasi pengajuan laptop | Validasi Pengajuan, Distribusi Laptop, Pengembalian |
+| 👨‍💼 **Talent** | Mengajukan kebutuhan laptop | Pengajuan Laptop, Riwayat Peminjaman |
 
 ---
 
@@ -148,12 +142,12 @@ Pengembangan SILAPTOP79 dibagi menjadi **3 Increment** yang saling berkaitan:
     <th>Teknologi</th>
   </tr>
   <tr>
-    <td>🖼️ <b>Frontend</b></td>
-    <td>Next.js · React.js · TypeScript · Tailwind CSS · Shadcn UI</td>
+    <td>🖼️ <b>Frontend / Presentation</b></td>
+    <td>Django Templates · Vanilla HTML5 · Vanilla CSS3 · JavaScript (Vanilla)</td>
   </tr>
   <tr>
-    <td>⚙️ <b>Backend</b></td>
-    <td>Python · FastAPI</td>
+    <td>⚙️ <b>Backend Framework</b></td>
+    <td>Python · Django Web Framework</td>
   </tr>
   <tr>
     <td>🗄️ <b>Database</b></td>
@@ -161,11 +155,7 @@ Pengembangan SILAPTOP79 dibagi menjadi **3 Increment** yang saling berkaitan:
   </tr>
   <tr>
     <td>🔐 <b>Authentication</b></td>
-    <td>JWT Authentication</td>
-  </tr>
-  <tr>
-    <td>📄 <b>API Docs</b></td>
-    <td>Swagger / OpenAPI</td>
+    <td>Django Session & Custom Authentication Backend (`InventoriAuthBackend`)</td>
   </tr>
   <tr>
     <td>🔄 <b>Version Control</b></td>
@@ -177,12 +167,10 @@ Pengembangan SILAPTOP79 dibagi menjadi **3 Increment** yang saling berkaitan:
 
 ## 📦 Prasyarat Instalasi
 
-Pastikan perangkat Anda telah menginstal semua software berikut:
+Pastikan perangkat Anda telah menginstal software berikut:
 
 | Software | Versi Minimum |
 |----------|:-------------:|
-| ![Node.js](https://img.shields.io/badge/Node.js-20+-339933?logo=nodedotjs&logoColor=white) | **20+** |
-| ![npm](https://img.shields.io/badge/npm-10+-CB3837?logo=npm&logoColor=white) | **10+** |
 | ![Python](https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=white) | **3.11+** |
 | ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16+-4169E1?logo=postgresql&logoColor=white) | **16+** |
 | ![Git](https://img.shields.io/badge/Git-Latest-F05032?logo=git&logoColor=white) | **Terbaru** |
@@ -194,47 +182,21 @@ Pastikan perangkat Anda telah menginstal semua software berikut:
 ```
 silaptop79/
 │
-├── 🖼️  frontend/
-│   ├── src/
-│   │   ├── app/              # Halaman & routing (App Router)
-│   │   ├── components/       # Komponen UI reusable
-│   │   ├── hooks/            # Custom React hooks
-│   │   ├── services/         # API service layer
-│   │   ├── lib/              # Utility & helper functions
-│   │   └── types/            # TypeScript type definitions
-│   │
-│   ├── public/               # Static assets
-│   └── package.json
+├── ⚙️ silaptop79/          # Django project configuration (settings, urls, wsgi)
 │
-├── ⚙️  backend/
-│   ├── app/
-│   │   ├── api/              # Endpoint API (routers)
-│   │   ├── models/           # Model database (ORM)
-│   │   ├── schemas/          # Pydantic schemas
-│   │   ├── repositories/     # Database access layer
-│   │   ├── services/
-│   │   │   ├── auth/         # Autentikasi & otorisasi
-│   │   │   ├── inventory/    # Manajemen inventori
-│   │   │   ├── submission/   # Pengajuan laptop
-│   │   │   ├── dss/          # Decision Support System
-│   │   │   ├── notification/ # Layanan notifikasi
-│   │   │   └── user_management/
-│   │   │
-│   │   ├── core/             # Konfigurasi inti aplikasi
-│   │   └── main.py           # Entry point FastAPI
-│   │
-│   ├── migrations/           # Alembic migrations
-│   ├── requirements.txt
-│   └── .env
+├── 📦 core/                # Modul inti (middleware, custom auth backend, helper)
+├── ⚖️ dss/                 # Modul Decision Support System (SWARA & SAW)
+├── 💻 inventori/           # Modul Inventori Laptop & Peminjaman (models, views)
+├── 👥 users/               # Modul manajemen pengguna & custom user
 │
-├── 📚 docs/
-│   ├── SRS/                  # Software Requirements Specification
-│   ├── SDD/                  # Software Design Document
-│   ├── UML/                  # Diagram UML
-│   ├── Testing/              # Dokumen pengujian
-│   └── Deployment/           # Panduan deployment
+├── 📂 templates/           # Berkas Django HTML Templates (Base, IT, HC, Talent)
+├── 📂 static/              # Aset statis (CSS, JS, Images)
 │
-├── docker-compose.yml
+├── 📂 seeders/             # Script seeder untuk inisialisasi database
+├── 🧪 tests/               # Berkas pengujian unit & integration test
+│
+├── manage.py               # Django CLI management script
+├── requirement.txt         # Daftar dependencies Python
 ├── README.md
 └── .gitignore
 ```
@@ -256,30 +218,14 @@ cd silaptop79
 CREATE DATABASE silaptop79;
 ```
 
-### 3️⃣ Konfigurasi Backend
-
-Masuk ke folder backend:
-
-```bash
-cd backend
-```
-
-Buat file `.env` dan isi dengan konfigurasi berikut:
-
-```env
-DATABASE_URL=postgresql://postgres:password@localhost:5432/silaptop79
-SECRET_KEY=your-secret-key
-ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=60
-```
-
-### 4️⃣ Install Dependency Backend
+### 3️⃣ Setup Environment & Install Dependencies
 
 **Windows:**
 
 ```bash
 python -m venv venv
 venv\Scripts\activate
+pip install -r requirement.txt
 ```
 
 **Linux / macOS:**
@@ -287,68 +233,54 @@ venv\Scripts\activate
 ```bash
 python -m venv venv
 source venv/bin/activate
+pip install -r requirement.txt
 ```
 
-Install package:
+### 4️⃣ Konfigurasi `.env` (Optional/Django Settings)
+
+Sesuaikan konfigurasi database Anda pada `silaptop79/settings.py` atau pastikan kredensial database lokal telah sesuai dengan konfigurasi database PostgreSQL Anda.
+
+### 5️⃣ Jalankan Migrasi Database
 
 ```bash
-pip install -r requirements.txt
+python manage.py makemigrations
+python manage.py migrate
 ```
 
-### 5️⃣ Jalankan Migration
+### 6️⃣ Seed Data Awal (Optional)
+
+Gunakan scripts seeder untuk mengisi data awal (user dummy, role, kriteria, laptop):
 
 ```bash
-alembic upgrade head
+python manage.py loaddata seeders/seed_data.json
+# Atau menggunakan python script seeder jika tersedia
 ```
 
-### 6️⃣ Jalankan Backend
+### 7️⃣ Jalankan Server Development Django
 
 ```bash
-uvicorn app.main:app --reload
+python manage.py runserver
 ```
 
-| Service | URL |
-|---------|-----|
-| 🔗 Backend API | http://localhost:8000 |
-| 📄 Swagger Docs | http://localhost:8000/docs |
-
-### 7️⃣ Setup Frontend
-
-```bash
-cd frontend
-npm install
-```
-
-Buat file `.env.local`:
-
-```env
-NEXT_PUBLIC_API_URL=http://localhost:8000
-```
-
-Jalankan aplikasi:
-
-```bash
-npm run dev
-```
-
-| Service | URL |
-|---------|-----|
-| 🖼️ Frontend | http://localhost:3000 |
+Buka peramban (browser) dan akses:
+🔗 **http://localhost:8000**
 
 ---
 
 ## 🧪 Testing
 
-**Backend:**
+Untuk menjalankan pengujian unit test dan verifikasi fungsionalitas CRUD:
 
 ```bash
-pytest
+python manage.py test
 ```
 
-**Frontend:**
+Atau jalankan file test spesifik secara manual:
 
 ```bash
-npm run test
+python test_it_crud.py
+python test_hc_crud.py
+python test_talent_crud.py
 ```
 
 ---
@@ -393,23 +325,22 @@ Berikut adalah alur kerja Decision Support System pada SILAPTOP79:
 ## 🛣️ Roadmap Pengembangan
 
 - [x] **Increment 1** – Manajemen Inventori Laptop
-  - [x] Authentication & Authorization
-  - [x] CRUD Inventori Laptop
-  - [x] Pengajuan & Distribusi Laptop
+  - [x] Session-based Authentication & Authorization
+  - [x] CRUD Inventori Laptop (IT & HC view)
+  - [x] Pengajuan & Peminjaman Laptop oleh Talent
   - [x] Dashboard Monitoring
 
-- [x] **Increment 2** – Decision Support System
-  - [x] Manajemen Kriteria & Spesifikasi
-  - [x] Perhitungan Bobot (SWARA)
-  - [x] Rekomendasi Laptop (SAW)
-  - [x] Dashboard DSS
+- [x] **Increment 2** – Decision Support System (DSS)
+  - [x] Manajemen Kriteria & Parameter Penilaian
+  - [x] Integrasi Pembobotan SWARA
+  - [x] Perhitungan dan Perankingan Rekomendasi SAW
+  - [x] Dashboard Hasil Rekomendasi
 
 - [x] **Increment 3** – Integrasi & Deployment
-  - [x] User Management
-  - [x] Notification Service
-  - [x] Audit Log & Monitoring
+  - [x] User Management & Custom Authentication Backend
+  - [x] Log Audit & Riwayat Peminjaman
+  - [x] Toast & Banner Notification pada aksi sukses/gagal CRUD
   - [x] Integration Testing & UAT
-  - [x] Deployment
 
 ---
 
