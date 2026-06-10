@@ -1,0 +1,416 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Riwayat Peminjaman - SiLaptop79</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        /* Reset Sidebar & Menu (Menghilangkan Titik-Titik) */
+        ul,
+        li {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        body {
+            background-color: #f8fafc;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            display: flex;
+        }
+
+        .main-content {
+            flex: 1;
+            margin-left: 260px;
+            padding: 30px 50px;
+        }
+
+        /* Perbaikan Top Navigation (Header Area) */
+        .top-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .breadcrumb {
+            font-size: 13px;
+            color: #64748b;
+            margin-bottom: 4px;
+        }
+
+        .breadcrumb span {
+            color: #0b57c6;
+            font-weight: 600;
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 800;
+            color: #1e293b;
+            margin: 0;
+        }
+
+        /* Styling Tombol Navigasi Kanan Atas */
+        .nav-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-nav {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.2s;
+        }
+
+        .btn-grey {
+            background: #e2e8f0;
+            color: #475569;
+        }
+
+        .btn-blue {
+            background: #0b57c6;
+            color: white;
+        }
+
+        /* Summary Cards */
+        .summary-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .summary-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            border: 1px solid #f1f5f9;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+        }
+
+        .icon-box {
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+            /* Menjadi lingkaran sesuai gambar */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .blue-icon {
+            background: #eff6ff;
+            color: #3b82f6;
+        }
+
+        .red-icon {
+            background: #fef2f2;
+            color: #ef4444;
+        }
+
+        .summary-info label {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .summary-info span {
+            font-size: 22px;
+            font-weight: 800;
+            color: #1e293b;
+        }
+
+        /* Table Section */
+        .table-card {
+            background: white;
+            border-radius: 16px;
+            border: 1px solid #f1f5f9;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+        }
+
+        .table-header {
+            padding: 20px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .table-header h2 {
+            font-size: 17px;
+            font-weight: 700;
+            margin: 0;
+            color: #1e293b;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-filter,
+        .btn-export {
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-filter {
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        .btn-export {
+            background: #075985;
+            color: white;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 16px 24px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+            background: #fafafa;
+        }
+
+        td {
+            padding: 14px 24px;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 13px;
+            color: #475569;
+        }
+
+        .user-cell {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #334155;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .user-name {
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .user-role {
+            font-size: 11px;
+            color: #94a3b8;
+        }
+
+        .badge {
+            padding: 5px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .badge-excellent {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .badge-good {
+            background: #f1f5f9;
+            color: #64748b;
+        }
+
+        .badge-scratch {
+            background: #fef2f2;
+            color: #ef4444;
+        }
+
+        .pagination {
+            padding: 15px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #64748b;
+            font-size: 12px;
+        }
+
+        .page-ctrl {
+            display: flex;
+            gap: 5px;
+        }
+
+        .page-num {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            border: 1.5px solid #e2e8f0;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .page-num:hover {
+            background-color: #f8fafc;
+            border-color: #cbd5e1;
+        }
+
+        .page-num.active {
+            background: #0b57c6;
+            color: white;
+            border-color: #0b57c6;
+        }
+    </style>
+</head>
+
+<body>
+
+    {% include 'it/components/sidebar.html' with active_page='data_laptop' %}
+
+    <div class="main-content">
+        <!-- Flash Messages -->
+        {% if messages %}
+        <div style="margin-bottom:20px;">
+            {% for message in messages %}
+            <div style="padding:12px 20px; border-radius:8px; margin-bottom:8px; font-size:14px; font-weight:500;
+                {% if message.tags == 'success' %}background:#dcfce7; color:#15803d; border:1px solid #bbf7d0;
+                {% elif message.tags == 'error' %}background:#fee2e2; color:#dc2626; border:1px solid #fecaca;
+                {% else %}background:#dbeafe; color:#2563eb; border:1px solid #bfdbfe;{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="top-nav">
+            <div>
+                <div class="breadcrumb">Data Laptop / <span>Semua Peminjaman</span></div>
+                <h1 class="page-title">Riwayat Peminjam</h1>
+            </div>
+            <div class="nav-buttons">
+                <a href="{% url 'manajemen_laptop_it' %}" class="btn-nav btn-grey">Kembali ke Daftar</a>
+            </div>
+        </div>
+
+        <div class="summary-container">
+            <div class="summary-card">
+                <div class="icon-box blue-icon"><i class="fa-solid fa-calendar-check"></i></div>
+                <div class="summary-info">
+                    <label>Total Peminjaman</label>
+                    <span>{{ total_peminjaman }} Kali</span>
+                </div>
+            </div>
+            <div class="summary-card">
+                <div class="icon-box red-icon"><i class="fa-solid fa-user-check"></i></div>
+                <div class="summary-info">
+                    <label>Peminjam Terakhir</label>
+                    <span>{{ peminjam_terakhir }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-card">
+            <div class="table-header">
+                <h2>Daftar Peminjam</h2>
+                <div class="header-actions">
+                    <button class="btn-filter"><i class="fa-solid fa-sliders"></i> Filter</button>
+                    <button class="btn-export"><i class="fa-solid fa-file-export"></i> Export</button>
+                </div>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>User Name</th>
+                        <th>Device Laptop</th>
+                        <th>Borrow Date</th>
+                        <th>Return Date</th>
+                        <th>Device Condition / Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in list_peminjaman %}
+                    <tr>
+                        <td>
+                            <div class="user-cell">
+                                <div class="avatar">{{ p.user_nama|slice:":2"|upper }}</div>
+                                <div>
+                                    <span class="user-name">{{ p.user_nama }}</span>
+                                    <span class="user-role">{{ p.user_role }}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>{{ p.laptop_nama }}</td>
+                        <td>{{ p.tanggal_pinjam|date:"d M Y"|default:"-" }}</td>
+                        <td>{{ p.tanggal_kembali|date:"d M Y"|default:"-" }}</td>
+                        <td>
+                            {% if p.status|lower == 'kembali' or p.status|lower == 'selesai' %}
+                                <span class="badge badge-excellent">{{ p.status }}</span>
+                            {% elif p.status|lower == 'dipinjam' or p.status|lower == 'aktif' %}
+                                <span class="badge badge-good">{{ p.status }}</span>
+                            {% else %}
+                                <span class="badge badge-scratch">{{ p.status }}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" style="text-align: center; color: #94a3b8; padding: 30px;">Tidak ada riwayat peminjaman.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <div class="pagination">
+                <span>Menampilkan {{ total_peminjaman }} peminjaman</span>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

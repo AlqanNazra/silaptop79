@@ -52,4 +52,9 @@ class AlternatifDssRepository(IAlternatifDss):
             result = cur.fetchone()
             self.conn.commit()
 
-            return result[0] if result else None
+            if result:
+                if isinstance(result, dict):
+                    return list(result.values())[0]
+                else:
+                    return result[0]
+            return None

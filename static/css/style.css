@@ -315,6 +315,12 @@ a {
     color: var(--dark);
 }
 
+.logo-img {
+    height: 32px;
+    width: auto;
+    object-fit: contain;
+}
+
 .sidebar-menu {
     padding: 1.5rem;
     flex: 1;
@@ -474,16 +480,16 @@ a {
 }
 
 .page-btn {
-    width: 28px;
-    height: 28px;
+    width: 36px;
+    height: 36px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 6px;
-    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    border: 1.5px solid #e2e8f0;
     background: white;
     color: #64748b;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;
@@ -491,6 +497,7 @@ a {
 
 .page-btn:hover {
     background-color: #f8fafc;
+    border-color: #cbd5e1;
 }
 
 .page-btn.active {

@@ -112,5 +112,9 @@ class ProjectRoleRepository(
             ))
 
             result = cur.fetchone()
-
-            return result[0]
+            if result:
+                if isinstance(result, dict):
+                    return list(result.values())[0]
+                else:
+                    return result[0]
+            return None

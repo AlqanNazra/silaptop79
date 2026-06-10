@@ -2,7 +2,7 @@ import pytest
 import json
 from tabulate import tabulate
 
-from db import get_connection
+from core.db import get_connection
 from dss.services.service_saw import Servicesaw
 from dss.repositories.dto.dto_laptop_pengadaan import FilterPengadaanDTO
 from inventori.repositories.dto.dto_laptop_inventori import FilterInventoriDTO

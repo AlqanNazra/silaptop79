@@ -27,7 +27,12 @@ class KriteriaRepository(IKriteriaRepositoryImpl):
             result = cur.fetchone()
             print("RESULT KRITERIA:", result)
 
-            return result[0]
+            if result:
+                if isinstance(result, dict):
+                    return list(result.values())[0]
+                else:
+                    return result[0]
+            return None
 
     # =========================
     # READ
@@ -58,7 +63,12 @@ class KriteriaRepository(IKriteriaRepositoryImpl):
             result = cur.fetchone()
             self.conn.commit()
 
-            return result[0] if result else None
+            if result:
+                if isinstance(result, dict):
+                    return list(result.values())[0]
+                else:
+                    return result[0]
+            return None
         
     def ambil_semua_role(self):
         query = "SELECT role FROM dss_bobotkriteria;"

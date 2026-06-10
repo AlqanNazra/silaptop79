@@ -1,0 +1,315 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detail Rekomendasi - SiLaptop79</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        /* Reset agar menu tidak ada bullet points */
+        ul,
+        li {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        body {
+            background-color: #f8fafc;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+        }
+
+        /* Pembungkus utama agar sidebar dan konten bersandingan dengan benar */
+        .dashboard-wrapper {
+            display: flex;
+            width: 100%;
+        }
+
+        .main-content {
+            flex: 1;
+            margin-left: 260px;
+            /* Lebar sidebar */
+            padding: 30px 50px;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        /* Top Nav Header Area */
+        .top-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .breadcrumb {
+            font-size: 13px;
+            color: #64748b;
+            margin-bottom: 4px;
+        }
+
+        .breadcrumb span {
+            color: #0b57c6;
+            font-weight: 600;
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 800;
+            color: #1e293b;
+            margin: 0;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-nav {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.2s;
+        }
+
+        .btn-grey {
+            background: #e2e8f0;
+            color: #475569;
+        }
+
+        /* Grid Layout Sesuai Gambar */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 30px;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid #f1f5f9;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+            position: relative;
+        }
+
+        /* Status Badge */
+        .status-badge {
+            position: absolute;
+            top: 25px;
+            left: 25px;
+            background: #dcfce7;
+            color: #16a34a;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .laptop-display {
+            text-align: center;
+        }
+
+        .laptop-img {
+            width: 80%;
+            margin: 20px 0;
+            border-radius: 12px;
+        }
+
+        .laptop-info h2 {
+            font-size: 24px;
+            font-weight: 800;
+            color: #1e293b;
+            margin: 0 0 5px 0;
+        }
+
+        .laptop-info p {
+            color: #94a3b8;
+            font-weight: 500;
+            margin: 0;
+        }
+
+        /* Admin Info */
+        .admin-title {
+            font-size: 18px;
+            font-weight: 800;
+            color: #1e293b;
+            margin-bottom: 20px;
+        }
+
+        .admin-item {
+            margin-bottom: 24px;
+        }
+
+        .admin-item label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #64748b;
+            margin-bottom: 8px;
+        }
+
+        .asset-id {
+            background: #eff6ff;
+            color: #2563eb;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-weight: 700;
+            display: inline-block;
+        }
+
+        /* Specs Section */
+        .specs-card {
+            grid-column: span 2;
+            margin-top: 10px;
+        }
+
+        .specs-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 18px;
+            font-weight: 800;
+            color: #1e293b;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #0b57c6;
+            width: fit-content;
+        }
+
+        .specs-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+
+        .spec-item label {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .spec-item span {
+            font-size: 14px;
+            font-weight: 700;
+            color: #334155;
+        }
+
+        /* Footer Action */
+        .footer-action {
+            grid-column: span 2;
+            margin-top: 10px;
+        }
+
+        .btn-history {
+            width: 100%;
+            padding: 14px;
+            background: #e2e8f0;
+            color: #1e293b;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="dashboard-wrapper">
+        {% include 'hc/components/sidebar.html' with active_page='hasil_rekomendasi' %}
+
+        <div class="main-content">
+            <div class="top-nav">
+                <div>
+                    <div class="breadcrumb">Data Laptop / <span>MacBook Pro 16" M3</span></div>
+                    <h1 class="page-title">Detail Rekomendasi</h1>
+                </div>
+                <div class="nav-buttons">
+                    <a href="{% url 'hasilrekomendasi_hc' %}" class="btn-nav btn-grey">Kembali ke Daftar</a>
+                </div>
+            </div>
+
+            <div class="content-grid">
+                <div class="card laptop-display">
+                    <div class="status-badge">
+                        <i class="fa-solid fa-circle" style="font-size: 8px;"></i> TERSEDIA
+                    </div>
+                    <img src="https://images.unsplash.com/photo-1517336714460-d1b16dd1c06d?q=80&w=1000&auto=format&fit=crop"
+                        class="laptop-img" alt="Laptop">
+                    <div class="laptop-info">
+                        <h2>MacBook Pro 16" M3</h2>
+                        <p>Apple Silicon M3 Max Chip - Space Black</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="admin-title">Asset Administration</div>
+                    <div class="admin-item">
+                        <label>Asset ID</label>
+                        <div class="asset-id">PLC-LP-2024-B12-045</div>
+                    </div>
+                    <div class="admin-item">
+                        <label>Storage Location</label>
+                        <div style="font-weight: 700; color: #1e293b;">
+                            <i class="fa-solid fa-location-dot" style="color: #0b57c6; margin-right: 8px;"></i>
+                            Warehouse B-12
+                        </div>
+                    </div>
+                    <div class="admin-item">
+                        <label>Warranty Status</label>
+                        <span
+                            style="background: #dcfce7; color: #16a34a; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 800;">ACTIVE</span>
+                    </div>
+                </div>
+
+                <div class="card specs-card">
+                    <div class="specs-header">
+                        <i class="fa-solid fa-microchip"></i> Spesifikasi Laptop
+                    </div>
+                    <div class="specs-grid">
+                        <div class="spec-item"><label>Processor</label><span>Apple M3 Max (14-core)</span></div>
+                        <div class="spec-item"><label>Storage</label><span>1TB SSD NVMe</span></div>
+                        <div class="spec-item"><label>Memory RAM</label><span>36GB Unified Memory</span></div>
+                        <div class="spec-item"><label>Battery Capacity</label><span>7200 mAh</span></div>
+                        <div class="spec-item"><label>GPU</label><span>30-Core GPU</span></div>
+                        <div class="spec-item"><label>Screen Size</label><span>16.2-inch Liquid Retina</span></div>
+                    </div>
+                </div>
+
+                <div class="footer-action">
+                    <button class="btn-history">
+                        <i class="fa-solid fa-clock-rotate-left"></i> Lihat Riwayat Peminjaman
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

@@ -1,0 +1,1 @@
+{"nodes": [{"id": "database_seeder_hardware", "label": "Hardware Seeder Data", "file_type": "document", "source_file": "querry database/seeder_laptop,ram,processor,storage.sql", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}], "edges": [], "hyperedges": []}

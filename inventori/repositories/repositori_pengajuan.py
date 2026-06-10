@@ -1,10 +1,11 @@
 import psycopg2
 from psycopg2.extras import RealDictCursor
+from inventori.dto.dto_pengajuan import PengajuanDTO
 from .dto.dto_pengajuan import PengajuanDTO
 from .interfaces.interface_pengajuan import IPengajuanRepository
 
 
-class PengajuanRepository(IPengajuanRepository):
+class PengajuanRepository:
 
     def __init__(self, conn):
         self.conn = conn
@@ -52,8 +53,13 @@ class PengajuanRepository(IPengajuanRepository):
             cur.execute(query, (id_pengajuan,))
             result = cur.fetchone()
             self.conn.commit()
-
-            return result[0] if result else None
+            # Use safe dict/tuple retrieval to avoid KeyError/IndexError
+            if result:
+                if isinstance(result, dict):
+                    return list(result.values())[0]
+                else:
+                    return result[0]
+            return None
 
     def approve_pengajuan(self, data: PengajuanDTO):
         query = """
@@ -68,8 +74,13 @@ class PengajuanRepository(IPengajuanRepository):
             ))
             result = cur.fetchone()
             self.conn.commit()
-
-            return result[0] if result else None
+            # Use safe dict/tuple retrieval to avoid KeyError/IndexError
+            if result:
+                if isinstance(result, dict):
+                    return list(result.values())[0]
+                else:
+                    return result[0]
+            return None
 
     def _map_to_dto(self, row):
         return PengajuanDTO(

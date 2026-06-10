@@ -1,10 +1,11 @@
 import psycopg2
 from psycopg2.extras import RealDictCursor
+from inventori.dto.dto_peminjaman import PeminjamanDTO
 from .dto.dto_peminjaman import PeminjamanDTO
 from .interfaces.interface_peminjaman import IPeminjamanRepository
 
 
-class PeminjamanRepository(IPeminjamanRepository):
+class PeminjamanRepository:
 
     def __init__(self, conn):
         self.conn = conn
@@ -60,8 +61,13 @@ class PeminjamanRepository(IPeminjamanRepository):
             ))
             result = cur.fetchone()
             self.conn.commit()
-
-            return result[0] if result else None
+            # Use safe dict/tuple retrieval to avoid KeyError/IndexError
+            if result:
+                if isinstance(result, dict):
+                    return list(result.values())[0]
+                else:
+                    return result[0]
+            return None
 
     def hapus_peminjaman(self, id_peminjaman):
         query = "SELECT hapus_peminjaman(%s);"
@@ -70,8 +76,13 @@ class PeminjamanRepository(IPeminjamanRepository):
             cur.execute(query, (id_peminjaman,))
             result = cur.fetchone()
             self.conn.commit()
-
-            return result[0] if result else None
+            # Use safe dict/tuple retrieval to avoid KeyError/IndexError
+            if result:
+                if isinstance(result, dict):
+                    return list(result.values())[0]
+                else:
+                    return result[0]
+            return None
 
     def pinjam_laptop(self, data: PeminjamanDTO):
         query = """
@@ -89,8 +100,13 @@ class PeminjamanRepository(IPeminjamanRepository):
             ))
             result = cur.fetchone()
             self.conn.commit()
-
-            return result[0] if result else None
+            # Use safe dict/tuple retrieval to avoid KeyError/IndexError
+            if result:
+                if isinstance(result, dict):
+                    return list(result.values())[0]
+                else:
+                    return result[0]
+            return None
 
     def pengembalian_laptop(self, data: PeminjamanDTO):
         query = """
@@ -105,8 +121,15 @@ class PeminjamanRepository(IPeminjamanRepository):
             ))
             result = cur.fetchone()
             self.conn.commit()
-
-            return result[0] if result else None
+            print(f"DEBUG pengembalian_laptop: result={result}, type={type(result)}")
+            
+            # Use safe dict/tuple retrieval to avoid KeyError/IndexError
+            if result:
+                if isinstance(result, dict):
+                    return list(result.values())[0]
+                else:
+                    return result[0]
+            return None
 
     def sync_status_laptop(self):
         query = "SELECT sync_status_laptop();"

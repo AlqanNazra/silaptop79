@@ -1,12 +1,13 @@
 from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
 
 from .services.service_swara import ServiceSwara
 from .services.service_bobotkriteria import ServiceBobotKriteria
-from db import get_connection
-
+from core.db import get_connection
 
 import json
 
+# @login_required
 def testing_swara(request):
     conn =  get_connection()
     result = None

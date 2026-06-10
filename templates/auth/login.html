@@ -1,0 +1,177 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - SiLaptop79</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: #F1F5F9;
+            /* Slate 100 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .login-wrapper {
+            background: #FFFFFF;
+            padding: 48px;
+            border-radius: 24px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 32px;
+            gap: 12px;
+        }
+
+        .logo-text {
+            font-size: 24px;
+            font-weight: 800;
+            color: #0F172A;
+            letter-spacing: -0.5px;
+        }
+
+        .login-title {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .login-title h1 {
+            margin: 0;
+            font-size: 24px;
+            color: #0F172A;
+            font-weight: 700;
+        }
+
+        .login-title p {
+            margin: 8px 0 0 0;
+            color: #64748B;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #475569;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #E2E8F0;
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 14px;
+            color: #0F172A;
+            box-sizing: border-box;
+            transition: all 0.2s;
+            outline: none;
+        }
+
+        .form-input:focus {
+            border-color: #3B82F6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 14px;
+            background-color: #0F172A;
+            color: #FFFFFF;
+            border: none;
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 12px;
+        }
+
+        .btn-login:hover {
+            background-color: #1E293B;
+            transform: translateY(-1px);
+        }
+
+        .error-message {
+            background-color: #FEF2F2;
+            color: #DC2626;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-bottom: 20px;
+            border: 1px solid #FCA5A5;
+            text-align: center;
+        }
+
+        .login-title h1 {
+            color: #0060AB;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="login-wrapper">
+        <div class="logo-container" style="gap: 8px;">
+            <img src="{% static 'img/logo_tujuh_sembilan.png' %}" alt="Logo Tujuh Sembilan"
+                style="height: 50px; width: auto; object-fit: contain; flex-shrink: 0;">
+        </div>
+
+        <div class="login-title">
+            <h1>SILAPTOP79</h1>
+            <p>Silakan masuk untuk mengelola inventori dan rekomendasi laptop.</p>
+        </div>
+
+        {% if form.errors %}
+        <div class="error-message">
+            Username atau password yang Anda masukkan salah.
+        </div>
+        {% endif %}
+
+        <form method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="username" class="form-label">Username</label>
+                <input type="text" id="username" name="username" class="form-input" required autofocus
+                    placeholder="Masukkan username">
+            </div>
+            <div class="form-group">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" id="password" name="password" class="form-input" required
+                    placeholder="Masukkan password">
+            </div>
+
+            <button type="submit" class="btn-login">Masuk</button>
+            <input type="hidden" name="next" value="{{ next|default:'/login-redirect/' }}" />
+        </form>
+    </div>
+
+</body>
+
+</html>

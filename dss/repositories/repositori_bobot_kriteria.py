@@ -97,7 +97,12 @@ class BobotKriteriaRepository(IBobotKriteriaRepositoryImpl):
             ))
             result = cur.fetchone()
 
-            return result[0] if result else None
+            if result:
+                if isinstance(result, dict):
+                    return list(result.values())[0]
+                else:
+                    return result[0]
+            return None
         
     def update_nilai_swara(self, data: BobotKriteriaDTO):
         query = "SELECT update_nilai_swara(%s, %s)"
@@ -108,7 +113,12 @@ class BobotKriteriaRepository(IBobotKriteriaRepositoryImpl):
             ))
             result = cur.fetchone()
 
-            return result[0] if result else None
+            if result:
+                if isinstance(result, dict):
+                    return list(result.values())[0]
+                else:
+                    return result[0]
+            return None
 
     # =========================
     # DELETE
@@ -120,4 +130,9 @@ class BobotKriteriaRepository(IBobotKriteriaRepositoryImpl):
             cur.execute(query, (id_bobot,))
             result = cur.fetchone()
 
-            return result[0] if result else None
+            if result:
+                if isinstance(result, dict):
+                    return list(result.values())[0]
+                else:
+                    return result[0]
+            return None

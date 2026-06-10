@@ -1,8 +1,9 @@
 from django.urls import path
+from .views import testing_swara
 
 app_name = 'dss'
 
 urlpatterns = [
-    # TODO: Daftarkan endpoint API/View untuk DSS di sini
-    # path('api/calculate/', views.calculate_spk, name='calculate_spk'),
+    path('', testing_swara, name='testing_swara'),
+    path('api/testing-swara/', testing_swara, name='api_testing_swara'),
 ]

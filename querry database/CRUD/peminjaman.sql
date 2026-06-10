@@ -41,19 +41,41 @@ RETURNS TABLE (
     keterangan TEXT
 ) AS $$
 BEGIN 
-    RETURN  QUERY
-    SELECT *
-    FROM inventori_peminjaman;
+    RETURN QUERY
+    SELECT 
+        p.id_peminjaman::VARCHAR,
+        p.user_id::VARCHAR,
+        p.laptop_id::VARCHAR,
+        p.tanggal_pinjam,
+        p.tanggal_kembali,
+        p.status::VARCHAR,
+        p.keterangan::TEXT
+    FROM inventori_peminjaman p;
 END;
 $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION cari_peminjaman(f_id_peminjaman VARCHAR(100))
-RETURNS TABLE (id_peminjaman, id_user,id_laptop_inventori,tanggal_pinjam ,tanggal_kembali,status,keterangan) AS $$
+RETURNS TABLE (
+    id_peminjaman VARCHAR,
+    id_user VARCHAR,
+    id_laptop_inventori VARCHAR,
+    tanggal_pinjam DATE,
+    tanggal_kembali DATE,
+    status VARCHAR,
+    keterangan TEXT
+) AS $$
 BEGIN 
     RETURN QUERY
-    SELECT *
-    FROM inventori_peminjaman b
-    WHERE b.id_peminjaman = f_id_peminjaman;
+    SELECT 
+        p.id_peminjaman::VARCHAR,
+        p.user_id::VARCHAR,
+        p.laptop_id::VARCHAR,
+        p.tanggal_pinjam,
+        p.tanggal_kembali,
+        p.status::VARCHAR,
+        p.keterangan::TEXT
+    FROM inventori_peminjaman p
+    WHERE p.id_peminjaman = f_id_peminjaman;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -68,10 +90,10 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE function hapus_peminjaman(f_id_peminjaman VARCHAR(100))
-RETURN TEXT As $$
+RETURNS TEXT As $$
 BEGIN
     DELETE FROM inventori_peminjaman WHERE id_peminjaman = f_id_peminjaman;
-    RETURN 'DATA pemimjaman dengan id' || id_peminjaman || ' berhasil dihapus,';
+    RETURN 'DATA pemimjaman dengan id' || f_id_peminjaman || ' berhasil dihapus,';
 END;
 $$ LANGUAGE plpgsql;
 
@@ -90,7 +112,7 @@ DECLARE
 BEGIN
     -- cek status laptop
     SELECT status INTO v_status
-    FROM laptop_inventori
+    FROM inventori_laptopinventori
     WHERE id_laptop_inventori = f_id_laptop;
 
     IF NOT FOUND THEN
@@ -103,7 +125,7 @@ BEGIN
 
     IF EXISTS (
         SELECT 1 FROM inventori_peminjaman
-        WHERE id_laptop_inventori = f_id_laptop
+        WHERE laptop_id = f_id_laptop
         AND status = 'dipinjam'
     ) THEN
         RETURN 'Laptop sedang dipinjam';
@@ -121,16 +143,16 @@ BEGIN
     -- insert peminjaman
     INSERT INTO inventori_peminjaman(
         id_peminjaman,
-        id_pengajuan,
-        id_user,
-        id_laptop_inventori,
+        pengajuan_id,
+        user_id,
+        laptop_id,
         tanggal_pinjam,
         tanggal_kembali,
         status,
         keterangan
     )
     VALUES (
-        f_generate_id('PIM','peminjaman'),
+        f_generate_id('PIM','inventori_peminjaman','id_peminjaman'),
         f_id_pengajuan,
         f_id_user,
         f_id_laptop,
@@ -158,7 +180,7 @@ RETURNS TEXT AS $$
 DECLARE
     v_id_laptop VARCHAR;
 BEGIN 
-    SELECT id_laptop_inventori INTO v_id_laptop 
+    SELECT laptop_id INTO v_id_laptop 
     FROM inventori_peminjaman 
     WHERE id_peminjaman = f_id_peminjaman;
 

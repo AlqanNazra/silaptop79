@@ -8,7 +8,7 @@ CREATE TABLE dss_nilaialternatif (
     id_alternatif_laptop VARCHAR(100),
     id_bobot VARCHAR(100),
     FOREIGN KEY (id_alternatif_laptop) REFERENCES dss_laptopalternatif(id_alternatif_laptop),
-    FOREIGN KEY (id_bobot) REFERENCES dss_bobotkriteria(id_bobot),
+    FOREIGN KEY (id_bobot) REFERENCES dss_bobotkriteria(id_bobot)
 );
 
 CREATE OR REPLACE FUNCTION tambah_nilai_alternatif(
@@ -19,7 +19,7 @@ CREATE OR REPLACE FUNCTION tambah_nilai_alternatif(
 )
 RETURNS TEXT AS $$
 BEGIN
-    INSERT INTO dss_laptopalternatif (
+    INSERT INTO dss_nilaialternatif (
         id_nilai_alternatif,
         nilai_alternatif,
         nilai_normalisasi,

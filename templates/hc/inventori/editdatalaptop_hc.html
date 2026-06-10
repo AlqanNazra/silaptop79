@@ -1,0 +1,327 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Data Laptop - SiLaptop79</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        /* Reset Sidebar & Menu sesuai standar halaman Riwayat */
+        ul,
+        li {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        body {
+            background-color: #f8fafc;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            display: flex;
+        }
+
+        .main-content {
+            flex: 1;
+            margin-left: 260px;
+            padding: 30px 50px;
+        }
+
+        /* Top Navigation (Header Area) - Identik dengan Riwayat */
+        .top-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .breadcrumb {
+            font-size: 13px;
+            color: #64748b;
+            margin-bottom: 4px;
+        }
+
+        .breadcrumb span {
+            color: #0b57c6;
+            font-weight: 600;
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 800;
+            color: #1e293b;
+            margin: 0;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-nav {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.2s;
+        }
+
+        .btn-grey {
+            background: #e2e8f0;
+            color: #475569;
+        }
+
+        .btn-blue {
+            background: #0b57c6;
+            color: white;
+        }
+
+        /* Grid Layout Sesuai Gambar Referensi */
+        .edit-grid {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 24px;
+            align-items: start;
+        }
+
+        /* Card Styling */
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid #f1f5f9;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #1e293b;
+        }
+
+        /* Accent Borders */
+        .border-blue {
+            border-left: 4px solid #005FAA;
+            padding-left: 15px;
+        }
+
+        .border-green {
+            border-left: 4px solid #16a34a;
+            padding-left: 15px;
+        }
+
+        .border-red {
+            border-left: 4px solid #dc2626;
+            padding-left: 15px;
+        }
+
+        /* Form Controls */
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+            background: #f8fafc;
+            /* Warna input abu muda sesuai gambar */
+            font-family: inherit;
+            font-size: 14px;
+            color: #334155;
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        .row-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .laptop-preview {
+            width: 100%;
+            border-radius: 16px;
+            object-fit: cover;
+        }
+    </style>
+</head>
+
+<body>
+
+    {% include 'hc/components/sidebar.html' with active_page='manajemen_laptop' %}
+
+    <div class="main-content">
+        <div class="top-nav">
+            <div>
+                <div class="breadcrumb">Data Laptop / <span>Edit Mode</span></div>
+                <h1 class="page-title">Edit Data Laptop</h1>
+            </div>
+            <div class="nav-buttons">
+                <a href="{% url 'inventori:detaillaptop_hc' laptop.id_laptop_inventori %}"
+                    class="btn-nav btn-grey">Batal</a>
+                <button type="submit" form="editForm" class="btn-nav btn-blue">
+                    <i class="fa-solid fa-save"></i> Simpan Perubahan
+                </button>
+            </div>
+        </div>
+
+        <!-- Flash Messages -->
+        {% if messages %}
+        <div style="margin-bottom:20px;">
+            {% for message in messages %}
+            <div style="padding:12px 20px; border-radius:8px; margin-bottom:8px; font-size:14px; font-weight:500;
+                {% if message.tags == 'success' %}background:#dcfce7; color:#15803d; border:1px solid #bbf7d0;
+                {% elif message.tags == 'error' %}background:#fee2e2; color:#dc2626; border:1px solid #fecaca;
+                {% else %}background:#dbeafe; color:#2563eb; border:1px solid #bfdbfe;{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <form id="editForm" method="POST" action="{% url 'inventori:editdatalaptop_hc' laptop.id_laptop_inventori %}">
+            {% csrf_token %}
+            <div class="edit-grid">
+
+                <div class="col-left">
+                    <div class="card">
+                        <div class="card-title" style="color: #005FAA;">
+                            <i class="fa-solid fa-circle-info"></i> Current Status
+                        </div>
+                        <div class="form-group">
+                            <label>Status Availability</label>
+                            <select name="status">
+                                <option value="tersedia" {% if laptop.status=='tersedia' %}selected{% endif %}>Tersedia
+                                </option>
+                                <option value="dipinjam" {% if laptop.status=='dipinjam' %}selected{% endif %}>Dipinjam
+                                </option>
+                                <option value="rusak" {% if laptop.status=='rusak' %}selected{% endif %}>Rusak</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Lokasi</label>
+                            <input type="text" name="lokasi" value="{{ laptop.lokasi }}">
+                        </div>
+                        <div class="form-group">
+                            <label>Device Condition</label>
+                            <select name="kondisi">
+                                <option value="baik" {% if laptop.kondisi=='baik' %}selected{% endif %}>Baik</option>
+                                <option value="rusak_ringan" {% if laptop.kondisi=='rusak_ringan' %}selected{% endif %}>
+                                    Rusak Ringan</option>
+                                <option value="rusak_berat" {% if laptop.kondisi=='rusak_berat' %}selected{% endif %}>
+                                    Rusak Berat</option>
+                            </select>
+                        </div>
+                    </div>
+                    <img src="https://images.unsplash.com/photo-1517336714460-d1b16dd1c06d?q=80&w=1000&auto=format&fit=crop"
+                        class="laptop-preview">
+                </div>
+
+                <div class="col-right">
+                    <div class="card border-blue">
+                        <div class="card-title">Basic Information</div>
+                        <div class="row-group">
+                            <div class="form-group">
+                                <label>Laptop Name</label>
+                                <input type="text" value="{{ laptop.nama_laptop }}" disabled>
+                            </div>
+                            <div class="form-group">
+                                <label>Brand/Model</label>
+                                <input type="text" value="{{ laptop.model }}" disabled>
+                            </div>
+                        </div>
+                        <div class="form-group" style="width: 50%; padding-right: 10px;">
+                            <label>Serial Number / ID</label>
+                            <input type="text" value="{{ laptop.no_inventori }}" disabled>
+                        </div>
+                    </div>
+
+                    <div class="card border-green">
+                        <div class="card-title">Technical Specifications</div>
+                        <div class="row-group">
+                            <div class="form-group">
+                                <label>Processor</label>
+                                <select name="id_processor">
+                                    {% for p in processors %}
+                                    <option value="{{ p.id_processor }}" {% if
+                                        laptop.id_processor.id_processor==p.id_processor %}selected{% endif %}>{{
+                                        p.nama_processor }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>RAM</label>
+                                <select name="id_ram">
+                                    {% for r in rams %}
+                                    <option value="{{ r.id_ram }}" {% if laptop.id_ram.id_ram==r.id_ram %}selected{%
+                                        endif %}>{{ r.kapasitas_gb }} GB {{ r.tipe }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row-group">
+                            <div class="form-group">
+                                <label>Storage</label>
+                                <select name="id_storage">
+                                    {% for s in storages %}
+                                    <option value="{{ s.id_storage }}" {% if laptop.id_storage.id_storage==s.id_storage
+                                        %}selected{% endif %}>{{ s.kapasitas_gb }} GB {{ s.tipe }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Operating System</label>
+                                <input type="text" value="{{ laptop.os }}" disabled>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card border-red">
+                        <div class="card-title">Administrative Info</div>
+                        <div class="row-group">
+                            <div class="form-group">
+                                <label>OS</label>
+                                <input type="text" value="{{ laptop.os }}" disabled>
+                            </div>
+                            <div class="form-group">
+                                <label>Asset ID</label>
+                                <input type="text" value="{{ laptop.id_laptop_inventori }}" disabled>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+</body>
+
+</html>

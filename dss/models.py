@@ -1,59 +1,25 @@
 from django.db import models
-from django.utils import timezone
+from inventori.models import User, LaptopInventori
 
-from inventori.models import (
-    User,
-    Teknologi,
-    RoleTeknologi,
-    Processor,
-    RAM,
-    Storage
-)
 
 # =====================================================
 # 1. KRITERIA
 # =====================================================
 
 class Kriteria(models.Model):
+    id_kriteria = models.CharField(primary_key=True, max_length=100)
 
-    BENEFIT = "benefit"
-    COST = "cost"
-
-    TIPE_CHOICES = [
-        (BENEFIT, "Benefit"),
-        (COST, "Cost")
-    ]
-
-    id_kriteria = models.CharField(
-        primary_key=True,
-        max_length=100
-    )
-
-    nama_kriteria = models.CharField(
-        max_length=255
-    )
+    nama_kriteria = models.CharField(max_length=255)
 
     tipe_kriteria = models.CharField(
         max_length=20,
-        choices=TIPE_CHOICES
+        choices=[
+            ('benefit', 'Benefit'),
+            ('cost', 'Cost')
+        ]
     )
-
-    golongan_kriteria = models.CharField(
-        max_length=255
-    )
-
-    teknologi = models.ForeignKey(
-        Teknologi,
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True
-    )
-
-    class Meta:
-        db_table = "dss_kriteria"
-
-    def __str__(self):
-        return self.nama_kriteria
+    
+    golongan_kriteria = models.CharField(max_length=255)
 
 
 # =====================================================
@@ -61,56 +27,12 @@ class Kriteria(models.Model):
 # =====================================================
 
 class BobotKriteria(models.Model):
+    id_bobot = models.CharField(primary_key=True, max_length=100)
 
-    id_bobot = models.CharField(
-        primary_key=True,
-        max_length=100
-    )
+    id_kriteria = models.ForeignKey(Kriteria, on_delete=models.CASCADE)
 
-    role_teknologi = models.ForeignKey(
-        RoleTeknologi,
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True
-    )
-
-    kriteria = models.ForeignKey(
-        Kriteria,
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True
-    )
-
+    role = models.CharField(max_length=100)
     nilai_bobot = models.FloatField()
-
-    nilai_swara = models.FloatField(
-        null=True,
-        blank=True
-    )
-
-    versi = models.IntegerField(default=1)
-
-    is_active = models.BooleanField(default=True)
-
-    created_at = models.DateTimeField(
-        default=timezone.now
-    )
-
-    class Meta:
-
-        db_table = "dss_bobotkriteria"
-
-        indexes = [
-            models.Index(
-                fields=[
-                    "role_teknologi",
-                    "is_active"
-                ]
-            )
-        ]
-
-    def __str__(self):
-        return self.id_bobot
 
 
 # =====================================================
@@ -118,92 +40,51 @@ class BobotKriteria(models.Model):
 # =====================================================
 
 class DSSProses(models.Model):
+    id_dss = models.CharField(primary_key=True, max_length=100)
 
-    id_dss = models.CharField(
-        primary_key=True,
-        max_length=100
-    )
+    id_user = models.ForeignKey(User, on_delete=models.CASCADE)
+    id_bobot = models.ForeignKey(BobotKriteria, on_delete=models.CASCADE)
 
-    user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE
-    )
+    role_dss = models.CharField(max_length=100)
+    jenis_dss = models.CharField(max_length=100)
 
-    bobot = models.ForeignKey(
-        BobotKriteria,
-        on_delete=models.CASCADE
-    )
-
-    role_dss = models.CharField(
-        max_length=100
-    )
-
-    jenis_dss = models.CharField(
-        max_length=100
-    )
-
-    created_at = models.DateTimeField(
-        auto_now_add=True
-    )
-
-    class Meta:
-        db_table = "dss_dssproses"
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.id_dss
+        return f"{self.id_dss} - {self.role_dss} ({self.jenis_dss})"
 
 
-# =====================================================
-# 4. LAPTOP ALTERNATIF
-# =====================================================
-
+# =============================================
+# 4. LAPTOP ALTERNATIF (NEW - sesuai SQL)
+# =============================================
 class LaptopAlternatif(models.Model):
-
-    id_alternatif_laptop = models.CharField(
-        primary_key=True,
-        max_length=100
-    )
+    id_alternatif_laptop = models.CharField(primary_key=True, max_length=100)
 
     model_alternatif = models.TextField()
 
     brand_alternatif = models.TextField()
 
-    dss = models.ForeignKey(
-        DSSProses,
-        on_delete=models.CASCADE
-    )
-
-    class Meta:
-        db_table = "dss_laptopalternatif"
+    id_dss = models.ForeignKey(DSSProses, on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.model_alternatif
+        return f"{self.brand_alternatif} {self.model_alternatif}"
 
 
-# =====================================================
-# 5. NILAI ALTERNATIF
-# =====================================================
-
+# =============================================
+# 5. NILAI ALTERNATIF (NEW - SAW CORE)
+# =============================================
 class NilaiAlternatif(models.Model):
-
-    id_nilai_alternatif = models.CharField(
-        primary_key=True,
-        max_length=100
-    )
+    id_nilai_alternatif = models.CharField(primary_key=True, max_length=100)
 
     nilai_alternatif = models.FloatField()
+    nilai_normalisasi = models.FloatField()
 
-    nilai_normalisasi = models.FloatField(
-        null=True,
-        blank=True
-    )
-
-    alternatif = models.ForeignKey(
+    id_alternatif_laptop = models.ForeignKey(
         LaptopAlternatif,
         on_delete=models.CASCADE
     )
 
-    bobot = models.ForeignKey(
+    id_bobot = models.ForeignKey(
         BobotKriteria,
         on_delete=models.CASCADE
     )
@@ -215,38 +96,25 @@ class NilaiAlternatif(models.Model):
         return self.id_nilai_alternatif
 
 
-# =====================================================
-# 6. HASIL SAW
-# =====================================================
-
+# =============================================
+# 6. HASIL SAW (UPDATED)
+# =============================================
 class HasilSAW(models.Model):
+    id_hasil = models.CharField(primary_key=True, max_length=100)
 
-    id_hasil = models.CharField(
-        primary_key=True,
-        max_length=100
-    )
+    id_dss = models.ForeignKey(DSSProses, on_delete=models.CASCADE)
 
-    dss = models.ForeignKey(
-        DSSProses,
-        on_delete=models.CASCADE
-    )
+    tanggal_proses = models.DateTimeField(auto_now_add=True)
 
-    nilai_alternatif = models.ForeignKey(
+    id_nilai_alternatif = models.ForeignKey(
         NilaiAlternatif,
         on_delete=models.CASCADE,
         null=True,
         blank=True
     )
 
-    tanggal_proses = models.DateTimeField(
-        auto_now_add=True
-    )
-
-    class Meta:
-        db_table = "dss_hasilsaw"
-
     def __str__(self):
-        return self.id_hasil
+        return f"Hasil SAW {self.id_hasil} ({self.tanggal_proses})"
 
 
 # =====================================================
@@ -254,44 +122,32 @@ class HasilSAW(models.Model):
 # =====================================================
 
 class LaptopPengadaan(models.Model):
+    id_laptop_pengadaan = models.CharField(primary_key=True, max_length=100)
 
-    id_laptop_pengadaan = models.CharField(
-        primary_key=True,
-        max_length=100
-    )
-
-    processor = models.ForeignKey(
-        Processor,
+    id_processor = models.ForeignKey(
+        'inventori.Processor',
         on_delete=models.SET_NULL,
         null=True,
         blank=True
     )
 
-    ram = models.ForeignKey(
-        RAM,
+    id_ram = models.ForeignKey(
+        'inventori.RAM',
         on_delete=models.SET_NULL,
         null=True,
         blank=True
     )
 
-    storage = models.ForeignKey(
-        Storage,
+    id_storage = models.ForeignKey(
+        'inventori.Storage',
         on_delete=models.SET_NULL,
         null=True,
         blank=True
     )
 
-    nama_laptop = models.CharField(
-        max_length=255
-    )
-
+    nama_laptop = models.CharField(max_length=255)
     harga = models.IntegerField()
-
-    gpu = models.CharField(
-        max_length=255,
-        null=True,
-        blank=True
-    )
+    gpu = models.CharField(max_length=255, null=True, blank=True)
 
     ukuran_layar = models.FloatField()
 
@@ -304,25 +160,20 @@ class LaptopPengadaan(models.Model):
 
     def __str__(self):
         return self.nama_laptop
-
-
-# =====================================================
+    
+# =============================================
 # 8. DETAIL HASIL SAW
-# =====================================================
-
+# =============================================
 class DetailHasilSAW(models.Model):
-
-    id_detail = models.CharField(
-        primary_key=True,
-        max_length=100
-    )
-
-    hasil = models.ForeignKey(
-        HasilSAW,
+    id_detail = models.CharField(primary_key=True, max_length=100)
+    
+    # Menghubungkan ke tabel HasilSAW (id_hasil)
+    id_hasil = models.ForeignKey(
+        HasilSAW, 
         on_delete=models.CASCADE,
         related_name='detail_set'
     )
-
+    
     nilai_normalisasi = models.FloatField()
 
     nilai_preferensi = models.FloatField()
@@ -330,7 +181,7 @@ class DetailHasilSAW(models.Model):
     ranking = models.IntegerField()
 
     class Meta:
-        db_table = "dss_detailhasilsaw"
+        db_table = 'dss_detailhasilsaw'  # Sesuai dengan nama tabel di SQL kamu
 
     def __str__(self):
-        return f"{self.id_detail} - Rank {self.ranking}"
+        return f"Detail {self.id_detail} - Rank {self.ranking}"

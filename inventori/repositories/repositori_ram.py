@@ -1,10 +1,11 @@
 import psycopg2
 from psycopg2.extras import RealDictCursor
+from inventori.dto.dto_ram import RamDTO
 from .dto.dto_ram import RamDTO
 from .interfaces.interface_ram import IRamRepository
 
 
-class RamRepository(IRamRepository):
+class RamRepository:
 
     def __init__(self, conn):
         self.conn = conn
@@ -24,7 +25,12 @@ class RamRepository(IRamRepository):
             result = cur.fetchone()
             self.conn.commit()
 
-            return result[0] if result else None
+            if result:
+                if isinstance(result, dict):
+                    return list(result.values())[0]
+                else:
+                    return result[0]
+            return None
 
     # =========================
     # READ
@@ -51,7 +57,12 @@ class RamRepository(IRamRepository):
             result = cur.fetchone()
             self.conn.commit()
 
-            return result[0] if result else None
+            if result:
+                if isinstance(result, dict):
+                    return list(result.values())[0]
+                else:
+                    return result[0]
+            return None
 
     # =========================
     # DELETE
@@ -64,7 +75,12 @@ class RamRepository(IRamRepository):
             result = cur.fetchone()
             self.conn.commit()
 
-            return result[0] if result else None
+            if result:
+                if isinstance(result, dict):
+                    return list(result.values())[0]
+                else:
+                    return result[0]
+            return None
 
     # =========================
     # MAPPING

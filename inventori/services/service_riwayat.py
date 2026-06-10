@@ -1,4 +1,4 @@
-from db import get_connection
+from core.db import get_connection
 from inventori.repositories.repositori_riwayat_laptop import RiwayatAktivitasRepository
 from inventori.repositories.dto.dto_riwayat_aktivitas import RiwayatAktivitasDTO
 
