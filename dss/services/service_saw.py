@@ -16,6 +16,8 @@ from dss.repositories.repositori_hasil_saw import HasilSawRepository
 from dss.repositories.dto.dto_hasil_saw import HasilSAWDTO
 from dss.repositories.repositori_detail_hasil_saw import DetailHasilSawRepository
 from dss.repositories.dto.dto_detail_hasil_saw import DetailHasilSawDTO
+from inventori.repositories.repositori_role import RoleRepository
+from inventori.dto.dto_role import RoleDTO
 
 from inventori.repositories.repositori_laptop_inventori import LaptopInventoriRepository
 from dss.repositories.repositori_laptop_pengadaan import LaptopPengadaanRepository
@@ -35,6 +37,7 @@ class Servicesaw:
         self.repoBK = BobotKriteriaRepository(conn)
         self.repoInventori = LaptopInventoriRepository(conn)
         self.repoPengadaan = LaptopPengadaanRepository(conn)
+        self.repoRole = RoleRepository(conn)
 
     def serialize(self, data):
         def convert(val):
@@ -46,7 +49,62 @@ class Servicesaw:
             {k: convert(v) for k, v in dict(row).items()}
             for row in data
         ]
-        
+
+    def proses_dual_dataset(
+        self,
+        data_raw,
+        role_requirement,
+        role
+    ):
+        hasil_split = (
+            self.servisPD.split_role_requirement(
+                data_raw,
+                role_requirement
+            )
+        )
+        role_match = (hasil_split["role_match"])
+        fallback = ( hasil_split["fallback"])
+        hasil_role = None
+        hasil_fallback = None
+        if role_match:
+            hasil_role = (
+                self.proses_saw_pipeline(
+                    role_match,
+                    role
+                )
+            )
+        hasil_fallback = (
+            self.proses_saw_pipeline(
+                fallback,
+                role
+            )
+        )
+        return {
+            "role_result": hasil_role,
+            "fallback_result": hasil_fallback,
+            "warning":
+                None
+                if role_match
+                else
+                "Tidak ditemukan laptop yang memenuhi spesifikasi minimum role"
+        }
+
+    def get_role_requirement(
+        self,
+        role_id
+    ):
+        role = self.repoRole.get_by_id(role_id)
+
+        if not role:
+            raise Exception(
+                f"Role {role_id} tidak ditemukan"
+            )
+
+        return {
+            "min_ram": role["min_ram"],
+            "min_storage": role["min_storage"],
+            "min_processor_score": role["min_processor_score"]
+        }
     def normalisasi_saw(self, data_preproses):  
         if not data_preproses:
             return []
@@ -211,11 +269,10 @@ class Servicesaw:
                 )
             )
 
-    def proses_dss_saw(self, id_user, id_bobot, sumber_data, filter_data, role: list, debug=False):
+    def proses_dss_saw(self,id_user,id_bobot,sumber_data,filter_data,role: list,debug=False):
         conn = self.conn
-
         try:
-            conn.autocommit = False      
+            conn.autocommit = False
             id_dss = self.repodssprosses.tambah_dss_proses(
                 DssProsesDTO(
                     id_user=id_user,
@@ -225,51 +282,177 @@ class Servicesaw:
                     create_at=datetime.now()
                 )
             )
-
-            hasil_filter = self.servisPD.filtering_data(sumber_data, filter_data)
+            hasil_filter = self.servisPD.filtering_data(
+                sumber_data,
+                filter_data
+            )
             if hasil_filter["status"] != "success":
                 conn.rollback()
                 return hasil_filter
             data_raw = hasil_filter["data_raw"]
-
-            list_alternatif = self.simpan_alternatif_awal(
-                data_raw, id_dss, sumber_data
+            if not data_raw:
+                conn.rollback()
+                return {
+                    "status": "error",
+                    "message": "Data laptop tidak ditemukan"
+                }
+            role_requirement = self.get_role_requirement(role[0])
+            hasil_split = (
+                self.servisPD.split_role_requirement(
+                    data_raw,
+                    role_requirement
+                )
             )
-            hasil = self.proses_saw_pipeline(list_alternatif, role)
-            ranking = hasil["ranking"]
-            id_hasil = self.simpan_hasil_saw(id_dss, ranking)
+            role_match_data = (hasil_split["role_match"])
+            fallback_data = (hasil_split["fallback"])
+            
+            # DATASET 1 REKOMENDASI SESUAI ROLE
+            ranking_role = []
+            hasil_role = None
+            if role_match_data:
+                hasil_role = (
+                    self.proses_saw_pipeline(
+                        role_match_data,
+                        role
+                    )
+                )
+                ranking_role = (
+                    hasil_role["ranking"]
+                )
+            # DATASET 2 ALTERNATIF LAIN
+            hasil_fallback = (
+                self.proses_saw_pipeline(fallback_data,role)
+            )
+            ranking_fallback = (hasil_fallback["ranking"])
+            
+            if ranking_role:
+                id_hasil_role = (
+                    self.simpan_hasil_saw(
+                        id_dss,
+                        ranking_role
+                    )
+                )
+            else:
+                id_hasil_role = None
+            id_hasil_fallback = (
+                self.simpan_hasil_saw(
+                    id_dss,
+                    ranking_fallback
+                )
+            )
 
-            self.simpan_laptop_terpilih(ranking, id_dss, top_n=3)
-
+            if ranking_role:
+                self.simpan_laptop_terpilih(
+                    ranking_role,
+                    id_dss,
+                    top_n=3
+                )
+            else:
+                self.simpan_laptop_terpilih(
+                    ranking_fallback,
+                    id_dss,
+                    top_n=3
+                )
             conn.commit()
-
+            
             if debug:
                 return {
                     "status": "success",
-                    "debug": hasil,
-                    "data": {"ranking": ranking}
+                    "warning":
+                        None
+                        if role_match_data
+                        else
+                        (
+                            "Tidak ditemukan laptop "
+                            "yang memenuhi minimum "
+                            "requirement role"
+                        ),
+                    "debug": {
+                        "role_requirement":
+                            role_requirement,
+                        "total_role_match":
+                            len(role_match_data),
+                        "total_fallback":
+                            len(fallback_data),
+                        "hasil_role":
+                            hasil_role,
+                        "hasil_fallback":
+                            hasil_fallback
+                    },
+
+                    "data": {
+                        "rekomendasi_sesuai_role": {
+                            "ranking":
+                                ranking_role
+                        },
+                        "alternatif_lain": {
+                            "ranking":
+                                ranking_fallback
+                        }
+                    }
                 }
 
+            # ==========================================
+            # NORMAL MODE
+            # ==========================================
+
             return {
+
                 "status": "success",
+
+                "warning":
+                    None
+                    if role_match_data
+                    else
+                    (
+                        "Tidak ditemukan laptop "
+                        "yang memenuhi minimum "
+                        "requirement role"
+                    ),
+
                 "meta": {
-                    "id_dss": id_dss,
-                    "id_hasil": id_hasil,
-                    "total_data": len(ranking)
+
+                    "id_dss":
+                        id_dss,
+
+                    "id_hasil_role":
+                        id_hasil_role,
+
+                    "id_hasil_fallback":
+                        id_hasil_fallback,
+
+                    "total_role_match":
+                        len(ranking_role),
+
+                    "total_fallback":
+                        len(ranking_fallback)
                 },
+
                 "data": {
-                    "ranking": ranking
+
+                    "rekomendasi_sesuai_role": {
+
+                        "ranking":
+                            ranking_role
+                    },
+
+                    "alternatif_lain": {
+
+                        "ranking":
+                            ranking_fallback
+                    }
                 }
             }
 
         except Exception as e:
+
             conn.rollback()
+
             return {
                 "status": "error",
                 "message": str(e)
             }
 
         finally:
-            conn.autocommit = True
 
-  
+            conn.autocommit = True

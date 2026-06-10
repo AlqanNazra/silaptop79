@@ -71,10 +71,11 @@ RETURNS TABLE (
     processor_model VARCHAR,
     cores INT,
     threads INT,
+    benchmark_score INTEGER,
     ram_kapasitas INT,
     ram_tipe VARCHAR,
     storage_kapasitas INT,
-    storage_tipe VARCHAR
+    storage_tipe VARCHAR,
 ) AS $$
 BEGIN
     RETURN QUERY
@@ -84,6 +85,7 @@ BEGIN
         pro.model,
         pro.cores,
         pro.threads,
+        pro.benchmark_score,
         r.kapasitas_gb,
         r.tipe,
         s.kapasitas_gb,

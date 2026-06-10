@@ -6,6 +6,7 @@ CREATE TABLE processor (
     nama_processor VARCHAR(255),
     manufacturer VARCHAR(255),
     model VARCHAR(255),
+    benchmark_score INTEGER NOT NULL,
     cores INTEGER CHECK (cores > 0),
     threads INTEGER CHECK (threads > 0),
     base_clock FLOAT CHECK (base_clock > 0),
