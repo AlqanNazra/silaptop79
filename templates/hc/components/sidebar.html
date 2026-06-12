@@ -2,8 +2,7 @@
 <aside class="sidebar">
     <div class="sidebar-header">
         <div class="logo-wrapper" style="gap: 8px;">
-            <img src="{% static 'img/logo_tujuh_sembilan.png' %}" alt="Logo Tujuh Sembilan"
-                style="height: 24px; width: auto; object-fit: contain; flex-shrink: 0;">
+            <img src="{% static 'img/logo_tujuh_sembilan.png' %}" alt="Logo Tujuh Sembilan" style="height: 24px; width: auto; object-fit: contain; flex-shrink: 0;">
             <span class="logo-text" style="font-size: 1.1rem;">SILAPTOP79</span>
         </div>
     </div>
@@ -42,6 +41,7 @@
             <li>
                 <a href="{% url 'inventori:manajemen_laptop' %}"
                     class="menu-item {% if request.resolver_match.url_name == 'manajemen_laptop' or request.resolver_match.url_name == 'tambahlaptop_hc' or request.resolver_match.url_name == 'detaillaptop_hc' or request.resolver_match.url_name == 'editdatalaptop_hc' or request.resolver_match.url_name == 'riwayatpeminjamanlaptop_hc' %}active{% endif %}">
+
                     <svg class="menu-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
@@ -102,8 +102,7 @@
             </div>
             <form action="{% url 'logout' %}" method="post" style="margin: 0; padding: 0;">
                 {% csrf_token %}
-                <button type="submit" class="logout-btn" title="Logout"
-                    style="background: none; border: none; cursor: pointer;">
+                <button type="submit" class="logout-btn" title="Logout" style="background: none; border: none; cursor: pointer;">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                         stroke-linecap="round" stroke-linejoin="round">
                         <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>

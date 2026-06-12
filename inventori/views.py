@@ -251,7 +251,7 @@ def riwayatpeminjamanlaptop_hc_view(request):
     
     try:
         service = PeminjamanService()
-        list_peminjaman = service.service_ambil_semua_peminjaamn()
+        list_peminjaman = service.service_ambil_semua_peminjaman()
         
         users_dict = {u.id_user: u.nama for u in User.objects.all()}
         users_role_dict = {u.id_user: u.role for u in User.objects.all()}
@@ -277,6 +277,7 @@ def riwayatpeminjamanlaptop_hc_view(request):
         }
         return render(request, 'hc/inventori/riwayatpeminjamanlaptop_hc.html', context)
     except Exception as e:
+        import traceback; traceback.print_exc()
         messages.error(request, f'Gagal memuat riwayat: {str(e)}')
         return redirect('inventori:manajemen_laptop')
 

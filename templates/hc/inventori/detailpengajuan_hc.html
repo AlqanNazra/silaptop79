@@ -200,160 +200,6 @@
         .btn-reject:hover {
             background: #cbd5e1;
         }
-
-        /* Modal popup styling matching user request */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(15, 23, 42, 0.4);
-            backdrop-filter: blur(4px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.25s ease;
-        }
-
-        .modal-overlay.active {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .modal-box {
-            background-color: #eef2f6;
-            /* matching user's light-gray bg */
-            border-radius: 20px;
-            padding: 32px;
-            width: 440px;
-            max-width: 90%;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            border: 1px solid #e2e8f0;
-            box-sizing: border-box;
-        }
-
-        .modal-icon-container {
-            width: 64px;
-            height: 64px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 20px;
-        }
-
-        .modal-icon-container.danger {
-            background-color: #fee2e2;
-            /* soft red background circle */
-        }
-
-        .modal-icon-inner {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            font-weight: 700;
-            color: white;
-        }
-
-        .modal-icon-inner.danger {
-            background-color: #dc2626;
-            /* solid red circle */
-        }
-
-        .modal-title {
-            font-size: 20px;
-            font-weight: 700;
-            margin-top: 0;
-            margin-bottom: 20px;
-        }
-
-        .modal-title.danger {
-            color: #b91c1c;
-        }
-
-        .modal-reason-group {
-            width: 100%;
-            text-align: left;
-            margin-bottom: 24px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .modal-reason-group label {
-            font-size: 13px;
-            font-weight: 600;
-            color: #64748b;
-        }
-
-        .modal-textarea {
-            width: 100%;
-            height: 90px;
-            padding: 12px 14px;
-            border-radius: 10px;
-            border: 1px solid #cbd5e1;
-            background-color: #ffffff;
-            font-family: 'Inter', sans-serif;
-            font-size: 14px;
-            color: #334155;
-            resize: none;
-            box-sizing: border-box;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-
-        .modal-textarea:focus {
-            border-color: #0b57c6;
-        }
-
-        .modal-buttons {
-            display: flex;
-            gap: 16px;
-            width: 100%;
-        }
-
-        .modal-btn {
-            flex: 1;
-            padding: 14px;
-            border-radius: 10px;
-            font-size: 14px;
-            font-weight: 700;
-            border: none;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-family: 'Inter', sans-serif;
-        }
-
-        .modal-btn.confirm {
-            background-color: #0b57c6;
-            color: white;
-            box-shadow: 0 4px 10px rgba(11, 87, 198, 0.2);
-        }
-
-        .modal-btn.confirm:hover {
-            background-color: #09459e;
-        }
-
-        .modal-btn.cancel {
-            background-color: #e2e8f0;
-            color: #475569;
-        }
-
-        .modal-btn.cancel:hover {
-            background-color: #cbd5e1;
-        }
     </style>
 </head>
 
@@ -362,11 +208,25 @@
         {% include 'hc/components/sidebar.html' with active_page='pengajuan_laptop' %}
 
         <div class="main-content">
+            <!-- Flash Messages -->
+            {% if messages %}
+            <div style="margin-bottom:20px;">
+                {% for message in messages %}
+                <div style="padding:12px 20px; border-radius:8px; margin-bottom:8px; font-size:14px; font-weight:500;
+                    {% if message.tags == 'success' %}background:#dcfce7; color:#15803d; border:1px solid #bbf7d0;
+                    {% elif message.tags == 'error' %}background:#fee2e2; color:#dc2626; border:1px solid #fecaca;
+                    {% else %}background:#dbeafe; color:#2563eb; border:1px solid #bfdbfe;{% endif %}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
             <div class="breadcrumb">Daftar Pengajuan / <span>Detail Pengajuan</span></div>
 
             <div class="header-area">
                 <h1 class="page-title">Detail Pengajuan</h1>
-                <a href="{% url 'pengajuanlaptop_hc' %}" class="btn-back">Kembali ke Daftar</a>
+                <a href="{% url 'inventori:pengajuanlaptop_hc' %}" class="btn-back">Kembali ke Daftar</a>
             </div>
 
             <div class="card">
@@ -376,95 +236,68 @@
                             <i class="fa-solid fa-laptop"></i>
                         </div>
                         <div>
-                            <h2 style="font-size: 20px; font-weight: 800; color: #1e293b; margin: 0;">Peminjaman Laptop
-                                Baru</h2>
-                            <p style="color: #64748b; font-size: 14px; margin-top: 4px;">Submitted on 24 October 2023
-                            </p>
+                            <h2 style="font-size: 20px; font-weight: 800; color: #1e293b; margin: 0;">Peminjaman Laptop Baru</h2>
+                            <p style="color: #64748b; font-size: 14px; margin-top: 4px;">Submitted on {{ pengajuan.tanggal_pengajuan|date:"d F Y" }}</p>
                         </div>
                     </div>
-                    <div class="status-badge-pending">
-                        <i class="fa-solid fa-circle" style="font-size: 8px;"></i> PENDING
-                    </div>
+                    {% if pengajuan.status|lower == 'approved' %}
+                        <div class="status-badge-pending" style="background: #dcfce7; color: #166534;">
+                            <i class="fa-solid fa-circle" style="font-size: 8px;"></i> APPROVED
+                        </div>
+                    {% elif pengajuan.status|lower == 'rejected' %}
+                        <div class="status-badge-pending" style="background: #fee2e2; color: #991b1b;">
+                            <i class="fa-solid fa-circle" style="font-size: 8px;"></i> REJECTED
+                        </div>
+                    {% else %}
+                        <div class="status-badge-pending">
+                            <i class="fa-solid fa-circle" style="font-size: 8px;"></i> PENDING
+                        </div>
+                    {% endif %}
                 </div>
 
                 <div class="details-grid">
                     <div class="detail-item">
                         <label>Requested By</label>
-                        <div class="value-text">Adi Saputra</div>
-                        <div style="font-size: 12px; color: #94a3b8;">Engineering Department</div>
+                        <div class="value-text">{{ pengajuan.id_user.nama }}</div>
+                        <div style="font-size: 12px; color: #94a3b8;">{{ pengajuan.perusahaan|default:"-" }}</div>
                     </div>
                     <div class="detail-item">
-                        <label>Request Type</label>
-                        <div class="value-text">Peminjaman Baru</div>
-                        <div style="font-size: 12px; color: #94a3b8;">Standard Asset</div>
+                        <label>Request Type / Role</label>
+                        <div class="value-text">{{ pengajuan.kebutuhan_role|default:"-" }}</div>
+                        <div style="font-size: 12px; color: #94a3b8;">Mulai: {{ pengajuan.bulan|date:"M Y"|default:"-" }}</div>
                     </div>
                     <div class="detail-item">
-                        <label>Priority Status</label>
-                        <div class="value-text" style="color: #dc2626;"><i class="fa-solid fa-bolt"></i> High Priority
-                        </div>
+                        <label>Requirement</label>
+                        <div class="value-text">{{ pengajuan.kebutuhan_requirement|default:"-" }}</div>
                     </div>
                 </div>
             </div>
 
             <div class="card">
-                <h3
-                    style="font-size: 17px; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
-                    <i class="fa-solid fa-file-lines" style="color: #0b57c6;"></i> Alasan Pengajuan
+                <h3 style="font-size: 17px; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                    <i class="fa-solid fa-file-lines" style="color: #0b57c6;"></i> Alasan / Keterangan
                 </h3>
                 <div class="reason-box">
-                    "Kebutuhan software development berat. Proyek terbaru memerlukan kompilasi kernel dan menjalankan
-                    multiple virtual containers secara simultan. Perangkat saat ini mengalami bottleneck pada RAM dan
-                    CPU thermal throttling."
+                    "{{ pengajuan.keterangan|default:"Tidak ada keterangan tambahan." }}"
                 </div>
             </div>
 
-            <div class="action-buttons-wrapper">
-                <a href="{% url 'setujui_pengajuan_hc' %}?id={{ pengajuan.id_pengajuan }}"
-                    style="flex: 1; text-decoration: none;">
-                    <button class="btn-action btn-approve" style="width: 100%;">
-                        <i class="fa-solid fa-circle-check"></i> Isi Detail Laptop Pengajuan
-                    </button>
-                </a>
-                <button class="btn-action btn-reject" type="button" onclick="showRejectModal()">
-                    <i class="fa-solid fa-circle-xmark"></i> Tolak Pengajuan
-                </button>
-            </div>
-
-        </div>
-    </div>
-
-    <!-- Modal Rejection Box -->
-    <div id="rejectModal" class="modal-overlay">
-        <div class="modal-box">
-            <div class="modal-icon-container danger">
-                <div class="modal-icon-inner danger">!</div>
-            </div>
-            <h3 class="modal-title danger">Konfirmasi Tolak Pengajuan</h3>
-
-            <form method="POST" action="" style="width: 100%;">
+            {% if pengajuan.status|lower == 'pending' %}
+            <form method="POST" action="">
                 {% csrf_token %}
-                <div class="modal-reason-group">
-                    <label>Alasan Penolakan</label>
-                    <textarea name="alasan_penolakan" class="modal-textarea" required
-                        placeholder="Urgensi tidak sesuai dengan permintaan"></textarea>
-                </div>
-                <div class="modal-buttons">
-                    <button type="submit" class="modal-btn confirm">Konfirmasi</button>
-                    <button type="button" class="modal-btn cancel" onclick="closeRejectModal()">Batal</button>
+                <div class="action-buttons-wrapper">
+                    <button type="submit" name="action" value="approved" class="btn-action btn-approve">
+                        <i class="fa-solid fa-circle-check"></i> Setujui Pengajuan
+                    </button>
+                    <button type="submit" name="action" value="rejected" class="btn-action btn-reject">
+                        <i class="fa-solid fa-circle-xmark"></i> Tolak Pengajuan
+                    </button>
                 </div>
             </form>
+            {% endif %}
+
         </div>
     </div>
-
-    <script>
-        function showRejectModal() {
-            document.getElementById("rejectModal").classList.add("active");
-        }
-
-        function closeRejectModal() {
-            document.getElementById("rejectModal").classList.remove("active");
-        }
-    </script>
 </body>
 
 </html>

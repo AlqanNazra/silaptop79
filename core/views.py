@@ -764,3 +764,23 @@ def home_view(request):
     return login_redirect_view(request)
 
 
+# Procurement management views for IT (Added to fix NoReverseMatch)
+def manajemenpengadaan_it_view(request):
+    return render(request, 'it/inventori/manajemenpengadaan_it.html')
+
+def detailpengadaan_it_view(request):
+    return render(request, 'it/inventori/detailpengadaan_it.html')
+
+def editpengadaan_it_view(request):
+    return render(request, 'it/inventori/editpengadaan_it.html')
+
+def setujui_pengajuan_it_view(request):
+    from inventori.models import LaptopInventori
+    pengajuan_id = request.GET.get('id', '1')
+    available_laptops = LaptopInventori.objects.filter(status__iexact='Available')
+    return render(request, 'it/inventori/setujuipengajuan_it.html', {
+        'pengajuan_id': pengajuan_id,
+        'laptops': available_laptops
+    })
+
+

@@ -24,6 +24,10 @@ from core.views import (
     detailrekomendasi_it_view,
     detailrekomendasiscrapping_it_view,
     notifikasi_it_view,
+    manajemenpengadaan_it_view,
+    detailpengadaan_it_view,
+    editpengadaan_it_view,
+    setujui_pengajuan_it_view,
 
     # Talent Views
     dashboard_talent_view,
@@ -99,6 +103,10 @@ urlpatterns = [
     path('it/detail-rekomendasi/', detailrekomendasi_it_view, name='detailrekomendasi_it'),
     path('it/detail-scrapping/', detailrekomendasiscrapping_it_view, name='detailrekomendasiscrapping_it'),
     path('it/notifikasi/', notifikasi_it_view, name='notifikasi_it'),
+    path('it/manajemen-pengadaan/', manajemenpengadaan_it_view, name='manajemen_pengadaan_it'),
+    path('it/detail-pengadaan/', detailpengadaan_it_view, name='detailpengadaan_it'),
+    path('it/edit-pengadaan/', editpengadaan_it_view, name='editpengadaan_it'),
+    path('it/setujui-pengajuan/', setujui_pengajuan_it_view, name='setujui_pengajuan_it'),
 
     # ==========================================
     # TALENT ROUTES
