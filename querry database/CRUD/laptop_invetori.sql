@@ -19,13 +19,48 @@ CREATE TABLE inventori_laptopinventori (
     FOREIGN KEY (id_storage) REFERENCES storage(id_storage)
 );
 
-CREATE OR REPLACE FUNCTION tambah_laptop_inventori
-(f_nama_laptop VARCHAR,f_model VARCHAR,VARCHAR,f_kondisi VARCHAR,f_status VARCHAR,
-f_lokasi VARCHAR,f_id_processor BIGINT,f_id_ram BIGINT,f_id_storage BIGINT,f_ukuran_layar FLOAT)
+CREATE OR REPLACE FUNCTION tambah_laptop_inventori(
+    f_nama_laptop VARCHAR,
+    f_model VARCHAR,
+    f_os VARCHAR,
+    f_kondisi VARCHAR,
+    f_status VARCHAR,
+    f_lokasi VARCHAR,
+    f_id_processor VARCHAR, -- Ubah ke VARCHAR
+    f_id_ram VARCHAR,       -- Ubah ke VARCHAR
+    f_id_storage VARCHAR,   -- Ubah ke VARCHAR
+    f_ukuran_layar FLOAT
+)
 RETURNS VOID AS $$
 BEGIN
-    INSERT INTO inventori_laptopinventori (id_laptop_inventori,no_inventori,nama_laptop,model,os,kondisi,status,lokasi,id_processor,id_ram,id_storage,ukuran_layar)
-    VALUES (f_generate_id('inventori','inventori_laptopinventori'),generate_no_inventori(),f_nama_laptop,f_model,f_os,f_kondisi,f_status,f_lokasi,f_id_processor,f_id_ram,f_id_storage,f_ukuran_layar);
+    INSERT INTO inventori_laptopinventori (
+        id_laptop_inventori,
+        no_inventori,
+        nama_laptop,
+        model,
+        os,
+        kondisi,
+        status,
+        lokasi,
+        processor_id, -- Gunakan suffix _id jika Django
+        ram_id,
+        storage_id,
+        ukuran_layar
+    )
+    VALUES (
+        f_generate_id('INV','inventori_laptopinventori','id_laptop_inventori'),
+        'LTP-' || CAST(extract(epoch from now()) AS TEXT) || f_nama_laptop, -- Generate manual simpel
+        f_nama_laptop,
+        f_model,
+        f_os,
+        f_kondisi,
+        f_status,
+        f_lokasi,
+        NULLIF(f_id_processor, '')::bigint,
+        NULLIF(f_id_ram, '')::bigint,
+        NULLIF(f_id_storage, '')::bigint,
+        f_ukuran_layar
+    );
 END;
 $$ LANGUAGE plpgsql;
 
@@ -54,9 +89,9 @@ BEGIN
         s.kapasitas_gb,
         s.tipe
     FROM inventori_laptopinventori li
-    LEFT JOIN inventori_processor pro ON li.id_processor = pro.id_processor
-    LEFT JOIN inventori_ram r ON li.id_ram = r.id_ram
-    LEFT JOIN inventori_storage s ON li.id_storage = s.id_storage
+    LEFT JOIN inventori_processor pro ON li.processor_id = pro.id_processor
+    LEFT JOIN inventori_ram r ON li.ram_id = r.id_ram
+    LEFT JOIN inventori_storage s ON li.storage_id = s.id_storage
     WHERE li.id_laptop_inventori = f_id_laptop_inventori;
 END;
 $$ LANGUAGE plpgsql;
@@ -107,9 +142,9 @@ BEGIN
 
     FROM inventori_laptopinventori li
 
-    LEFT JOIN inventori_processor pro ON li.id_processor = pro.id_processor
-    LEFT JOIN inventori_ram r ON li.id_ram = r.id_ram
-    LEFT JOIN inventori_storage s ON li.id_storage = s.id_storage;
+    LEFT JOIN inventori_processor pro ON li.processor_id = pro.id_processor
+    LEFT JOIN inventori_ram r ON li.ram_id = r.id_ram
+    LEFT JOIN inventori_storage s ON li.storage_id = s.id_storage;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -213,9 +248,9 @@ RETURNS TEXT AS $$
 BEGIN
     UPDATE inventori_laptopinventori
     SET 
-        id_processor = f_id_processor,
-        id_ram = f_id_ram,
-        id_storage = f_id_storage
+        processor_id = f_id_processor,
+        ram_id = f_id_ram,
+        storage_id = f_id_storage
     WHERE id_laptop_inventori = f_id_laptop_inventori;
 
     RETURN 'Spesifikasi berhasil diupdate!';

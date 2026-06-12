@@ -1,0 +1,241 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventori Laptop Perusahaan - SiLaptop79</title>
+
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <!-- MAIN CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=2">
+
+    <!-- 🔥 PENTING: CSS LAYOUT (INI YANG HILANG TADI) -->
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            min-height: 100vh;
+            background-color: #f8fafc;
+        }
+
+        .dashboard-wrapper {
+            display: flex;
+            width: 100%;
+        }
+
+        .main-dashboard-content {
+            flex: 1;
+            margin-left: 260px;
+            padding: 40px 60px;
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 40px;
+        }
+
+        .top-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+
+        .search-box input {
+            padding: 12px 16px;
+            border-radius: 12px;
+            border: none;
+            background: #e2e8f0;
+            width: 300px;
+        }
+
+        .btn-primary {
+            background: #0b57c6;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+        }
+
+        .table-card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            padding: 16px;
+            text-align: left;
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+        td {
+            padding: 16px;
+            border-top: 1px solid #f1f5f9;
+        }
+
+        .laptop-cell {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .laptop-icon {
+            background: #f1f5f9;
+            padding: 10px;
+            border-radius: 6px;
+        }
+
+        .laptop-name {
+            font-weight: 700;
+        }
+
+        .laptop-brand {
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+        .status-pill {
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-available {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .status-dipinjam {
+            background: #dbeafe;
+            color: #2563eb;
+        }
+
+        .status-rusak {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        .btn-detail {
+            padding: 6px 12px;
+            background: #e2e8f0;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        tbody tr:hover {
+            background: #f8fafc;
+        }
+
+        .pagination-container {
+            padding: 16px;
+            border-top: 1px solid #f1f5f9;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="dashboard-wrapper">
+
+    {% include 'components/sidebar.html' with active_page='data_laptop' %}
+
+    <div class="main-dashboard-content">
+
+        <h1 class="page-title">Inventori Laptop Perusahaan</h1>
+
+        <div class="top-actions">
+            <div class="search-box">
+                <input type="text" placeholder="Cari serial number atau merk...">
+            </div>
+
+            <a href="{% url 'tambahlaptop_hc' %}" class="btn-primary">
+                <i class="fa-solid fa-plus"></i> Tambah Laptop Baru
+            </a>
+        </div>
+
+        <div class="table-card">
+            <table>
+                <thead>
+                    <tr>
+                        <th>NO</th>
+                        <th>NAMA LAPTOP</th>
+                        <th>SERIAL NUMBER</th>
+                        <th>STATUS</th>
+                        <th>AKSI</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                {% for laptop in laptops %}
+                <tr>
+                    <td>{{ forloop.counter|stringformat:"02d" }}</td>
+
+                    <td>
+                        <div class="laptop-cell">
+                            <div class="laptop-icon">
+                                <i class="fa-solid fa-laptop"></i>
+                            </div>
+                            <div>
+                                <div class="laptop-name">{{ laptop.nama_laptop }}</div>
+                                <div class="laptop-brand">{{ laptop.model }}</div>
+                            </div>
+                        </div>
+                    </td>
+
+                    <td>{{ laptop.no_inventori }}</td>
+
+                    <td>
+                        <div class="status-pill
+                            {% if laptop.status == 'tersedia' %}status-available
+                            {% elif laptop.status == 'dipinjam' %}status-dipinjam
+                            {% elif laptop.status == 'rusak' %}status-rusak
+                            {% else %}status-available{% endif %}
+                        ">
+                            <span class="dot"></span>
+                            {{ laptop.status|title }}
+                        </div>
+                    </td>
+
+                    <td>
+                        <button class="btn-detail">Detail</button>
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+
+            <div class="pagination-container">
+                Total {{ laptops|length }} data
+            </div>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>

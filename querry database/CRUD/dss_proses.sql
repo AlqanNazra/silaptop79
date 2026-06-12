@@ -50,4 +50,3 @@ BEGIN
     FROM dss_dssproses d;
 END;
 $$ LANGUAGE plpgsql;
-

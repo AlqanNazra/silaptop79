@@ -1,6 +1,6 @@
 import psycopg2
 from psycopg2.extras import RealDictCursor
-from dto.dto_riwayat_aktivitas import RiwayatAktivitasDTO
+from inventori.dto.dto_riwayat_aktivitas import RiwayatAktivitasDTO
 
 
 class RiwayatAktivitasRepository:
@@ -81,7 +81,12 @@ class RiwayatAktivitasRepository:
             cur.execute(query, (id_aktivitas,))
             result = cur.fetchone()
             self.conn.commit()
-            return result[0] if result else None
+            if result:
+                if isinstance(result, dict):
+                    return list(result.values())[0]
+                else:
+                    return result[0]
+            return None
         
     def _map_to_dto(self, row):
         if not row:

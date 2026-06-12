@@ -1,0 +1,362 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detail Laptop - SiLaptop79</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        body {
+            background-color: #f8fafc;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            display: flex;
+        }
+
+        .dashboard-wrapper {
+            display: flex;
+            width: 100%;
+        }
+
+        .main-content {
+            flex: 1;
+            margin-left: 260px;
+            padding: 40px 60px;
+        }
+
+        .breadcrumb {
+            font-size: 14px;
+            color: #64748b;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .breadcrumb span {
+            color: #0b57c6;
+            font-weight: 600;
+        }
+
+        .header-area {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .page-title {
+            font-size: 32px;
+            font-weight: 800;
+            color: #1e293b;
+            margin: 0;
+        }
+
+        .btn-back {
+            background: #e2e8f0;
+            color: #475569;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: 0.2s;
+        }
+
+        .btn-back:hover {
+            background: #cbd5e1;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 30px;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid #f1f5f9;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+        }
+
+        /* Laptop Display Section */
+        .laptop-display {
+            text-align: center;
+            position: relative;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 800;
+            margin-bottom: 20px;
+        }
+
+        .status-available {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .status-dipinjam {
+            background: #dbeafe;
+            color: #2563eb;
+        }
+
+        .status-rusak {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .laptop-img {
+            width: 80%;
+            margin: 20px 0;
+            border-radius: 12px;
+        }
+
+        .laptop-info h2 {
+            font-size: 24px;
+            font-weight: 800;
+            color: #1e293b;
+            margin: 0 0 5px 0;
+        }
+
+        .laptop-info p {
+            color: #94a3b8;
+            font-weight: 500;
+            margin: 0;
+        }
+
+        /* Specs Section */
+        .specs-section {
+            margin-top: 30px;
+        }
+
+        .specs-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 18px;
+            font-weight: 800;
+            color: #1e293b;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #0b57c6;
+            width: fit-content;
+        }
+
+        .specs-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+
+        .spec-item label {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .spec-item span {
+            display: block;
+            font-size: 14px;
+            font-weight: 700;
+            color: #334155;
+        }
+
+        /* Sidebar Info Section */
+        .admin-title {
+            font-size: 18px;
+            font-weight: 800;
+            color: #1e293b;
+            margin-bottom: 20px;
+        }
+
+        .admin-item {
+            margin-bottom: 24px;
+        }
+
+        .admin-item label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #64748b;
+            margin-bottom: 8px;
+        }
+
+        .asset-id {
+            background: #eff6ff;
+            color: #2563eb;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-weight: 700;
+            display: inline-block;
+        }
+
+        .loc-text {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #1e293b;
+            font-weight: 700;
+        }
+
+        .warranty-active {
+            background: #dcfce7;
+            color: #16a34a;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        /* Action Buttons */
+        .actions {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .btn-action {
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: 0.3s;
+        }
+
+        .btn-edit {
+            background: #0b57c6;
+            color: #fff;
+        }
+
+        .btn-edit:hover {
+            background: #09459e;
+        }
+
+        .btn-history {
+            background: #e2e8f0;
+            color: #1e293b;
+        }
+
+        .btn-history:hover {
+            background: #cbd5e1;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="dashboard-wrapper">
+        {% include 'it/components/sidebar.html' with active_page='data_laptop' %}
+
+        <div class="main-content">
+            <!-- Flash Messages -->
+            {% if messages %}
+            <div style="margin-bottom:20px;">
+                {% for message in messages %}
+                <div style="padding:12px 20px; border-radius:8px; margin-bottom:8px; font-size:14px; font-weight:500;
+                    {% if message.tags == 'success' %}background:#dcfce7; color:#15803d; border:1px solid #bbf7d0;
+                    {% elif message.tags == 'error' %}background:#fee2e2; color:#dc2626; border:1px solid #fecaca;
+                    {% else %}background:#dbeafe; color:#2563eb; border:1px solid #bfdbfe;{% endif %}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="breadcrumb">Data Laptop / <span>{{ laptop.nama_laptop }}</span></div>
+
+            <div class="header-area">
+                <h1 class="page-title">Laptop Detail</h1>
+                <a href="{% url 'manajemen_laptop_it' %}" class="btn-back">Kembali ke Daftar</a>
+            </div>
+
+            <div class="content-grid">
+                <div class="left-column">
+                    <div class="card laptop-display">
+                        <div class="status-badge {% if laptop.status == 'tersedia' %}status-available{% elif laptop.status == 'dipinjam' %}status-dipinjam{% else %}status-rusak{% endif %}">
+                            <i class="fa-solid fa-circle" style="font-size: 8px;"></i> {{ laptop.status|upper }}
+                        </div>
+                        <br>
+                        <img src="{% static 'img/laptop_placeholder.png' %}" onerror="this.src='https://via.placeholder.com/400x250'" class="laptop-img" alt="Laptop">
+                        <div class="laptop-info">
+                            <h2>{{ laptop.nama_laptop }}</h2>
+                            <p>{{ laptop.model|default:"-" }} - {{ laptop.os|default:"-" }}</p>
+                        </div>
+                    </div>
+
+                    <div class="card specs-section">
+                        <div class="specs-title"><i class="fa-solid fa-microchip"></i> Spesifikasi Laptop</div>
+                        <div class="specs-grid">
+                            <div class="spec-item"><label>Processor</label><span>{{ laptop.id_processor.nama_processor|default:"-" }}</span></div>
+                            <div class="spec-item"><label>Storage</label><span>{{ laptop.id_storage.kapasitas_gb|default:"0" }} GB {{ laptop.id_storage.tipe|default:"" }}</span></div>
+                            <div class="spec-item"><label>Memory RAM</label><span>{{ laptop.id_ram.kapasitas_gb|default:"0" }} GB {{ laptop.id_ram.tipe|default:"" }}</span></div>
+                            <div class="spec-item"><label>Screen Size</label><span>{{ laptop.ukuran_layar|default:"-" }} inch</span></div>
+                            <div class="spec-item"><label>Kondisi</label><span>{{ laptop.kondisi|title }}</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="right-column">
+                    <div class="card">
+                        <div class="admin-title">Asset Administration</div>
+
+                        <div class="admin-item">
+                            <label>Asset ID</label>
+                            <div class="asset-id">{{ laptop.no_inventori }}</div>
+                        </div>
+
+                        <div class="admin-item">
+                            <label>Storage Location</label>
+                            <div class="loc-text"><i class="fa-solid fa-location-dot" style="color: #0b57c6;"></i>
+                                {{ laptop.lokasi }}</div>
+                        </div>
+                    </div>
+
+                    <div class="actions" style="display: flex; gap: 10px; align-items: center; width: 100%;">
+
+                        <a href="{% url 'editdatalaptop_it' laptop.id_laptop_inventori %}" style="text-decoration: none; flex: 1;">
+                            <button class="btn-action"
+                                style="width: 100%; height: 45px; cursor: pointer; background-color: #005FAA; color: white; border: none; border-radius: 50px; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 500; white-space: nowrap; padding: 0 15px;">
+                                <i class="fa-solid fa-pen"></i> Edit Data
+                            </button>
+                        </a>
+
+                        <form action="{% url 'detaillaptop_it' laptop.id_laptop_inventori %}" method="POST" style="flex: 1;" onsubmit="return confirm('Yakin ingin menghapus laptop ini?');">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="hapus">
+                            <button type="submit" class="btn-action btn-history"
+                                style="width: 100%; height: 45px; cursor: pointer; border: none; border-radius: 50px; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 500; white-space: nowrap; padding: 0 15px; color: #dc2626;">
+                                <i class="fa-solid fa-trash"></i> Hapus Aset
+                            </button>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

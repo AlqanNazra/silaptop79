@@ -1,7 +1,7 @@
 import psycopg2
 from psycopg2.extras import RealDictCursor
-from dto.dto_alternatif_dss import AlternatifDssDTO
-from interface.interface_alternatif_dss import IAlternatifDss
+from .dto.dto_alternatif_dss import AlternatifDssDTO
+from .interface.interface_alternatif_dss import IAlternatifDss
 
 
 class AlternatifDssRepository(IAlternatifDss):
@@ -52,4 +52,9 @@ class AlternatifDssRepository(IAlternatifDss):
             result = cur.fetchone()
             self.conn.commit()
 
-            return result[0] if result else None
+            if result:
+                if isinstance(result, dict):
+                    return list(result.values())[0]
+                else:
+                    return result[0]
+            return None

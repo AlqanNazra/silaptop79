@@ -1,21 +1,4 @@
-1. Install Django 
-# Buat virtual environment dulu (recommended)
-python -m venv venv
-
-# Aktifkan venv
-# Windows:
-venv\Scripts\activate
-
-# Mac/Linux:
-source venv/bin/activate
-
-# Install Django
-pip install django
-
-2. cara jalankan server 
-
-python manage.py runserver
-
-fullnya disini 
-
-https://grok.com/share/c2hhcmQtMi1jb3B5_0ed4553f-5871-4511-a78f-8c9e13a354d5
+asgiref==3.11.1
+Django==6.0.4
+psycopg2-binary==2.9.11
+sqlparse==0.5.5

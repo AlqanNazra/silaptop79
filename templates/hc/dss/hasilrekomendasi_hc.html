@@ -1,0 +1,592 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hasil Rekomendasi SAW - SiLaptop79</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1.1">
+
+    <style>
+        /* Base and Layout Styles */
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .dashboard-wrapper {
+            display: flex;
+            width: 100%;
+        }
+
+        .main-dashboard-content {
+            flex: 1;
+            margin-left: 260px;
+            /* Adjust based on actual sidebar width */
+            padding: 40px 60px;
+            box-sizing: border-box;
+        }
+
+        /* Page Headers */
+        .page-header-wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 24px;
+        }
+
+        .page-title-section {
+            max-width: 650px;
+        }
+
+        .supra-title {
+            font-size: 11px;
+            font-weight: 700;
+            color: #0b57c6;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 800;
+            color: #1e293b;
+            margin-top: 0;
+            margin-bottom: 12px;
+            letter-spacing: -0.5px;
+        }
+
+        .page-subtitle {
+            font-size: 14px;
+            color: #64748b;
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        /* Toolbar / Top Actions */
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-action {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            text-decoration: none;
+        }
+
+        .btn-pdf {
+            background-color: #e2e8f0;
+            color: #0b57c6;
+        }
+
+        .btn-pdf:hover {
+            background-color: #cbd5e1;
+        }
+
+        .btn-recalc {
+            background-color: #0b57c6;
+            color: white;
+            box-shadow: 0 4px 12px rgba(11, 87, 198, 0.2);
+        }
+
+        .btn-recalc:hover {
+            background-color: #09459e;
+        }
+
+        /* Metric Cards */
+        .metrics-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .metric-card {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+            border: 1px solid #f1f5f9;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Color accents for cards */
+        .metric-card:nth-child(1) {
+            border-left: 4px solid #0b57c6;
+        }
+
+        .metric-card:nth-child(2) {
+            border-left: 4px solid #ef4444;
+        }
+
+        .metric-card:nth-child(3) {
+            border-left: 4px solid #10b981;
+        }
+
+        .metric-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .icon-blue {
+            background-color: #eff6ff;
+            color: #0b57c6;
+        }
+
+        .icon-red {
+            background-color: #fef2f2;
+            color: #ef4444;
+        }
+
+        .icon-green {
+            background-color: #ecfdf5;
+            color: #10b981;
+        }
+
+        .metric-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #64748b;
+            margin-bottom: 4px;
+        }
+
+        .metric-value {
+            font-size: 20px;
+            font-weight: 800;
+            color: #1e293b;
+        }
+
+        /* Info Alert Box */
+        .info-card {
+            background-color: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-radius: 12px;
+            padding: 16px 20px;
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+            margin-bottom: 32px;
+        }
+
+        .info-card-icon {
+            color: #0b57c6;
+            font-size: 18px;
+            margin-top: 2px;
+        }
+
+        .info-card-text h4 {
+            margin: 0 0 4px 0;
+            color: #0b57c6;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .info-card-text p {
+            margin: 0;
+            color: #475569;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        /* Table Card Container */
+        .table-card {
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+            border: 1px solid #f1f5f9;
+            overflow: hidden;
+            margin-bottom: 40px;
+        }
+
+        .table-header {
+            padding: 20px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .table-header h3 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .sort-select {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .sort-select select {
+            border: none;
+            background: none;
+            font-weight: 600;
+            color: #0b57c6;
+            cursor: pointer;
+            outline: none;
+            font-family: 'Inter', sans-serif;
+            appearance: none;
+            padding-right: 16px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230b57c6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right center;
+            background-size: 12px;
+        }
+
+        /* Data Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 16px 24px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            border-bottom: 1px solid #f1f5f9;
+            background-color: #fafbfc;
+        }
+
+        td {
+            padding: 16px 24px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+            font-size: 13px;
+            color: #475569;
+        }
+
+        tbody tr:hover {}
+
+        /* Rank Column */
+        .rank-cell {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: #e2e8f0;
+            color: #64748b;
+            font-weight: 700;
+            font-size: 12px;
+        }
+
+        .rank-1 {
+            background-color: #0b57c6;
+            color: white;
+        }
+
+        .nama-laptop {
+            font-weight: 700;
+            color: #1e293b;
+            font-size: 14px;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .specs-subtext {
+            font-size: 10px;
+            color: #0b57c6;
+            font-weight: 600;
+        }
+
+        /* Source Badges */
+        .source-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 700;
+        }
+
+        .source-internal {
+            background-color: #dcfce7;
+            color: #16a34a;
+        }
+
+        .source-external {
+            background-color: #ffedd5;
+            color: #ea580c;
+        }
+
+        /* Special Badges */
+        .ram-badge {
+            background-color: #f1f5f9;
+            color: #64748b;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        /* Score Styling */
+        .score-val {
+            font-size: 16px;
+            font-weight: 800;
+            color: #1e293b;
+        }
+
+        .score-val.high {
+            color: #0b57c6;
+        }
+
+        /* Actions */
+        .btn-detail {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            color: #475569;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-detail:hover {
+            border-color: #cbd5e1;
+        }
+
+        /* Pagination */
+        .pagination-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px;
+            background-color: #ffffff;
+            border-top: 1px solid #f1f5f9;
+        }
+
+        .pagination-text {
+            font-size: 12px;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .pagination-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .page-btn {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            border: 1.5px solid #e2e8f0;
+            background: white;
+            color: #64748b;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .page-btn:hover {
+            background-color: #f8fafc;
+            border-color: #cbd5e1;
+        }
+
+        .page-btn.active {
+            background-color: #0b57c6;
+            color: white;
+            border-color: #0b57c6;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="dashboard-wrapper">
+        <!-- Load Sidebar -> highlight "Hasil Rekomendasi" -->
+        {% include 'hc/components/sidebar.html' with active_page='hasil_rekomendasi' %}
+
+        <!-- Main Content -->
+        <div class="main-dashboard-content">
+            <!-- Flash Messages -->
+            {% if messages %}
+            <div style="margin-bottom:20px;">
+                {% for message in messages %}
+                <div style="padding:12px 20px; border-radius:8px; margin-bottom:8px; font-size:14px; font-weight:500;
+                    {% if message.tags == 'success' %}background:#dcfce7; color:#15803d; border:1px solid #bbf7d0;
+                    {% elif message.tags == 'error' %}background:#fee2e2; color:#dc2626; border:1px solid #fecaca;
+                    {% else %}background:#dbeafe; color:#2563eb; border:1px solid #bfdbfe;{% endif %}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Header Section -->
+            <div class="page-header-wrapper" style="align-items: flex-end;">
+                <div class="page-title-section" style="max-width: 100%; width: 100%;">
+                    <span class="supra-title">Hasil Analisis</span>
+                    <h1 class="page-title">Rekomendasi Laptop SAW</h1>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; gap: 40px;">
+                        <p class="page-subtitle" style="flex: 1;">
+                            Berdasarkan kriteria performa, portabilitas, dan anggaran yang Anda tentukan,
+                            berikut adalah hasil perankingkan menggunakan metode Simple Additive Weighting.
+                        </p>
+
+                        <div class="header-actions" style="flex-shrink: 0;">
+                            <button class="btn-action btn-pdf">
+                                <i class="fa-solid fa-download"></i> Cetak PDF
+                            </button>
+                            <a href="{% url 'inputkriteria_hc' %}" class="btn-action btn-recalc">
+                                <i class="fa-solid fa-arrow-rotate-right"></i> Hitung Ulang
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Metrics Container -->
+            <div class="metrics-container">
+                <div class="metric-card">
+                    <div class="metric-icon icon-blue"><i class="fa-solid fa-laptop"></i></div>
+                    <div class="metric-label">Total Alternatif</div>
+                    <div class="metric-value">{{ total_alternatif }} Laptop</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-icon icon-red"><i class="fa-solid fa-money-bill"></i></div>
+                    <div class="metric-label">Rata-rata Harga</div>
+                    <div class="metric-value">Rp {{ rata_rata_harga|floatformat:0 }}</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-icon icon-green"><i class="fa-solid fa-check-circle"></i></div>
+                    <div class="metric-label">Skor Tertinggi</div>
+                    <div class="metric-value">{{ skor_tertinggi|floatformat:3 }} (SAW)</div>
+                </div>
+            </div>
+
+            <!-- Info Logika Sourcing -->
+            <div class="info-card">
+                <div class="info-card-icon"><i class="fa-solid fa-circle-info"></i></div>
+                <div class="info-card-text">
+                    <h4>Logika Sourcing Data</h4>
+                    <p>Sistem memprioritaskan aset internal kantor. Hasil dari database eksternal ditampilkan karena
+                        tidak ditemukan unit internal yang memenuhi kriteria spesifikasi tinggi dalam rentang anggaran
+                        yang diinginkan.</p>
+                </div>
+            </div>
+
+            <!-- Main Ranking Table -->
+            <div class="table-card">
+                <div class="table-header">
+                    <h3>Daftar Peringkat Laptop</h3>
+                    <div class="sort-select">
+                        Urutkan:
+                        <select>
+                            <option>Skor SAW (Tertinggi)</option>
+                            <option>Skor SAW (Terendah)</option>
+                            <option>Harga (Termurah)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 80px; text-align: center;">RANK</th>
+                            <th>NAMA LAPTOP</th>
+                            <th>SUMBER DATA</th>
+                            <th>PROSESSOR</th>
+                            <th>RAM</th>
+                            <th>SKOR (SAW)</th>
+                            <th>AKSI</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in ranking %}
+                        <tr>
+                            <td style="text-align: center;">
+                                <div style="display: flex; justify-content: center;">
+                                    <div class="rank-cell {% if forloop.counter == 1 %}rank-1{% endif %}">
+                                        {{ item.rank }}
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="nama-laptop" style="margin-bottom:0;">{{ item.detail.nama }}</span>
+                            </td>
+                            <td>
+                                <span class="source-badge source-internal">
+                                    <i class="fa-solid fa-building"></i> Internal
+                                </span>
+                            </td>
+                            <td>Processor Core: {{ item.detail.processor }}</td>
+                            <td><span class="ram-badge">{{ item.detail.ram }}GB</span></td>
+                            <td><span class="score-val {% if forloop.counter == 1 %}high{% endif %}">{{ item.skor|floatformat:3 }}</span></td>
+                            <td><button class="btn-detail">Detail</button></td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" style="text-align: center;">Belum ada hasil kalkulasi SAW. Silahkan input kriteria terlebih dahulu.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <!-- Pagination footer -->
+                <div class="pagination-container">
+                    <span class="pagination-text">Menampilkan 7 dari 12 rekomendasi laptop</span>
+                    <div class="pagination-controls">
+                        <button class="page-btn"><i class="fa-solid fa-angle-left"></i></button>
+                        <button class="page-btn active">1</button>
+                        <button class="page-btn">2</button>
+                        <button class="page-btn"><i class="fa-solid fa-angle-right"></i></button>
+                    </div>
+                </div>
+
+            </div> <!-- End Table Card -->
+
+        </div> <!-- End Main Content -->
+    </div> <!-- End Dashboard Wrapper -->
+
+</body>
+
+</html>

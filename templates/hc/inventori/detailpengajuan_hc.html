@@ -1,0 +1,303 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detail Pengajuan Laptop - SiLaptop79</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+    <style>
+        /* Reset Sidebar Menu agar tidak ada bullet points */
+        ul,
+        li {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        body {
+            background-color: #f8fafc;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            display: flex;
+        }
+
+        .dashboard-wrapper {
+            display: flex;
+            width: 100%;
+        }
+
+        .main-content {
+            flex: 1;
+            margin-left: 260px;
+            /* Sesuai lebar sidebar */
+            padding: 40px 60px;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        /* Header Area */
+        .breadcrumb {
+            font-size: 13px;
+            color: #64748b;
+            margin-bottom: 8px;
+        }
+
+        .breadcrumb span {
+            color: #0b57c6;
+            font-weight: 600;
+        }
+
+        .header-area {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .page-title {
+            font-size: 32px;
+            font-weight: 800;
+            color: #1e293b;
+            margin: 0;
+        }
+
+        .btn-back {
+            background: #e2e8f0;
+            color: #475569;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: 0.2s;
+        }
+
+        /* Card System */
+        .card {
+            background: #fff;
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid #f1f5f9;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+            margin-bottom: 24px;
+        }
+
+        /* Status Badge */
+        .status-badge-pending {
+            background: #fef9c3;
+            color: #a16207;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Header Card Info */
+        .request-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 30px;
+        }
+
+        .icon-box {
+            width: 60px;
+            height: 60px;
+            background: #eff6ff;
+            color: #3b82f6;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        /* Grid Detail */
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #f1f5f9;
+        }
+
+        .detail-item label {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .value-text {
+            font-size: 14px;
+            font-weight: 700;
+            color: #334155;
+        }
+
+        /* Alasan Box */
+        .reason-box {
+            background: #f8fafc;
+            border-left: 4px solid #0b57c6;
+            padding: 20px;
+            border-radius: 0 12px 12px 0;
+            font-style: italic;
+            color: #475569;
+            line-height: 1.6;
+            font-size: 15px;
+        }
+
+        /* Tombol Aksi 1:1 */
+        .action-buttons-wrapper {
+            display: flex;
+            gap: 20px;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn-action {
+            flex: 1;
+            /* Membuat ukuran tombol seimbang 1:1 */
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: 0.3s;
+        }
+
+        .btn-approve {
+            background: #0b57c6;
+            color: white;
+            box-shadow: 0 4px 12px rgba(11, 87, 198, 0.2);
+        }
+
+        .btn-reject {
+            background: #e2e8f0;
+            color: #991b1b;
+        }
+
+        .btn-approve:hover {
+            background: #09459e;
+        }
+
+        .btn-reject:hover {
+            background: #cbd5e1;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-wrapper">
+        {% include 'hc/components/sidebar.html' with active_page='pengajuan_laptop' %}
+
+        <div class="main-content">
+            <!-- Flash Messages -->
+            {% if messages %}
+            <div style="margin-bottom:20px;">
+                {% for message in messages %}
+                <div style="padding:12px 20px; border-radius:8px; margin-bottom:8px; font-size:14px; font-weight:500;
+                    {% if message.tags == 'success' %}background:#dcfce7; color:#15803d; border:1px solid #bbf7d0;
+                    {% elif message.tags == 'error' %}background:#fee2e2; color:#dc2626; border:1px solid #fecaca;
+                    {% else %}background:#dbeafe; color:#2563eb; border:1px solid #bfdbfe;{% endif %}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="breadcrumb">Daftar Pengajuan / <span>Detail Pengajuan</span></div>
+
+            <div class="header-area">
+                <h1 class="page-title">Detail Pengajuan</h1>
+                <a href="{% url 'inventori:pengajuanlaptop_hc' %}" class="btn-back">Kembali ke Daftar</a>
+            </div>
+
+            <div class="card">
+                <div class="request-header">
+                    <div style="display: flex; gap: 20px; align-items: center;">
+                        <div class="icon-box">
+                            <i class="fa-solid fa-laptop"></i>
+                        </div>
+                        <div>
+                            <h2 style="font-size: 20px; font-weight: 800; color: #1e293b; margin: 0;">Peminjaman Laptop Baru</h2>
+                            <p style="color: #64748b; font-size: 14px; margin-top: 4px;">Submitted on {{ pengajuan.tanggal_pengajuan|date:"d F Y" }}</p>
+                        </div>
+                    </div>
+                    {% if pengajuan.status|lower == 'approved' %}
+                        <div class="status-badge-pending" style="background: #dcfce7; color: #166534;">
+                            <i class="fa-solid fa-circle" style="font-size: 8px;"></i> APPROVED
+                        </div>
+                    {% elif pengajuan.status|lower == 'rejected' %}
+                        <div class="status-badge-pending" style="background: #fee2e2; color: #991b1b;">
+                            <i class="fa-solid fa-circle" style="font-size: 8px;"></i> REJECTED
+                        </div>
+                    {% else %}
+                        <div class="status-badge-pending">
+                            <i class="fa-solid fa-circle" style="font-size: 8px;"></i> PENDING
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="details-grid">
+                    <div class="detail-item">
+                        <label>Requested By</label>
+                        <div class="value-text">{{ pengajuan.id_user.nama }}</div>
+                        <div style="font-size: 12px; color: #94a3b8;">{{ pengajuan.perusahaan|default:"-" }}</div>
+                    </div>
+                    <div class="detail-item">
+                        <label>Request Type / Role</label>
+                        <div class="value-text">{{ pengajuan.kebutuhan_role|default:"-" }}</div>
+                        <div style="font-size: 12px; color: #94a3b8;">Mulai: {{ pengajuan.bulan|date:"M Y"|default:"-" }}</div>
+                    </div>
+                    <div class="detail-item">
+                        <label>Requirement</label>
+                        <div class="value-text">{{ pengajuan.kebutuhan_requirement|default:"-" }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 style="font-size: 17px; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                    <i class="fa-solid fa-file-lines" style="color: #0b57c6;"></i> Alasan / Keterangan
+                </h3>
+                <div class="reason-box">
+                    "{{ pengajuan.keterangan|default:"Tidak ada keterangan tambahan." }}"
+                </div>
+            </div>
+
+            {% if pengajuan.status|lower == 'pending' %}
+            <form method="POST" action="">
+                {% csrf_token %}
+                <div class="action-buttons-wrapper">
+                    <button type="submit" name="action" value="approved" class="btn-action btn-approve">
+                        <i class="fa-solid fa-circle-check"></i> Setujui Pengajuan
+                    </button>
+                    <button type="submit" name="action" value="rejected" class="btn-action btn-reject">
+                        <i class="fa-solid fa-circle-xmark"></i> Tolak Pengajuan
+                    </button>
+                </div>
+            </form>
+            {% endif %}
+
+        </div>
+    </div>
+</body>
+
+</html>

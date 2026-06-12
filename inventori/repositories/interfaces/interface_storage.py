@@ -7,7 +7,7 @@ class IStorageRepository(ABC):
         pass
 
     @abstractmethod
-    def ambil_storage(self, id_alternatif):
+    def ambil_storage(self):
         pass
 
     @abstractmethod
@@ -15,5 +15,5 @@ class IStorageRepository(ABC):
         pass
 
     @abstractmethod
-    def hapus_storage(self, id_alternatif):
+    def delete_storage(self, id_alternatif):
         pass
