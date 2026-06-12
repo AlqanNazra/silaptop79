@@ -32,7 +32,8 @@
 
         .main-dashboard-content {
             flex: 1;
-            margin-left: 260px; /* Adjust based on actual sidebar width */
+            margin-left: 260px;
+            /* Adjust based on actual sidebar width */
             padding: 40px 60px;
             box-sizing: border-box;
         }
@@ -102,7 +103,8 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
             display: flex;
-            justify-content: space-between; /* To push badge to the right */
+            justify-content: space-between;
+            /* To push badge to the right */
             align-items: center;
         }
 
@@ -146,7 +148,7 @@
             grid-template-columns: 1fr 1fr;
             gap: 16px;
         }
-        
+
         .grid-2-cols-bobot {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -161,10 +163,12 @@
             font-weight: 700;
             letter-spacing: 0.5px;
         }
+
         .badge-benefit {
             background-color: #e2e8f0;
             color: #475569;
         }
+
         .badge-cost {
             background-color: #e2e8f0;
             color: #475569;
@@ -176,6 +180,7 @@
             border-bottom: 1px dashed #cbd5e1;
             position: relative;
         }
+
         .group-title {
             position: absolute;
             top: -10px;
@@ -197,10 +202,12 @@
             align-items: flex-start;
             margin-top: 16px;
         }
+
         .info-alert i {
             color: #64748b;
             margin-top: 2px;
         }
+
         .info-alert p {
             margin: 0;
             font-size: 12px;
@@ -217,6 +224,7 @@
             font-size: 12px;
             color: #475569;
         }
+
         .summary-box .title {
             font-weight: 700;
             margin-bottom: 8px;
@@ -224,20 +232,31 @@
             letter-spacing: 0.5px;
             color: #64748b;
         }
+
         .summary-box ul {
             list-style: none;
             padding: 0;
             margin: 0;
         }
+
         .summary-box li {
             margin-bottom: 4px;
             display: flex;
             align-items: center;
             gap: 8px;
         }
-        .summary-box li i { font-size: 6px; }
-        .dot-blue { color: #0b57c6; }
-        .dot-cyan { color: #06b6d4; }
+
+        .summary-box li i {
+            font-size: 6px;
+        }
+
+        .dot-blue {
+            color: #0b57c6;
+        }
+
+        .dot-cyan {
+            color: #06b6d4;
+        }
 
         /* Bobot List */
         .bobot-row {
@@ -247,13 +266,16 @@
             padding: 8px 0;
             border-bottom: 1px solid #f1f5f9;
         }
+
         .bobot-row:last-child {
             border-bottom: none;
         }
+
         .bobot-label {
             font-size: 13px;
             color: #475569;
         }
+
         .bobot-input {
             width: 60px;
             text-align: center;
@@ -281,20 +303,25 @@
             text-align: center;
             margin-bottom: 12px;
         }
+
         .btn-primary {
             background-color: #0b57c6;
             color: white;
         }
+
         .btn-primary:hover {
             background-color: #09459e;
         }
+
         .btn-secondary {
             background-color: #e2e8f0;
             color: #1e293b;
         }
+
         .btn-secondary:hover {
             background-color: #cbd5e1;
         }
+
         .btn-link {
             background: none;
             color: #475569;
@@ -303,6 +330,7 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
+
         .btn-link:hover {
             color: #0f172a;
         }
@@ -311,6 +339,7 @@
         .group-row {
             margin-bottom: 24px;
         }
+
         .group-row-title {
             font-size: 11px;
             font-weight: 700;
@@ -320,10 +349,10 @@
             display: flex;
             justify-content: space-between;
         }
+
         .inline-badge {
             margin-left: 8px;
         }
-
     </style>
 </head>
 
@@ -350,7 +379,8 @@
             {% endif %}
 
             <h1 class="page-title">Konfigurasi Parameter SAW</h1>
-            <p class="page-subtitle">Lakukan penyesuaian kriteria dan bobot untuk mendapatkan rekomendasi laptop terbaik menggunakan metode Simple Additive Weighting (SAW).</p>
+            <p class="page-subtitle">Lakukan penyesuaian kriteria dan bobot untuk mendapatkan rekomendasi laptop terbaik
+                menggunakan metode Simple Additive Weighting (SAW).</p>
 
             <form action="{% url 'inputkriteria_hc' %}" method="POST">
                 {% csrf_token %}
@@ -375,7 +405,9 @@
 
                     <div class="info-alert">
                         <i class="fa-solid fa-circle-info"></i>
-                        <p>Memilih role akan secara otomatis menyesuaikan bobot kriteria (Section C) berdasarkan kebutuhan standar industri untuk profesi tersebut. Anda tetap dapat menyesuaikan bobot secara manual.</p>
+                        <p>Memilih role akan secara otomatis menyesuaikan bobot kriteria (Section C) berdasarkan
+                            kebutuhan standar industri untuk profesi tersebut. Anda tetap dapat menyesuaikan bobot
+                            secara manual.</p>
                     </div>
                 </div>
 
@@ -502,8 +534,11 @@
                 <div class="summary-box">
                     <div class="title">Ringkasan Klasifikasi</div>
                     <ul>
-                        <li><i class="fa-solid fa-circle dot-blue"></i> <b>Benefit (Semakin besar semakin baik)</b> &rarr; Processor, RAM, Storage, Baterai, Ukuran Layar</li>
-                        <li><i class="fa-solid fa-circle dot-cyan" style="color: #0b57c6; background:none;"></i> <span style="font-weight:bold; color: #0b57c6; box-shadow:inset 0 0 0 1px #0b57c6; border-radius:50%; width:6px; height:6px; display:inline-block;"></span> <b>Cost (Semakin kecil semakin baik)</b> &rarr; Berat, Harga</li>
+                        <li><i class="fa-solid fa-circle dot-blue"></i> <b>Benefit (Semakin besar semakin baik)</b>
+                            &rarr; Processor, RAM, Storage, Baterai, Ukuran Layar</li>
+                        <li><i class="fa-solid fa-circle dot-cyan" style="color: #0b57c6; background:none;"></i> <span
+                                style="font-weight:bold; color: #0b57c6; box-shadow:inset 0 0 0 1px #0b57c6; border-radius:50%; width:6px; height:6px; display:inline-block;"></span>
+                            <b>Cost (Semakin kecil semakin baik)</b> &rarr; Berat, Harga</li>
                     </ul>
                 </div>
 
@@ -536,7 +571,7 @@
                                 <input type="text" class="bobot-input" value="2" name="bobot_berat">
                             </div>
                         </div>
-                        
+
                         <!-- Right Column Bobot -->
                         <div>
                             <div class="bobot-row">
@@ -567,4 +602,5 @@
     </div> <!-- End Dashboard Wrapper -->
 
 </body>
+
 </html>
