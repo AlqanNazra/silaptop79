@@ -43,14 +43,37 @@ def pengajuanlaptop_it_view(request):
         semua_pengajuan = service.service_ambil_semua_pengajuan()
 
         from inventori.models import User
+        import datetime
         users_dict = {u.id_user: u.nama for u in User.objects.all()}
+        
+        total_siap_proses = 0
+        total_dikonfigurasi = 0
+        total_selesai = 0
+        total_mendesak = 0
+        today = datetime.date.today()
+
         for p in semua_pengajuan:
             p.user_nama = users_dict.get(p.id_user, f"User {p.id_user}")
+            
+            # Map status_it for frontend representation
+            if p.status and p.status.lower() == 'pending':
+                p.status_it = 'configuring' # Configuring / Menunggu Antrean
+                total_siap_proses += 1
+                total_dikonfigurasi += 1
+                # Calculate if urgent (due date <= 7 days)
+                if p.bulan:
+                    diff_days = (p.bulan - today).days
+                    if diff_days <= 7:
+                        total_mendesak += 1
+            elif p.status and p.status.lower() == 'approved':
+                p.status_it = 'ready' # Siap Diambil
+                total_selesai += 1
+            else:
+                p.status_it = 'rejected'
         
         # Sort by date descending
         semua_pengajuan.sort(key=lambda x: x.tanggal_pengajuan, reverse=True)
         
-        # Calculate statistics
         total_pengajuan = len(semua_pengajuan)
         total_pending = sum(1 for p in semua_pengajuan if p.status and p.status.lower() == 'pending')
         total_disetujui = sum(1 for p in semua_pengajuan if p.status and p.status.lower() == 'approved')
@@ -62,6 +85,10 @@ def pengajuanlaptop_it_view(request):
             'total_pending': total_pending,
             'total_disetujui': total_disetujui,
             'total_ditolak': total_ditolak,
+            'total_siap_proses': total_siap_proses,
+            'total_dikonfigurasi': total_dikonfigurasi,
+            'total_selesai': total_selesai,
+            'total_mendesak': total_mendesak,
         }
     except Exception as e:
         context = {
@@ -71,6 +98,10 @@ def pengajuanlaptop_it_view(request):
             'total_pending': 0,
             'total_disetujui': 0,
             'total_ditolak': 0,
+            'total_siap_proses': 0,
+            'total_dikonfigurasi': 0,
+            'total_selesai': 0,
+            'total_mendesak': 0,
         }
 
     return render(request, 'it/inventori/pengajuanlaptop_it.html', context)
@@ -587,7 +618,55 @@ def detailrekomendasiscrapping_it_view(request):
     return render(request, 'it/dss/detailrekomendasiscrapping_it.html', context)
 
 def notifikasi_it_view(request):
-    return render(request, 'it/inventori/notifikasi_it.html')
+    from inventori.models import Pengajuan
+    import datetime
+    
+    # Get all pending pengajuan
+    pending_list = Pengajuan.objects.filter(status='pending').select_related('id_user').order_by('bulan')
+    
+    today = datetime.date.today()
+    notifications = []
+    
+    for p in pending_list:
+        diff_days = (p.bulan - today).days
+        
+        # Determine urgency class & tag
+        if diff_days <= 3:
+            urgency_class = 'urgent'
+            urgency_tag = 'Sangat Mendesak'
+        elif diff_days <= 7:
+            urgency_class = 'warning'
+            urgency_tag = 'Mendesak'
+        else:
+            urgency_class = 'info'
+            urgency_tag = 'Segera Disiapkan'
+            
+        # Time string
+        if diff_days < 0:
+            time_str = f"Lewat {abs(diff_days)} hari"
+        elif diff_days == 0:
+            time_str = "Hari ini"
+        elif diff_days == 1:
+            time_str = "Besok"
+        else:
+            time_str = f"{diff_days} hari lagi"
+            
+        notifications.append({
+            'id_pengajuan': p.id_pengajuan,
+            'user_nama': p.id_user.nama if p.id_user else '',
+            'kebutuhan_role': p.kebutuhan_role,
+            'perusahaan': p.perusahaan,
+            'bulan': p.bulan.strftime('%d %B %Y') if hasattr(p.bulan, 'strftime') else p.bulan,
+            'tanggal_pengajuan': p.tanggal_pengajuan.strftime('%d %B %Y') if hasattr(p.tanggal_pengajuan, 'strftime') else '',
+            'urgency_class': urgency_class,
+            'urgency_tag': urgency_tag,
+            'time_str': time_str,
+            'keterangan': p.keterangan
+        })
+        
+    return render(request, 'it/inventori/notifikasi_it.html', {
+        'notifications': notifications
+    })
 
 
 # ==========================================
@@ -861,11 +940,101 @@ def editpengadaan_it_view(request):
 
 def setujui_pengajuan_it_view(request):
     from inventori.models import LaptopInventori
-    pengajuan_id = request.GET.get('id', '1')
-    available_laptops = LaptopInventori.objects.filter(status__iexact='Available')
+    from inventori.services.service_pengajuan import PengajuanService
+    from inventori.repositories.dto.dto_pengajuan import PengajuanDTO
+    from inventori.repositories.dto.dto_peminjaman import PeminjamanDTO
+    import datetime
+    import time
+
+    pengajuan_id = request.GET.get('id')
+    if not pengajuan_id:
+        messages.error(request, 'ID Pengajuan tidak diberikan.')
+        return redirect('pengajuanlaptop_it')
+
+    if request.method == 'POST':
+        laptop_id = request.POST.get('laptop_id')
+        if not laptop_id:
+            messages.error(request, 'Laptop harus dipilih.')
+            return redirect(f"{request.path}?id={pengajuan_id}")
+        
+        try:
+            service = PengajuanService()
+            pengajuan = service.service_cari_pengajuan_by_id(pengajuan_id)
+            if not pengajuan:
+                messages.error(request, 'Pengajuan tidak ditemukan.')
+                return redirect('pengajuanlaptop_it')
+
+            # Update status laptop ke dipinjam
+            laptop = LaptopInventori.objects.get(id_laptop_inventori=laptop_id)
+            laptop.status = 'dipinjam'
+            laptop.save()
+
+            # Buat DTO Pengajuan
+            user_id = request.user.id_user if (hasattr(request.user, 'id_user') and request.user.id_user) else 'USR-002'
+            dto_peng = PengajuanDTO(
+                id_pengajuan=pengajuan_id,
+                status='approved',
+                approved_by=user_id
+            )
+
+            # Buat DTO Peminjaman
+            id_peminjaman = f"PMJ-{int(time.time())}"
+            dto_pem = PeminjamanDTO(
+                id_peminjaman=id_peminjaman,
+                id_pengajuan=pengajuan_id,
+                id_user=pengajuan.id_user,
+                id_laptop_inventori=laptop_id,
+                tanggal_pinjam=datetime.date.today().strftime('%Y-%m-%d'),
+                status='dipinjam',
+                keterangan='Persetujuan pengajuan laptop oleh IT'
+            )
+
+            # Eksekusi
+            service.service_approve_dan_pinjam(dto_peng, dto_pem)
+
+            messages.success(request, 'Pengajuan berhasil disetujui oleh IT dan laptop telah dipinjamkan.')
+            return redirect('pengajuanlaptop_it')
+        except Exception as e:
+            messages.error(request, f'Gagal menyetujui pengajuan: {str(e)}')
+            return redirect(f"{request.path}?id={pengajuan_id}")
+
+    # GET Request: Fetch and Map Laptop Specifications
+    laptops = LaptopInventori.objects.filter(status__in=['tersedia', 'Available', 'Tersedia']).select_related('id_processor', 'id_ram', 'id_storage')
+    for laptop in laptops:
+        laptop.id = laptop.id_laptop_inventori
+        
+        if laptop.id_processor:
+            laptop.processor = laptop.id_processor.nama_processor
+        else:
+            laptop.processor = "-"
+            
+        if laptop.id_ram:
+            laptop.ram = f"{laptop.id_ram.kapasitas_gb} GB {laptop.id_ram.tipe}"
+        else:
+            laptop.ram = "-"
+            
+        if laptop.id_storage:
+            laptop.storage = f"{laptop.id_storage.kapasitas_gb} GB {laptop.id_storage.tipe}"
+        else:
+            laptop.storage = "-"
+            
+        if laptop.ukuran_layar:
+            laptop.screen_size = f"{laptop.ukuran_layar} inch"
+        else:
+            laptop.screen_size = "-"
+            
+        from dss.models import LaptopPengadaan
+        pengadaan = LaptopPengadaan.objects.filter(nama_laptop__icontains=laptop.nama_laptop).first()
+        if pengadaan:
+            laptop.battery_capacity = f"{int(pengadaan.baterai)} mAh" if pengadaan.baterai else "5000 mAh"
+            laptop.weight = f"{pengadaan.berat} kg" if pengadaan.berat else "1.5 kg"
+        else:
+            laptop.battery_capacity = "5000 mAh"
+            laptop.weight = "1.5 kg"
+
     return render(request, 'it/inventori/setujuipengajuan_it.html', {
         'pengajuan_id': pengajuan_id,
-        'laptops': available_laptops
+        'laptops': laptops
     })
 
 

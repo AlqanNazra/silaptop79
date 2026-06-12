@@ -18,8 +18,8 @@ yang masih tersisa pada aplikasi SiLaptop79, dibagi berdasarkan role.
 2. 🛠️ INFORMATION TECHNOLOGY (IT) TASKS
 --------------------------------------------------------------------
 [ ] Infrastruktur Data Laptop IT Error: Fitur Manajemen/CRUD data laptop di sisi IT masih terdapat error/belum berfungsi seutuhnya seperti di HC.
-[ ] Notifikasi IT Belum Ada: Jika ada pengajuan spesifikasi khusus dari Talent yang butuh review IT, notifikasinya belum masuk ke halaman IT.
-[ ] Persetujuan Teknis Pengajuan: Form IT untuk menyetujui/me-review spesifikasi yang diminta Talent belum tersambung dengan baik ke alur persetujuan final HC.
+[x] Notifikasi IT Belum Ada: Jika ada pengajuan spesifikasi khusus dari Talent yang butuh review IT, notifikasinya belum masuk ke halaman IT.
+[x] Persetujuan Teknis Pengajuan: Form IT untuk menyetujui/me-review spesifikasi yang diminta Talent belum tersambung dengan baik ke alur persetujuan final HC.
 [ ] Pesan Konfirmasi (Flash Message): Tambahkan notifikasi pop-up/alert sukses jika IT berhasil menambah, mengedit, atau menghapus data inventori.
 
 --------------------------------------------------------------------
