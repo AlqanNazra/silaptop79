@@ -28,6 +28,7 @@ from core.views import (
     detailpengadaan_it_view,
     editpengadaan_it_view,
     setujui_pengajuan_it_view,
+    tambah_komponen_it_view,
 
     # Talent Views
     dashboard_talent_view,
@@ -94,6 +95,7 @@ urlpatterns = [
     # ==========================================
     path('it/', dashboard_it_view, name='dashboard_it'),
     path('it/manajemen-laptop/', manajemenlaptop_it_view, name='manajemen_laptop_it'),
+    path('it/tambah-komponen/', tambah_komponen_it_view, name='tambah_komponen_it'),
     path('it/pengajuan-laptop/', pengajuanlaptop_it_view, name='pengajuanlaptop_it'),
     path('it/detail-pengajuan/', detailpengajuan_it_view, name='detailpengajuan_it'),
     path('it/tambah-laptop/', tambahlaptop_it_view, name='tambahlaptop_it'),
