@@ -1,0 +1,38 @@
+====================================================================
+           DAFTAR SISA TASK PENGEMBANGAN APLIKASI SILAPTOP79
+====================================================================
+
+Dokumen ini memuat daftar tugas fungsional dan perbaikan bug (error) 
+yang masih tersisa pada aplikasi SiLaptop79, dibagi berdasarkan role.
+
+--------------------------------------------------------------------
+1. 💼 HUMAN CAPITAL (HC) TASKS
+--------------------------------------------------------------------
+[ ] Detail Pengajuan Error: Saat HC klik untuk melihat detail pengajuan dari Talent, data detailnya belum muncul atau halamannya masih error.
+[ ] Input Kriteria DSS Belum Selesai: Form input untuk bobot kriteria DSS (RAM, Processor, Storage, dll) masih perlu disempurnakan agar perhitungannya tepat.
+[ ] Assign Laptop pada Persetujuan: Saat menyetujui pengajuan, dropdown pemilihan laptop terkadang masih memunculkan laptop yang sedang dipinjam (seharusnya hanya yang 'tersedia').
+[ ] Notifikasi "Mark as Read": Notifikasi pengajuan masuk di HC sudah berjalan, tapi belum ada fitur untuk menandai notifikasi tersebut sudah dibaca sehingga menumpuk.
+[ ] Pesan Konfirmasi (Flash Message): Memastikan semua aksi (Tambah/Edit/Hapus/Setujui) di HC memunculkan pesan sukses sesuai template (sebagian sudah, tapi perlu dipastikan rata di semua halaman).
+
+--------------------------------------------------------------------
+2. 🛠️ INFORMATION TECHNOLOGY (IT) TASKS
+--------------------------------------------------------------------
+[ ] Infrastruktur Data Laptop IT Error: Fitur Manajemen/CRUD data laptop di sisi IT masih terdapat error/belum berfungsi seutuhnya seperti di HC.
+[ ] Notifikasi IT Belum Ada: Jika ada pengajuan spesifikasi khusus dari Talent yang butuh review IT, notifikasinya belum masuk ke halaman IT.
+[ ] Persetujuan Teknis Pengajuan: Form IT untuk menyetujui/me-review spesifikasi yang diminta Talent belum tersambung dengan baik ke alur persetujuan final HC.
+[ ] Pesan Konfirmasi (Flash Message): Tambahkan notifikasi pop-up/alert sukses jika IT berhasil menambah, mengedit, atau menghapus data inventori.
+
+--------------------------------------------------------------------
+3. 🧑‍💻 TALENT TASKS
+--------------------------------------------------------------------
+[ ] Status Detail Laptop Dipinjam: Di Dashboard Talent, informasi spesifikasi laptop yang sedang dipinjam belum terlihat jelas detailnya (merk, seri, dll).
+[ ] Form Pengajuan Error/Validasi: Talent masih bisa memilih tanggal peminjaman di masa lalu. Perlu ditambahkan pembatasan (validasi).
+[ ] Notifikasi Hasil Pengajuan: Talent belum menerima notifikasi langsung di web jika pengajuannya ditolak atau disetujui.
+[ ] Form Pengembalian: Belum ada fitur bagi Talent untuk mengonfirmasi pengembalian unit beserta laporan kondisinya (baik/rusak).
+[ ] Pesan Konfirmasi (Flash Message): Tambahkan pesan sukses setiap kali Talent berhasil mensubmit pengajuan baru.
+
+--------------------------------------------------------------------
+4. ⚙️ SYSTEM & BACKEND
+--------------------------------------------------------------------
+[ ] Batasan Akses Halaman (Keamanan): Saat ini Talent mungkin masih bisa memaksa masuk ke URL/halaman HC atau IT jika mengetik linknya langsung. Perlu dibatasi (Route Protection).
+[ ] Auto-Update Spesifikasi (Scraper): Script scraper processor belum berjalan otomatis di background untuk mengambil rating/spek terbaru.

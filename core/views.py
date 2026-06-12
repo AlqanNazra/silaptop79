@@ -41,6 +41,11 @@ def pengajuanlaptop_it_view(request):
     try:
         service = PengajuanService()
         semua_pengajuan = service.service_ambil_semua_pengajuan()
+
+        from inventori.models import User
+        users_dict = {u.id_user: u.nama for u in User.objects.all()}
+        for p in semua_pengajuan:
+            p.user_nama = users_dict.get(p.id_user, f"User {p.id_user}")
         
         # Sort by date descending
         semua_pengajuan.sort(key=lambda x: x.tanggal_pengajuan, reverse=True)
@@ -269,6 +274,8 @@ def inputkriteria_hc_view(request):
             request.session['dss_raw_weights'] = raw_weights
             return redirect('hasilrekomendasi_hc')
         except Exception as e:
+            print("Error processing weights:", e)
+
     processors = Processor.objects.all()
     rams = RAM.objects.all()
     storages = Storage.objects.all()
@@ -317,7 +324,55 @@ def detailrekomendasiscrapping_hc_view(request):
     return render(request, 'hc/dss/detailrekomendasiscrapping_hc.html')
 
 def notifikasi_hc_view(request):
-    return render(request, 'hc/inventori/notifikasi_hc.html')
+    from inventori.models import Pengajuan
+    import datetime
+    
+    # Get all pending pengajuan
+    pending_list = Pengajuan.objects.filter(status='pending').select_related('id_user').order_by('bulan')
+    
+    today = datetime.date.today()
+    notifications = []
+    
+    for p in pending_list:
+        diff_days = (p.bulan - today).days
+        
+        # Determine urgency class & tag
+        if diff_days <= 3:
+            urgency_class = 'urgent'
+            urgency_tag = 'Sangat Mendesak'
+        elif diff_days <= 7:
+            urgency_class = 'warning'
+            urgency_tag = 'Mendesak'
+        else:
+            urgency_class = 'info'
+            urgency_tag = 'Segera Disiapkan'
+            
+        # Time string
+        if diff_days < 0:
+            time_str = f"Lewat {abs(diff_days)} hari"
+        elif diff_days == 0:
+            time_str = "Hari ini"
+        elif diff_days == 1:
+            time_str = "Besok"
+        else:
+            time_str = f"{diff_days} hari lagi"
+            
+        notifications.append({
+            'id_pengajuan': p.id_pengajuan,
+            'user_nama': p.id_user.nama if p.id_user else '',
+            'kebutuhan_role': p.kebutuhan_role,
+            'perusahaan': p.perusahaan,
+            'bulan': p.bulan.strftime('%d %B %Y') if hasattr(p.bulan, 'strftime') else p.bulan,
+            'tanggal_pengajuan': p.tanggal_pengajuan.strftime('%d %B %Y') if hasattr(p.tanggal_pengajuan, 'strftime') else '',
+            'urgency_class': urgency_class,
+            'urgency_tag': urgency_tag,
+            'time_str': time_str,
+            'keterangan': p.keterangan
+        })
+        
+    return render(request, 'hc/inventori/notifikasi_hc.html', {
+        'notifications': notifications
+    })
 
 
 # ==========================================

@@ -400,9 +400,9 @@
                                 <td align="center" style="font-weight: 500; color: #475569;">{{ forloop.counter }}</td>
                                 <td>
                                     <div class="applicant-cell">
-                                        <div class="avatar-initials blue">U{{ pengajuan.id_user }}</div>
+                                        <div class="avatar-initials blue">{{ pengajuan.user_nama|slice:":2"|upper }}</div>
                                         <div class="applicant-info">
-                                            <span class="applicant-name">User {{ pengajuan.id_user }}</span>
+                                            <span class="applicant-name">{{ pengajuan.user_nama }}</span>
                                             <span class="applicant-email">{{ pengajuan.perusahaan|default:"-" }}</span>
                                         </div>
                                     </div>
