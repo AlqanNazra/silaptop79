@@ -10,7 +10,6 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <style>
-        /* Reset Sidebar & Menu sesuai standar halaman Riwayat */
         ul,
         li {
             list-style: none;
@@ -23,153 +22,183 @@
             font-family: 'Inter', sans-serif;
             margin: 0;
             display: flex;
+            min-height: 100vh;
         }
 
         .main-content {
             flex: 1;
             margin-left: 260px;
-            padding: 30px 50px;
+            padding: 40px 50px;
+            box-sizing: border-box;
         }
 
-        /* Top Navigation (Header Area) - Identik dengan Riwayat */
+        /* Top Navigation */
         .top-nav {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 25px;
-        }
-
-        .breadcrumb {
-            font-size: 13px;
-            color: #64748b;
-            margin-bottom: 4px;
-        }
-
-        .breadcrumb span {
-            color: #0b57c6;
-            font-weight: 600;
+            margin-bottom: 30px;
         }
 
         .page-title {
-            font-size: 28px;
+            font-size: 24px;
             font-weight: 800;
-            color: #1e293b;
+            color: #0f172a;
             margin: 0;
+            letter-spacing: -0.5px;
         }
 
-        .nav-buttons {
+        .header-actions {
             display: flex;
-            gap: 12px;
+            align-items: center;
+            gap: 24px;
         }
 
-        .btn-nav {
-            padding: 10px 20px;
-            border-radius: 8px;
+        .btn-cancel-text {
+            color: #0b57c6;
             font-weight: 600;
             font-size: 14px;
             text-decoration: none;
             cursor: pointer;
-            border: none;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: 0.2s;
+            transition: color 0.2s;
         }
 
-        .btn-grey {
-            background: #e2e8f0;
-            color: #475569;
+        .btn-cancel-text:hover {
+            color: #09459e;
         }
 
-        .btn-blue {
-            background: #0b57c6;
+        .btn-submit-pill {
+            background-color: #0b57c6;
             color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(11, 87, 198, 0.15);
+            transition: all 0.2s;
         }
 
-        /* Grid Layout Sesuai Gambar Referensi */
+        .btn-submit-pill:hover {
+            background-color: #09459e;
+        }
+
+        /* Grid Layout */
         .edit-grid {
             display: grid;
-            grid-template-columns: 350px 1fr;
-            gap: 24px;
+            grid-template-columns: 1fr 320px;
+            gap: 30px;
             align-items: start;
         }
 
         /* Card Styling */
         .card {
             background: white;
-            border-radius: 16px;
+            border-radius: 12px;
             padding: 24px;
             border: 1px solid #f1f5f9;
             margin-bottom: 24px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
         }
 
         .card-title {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 700;
-            margin-bottom: 20px;
+            margin-bottom: 24px;
             display: flex;
             align-items: center;
-            gap: 12px;
             color: #1e293b;
         }
 
-        /* Accent Borders */
-        .border-blue {
-            border-left: 4px solid #005FAA;
-            padding-left: 15px;
+        /* Accent Bars inside Card Title */
+        .title-accent-blue {
+            width: 4px;
+            height: 18px;
+            background-color: #0b57c6;
+            border-radius: 2px;
+            margin-right: 12px;
+            display: inline-block;
         }
 
-        .border-green {
-            border-left: 4px solid #16a34a;
-            padding-left: 15px;
+        .title-accent-green {
+            width: 4px;
+            height: 18px;
+            background-color: #16a34a;
+            border-radius: 2px;
+            margin-right: 12px;
+            display: inline-block;
         }
 
-        .border-red {
-            border-left: 4px solid #dc2626;
-            padding-left: 15px;
+        .title-accent-red {
+            width: 4px;
+            height: 18px;
+            background-color: #b91c1c;
+            border-radius: 2px;
+            margin-right: 12px;
+            display: inline-block;
         }
 
         /* Form Controls */
         .form-group {
-            margin-bottom: 18px;
+            margin-bottom: 20px;
         }
 
         label {
             display: block;
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 700;
-            color: #94a3b8;
+            color: #64748b;
             text-transform: uppercase;
             margin-bottom: 8px;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.8px;
         }
 
-        input,
-        select {
+        input {
             width: 100%;
             padding: 12px 16px;
-            border-radius: 10px;
-            border: 1px solid #e2e8f0;
-            background: #f8fafc;
-            /* Warna input abu muda sesuai gambar */
+            border-radius: 8px;
+            border: none;
+            background-color: #eff3f8;
             font-family: inherit;
-            font-size: 14px;
-            color: #334155;
+            font-size: 13px;
+            color: #1e293b;
+            font-weight: 500;
             box-sizing: border-box;
             outline: none;
         }
 
-        .row-group {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
+        select {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: none;
+            background-color: #eff3f8;
+            font-family: inherit;
+            font-size: 13px;
+            color: #1e293b;
+            font-weight: 500;
+            box-sizing: border-box;
+            outline: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+            background-size: 14px;
+            padding-right: 40px;
         }
 
-        .laptop-preview {
-            width: 100%;
-            border-radius: 16px;
-            object-fit: cover;
+        /* Layout rows */
+        .row-group-2 {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 24px;
+        }
+
+        .row-group-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 24px;
         }
     </style>
 </head>
@@ -180,22 +209,16 @@
 
     <div class="main-content">
         <div class="top-nav">
-            <div>
-                <div class="breadcrumb">Data Laptop / <span>Edit Mode</span></div>
-                <h1 class="page-title">Edit Data Laptop</h1>
-            </div>
-            <div class="nav-buttons">
-                <a href="{% url 'inventori:detaillaptop_hc' laptop.id_laptop_inventori %}"
-                    class="btn-nav btn-grey">Batal</a>
-                <button type="submit" form="editForm" class="btn-nav btn-blue">
-                    <i class="fa-solid fa-save"></i> Simpan Perubahan
-                </button>
+            <h1 class="page-title">Edit Data Laptop</h1>
+            <div class="header-actions">
+                <a href="{% url 'inventori:detaillaptop_hc' laptop.id_laptop_inventori %}" class="btn-cancel-text">Batal</a>
+                <button type="submit" form="editForm" class="btn-submit-pill">Simpan Perubahan</button>
             </div>
         </div>
 
         <!-- Flash Messages -->
         {% if messages %}
-        <div style="margin-bottom:20px;">
+        <div style="margin-bottom:20px; width: 100%;">
             {% for message in messages %}
             <div style="padding:12px 20px; border-radius:8px; margin-bottom:8px; font-size:14px; font-weight:500;
                 {% if message.tags == 'success' %}background:#dcfce7; color:#15803d; border:1px solid #bbf7d0;
@@ -211,44 +234,15 @@
             {% csrf_token %}
             <div class="edit-grid">
 
+                <!-- Left Column -->
                 <div class="col-left">
-                    <div class="card">
-                        <div class="card-title" style="color: #005FAA;">
-                            <i class="fa-solid fa-circle-info"></i> Current Status
-                        </div>
-                        <div class="form-group">
-                            <label>Status Availability</label>
-                            <select name="status">
-                                <option value="tersedia" {% if laptop.status == 'tersedia' %}selected{% endif %}>Tersedia
-                                </option>
-                                <option value="dipinjam" {% if laptop.status == 'dipinjam' %}selected{% endif %}>Dipinjam
-                                </option>
-                                <option value="rusak" {% if laptop.status == 'rusak' %}selected{% endif %}>Rusak</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Lokasi</label>
-                            <input type="text" name="lokasi" value="{{ laptop.lokasi }}">
-                        </div>
-                        <div class="form-group">
-                            <label>Device Condition</label>
-                            <select name="kondisi">
-                                <option value="baik" {% if laptop.kondisi == 'baik' %}selected{% endif %}>Baik</option>
-                                <option value="rusak_ringan" {% if laptop.kondisi == 'rusak_ringan' %}selected{% endif %}>
-                                    Rusak Ringan</option>
-                                <option value="rusak_berat" {% if laptop.kondisi == 'rusak_berat' %}selected{% endif %}>
-                                    Rusak Berat</option>
-                            </select>
-                        </div>
-                    </div>
-                    <img src="https://images.unsplash.com/photo-1517336714460-d1b16dd1c06d?q=80&w=1000&auto=format&fit=crop"
-                        class="laptop-preview">
-                </div>
 
-                <div class="col-right">
-                    <div class="card border-blue">
-                        <div class="card-title">Basic Information</div>
-                        <div class="row-group">
+                    <!-- Basic Information -->
+                    <div class="card">
+                        <div class="card-title">
+                            <span class="title-accent-blue"></span>Basic Information
+                        </div>
+                        <div class="row-group-2">
                             <div class="form-group">
                                 <label>Laptop Name</label>
                                 <input type="text" value="{{ laptop.nama_laptop }}" disabled>
@@ -258,15 +252,18 @@
                                 <input type="text" value="{{ laptop.model }}" disabled>
                             </div>
                         </div>
-                        <div class="form-group" style="width: 50%; padding-right: 10px;">
+                        <div class="form-group" style="width: calc(54.5% - 12px);">
                             <label>Serial Number / ID</label>
                             <input type="text" value="{{ laptop.no_inventori }}" disabled>
                         </div>
                     </div>
 
-                    <div class="card border-green">
-                        <div class="card-title">Technical Specifications</div>
-                        <div class="row-group">
+                    <!-- Technical Specifications -->
+                    <div class="card">
+                        <div class="card-title">
+                            <span class="title-accent-green"></span>Technical Specifications
+                        </div>
+                        <div class="row-group-2" style="grid-template-columns: 1.5fr 1fr;">
                             <div class="form-group">
                                 <label>Processor</label>
                                 <select name="id_processor">
@@ -284,7 +281,7 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="row-group">
+                        <div class="row-group-3">
                             <div class="form-group">
                                 <label>Storage</label>
                                 <select name="id_storage">
@@ -297,12 +294,19 @@
                                 <label>Operating System</label>
                                 <input type="text" value="{{ laptop.os }}" disabled>
                             </div>
+                            <div class="form-group">
+                                <label>Screen Size (Inch)</label>
+                                <input type="text" value="{{ laptop.ukuran_layar|default:'-' }}" disabled>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="card border-red">
-                        <div class="card-title">Administrative Info</div>
-                        <div class="row-group">
+                    <!-- Administrative Info -->
+                    <div class="card">
+                        <div class="card-title">
+                            <span class="title-accent-red"></span>Administrative Info
+                        </div>
+                        <div class="row-group-2">
                             <div class="form-group">
                                 <label>OS</label>
                                 <input type="text" value="{{ laptop.os }}" disabled>
@@ -313,7 +317,38 @@
                             </div>
                         </div>
                     </div>
+
                 </div>
+
+                <!-- Right Column -->
+                <div class="col-right">
+                    <div class="card">
+                        <div class="card-title" style="color: #0b57c6; gap: 8px; margin-bottom: 20px;">
+                            <i class="fa-solid fa-circle-info" style="font-size: 18px;"></i> Current Status
+                        </div>
+                        <div class="form-group">
+                            <label>Status Availability</label>
+                            <select name="status">
+                                <option value="tersedia" {% if laptop.status == 'tersedia' %}selected{% endif %}>Tersedia</option>
+                                <option value="dipinjam" {% if laptop.status == 'dipinjam' %}selected{% endif %}>Dipinjam</option>
+                                <option value="rusak" {% if laptop.status == 'rusak' %}selected{% endif %}>Rusak</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Lokasi</label>
+                            <input type="text" name="lokasi" value="{{ laptop.lokasi }}">
+                        </div>
+                        <div class="form-group">
+                            <label>Device Condition</label>
+                            <select name="kondisi">
+                                <option value="baik" {% if laptop.kondisi == 'baik' %}selected{% endif %}>Baik</option>
+                                <option value="rusak_ringan" {% if laptop.kondisi == 'rusak_ringan' %}selected{% endif %}>Rusak Ringan</option>
+                                <option value="rusak_berat" {% if laptop.kondisi == 'rusak_berat' %}selected{% endif %}>Rusak Berat</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </form>
     </div>
@@ -321,3 +356,5 @@
 </body>
 
 </html>
+
+#uibaru

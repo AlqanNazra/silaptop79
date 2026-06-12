@@ -337,16 +337,20 @@
             {% endif %}
 
             <!-- Top Actions -->
-            <form method="GET" action="" class="top-actions" style="margin-bottom: 24px; width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 24px;">
+            <form method="GET" action="" class="top-actions"
+                style="margin-bottom: 24px; width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 24px;">
                 <div class="search-box" style="flex: 1; max-width: 600px; display: flex; gap: 10px;">
-                    <input type="text" name="q" value="{{ search_query }}" placeholder="Cari serial number atau merk..." style="flex: 1; padding: 14px 20px; border: none; border-radius: 20px; background-color: #d1d5db; font-size: 14px; color: #374151; outline: none;">
-                    <select name="status" style="padding: 10px 15px; border-radius: 20px; border: none; background-color: #d1d5db; color: #374151; font-weight: 500; outline: none;">
+                    <input type="text" name="q" value="{{ search_query }}" placeholder="Cari serial number atau merk..."
+                        style="flex: 1; padding: 14px 20px; border: none; border-radius: 20px; background-color: #d1d5db; font-size: 14px; color: #374151; outline: none;">
+                    <select name="status"
+                        style="padding: 10px 15px; border-radius: 20px; border: none; background-color: #d1d5db; color: #374151; font-weight: 500; outline: none;">
                         <option value="">Semua Status</option>
-                        <option value="tersedia" {% if status_filter == 'tersedia' %}selected{% endif %}>Tersedia</option>
-                        <option value="dipinjam" {% if status_filter == 'dipinjam' %}selected{% endif %}>Dipinjam</option>
-                        <option value="rusak" {% if status_filter == 'rusak' %}selected{% endif %}>Rusak</option>
+                        <option value="tersedia" {% if status_filter=='tersedia' %}selected{% endif %}>Tersedia</option>
+                        <option value="dipinjam" {% if status_filter=='dipinjam' %}selected{% endif %}>Dipinjam</option>
+                        <option value="rusak" {% if status_filter=='rusak' %}selected{% endif %}>Rusak</option>
                     </select>
-                    <button type="submit" class="btn-primary" style="border-radius: 20px; padding: 10px 24px;"><i class="fa-solid fa-magnifying-glass"></i> Cari</button>
+                    <button type="submit" class="btn-primary" style="border-radius: 20px; padding: 10px 24px;"><i
+                            class="fa-solid fa-magnifying-glass"></i> Cari</button>
                 </div>
                 <a href="{% url 'tambahlaptop_it' %}" class="btn-primary"
                     style="text-decoration: none; text-align: center; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border-radius: 8px;">
@@ -381,17 +385,20 @@
                             </td>
                             <td class="col-sn">{{ laptop.no_inventori }}</td>
                             <td>
-                                <div class="status-pill {% if laptop.status == 'tersedia' %}status-available{% elif laptop.status == 'dipinjam' %}status-dipinjam{% else %}status-rusak{% endif %}">
+                                <div
+                                    class="status-pill {% if laptop.status == 'tersedia' %}status-available{% elif laptop.status == 'dipinjam' %}status-dipinjam{% else %}status-rusak{% endif %}">
                                     <span class="dot"></span>{{ laptop.status|title }}
                                 </div>
                             </td>
                             <td>
-                                <a href="{% url 'detaillaptop_it' laptop.id_laptop_inventori %}" class="btn-detail" style="text-decoration:none; padding:6px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:12px; color:#475569; font-weight:600; text-align: center; display: inline-block;">Detail</a>
+                                <a href="{% url 'detaillaptop_it' laptop.id_laptop_inventori %}" class="btn-detail"
+                                    style="text-decoration:none; padding:6px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:12px; color:#475569; font-weight:600; text-align: center; display: inline-block;">Detail</a>
                             </td>
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="5" style="text-align: center; padding: 40px; color: #64748b;">Belum ada data laptop.</td>
+                            <td colspan="5" style="text-align: center; padding: 40px; color: #64748b;">Belum ada data
+                                laptop.</td>
                         </tr>
                         {% endfor %}
                     </tbody>

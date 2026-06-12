@@ -389,17 +389,18 @@
                         <td>{{ p.tanggal_kembali|date:"d M Y"|default:"-" }}</td>
                         <td>
                             {% if p.status|lower == 'kembali' or p.status|lower == 'selesai' %}
-                                <span class="badge badge-excellent">{{ p.status }}</span>
+                            <span class="badge badge-excellent">{{ p.status }}</span>
                             {% elif p.status|lower == 'dipinjam' or p.status|lower == 'aktif' %}
-                                <span class="badge badge-good">{{ p.status }}</span>
+                            <span class="badge badge-good">{{ p.status }}</span>
                             {% else %}
-                                <span class="badge badge-scratch">{{ p.status }}</span>
+                            <span class="badge badge-scratch">{{ p.status }}</span>
                             {% endif %}
                         </td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="5" style="text-align: center; color: #94a3b8; padding: 30px;">Tidak ada riwayat peminjaman.</td>
+                        <td colspan="5" style="text-align: center; color: #94a3b8; padding: 30px;">Tidak ada riwayat
+                            peminjaman.</td>
                     </tr>
                     {% endfor %}
                 </tbody>

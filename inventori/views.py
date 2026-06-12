@@ -120,6 +120,17 @@ def tambah_laptop_page(request):
 
     if request.method == 'POST':
         try:
+            import re
+            raw_layar = request.POST.get('ukuran_layar')
+            layar_val = None
+            if raw_layar:
+                match = re.search(r'\d+(?:\.\d+)?', str(raw_layar))
+                if match:
+                    try:
+                        layar_val = float(match.group(0))
+                    except ValueError:
+                        pass
+
             dto = LaptopInventoriDTO(
                 nama_laptop=request.POST.get('nama_laptop'),
                 model=request.POST.get('model'),
@@ -130,7 +141,7 @@ def tambah_laptop_page(request):
                 id_processor=request.POST.get('id_processor') or None,
                 id_ram=request.POST.get('id_ram') or None,
                 id_storage=request.POST.get('id_storage') or None,
-                ukuran_layar=request.POST.get('ukuran_layar') or None,
+                ukuran_layar=layar_val,
             )
             service = CreateLaptopInventoriService()
             service.execute(dto)
@@ -218,6 +229,10 @@ def detailpengajuan_hc_view(request):
         if not pengajuan:
             messages.error(request, 'Data pengajuan tidak ditemukan.')
             return redirect('inventori:pengajuanlaptop_hc')
+
+        from inventori.models import User
+        user_obj = User.objects.filter(id_user=pengajuan.id_user).first()
+        pengajuan.user_nama = user_obj.nama if user_obj else pengajuan.id_user
 
         if request.method == 'POST':
             action = request.POST.get('action')

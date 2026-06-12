@@ -84,6 +84,9 @@ def detailpengajuan_it_view(request):
             messages.error(request, 'Data pengajuan tidak ditemukan.')
             return redirect('pengajuanlaptop_it')
 
+        user_obj = User.objects.filter(id_user=pengajuan.id_user).first()
+        pengajuan.user_nama = user_obj.nama if user_obj else pengajuan.id_user
+
         if request.method == 'POST':
             action = request.POST.get('action')
             if action in ['approved', 'rejected']:
@@ -114,6 +117,17 @@ def tambahlaptop_it_view(request):
 
     if request.method == 'POST':
         try:
+            import re
+            raw_layar = request.POST.get('ukuran_layar')
+            layar_val = None
+            if raw_layar:
+                match = re.search(r'\d+(?:\.\d+)?', str(raw_layar))
+                if match:
+                    try:
+                        layar_val = float(match.group(0))
+                    except ValueError:
+                        pass
+
             dto = LaptopInventoriDTO(
                 nama_laptop=request.POST.get('nama_laptop'),
                 model=request.POST.get('model'),
@@ -124,7 +138,7 @@ def tambahlaptop_it_view(request):
                 id_processor=request.POST.get('id_processor') or None,
                 id_ram=request.POST.get('id_ram') or None,
                 id_storage=request.POST.get('id_storage') or None,
-                ukuran_layar=request.POST.get('ukuran_layar') or None,
+                ukuran_layar=layar_val,
             )
             service = CreateLaptopInventoriService()
             service.execute(dto)
@@ -255,9 +269,16 @@ def inputkriteria_hc_view(request):
             request.session['dss_raw_weights'] = raw_weights
             return redirect('hasilrekomendasi_hc')
         except Exception as e:
-            print("Error processing weights:", e)
+    processors = Processor.objects.all()
+    rams = RAM.objects.all()
+    storages = Storage.objects.all()
 
-    return render(request, 'hc/dss/inputkriteria_hc.html')
+    context = {
+        'processors': processors,
+        'rams': rams,
+        'storages': storages,
+    }
+    return render(request, 'hc/dss/inputkriteria_hc.html', context)
 
 def hasilrekomendasi_hc_view(request):
     import sys
@@ -431,7 +452,16 @@ def inputkriteria_it_view(request):
         except Exception as e:
             messages.error(request, f'Gagal memproses kriteria: {str(e)}')
 
-    return render(request, 'it/dss/inputkriteria_it.html')
+    processors = Processor.objects.all()
+    rams = RAM.objects.all()
+    storages = Storage.objects.all()
+
+    context = {
+        'processors': processors,
+        'rams': rams,
+        'storages': storages,
+    }
+    return render(request, 'it/dss/inputkriteria_it.html', context)
 
 def hasilrekomendasi_it_view(request):
     import sys

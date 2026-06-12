@@ -265,7 +265,8 @@
         }
 
         .modal-icon-container.success {
-            background-color: #d1fae5; /* light green */
+            background-color: #d1fae5;
+            /* light green */
         }
 
         .modal-icon-inner {
@@ -281,7 +282,8 @@
         }
 
         .modal-icon-inner.success {
-            background-color: #10b981; /* green */
+            background-color: #10b981;
+            /* green */
         }
 
         .modal-title {
@@ -318,13 +320,15 @@
         }
 
         .modal-btn.confirm {
-            background-color: #10b981; /* green */
+            background-color: #10b981;
+            /* green */
             color: white;
             box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2);
         }
 
         .modal-btn.confirm:hover {
-            background-color: #059669; /* darker green */
+            background-color: #059669;
+            /* darker green */
         }
 
         .modal-btn.cancel {
@@ -351,7 +355,8 @@
                     <h1>Pengajuan Laptop</h1>
                     <p>Kelola dan tinjau semua permintaan peminjaman atau penggantian perangkat dari Talent.</p>
                 </div>
-                <a href="{% url 'detailpengajuan_hc' %}{% if request.GET.id %}?id={{ request.GET.id }}{% endif %}" class="btn-back">Kembali ke Detail Pengajuan</a>
+                <a href="{% url 'detailpengajuan_hc' %}{% if request.GET.id %}?id={{ request.GET.id }}{% endif %}"
+                    class="btn-back">Kembali ke Detail Pengajuan</a>
             </div>
 
             <!-- Approval Form -->
@@ -369,10 +374,11 @@
                     <div class="section-body">
                         <div class="form-group">
                             <label for="laptopSelect">Laptop Name</label>
-                            <select id="laptopSelect" name="laptop_id" class="form-control" onchange="updateSpecs()" required>
+                            <select id="laptopSelect" name="laptop_id" class="form-control" onchange="updateSpecs()"
+                                required>
                                 <option value="" disabled selected>Contoh: MacBook Pro 14 M3 Max</option>
                                 {% for laptop in laptops %}
-                                    <option value="{{ laptop.id }}">{{ laptop.nama_laptop }}</option>
+                                <option value="{{ laptop.id }}">{{ laptop.nama_laptop }}</option>
                                 {% endfor %}
                             </select>
                         </div>
@@ -434,7 +440,8 @@
                 </div>
             </div>
             <h3 class="modal-title">Konfirmasi Persetujuan</h3>
-            <p class="modal-desc">Apakah Anda yakin ingin menyetujui pengajuan ini? Laptop yang dipilih akan ditetapkan untuk pemohon.</p>
+            <p class="modal-desc">Apakah Anda yakin ingin menyetujui pengajuan ini? Laptop yang dipilih akan ditetapkan
+                untuk pemohon.</p>
             <div class="modal-buttons">
                 <button type="button" class="modal-btn confirm" onclick="submitApprovalForm()">Konfirmasi</button>
                 <button type="button" class="modal-btn cancel" onclick="closeConfirmModal()">Batal</button>
@@ -446,15 +453,15 @@
     <script>
         const laptopSpecs = {
             {% for laptop in laptops %}
-            "{{ laptop.id }}": {
-                "processor": "{{ laptop.processor|escapejs }}",
+        "{{ laptop.id }}": {
+            "processor": "{{ laptop.processor|escapejs }}",
                 "ram": "{{ laptop.ram|escapejs }}",
-                "storage": "{{ laptop.storage|escapejs }}",
-                "screen_size": "{{ laptop.screen_size|escapejs }}",
-                "battery_capacity": "{{ laptop.battery_capacity|escapejs }}",
-                "weight": "{{ laptop.weight|escapejs }}"
-            }{% if not forloop.last %},{% endif %}
-            {% endfor %}
+                    "storage": "{{ laptop.storage|escapejs }}",
+                        "screen_size": "{{ laptop.screen_size|escapejs }}",
+                            "battery_capacity": "{{ laptop.battery_capacity|escapejs }}",
+                                "weight": "{{ laptop.weight|escapejs }}"
+        } {% if not forloop.last %}, {% endif %}
+        {% endfor %}
         };
 
         function updateSpecs() {
