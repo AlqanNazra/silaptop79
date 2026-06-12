@@ -1038,3 +1038,51 @@ def setujui_pengajuan_it_view(request):
     })
 
 
+def tambah_komponen_it_view(request):
+    from inventori.models import Processor, RAM, Storage
+    
+    if request.method == 'POST':
+        comp_type = request.POST.get('component_type')
+        try:
+            if comp_type == 'processor':
+                Processor.objects.create(
+                    nama_processor=request.POST.get('nama_processor'),
+                    manufacturer=request.POST.get('manufacturer'),
+                    model=request.POST.get('model'),
+                    cores=int(request.POST.get('cores') or 0),
+                    threads=int(request.POST.get('threads') or 0),
+                    base_clock=float(request.POST.get('base_clock') or 0.0),
+                    max_clock=float(request.POST.get('max_clock') or 0.0),
+                    arsitektur=request.POST.get('arsitektur', ''),
+                    keterangan=request.POST.get('keterangan', '')
+                )
+                messages.success(request, 'Processor berhasil ditambahkan!')
+            elif comp_type == 'ram':
+                RAM.objects.create(
+                    kapasitas_gb=int(request.POST.get('kapasitas_gb') or 0),
+                    tipe=request.POST.get('tipe', ''),
+                    keterangan=request.POST.get('keterangan', '')
+                )
+                messages.success(request, 'RAM berhasil ditambahkan!')
+            elif comp_type == 'storage':
+                Storage.objects.create(
+                    kapasitas_gb=int(request.POST.get('kapasitas_gb') or 0),
+                    tipe=request.POST.get('tipe', '')
+                )
+                messages.success(request, 'Storage berhasil ditambahkan!')
+            return redirect('tambah_komponen_it')
+        except Exception as e:
+            messages.error(request, f'Gagal menambahkan komponen: {str(e)}')
+            return redirect('tambah_komponen_it')
+
+    processors = Processor.objects.all().order_by('-id_processor')[:10]
+    rams = RAM.objects.all().order_by('-id_ram')[:10]
+    storages = Storage.objects.all().order_by('-id_storage')[:10]
+
+    return render(request, 'it/inventori/tambah_komponen_it.html', {
+        'processors': processors,
+        'rams': rams,
+        'storages': storages,
+    })
+
+
