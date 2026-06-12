@@ -165,6 +165,10 @@ def run_test():
     
     detail_pengajuan_url = f'/hc/detail-pengajuan/?id={test_req.id_pengajuan}'
     response = client.get(detail_pengajuan_url)
+    if response.status_code != 200:
+        from django.contrib.messages import get_messages
+        msg_list = list(get_messages(response.wsgi_request))
+        print("REDIRECT MESSAGES:", [m.message for m in msg_list])
     assert response.status_code == 200, f"Expected 200, got {response.status_code}"
     print("Detail Pengajuan GET page loaded successfully!")
 

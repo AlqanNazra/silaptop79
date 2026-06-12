@@ -196,7 +196,8 @@
     <div class="main-dashboard-content">
 
         <a href="{% url 'pengajuanlaptop_hc' %}" class="back-link">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="15 18 9 12 15 6"></polyline>
             </svg>
             Kembali ke Pengajuan
@@ -208,75 +209,62 @@
         </div>
 
         <div class="notif-list">
-
-            <!-- Notifikasi 1 - Urgent -->
-            <div class="notif-card urgent">
-                <div class="notif-icon">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <line x1="12" y1="8" x2="12" y2="12"></line>
-                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            {% if notifications %}
+                {% for notif in notifications %}
+                <div class="notif-card {{ notif.urgency_class }}">
+                    <div class="notif-icon">
+                        {% if notif.urgency_class == 'urgent' %}
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                        {% elif notif.urgency_class == 'warning' %}
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                            <line x1="12" y1="9" x2="12" y2="13"></line>
+                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                        </svg>
+                        {% else %}
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                        {% endif %}
+                    </div>
+                    <div class="notif-body">
+                        <div class="notif-title">Pengajuan #{{ notif.id_pengajuan }} — {{ notif.user_nama }}</div>
+                        <div class="notif-desc">
+                            Membutuhkan laptop untuk posisi <strong>{{ notif.kebutuhan_role }}</strong> di {{ notif.perusahaan }}.
+                            Tanggal mulai kerja: <strong>{{ notif.bulan }}</strong>. Waktu tersisa tinggal sedikit dan laptop belum disiapkan.
+                            {% if notif.keterangan %}
+                            <br><small style="color: #64748b; font-style: italic;">"{{ notif.keterangan }}"</small>
+                            {% endif %}
+                        </div>
+                        <div class="notif-meta">
+                            <span class="tag {{ notif.urgency_class }}">{{ notif.urgency_tag }}</span>
+                            {% if notif.tanggal_pengajuan %}
+                            <span>Diajukan pada {{ notif.tanggal_pengajuan }}</span>
+                            {% endif %}
+                            <a href="{% url 'detailpengajuan_hc' %}?id={{ notif.id_pengajuan }}" style="margin-left: auto; color: #0284c7; font-weight: 600; text-decoration: none; font-size: 13px;">Tinjau Detail &rarr;</a>
+                        </div>
+                    </div>
+                    <div class="notif-time">{{ notif.time_str }}</div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
                     </svg>
+                    <h3>Tidak Ada Notifikasi Pengajuan</h3>
+                    <p>Semua pengajuan pending memiliki waktu persiapan yang cukup atau sudah diproses.</p>
                 </div>
-                <div class="notif-body">
-                    <div class="notif-title">Pengajuan #PG-2026-041 — Andi Pratama</div>
-                    <div class="notif-desc">
-                        Membutuhkan laptop untuk posisi <strong>Data Analyst</strong> di PT Telkom Indonesia.
-                        Tanggal mulai kerja: <strong>2 Juni 2026</strong> (besok). Laptop belum disiapkan.
-                    </div>
-                    <div class="notif-meta">
-                        <span class="tag urgent">Sangat Mendesak</span>
-                        <span>Diajukan 25 Mei 2026</span>
-                    </div>
-                </div>
-                <div class="notif-time">1 hari lagi</div>
-            </div>
-
-            <!-- Notifikasi 2 - Warning -->
-            <div class="notif-card warning">
-                <div class="notif-icon">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-                        <line x1="12" y1="9" x2="12" y2="13"></line>
-                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                    </svg>
-                </div>
-                <div class="notif-body">
-                    <div class="notif-title">Pengajuan #PG-2026-038 — Siti Nurhaliza</div>
-                    <div class="notif-desc">
-                        Membutuhkan laptop untuk posisi <strong>UI/UX Designer</strong> di PT Astra International.
-                        Tanggal mulai kerja: <strong>5 Juni 2026</strong>. Status masih pending.
-                    </div>
-                    <div class="notif-meta">
-                        <span class="tag warning">Mendesak</span>
-                        <span>Diajukan 20 Mei 2026</span>
-                    </div>
-                </div>
-                <div class="notif-time">4 hari lagi</div>
-            </div>
-
-            <!-- Notifikasi 3 - Info -->
-            <div class="notif-card info">
-                <div class="notif-icon">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <polyline points="12 6 12 12 16 14"></polyline>
-                    </svg>
-                </div>
-                <div class="notif-body">
-                    <div class="notif-title">Pengajuan #PG-2026-035 — Budi Santoso</div>
-                    <div class="notif-desc">
-                        Membutuhkan laptop untuk posisi <strong>Backend Developer</strong> di PT Bank Mandiri.
-                        Tanggal mulai kerja: <strong>9 Juni 2026</strong>. Sudah disetujui, menunggu persiapan unit.
-                    </div>
-                    <div class="notif-meta">
-                        <span class="tag info">Segera Disiapkan</span>
-                        <span>Diajukan 15 Mei 2026</span>
-                    </div>
-                </div>
-                <div class="notif-time">8 hari lagi</div>
-            </div>
-
+            {% endif %}
         </div>
 
     </div>

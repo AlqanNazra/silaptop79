@@ -24,6 +24,10 @@ from core.views import (
     detailrekomendasi_it_view,
     detailrekomendasiscrapping_it_view,
     notifikasi_it_view,
+    manajemenpengadaan_it_view,
+    detailpengadaan_it_view,
+    editpengadaan_it_view,
+    setujui_pengajuan_it_view,
 
     # Talent Views
     dashboard_talent_view,
@@ -45,6 +49,7 @@ from inventori.views import (
     manajemen_laptop_page as manajemenlaptop_hc_view,
     pengajuan_page_view as pengajuanlaptop_hc_view,
     detailpengajuan_hc_view,
+    setujui_pengajuan_hc_view,
     tambah_laptop_page as tambahlaptop_hc_view,
     detail_laptop_page as detaillaptop_hc_view,
     riwayatpeminjamanlaptop_hc_view,
@@ -73,6 +78,7 @@ urlpatterns = [
     path('hc/manajemen-laptop/', manajemenlaptop_hc_view, name='manajemen_laptop'),
     path('hc/pengajuan-laptop/', pengajuanlaptop_hc_view, name='pengajuanlaptop_hc'),
     path('hc/detail-pengajuan/', detailpengajuan_hc_view, name='detailpengajuan_hc'),
+    path('hc/setujui-pengajuan/', setujui_pengajuan_hc_view, name='setujui_pengajuan_hc'),
     path('hc/tambah-laptop/', tambahlaptop_hc_view, name='tambahlaptop_hc'),
     path('hc/detail-laptop/<str:id_laptop>/', detaillaptop_hc_view, name='detaillaptop_hc'),
     path('hc/riwayat-peminjaman/', riwayatpeminjamanlaptop_hc_view, name='riwayatpeminjamanlaptop_hc'),
@@ -99,6 +105,10 @@ urlpatterns = [
     path('it/detail-rekomendasi/', detailrekomendasi_it_view, name='detailrekomendasi_it'),
     path('it/detail-scrapping/', detailrekomendasiscrapping_it_view, name='detailrekomendasiscrapping_it'),
     path('it/notifikasi/', notifikasi_it_view, name='notifikasi_it'),
+    path('it/manajemen-pengadaan/', manajemenpengadaan_it_view, name='manajemen_pengadaan_it'),
+    path('it/detail-pengadaan/', detailpengadaan_it_view, name='detailpengadaan_it'),
+    path('it/edit-pengadaan/', editpengadaan_it_view, name='editpengadaan_it'),
+    path('it/setujui-pengajuan/', setujui_pengajuan_it_view, name='setujui_pengajuan_it'),
 
     # ==========================================
     # TALENT ROUTES
