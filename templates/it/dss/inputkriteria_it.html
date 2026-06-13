@@ -384,10 +384,11 @@
                         <div class="grid-5-cols">
                             <div class="form-group">
                                 <label>Manufacturer & Model</label>
-                                <select class="form-control">
-                                    <option>Intel Core i7-13700H</option>
-                                    <option>AMD Ryzen 7 7840HS</option>
-                                    <option>Apple M3 Pro</option>
+                                <select class="form-control" name="id_processor">
+                                    <option value="" disabled selected>Pilih Processor</option>
+                                    {% for proc in processors %}
+                                    <option value="{{ proc.id_processor }}">{{ proc.nama_processor }} ({{ proc.manufacturer }})</option>
+                                    {% endfor %}
                                 </select>
                             </div>
                             <div class="form-group">
@@ -418,10 +419,11 @@
                         <div class="grid-2-cols">
                             <div class="form-group">
                                 <label>Capacity (GB)</label>
-                                <select class="form-control">
-                                    <option>512 GB</option>
-                                    <option>1 TB</option>
-                                    <option>2 TB</option>
+                                <select class="form-control" name="id_storage">
+                                    <option value="" disabled selected>Pilih Storage</option>
+                                    {% for storage in storages %}
+                                    <option value="{{ storage.id_storage }}">{{ storage.kapasitas_gb }} GB {{ storage.tipe }}</option>
+                                    {% endfor %}
                                 </select>
                             </div>
                             <div class="form-group">
@@ -440,10 +442,11 @@
                         <div class="grid-2-cols">
                             <div class="form-group">
                                 <label>Capacity (GB)</label>
-                                <select class="form-control">
-                                    <option>16 GB</option>
-                                    <option>32 GB</option>
-                                    <option>64 GB</option>
+                                <select class="form-control" name="id_ram">
+                                    <option value="" disabled selected>Pilih RAM</option>
+                                    {% for ram in rams %}
+                                    <option value="{{ ram.id_ram }}">{{ ram.kapasitas_gb }} GB {{ ram.tipe }}</option>
+                                    {% endfor %}
                                 </select>
                             </div>
                             <div class="form-group">

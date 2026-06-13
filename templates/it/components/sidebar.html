@@ -37,6 +37,17 @@
                 </a>
             </li>
             <li>
+                <a href="{% url 'tambah_komponen_it' %}"
+                    class="menu-item {% if active_page == 'tambah_komponen' %}active{% endif %}">
+                    <svg class="menu-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    <span>Input Komponen Aset</span>
+                </a>
+            </li>
+            <li>
                 <a href="{% url 'pengajuanlaptop_it' %}"
                     class="menu-item {% if active_page == 'pengajuan_laptop' %}active{% endif %}">
                     <svg class="menu-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -50,7 +61,7 @@
                 </a>
             </li>
             <li>
-                <a href="#" class="menu-item {% if active_page == 'kelola_pengadaan' %}active{% endif %}">
+                <a href="{% url 'manajemen_pengadaan_it' %}" class="menu-item {% if active_page == 'kelola_pengadaan' %}active{% endif %}">
                     <svg class="menu-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>

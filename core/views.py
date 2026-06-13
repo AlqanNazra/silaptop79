@@ -41,11 +41,39 @@ def pengajuanlaptop_it_view(request):
     try:
         service = PengajuanService()
         semua_pengajuan = service.service_ambil_semua_pengajuan()
+
+        from inventori.models import User
+        import datetime
+        users_dict = {u.id_user: u.nama for u in User.objects.all()}
+        
+        total_siap_proses = 0
+        total_dikonfigurasi = 0
+        total_selesai = 0
+        total_mendesak = 0
+        today = datetime.date.today()
+
+        for p in semua_pengajuan:
+            p.user_nama = users_dict.get(p.id_user, f"User {p.id_user}")
+            
+            # Map status_it for frontend representation
+            if p.status and p.status.lower() == 'pending':
+                p.status_it = 'configuring' # Configuring / Menunggu Antrean
+                total_siap_proses += 1
+                total_dikonfigurasi += 1
+                # Calculate if urgent (due date <= 7 days)
+                if p.bulan:
+                    diff_days = (p.bulan - today).days
+                    if diff_days <= 7:
+                        total_mendesak += 1
+            elif p.status and p.status.lower() == 'approved':
+                p.status_it = 'ready' # Siap Diambil
+                total_selesai += 1
+            else:
+                p.status_it = 'rejected'
         
         # Sort by date descending
         semua_pengajuan.sort(key=lambda x: x.tanggal_pengajuan, reverse=True)
         
-        # Calculate statistics
         total_pengajuan = len(semua_pengajuan)
         total_pending = sum(1 for p in semua_pengajuan if p.status and p.status.lower() == 'pending')
         total_disetujui = sum(1 for p in semua_pengajuan if p.status and p.status.lower() == 'approved')
@@ -57,6 +85,10 @@ def pengajuanlaptop_it_view(request):
             'total_pending': total_pending,
             'total_disetujui': total_disetujui,
             'total_ditolak': total_ditolak,
+            'total_siap_proses': total_siap_proses,
+            'total_dikonfigurasi': total_dikonfigurasi,
+            'total_selesai': total_selesai,
+            'total_mendesak': total_mendesak,
         }
     except Exception as e:
         context = {
@@ -66,6 +98,10 @@ def pengajuanlaptop_it_view(request):
             'total_pending': 0,
             'total_disetujui': 0,
             'total_ditolak': 0,
+            'total_siap_proses': 0,
+            'total_dikonfigurasi': 0,
+            'total_selesai': 0,
+            'total_mendesak': 0,
         }
 
     return render(request, 'it/inventori/pengajuanlaptop_it.html', context)
@@ -83,6 +119,9 @@ def detailpengajuan_it_view(request):
         if not pengajuan:
             messages.error(request, 'Data pengajuan tidak ditemukan.')
             return redirect('pengajuanlaptop_it')
+
+        user_obj = User.objects.filter(id_user=pengajuan.id_user).first()
+        pengajuan.user_nama = user_obj.nama if user_obj else pengajuan.id_user
 
         if request.method == 'POST':
             action = request.POST.get('action')
@@ -114,6 +153,17 @@ def tambahlaptop_it_view(request):
 
     if request.method == 'POST':
         try:
+            import re
+            raw_layar = request.POST.get('ukuran_layar')
+            layar_val = None
+            if raw_layar:
+                match = re.search(r'\d+(?:\.\d+)?', str(raw_layar))
+                if match:
+                    try:
+                        layar_val = float(match.group(0))
+                    except ValueError:
+                        pass
+
             dto = LaptopInventoriDTO(
                 nama_laptop=request.POST.get('nama_laptop'),
                 model=request.POST.get('model'),
@@ -124,7 +174,7 @@ def tambahlaptop_it_view(request):
                 id_processor=request.POST.get('id_processor') or None,
                 id_ram=request.POST.get('id_ram') or None,
                 id_storage=request.POST.get('id_storage') or None,
-                ukuran_layar=request.POST.get('ukuran_layar') or None,
+                ukuran_layar=layar_val,
             )
             service = CreateLaptopInventoriService()
             service.execute(dto)
@@ -257,7 +307,16 @@ def inputkriteria_hc_view(request):
         except Exception as e:
             print("Error processing weights:", e)
 
-    return render(request, 'hc/dss/inputkriteria_hc.html')
+    processors = Processor.objects.all()
+    rams = RAM.objects.all()
+    storages = Storage.objects.all()
+
+    context = {
+        'processors': processors,
+        'rams': rams,
+        'storages': storages,
+    }
+    return render(request, 'hc/dss/inputkriteria_hc.html', context)
 
 def hasilrekomendasi_hc_view(request):
     import sys
@@ -296,7 +355,55 @@ def detailrekomendasiscrapping_hc_view(request):
     return render(request, 'hc/dss/detailrekomendasiscrapping_hc.html')
 
 def notifikasi_hc_view(request):
-    return render(request, 'hc/inventori/notifikasi_hc.html')
+    from inventori.models import Pengajuan
+    import datetime
+    
+    # Get all pending pengajuan
+    pending_list = Pengajuan.objects.filter(status='pending').select_related('id_user').order_by('bulan')
+    
+    today = datetime.date.today()
+    notifications = []
+    
+    for p in pending_list:
+        diff_days = (p.bulan - today).days
+        
+        # Determine urgency class & tag
+        if diff_days <= 3:
+            urgency_class = 'urgent'
+            urgency_tag = 'Sangat Mendesak'
+        elif diff_days <= 7:
+            urgency_class = 'warning'
+            urgency_tag = 'Mendesak'
+        else:
+            urgency_class = 'info'
+            urgency_tag = 'Segera Disiapkan'
+            
+        # Time string
+        if diff_days < 0:
+            time_str = f"Lewat {abs(diff_days)} hari"
+        elif diff_days == 0:
+            time_str = "Hari ini"
+        elif diff_days == 1:
+            time_str = "Besok"
+        else:
+            time_str = f"{diff_days} hari lagi"
+            
+        notifications.append({
+            'id_pengajuan': p.id_pengajuan,
+            'user_nama': p.id_user.nama if p.id_user else '',
+            'kebutuhan_role': p.kebutuhan_role,
+            'perusahaan': p.perusahaan,
+            'bulan': p.bulan.strftime('%d %B %Y') if hasattr(p.bulan, 'strftime') else p.bulan,
+            'tanggal_pengajuan': p.tanggal_pengajuan.strftime('%d %B %Y') if hasattr(p.tanggal_pengajuan, 'strftime') else '',
+            'urgency_class': urgency_class,
+            'urgency_tag': urgency_tag,
+            'time_str': time_str,
+            'keterangan': p.keterangan
+        })
+        
+    return render(request, 'hc/inventori/notifikasi_hc.html', {
+        'notifications': notifications
+    })
 
 
 # ==========================================
@@ -431,7 +538,16 @@ def inputkriteria_it_view(request):
         except Exception as e:
             messages.error(request, f'Gagal memproses kriteria: {str(e)}')
 
-    return render(request, 'it/dss/inputkriteria_it.html')
+    processors = Processor.objects.all()
+    rams = RAM.objects.all()
+    storages = Storage.objects.all()
+
+    context = {
+        'processors': processors,
+        'rams': rams,
+        'storages': storages,
+    }
+    return render(request, 'it/dss/inputkriteria_it.html', context)
 
 def hasilrekomendasi_it_view(request):
     import sys
@@ -502,7 +618,55 @@ def detailrekomendasiscrapping_it_view(request):
     return render(request, 'it/dss/detailrekomendasiscrapping_it.html', context)
 
 def notifikasi_it_view(request):
-    return render(request, 'it/inventori/notifikasi_it.html')
+    from inventori.models import Pengajuan
+    import datetime
+    
+    # Get all pending pengajuan
+    pending_list = Pengajuan.objects.filter(status='pending').select_related('id_user').order_by('bulan')
+    
+    today = datetime.date.today()
+    notifications = []
+    
+    for p in pending_list:
+        diff_days = (p.bulan - today).days
+        
+        # Determine urgency class & tag
+        if diff_days <= 3:
+            urgency_class = 'urgent'
+            urgency_tag = 'Sangat Mendesak'
+        elif diff_days <= 7:
+            urgency_class = 'warning'
+            urgency_tag = 'Mendesak'
+        else:
+            urgency_class = 'info'
+            urgency_tag = 'Segera Disiapkan'
+            
+        # Time string
+        if diff_days < 0:
+            time_str = f"Lewat {abs(diff_days)} hari"
+        elif diff_days == 0:
+            time_str = "Hari ini"
+        elif diff_days == 1:
+            time_str = "Besok"
+        else:
+            time_str = f"{diff_days} hari lagi"
+            
+        notifications.append({
+            'id_pengajuan': p.id_pengajuan,
+            'user_nama': p.id_user.nama if p.id_user else '',
+            'kebutuhan_role': p.kebutuhan_role,
+            'perusahaan': p.perusahaan,
+            'bulan': p.bulan.strftime('%d %B %Y') if hasattr(p.bulan, 'strftime') else p.bulan,
+            'tanggal_pengajuan': p.tanggal_pengajuan.strftime('%d %B %Y') if hasattr(p.tanggal_pengajuan, 'strftime') else '',
+            'urgency_class': urgency_class,
+            'urgency_tag': urgency_tag,
+            'time_str': time_str,
+            'keterangan': p.keterangan
+        })
+        
+    return render(request, 'it/inventori/notifikasi_it.html', {
+        'notifications': notifications
+    })
 
 
 # ==========================================
@@ -762,5 +926,163 @@ def login_redirect_view(request):
 
 def home_view(request):
     return login_redirect_view(request)
+
+
+# Procurement management views for IT (Added to fix NoReverseMatch)
+def manajemenpengadaan_it_view(request):
+    return render(request, 'it/inventori/manajemenpengadaan_it.html')
+
+def detailpengadaan_it_view(request):
+    return render(request, 'it/inventori/detailpengadaan_it.html')
+
+def editpengadaan_it_view(request):
+    return render(request, 'it/inventori/editpengadaan_it.html')
+
+def setujui_pengajuan_it_view(request):
+    from inventori.models import LaptopInventori
+    from inventori.services.service_pengajuan import PengajuanService
+    from inventori.repositories.dto.dto_pengajuan import PengajuanDTO
+    from inventori.repositories.dto.dto_peminjaman import PeminjamanDTO
+    import datetime
+    import time
+
+    pengajuan_id = request.GET.get('id')
+    if not pengajuan_id:
+        messages.error(request, 'ID Pengajuan tidak diberikan.')
+        return redirect('pengajuanlaptop_it')
+
+    if request.method == 'POST':
+        laptop_id = request.POST.get('laptop_id')
+        if not laptop_id:
+            messages.error(request, 'Laptop harus dipilih.')
+            return redirect(f"{request.path}?id={pengajuan_id}")
+        
+        try:
+            service = PengajuanService()
+            pengajuan = service.service_cari_pengajuan_by_id(pengajuan_id)
+            if not pengajuan:
+                messages.error(request, 'Pengajuan tidak ditemukan.')
+                return redirect('pengajuanlaptop_it')
+
+            # Update status laptop ke dipinjam
+            laptop = LaptopInventori.objects.get(id_laptop_inventori=laptop_id)
+            laptop.status = 'dipinjam'
+            laptop.save()
+
+            # Buat DTO Pengajuan
+            user_id = request.user.id_user if (hasattr(request.user, 'id_user') and request.user.id_user) else 'USR-002'
+            dto_peng = PengajuanDTO(
+                id_pengajuan=pengajuan_id,
+                status='approved',
+                approved_by=user_id
+            )
+
+            # Buat DTO Peminjaman
+            id_peminjaman = f"PMJ-{int(time.time())}"
+            dto_pem = PeminjamanDTO(
+                id_peminjaman=id_peminjaman,
+                id_pengajuan=pengajuan_id,
+                id_user=pengajuan.id_user,
+                id_laptop_inventori=laptop_id,
+                tanggal_pinjam=datetime.date.today().strftime('%Y-%m-%d'),
+                status='dipinjam',
+                keterangan='Persetujuan pengajuan laptop oleh IT'
+            )
+
+            # Eksekusi
+            service.service_approve_dan_pinjam(dto_peng, dto_pem)
+
+            messages.success(request, 'Pengajuan berhasil disetujui oleh IT dan laptop telah dipinjamkan.')
+            return redirect('pengajuanlaptop_it')
+        except Exception as e:
+            messages.error(request, f'Gagal menyetujui pengajuan: {str(e)}')
+            return redirect(f"{request.path}?id={pengajuan_id}")
+
+    # GET Request: Fetch and Map Laptop Specifications
+    laptops = LaptopInventori.objects.filter(status__in=['tersedia', 'Available', 'Tersedia']).select_related('id_processor', 'id_ram', 'id_storage')
+    for laptop in laptops:
+        laptop.id = laptop.id_laptop_inventori
+        
+        if laptop.id_processor:
+            laptop.processor = laptop.id_processor.nama_processor
+        else:
+            laptop.processor = "-"
+            
+        if laptop.id_ram:
+            laptop.ram = f"{laptop.id_ram.kapasitas_gb} GB {laptop.id_ram.tipe}"
+        else:
+            laptop.ram = "-"
+            
+        if laptop.id_storage:
+            laptop.storage = f"{laptop.id_storage.kapasitas_gb} GB {laptop.id_storage.tipe}"
+        else:
+            laptop.storage = "-"
+            
+        if laptop.ukuran_layar:
+            laptop.screen_size = f"{laptop.ukuran_layar} inch"
+        else:
+            laptop.screen_size = "-"
+            
+        from dss.models import LaptopPengadaan
+        pengadaan = LaptopPengadaan.objects.filter(nama_laptop__icontains=laptop.nama_laptop).first()
+        if pengadaan:
+            laptop.battery_capacity = f"{int(pengadaan.baterai)} mAh" if pengadaan.baterai else "5000 mAh"
+            laptop.weight = f"{pengadaan.berat} kg" if pengadaan.berat else "1.5 kg"
+        else:
+            laptop.battery_capacity = "5000 mAh"
+            laptop.weight = "1.5 kg"
+
+    return render(request, 'it/inventori/setujuipengajuan_it.html', {
+        'pengajuan_id': pengajuan_id,
+        'laptops': laptops
+    })
+
+
+def tambah_komponen_it_view(request):
+    from inventori.models import Processor, RAM, Storage
+    
+    if request.method == 'POST':
+        comp_type = request.POST.get('component_type')
+        try:
+            if comp_type == 'processor':
+                Processor.objects.create(
+                    nama_processor=request.POST.get('nama_processor'),
+                    manufacturer=request.POST.get('manufacturer'),
+                    model=request.POST.get('model'),
+                    cores=int(request.POST.get('cores') or 0),
+                    threads=int(request.POST.get('threads') or 0),
+                    base_clock=float(request.POST.get('base_clock') or 0.0),
+                    max_clock=float(request.POST.get('max_clock') or 0.0),
+                    arsitektur=request.POST.get('arsitektur', ''),
+                    keterangan=request.POST.get('keterangan', '')
+                )
+                messages.success(request, 'Processor berhasil ditambahkan!')
+            elif comp_type == 'ram':
+                RAM.objects.create(
+                    kapasitas_gb=int(request.POST.get('kapasitas_gb') or 0),
+                    tipe=request.POST.get('tipe', ''),
+                    keterangan=request.POST.get('keterangan', '')
+                )
+                messages.success(request, 'RAM berhasil ditambahkan!')
+            elif comp_type == 'storage':
+                Storage.objects.create(
+                    kapasitas_gb=int(request.POST.get('kapasitas_gb') or 0),
+                    tipe=request.POST.get('tipe', '')
+                )
+                messages.success(request, 'Storage berhasil ditambahkan!')
+            return redirect('tambah_komponen_it')
+        except Exception as e:
+            messages.error(request, f'Gagal menambahkan komponen: {str(e)}')
+            return redirect('tambah_komponen_it')
+
+    processors = Processor.objects.all().order_by('-id_processor')[:10]
+    rams = RAM.objects.all().order_by('-id_ram')[:10]
+    storages = Storage.objects.all().order_by('-id_storage')[:10]
+
+    return render(request, 'it/inventori/tambah_komponen_it.html', {
+        'processors': processors,
+        'rams': rams,
+        'storages': storages,
+    })
 
 
