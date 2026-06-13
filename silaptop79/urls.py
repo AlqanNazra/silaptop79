@@ -26,6 +26,7 @@ from core.views import (
     detailpengajuan_it_view,
     setujui_pengajuan_it_view,
     tambahlaptop_it_view,
+    tambahspek_it_view,
     inputkriteria_it_view,
     hasilrekomendasi_it_view,
     detaillaptop_it_view,
@@ -37,6 +38,10 @@ from core.views import (
     manajemenpengadaan_it_view,
     detailpengadaan_it_view,
     editpengadaan_it_view,
+    manajemenproyek_it_view,
+    tambahproyek_it_view,
+    editproyek_it_view,
+    hapusproyek_it_view,
 
     # Talent Views
     # Talent Views
@@ -87,6 +92,7 @@ urlpatterns = [
     path('it/detail-pengajuan/', detailpengajuan_it_view, name='detailpengajuan_it'),
     path('it/setujui-pengajuan/', setujui_pengajuan_it_view, name='setujui_pengajuan_it'),
     path('it/tambah-laptop/', tambahlaptop_it_view, name='tambahlaptop_it'),
+    path('it/dss/tambah-spek/', tambahspek_it_view, name='tambahspek_it'),
     path('it/detail-laptop/', detaillaptop_it_view, name='detaillaptop_it'),
     path('it/riwayat-peminjaman/', riwayatpeminjamanlaptop_it_view, name='riwayatpeminjamanlaptop_it'),
     path('it/edit-laptop/', editdatalaptop_it_view, name='editdatalaptop_it'),
@@ -98,6 +104,10 @@ urlpatterns = [
     path('it/manajemen-pengadaan/', manajemenpengadaan_it_view, name='manajemen_pengadaan_it'),
     path('it/detail-pengadaan/', detailpengadaan_it_view, name='detailpengadaan_it'),
     path('it/edit-pengadaan/', editpengadaan_it_view, name='editpengadaan_it'),
+    path('it/manajemen-proyek/', manajemenproyek_it_view, name='manajemen_proyek_it'),
+    path('it/tambah-proyek/', tambahproyek_it_view, name='tambahproyek_it'),
+    path('it/edit-proyek/<str:id_proyek>/', editproyek_it_view, name='editproyek_it'),
+    path('it/hapus-proyek/<str:id_proyek>/', hapusproyek_it_view, name='hapusproyek_it'),
 
     # ==========================================
     # TALENT ROUTES

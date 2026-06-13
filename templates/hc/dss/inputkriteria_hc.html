@@ -381,13 +381,27 @@
                         <h3>Section A: Pemilihan Role</h3>
                     </div>
 
+                    <div class="grid-2-cols" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                        <div class="form-group">
+                            <label>Pilih Proyek</label>
+                            <select class="form-control" name="proyek" id="select-proyek" required>
+                                <option value="">-- Pilih Proyek --</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Pilih Role</label>
+                            <select class="form-control" name="role" id="select-role" required disabled>
+                                <option value="">-- Pilih Role --</option>
+                            </select>
+                        </div>
+                    </div>
                     <div class="form-group" style="margin-bottom: 0;">
-                        <label>Pilih Profil Pengguna</label>
-                        <select class="form-control" name="role_profile">
-                            <option value="Programmer" selected>Programmer</option>
-                            <option value="Desainer">Desainer Grafis</option>
-                            <option value="Staff">Staff Administrasi</option>
-                        </select>
+                        <label>Pilih Teknologi</label>
+                        <div id="teknologi-container" style="background-color: #f1f5f9; border-radius: 8px; padding: 16px; min-height: 48px; box-sizing: border-box;">
+                            <div id="teknologi-checkboxes" style="display: flex; flex-direction: column; gap: 10px;">
+                                <span style="color: #94a3b8; font-size: 13px; font-style: italic;">Pilih role terlebih dahulu</span>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="info-alert">
@@ -588,6 +602,102 @@
         </div> <!-- End Main Content -->
     </div> <!-- End Dashboard Wrapper -->
 
-</body>
+    <script id="proyek-data-json" type="application/json">
+        {{ proyek_json|safe }}
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const dataEl = document.getElementById('proyek-data-json');
+            if (!dataEl) return;
+            
+            let proyekData = [];
+            try {
+                proyekData = JSON.parse(dataEl.textContent);
+            } catch (e) {
+                console.error("Error parsing proyek data:", e);
+            }
 
+            const selectProyek = document.getElementById('select-proyek');
+            const selectRole = document.getElementById('select-role');
+            const checkboxesContainer = document.getElementById('teknologi-checkboxes');
+
+            // Populate Proyek dropdown
+            proyekData.forEach(function(proyek) {
+                const opt = document.createElement('option');
+                opt.value = proyek.id_proyek;
+                opt.textContent = proyek.nama_proyek;
+                selectProyek.appendChild(opt);
+            });
+
+            // On Proyek change
+            selectProyek.addEventListener('change', function() {
+                const selectedProyekId = this.value;
+                
+                // Clear and disable downstream select options
+                selectRole.innerHTML = '<option value="">-- Pilih Role --</option>';
+                selectRole.disabled = true;
+                checkboxesContainer.innerHTML = '<span style="color: #94a3b8; font-size: 13px; font-style: italic;">Pilih role terlebih dahulu</span>';
+
+                if (!selectedProyekId) return;
+
+                const selectedProyek = proyekData.find(p => p.id_proyek === selectedProyekId);
+                if (selectedProyek && selectedProyek.roles.length > 0) {
+                    selectedProyek.roles.forEach(function(role) {
+                        const opt = document.createElement('option');
+                        opt.value = role.id_role;
+                        opt.textContent = role.nama_role;
+                        selectRole.appendChild(opt);
+                    });
+                    selectRole.disabled = false;
+                }
+            });
+
+            // On Role change
+            selectRole.addEventListener('change', function() {
+                const selectedRoleId = this.value;
+                const selectedProyekId = selectProyek.value;
+
+                // Clear checkboxes container
+                checkboxesContainer.innerHTML = '';
+
+                if (!selectedRoleId || !selectedProyekId) {
+                    checkboxesContainer.innerHTML = '<span style="color: #94a3b8; font-size: 13px; font-style: italic;">Pilih role terlebih dahulu</span>';
+                    return;
+                }
+
+                const selectedProyek = proyekData.find(p => p.id_proyek === selectedProyekId);
+                if (selectedProyek) {
+                    const selectedRole = selectedProyek.roles.find(r => r.id_role === selectedRoleId);
+                    if (selectedRole && selectedRole.teknologi.length > 0) {
+                        selectedRole.teknologi.forEach(function(tech) {
+                            const label = document.createElement('label');
+                            label.style.display = 'flex';
+                            label.style.alignItems = 'center';
+                            label.style.gap = '10px';
+                            label.style.fontSize = '14px';
+                            label.style.fontWeight = '500';
+                            label.style.color = '#334155';
+                            label.style.textTransform = 'none';
+                            label.style.cursor = 'pointer';
+
+                            const checkbox = document.createElement('input');
+                            checkbox.type = 'checkbox';
+                            checkbox.name = 'teknologi[]';
+                            checkbox.value = tech;
+                            checkbox.style.width = '18px';
+                            checkbox.style.height = '18px';
+                            checkbox.style.cursor = 'pointer';
+
+                            label.appendChild(checkbox);
+                            label.appendChild(document.createTextNode(tech));
+                            checkboxesContainer.appendChild(label);
+                        });
+                    } else {
+                        checkboxesContainer.innerHTML = '<span style="color: #94a3b8; font-size: 13px; font-style: italic;">Tidak ada teknologi untuk role ini</span>';
+                    }
+                }
+            });
+        });
+    </script>
+</body>
 </html>
