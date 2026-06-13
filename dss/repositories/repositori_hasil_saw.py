@@ -13,14 +13,31 @@ class HasilSawRepository(IHasilSawRepositoryImpl):
     # CREATE
     # =========================
     def buat_hasil_saw(self, data: HasilSAWDTO):
+
         query = """
-        SELECT tambah_hasil_saw(%s, %s);
+        SELECT buat_hasil_saw(%s);
         """
 
         with self.conn.cursor() as cur:
-            cur.execute(query, (
-                data.id_dss,
-            ))
+
+            cur.execute(
+                query,
+                (
+                    data.id_dss,
+                )
+            )
+
+            hasil = cur.fetchone()
+
+            print("\n=== DEBUG HASIL SAW ===")
+            print(hasil)
+
             self.conn.commit()
 
-            return "Berhasil tambah kriteria"
+            if isinstance(hasil, tuple):
+                return hasil[0]
+
+            if isinstance(hasil, dict):
+                return next(iter(hasil.values()))
+
+            return hasil

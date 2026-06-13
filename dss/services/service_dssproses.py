@@ -259,6 +259,8 @@ class DssProsesService:
                 alternatif_data
             )
         )
+        for item in preprocessing_result[:5]:
+            print(item)
         normalized_matrix = (
             self.sawCalculationService.normalize_decision_matrix(
                 preprocessing_result
@@ -302,18 +304,19 @@ class DssProsesService:
 
         for item in ranking:
 
-            self.repoDetailHasilSAW.tambah_detail_hasil_saw(
+            print("=== ITEM RANKING ===")
+            print(item)
+
+            print("normalisasi =", item.get("normalisasi"))
+            print("skor =", item.get("skor"))
+            print("rank =", item.get("rank"))
+
+            self.repodetailhasilsaw.tambah_detail_hasil_saw(
                 DetailHasilSawDTO(
                     id_hasil=id_hasil,
-                    nilai_normalisasi=item.get(
-                        "normalisasi"
-                    ),
-                    nilai_rangking=item.get(
-                        "skor"
-                    ),
-                    rangking=item.get(
-                        "rank"
-                    )
+                    nilai_normalisasi=item.get("normalisasi"),
+                    nilai_rangking=item.get("skor"),
+                    rangking=item.get("rank")
                 )
             )
 

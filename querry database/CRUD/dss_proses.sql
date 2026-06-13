@@ -19,7 +19,17 @@ CREATE OR REPLACE FUNCTION tambah_dss_proses (
     f_jenis_dss VARCHAR
 )
 RETURNS TEXT AS $$
+DECLARE
+    v_id_dss VARCHAR(100);
 BEGIN
+
+    v_id_dss :=
+        f_generate_id(
+            'DSS',
+            'dss_dssproses',
+            'id_dss'
+        );
+
     INSERT INTO dss_dssproses(
         id_dss,
         id_user,
@@ -29,15 +39,14 @@ BEGIN
         created_at
     )
     VALUES (
-        f_generate_id('DSS','dss_dssproses','id_dss'),
+        v_id_dss,
         f_id_user,
         f_id_bobot,
         f_role_dss,
         f_jenis_dss,
         CURRENT_TIMESTAMP
     );
-
-    RETURN 'DSS proses berhasil ditambahkan';
+    RETURN v_id_dss;
 END;
 $$ LANGUAGE plpgsql;
 

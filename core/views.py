@@ -572,7 +572,7 @@ def pengajuanlaptop_talent_view(request):
                 status='pending'
             )
             # The method is named service_tambah_peminjaman but actually creates pengajuan
-            service.service_tambah_peminjaman(dto)
+            service.service_tambah_pengajuan(dto)
             messages.success(request, 'Pengajuan laptop berhasil dikirim.')
             return redirect('dashboard_talent')
 

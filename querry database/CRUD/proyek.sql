@@ -40,7 +40,7 @@ BEGIN
         p_mulai_proyek,
         p_akhir_proyek,
         CURRENT_TIMESTAMP,
-        NULL
+        CURRENT_TIMESTAMP
     );
 
     RETURN TRUE;

@@ -10,7 +10,7 @@ from collections import defaultdict
 from typing import Union, Optional
 import re
 
-class PreprocessingService:
+class Servicepreposesdata:
     
     def __init__(self, conn):
         self.conn = conn
@@ -18,48 +18,49 @@ class PreprocessingService:
         self.repoLI = LaptopInventoriRepository(conn) 
     
     def filtering_data(
-        self, 
-        sumber_data: str, 
+        self,
+        sumber_data: str,
         data: Union[FilterPengadaanDTO, FilterInventoriDTO]
     ) -> dict:
         try:
             with self.conn:
+
                 if sumber_data == "pengadaan":
+
                     if not isinstance(data, FilterPengadaanDTO):
                         return {
                             "status": "error",
                             "message": "Untuk pengadaan, gunakan FilterPengadaanDTO"
                         }
-                    filtered_data = self.repoLP.filter_pengadaan(data)
-                    result = filtered_data
-                    processed = self.preprocessing_processor(result)
-                    
+
+                    result = self.repoLP.filter_pengadaan(data)
+
                     return {
                         "status": "success",
                         "sumber": "pengadaan",
-                        "data_raw": result,
-                        "data_processed": processed,
+                        "data": result,
                         "total": len(result),
                         "message": f"Berhasil mengambil {len(result)} data pengadaan"
                     }
+
                 elif sumber_data == "inventori":
+
                     if not isinstance(data, FilterInventoriDTO):
                         return {
                             "status": "error",
                             "message": "Untuk inventori, gunakan FilterInventoriDTO"
                         }
-                    filtered_data = self.repoLI.filter_inventori(data)
-                    result = filtered_data
-                    processed = self.preprocessing_processor(result)
-                    
+
+                    result = self.repoLI.filter_inventori(data)
+
                     return {
                         "status": "success",
                         "sumber": "inventori",
-                        "data_raw": result,
-                        "data_processed": processed,
+                        "data": result,
                         "total": len(result),
                         "message": f"Berhasil mengambil {len(result)} data inventori"
                     }
+
                 else:
                     return {
                         "status": "error",
@@ -72,37 +73,50 @@ class PreprocessingService:
                 "message": f"Gagal filter data: {str(e)}"
             }
 
-    def preprocessing_processor(self, data_list):
-        hasil = []
+    # def preprocessing_processor(self, data_list):
+    #     hasil = []
         
-        for item in data_list:
-            processor_text = item.get("processor")
-            series,model,gen = self.ekstrak_processor(processor_text)
-            skor_processor = self.mapping_processor(series,gen)
-            hasil.append({
-                "id": item.get("id") or item.get("id_laptop_pengadaan") or item.get("id_laptop_inventori"),
-                "processor": skor_processor
-            })
+    #     for item in data_list:
+    #         processor_text = item.get("processor")
+    #         series,model,gen = self.ekstrak_processor(processor_text)
+    #         skor_processor = self.mapping_processor(series,gen)
+    #         hasil.append({
+    #             "id": item.get("id") or item.get("id_laptop_pengadaan") or item.get("id_laptop_inventori"),
+    #             "processor": skor_processor
+    #         })
 
-        return hasil
+    #     return hasil
 
     def preprocessing(self, data_list):
+
         hasil = []
 
         for item in data_list:
 
             hasil.append({
-                "id": item.get("id_laptop_inventori") or item.get("id_laptop_pengadaan"),
 
-                "ram": item.get("ram_kapasitas") or item.get("ram") or 0,
+                "id":
+                    item.get("id_laptop_inventori")
+                    or item.get("id_laptop_pengadaan"),
 
-                "storage": item.get("storage_kapasitas") or item.get("storage") or 0,
+                "processor":
+                    item.get("benchmark_score", 0),
 
-                "berat": item.get("berat", 0),
+                "ram":
+                    item.get("ram_kapasitas", 0),
 
-                "layar": item.get("ukuran_layar", 0),
+                "storage":
+                    item.get("storage_kapasitas", 0),
 
-                "baterai": item.get("baterai", 0)
+                "berat":
+                    item.get("berat", 0),
+
+                "layar":
+                    item.get("ukuran_layar", 0),
+
+                "baterai":
+                    item.get("baterai", 0)
+
             })
 
         return hasil

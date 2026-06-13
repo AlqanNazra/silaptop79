@@ -17,48 +17,48 @@ CREATE TABLE inventori_pengajuan (
     FOREIGN KEY (approved_by) REFERENCES users(id_user)
 );
 
-CREATE OR REPLACE FUNCTION tambah_pengajuan (
-    f_id_user VARCHAR,
-    f_kebutuhan_role VARCHAR,
-    f_kebutuhan_requirement TEXT,
-    f_bulan DATE,
-    f_keterangan TEXT,
-    f_perusahaan TEXT,
-    f_status VARCHAR,
-    f_tanggal_pengajuan TIMESTAMP,
-    f_tanggal_approval TIMESTAMP,
-    f_approved_by VARCHAR
-)
-RETURNS VOID AS $$
-BEGIN
-    INSERT INTO inventori_pengajuan (
-        id_pengajuan,
-        user_id,
-        kebutuhan_role,
-        kebutuhan_requirement,
-        bulan,
-        keterangan,
-        perusahaan,
-        status,
-        tanggal_pengajuan ,
-        tanggal_approval ,
-        approved_by 
-    )
-    VALUES (
-        f_generate_id('PNJ','inventori_pengajuan','id_pengajuan'),
-        f_id_user,
-        f_kebutuhan_role,
-        f_kebutuhan_requirement,
-        f_bulan,
-        f_keterangan,
-        f_perusahaan,
-        f_status,
-        f_tanggal_pengajuan,
-        f_tanggal_approval,
-        f_approved_by
-    );
-END;
-$$ LANGUAGE plpgsql;
+-- CREATE OR REPLACE FUNCTION tambah_pengajuan (
+--     f_id_user VARCHAR,
+--     f_kebutuhan_role VARCHAR,
+--     f_kebutuhan_requirement TEXT,
+--     f_bulan DATE,
+--     f_keterangan TEXT,
+--     f_perusahaan TEXT,
+--     f_status VARCHAR,
+--     f_tanggal_pengajuan TIMESTAMP,
+--     f_tanggal_approval TIMESTAMP,
+--     f_approved_by VARCHAR
+-- )
+-- RETURNS VOID AS $$
+-- BEGIN
+--     INSERT INTO inventori_pengajuan (
+--         id_pengajuan,
+--         user_id,
+--         kebutuhan_role,
+--         kebutuhan_requirement,
+--         bulan,
+--         keterangan,
+--         perusahaan,
+--         status,
+--         tanggal_pengajuan ,
+--         tanggal_approval ,
+--         approved_by 
+--     )
+--     VALUES (
+--         f_generate_id('PNJ','inventori_pengajuan','id_pengajuan'),
+--         f_id_user,
+--         f_kebutuhan_role,
+--         f_kebutuhan_requirement,
+--         f_bulan,
+--         f_keterangan,
+--         f_perusahaan,
+--         f_status,
+--         f_tanggal_pengajuan,
+--         f_tanggal_approval,
+--         f_approved_by
+--     );
+-- END;
+-- $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION tambah_pengajuan (
     f_id_user VARCHAR,

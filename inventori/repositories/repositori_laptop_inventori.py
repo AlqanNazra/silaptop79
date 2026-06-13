@@ -62,6 +62,4 @@ class LaptopInventoriRepository(ILaptopInventoriRepository):
 
         with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute(query, params)
-            rows = cur.fetchall()
-
-            return rows
+            return cur.fetchall()

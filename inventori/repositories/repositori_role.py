@@ -1,8 +1,8 @@
 # repositories/role_repository.py
 import psycopg2
 from typing import List, Dict
-from interfaces.interface_role import IRoleRepository
-from dto.dto_role import RoleDTO
+from .interfaces.interface_role import IRoleRepository
+from ..dto.dto_role import RoleDTO
 
 class RoleRepository(IRoleRepository):
     def __init__(self, conn):

@@ -2,7 +2,7 @@
 -- 8. PROCESSOR
 -- =============================================
 CREATE TABLE processor (
-    id_processor SERIAL PRIMARY KEY,
+    id_processor VARCHAR(50),
     nama_processor VARCHAR(255),
     manufacturer VARCHAR(255),
     model VARCHAR(255),
@@ -24,6 +24,7 @@ CREATE OR REPLACE FUNCTION tambah_processor(
     f_base_clock FLOAT,
     f_max_clock FLOAT,
     f_arsitektur VARCHAR,
+	f_processor_score INT,
     f_keterangan TEXT
 )
 RETURNS TEXT AS $$
@@ -38,6 +39,7 @@ BEGIN
         base_clock,
         max_clock,
         arsitektur,
+		benchmark_score,
         keterangan
     )
     VALUES (
@@ -50,6 +52,7 @@ BEGIN
         f_base_clock,
         f_max_clock,
         f_arsitektur,
+		f_processor_score,
         f_keterangan
     );
 
@@ -68,6 +71,7 @@ RETURNS TABLE (
     base_clock FLOAT,
     max_clock FLOAT,
     arsitektur VARCHAR,
+	
     keterangan TEXT
 )
 AS $$

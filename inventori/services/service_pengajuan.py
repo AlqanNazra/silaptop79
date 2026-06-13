@@ -5,7 +5,7 @@ from inventori.repositories.dto.dto_pengajuan import PengajuanDTO
 
 class PengajuanService:
     
-    def service_tambah_peminjaman(self, dto: PengajuanDTO):
+    def service_tambah_pengajuan(self, dto: PengajuanDTO):
         conn = get_connection()
         try:
             repo = PengajuanRepository(conn)

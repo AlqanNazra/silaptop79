@@ -1,7 +1,7 @@
 -- =============================================
 -- 12. LAPTOP INVENTORI
 -- =============================================
-CREATE TABLE inventori_laptopinventori (
+CREATE TABLE inventori (
     id_laptop_inventori VARCHAR(100) PRIMARY KEY,
     no_inventori VARCHAR(100) UNIQUE,
     nama_laptop VARCHAR(255),
@@ -10,14 +10,17 @@ CREATE TABLE inventori_laptopinventori (
     kondisi VARCHAR(50)     CHECK (kondisi IN ('baik','rusak ringan','rusak berat')),
     status VARCHAR(50) CHECK (status IN ('tersedia','dipinjam','rusak')),
     lokasi VARCHAR(255),
-    id_processor INTEGER,
-    id_ram INTEGER,
-    id_storage INTEGER,
+    id_processor VARCHAR(50),
+    id_ram VARCHAR(50),
+    id_storage VARCHAR(100),
     ukuran_layar FLOAT,
-    FOREIGN KEY (id_processor) REFERENCES processor(id_processor),
-    FOREIGN KEY (id_ram) REFERENCES ram(id_ram),
-    FOREIGN KEY (id_storage) REFERENCES storage(id_storage)
+    baterai FLOAT,
+    FOREIGN KEY (id_processor) REFERENCES inventori_processor(id_processor),
+    FOREIGN KEY (id_ram) REFERENCES inventori_ram(id_ram),
+    FOREIGN KEY (id_storage) REFERENCES inventori_storage(id_storage)
 );
+
+select * from inventori_processor
 
 CREATE OR REPLACE FUNCTION tambah_laptop_inventori(
     f_nama_laptop VARCHAR,
@@ -26,10 +29,11 @@ CREATE OR REPLACE FUNCTION tambah_laptop_inventori(
     f_kondisi VARCHAR,
     f_status VARCHAR,
     f_lokasi VARCHAR,
-    f_id_processor VARCHAR, -- Ubah ke VARCHAR
-    f_id_ram VARCHAR,       -- Ubah ke VARCHAR
-    f_id_storage VARCHAR,   -- Ubah ke VARCHAR
-    f_ukuran_layar FLOAT
+    f_id_processor VARCHAR, 
+    f_id_ram VARCHAR,       
+    f_id_storage VARCHAR,   
+    f_ukuran_layar FLOAT,
+    f_baterai FLOAT -- Tambahkan ini di parameter ke-11
 )
 RETURNS VOID AS $$
 BEGIN
@@ -42,24 +46,26 @@ BEGIN
         kondisi,
         status,
         lokasi,
-        processor_id, -- Gunakan suffix _id jika Django
-        ram_id,
-        storage_id,
-        ukuran_layar
+        id_processor, 
+        id_ram,
+        id_storage,
+        ukuran_layar,
+        baterai -- Tambahkan kolom target
     )
     VALUES (
         f_generate_id('INV','inventori_laptopinventori','id_laptop_inventori'),
-        'LTP-' || CAST(extract(epoch from now()) AS TEXT) || f_nama_laptop, -- Generate manual simpel
+        'LTP-' || CAST(extract(epoch from now()) AS TEXT) || f_nama_laptop, 
         f_nama_laptop,
         f_model,
         f_os,
         f_kondisi,
         f_status,
         f_lokasi,
-        NULLIF(f_id_processor, '')::bigint,
-        NULLIF(f_id_ram, '')::bigint,
-        NULLIF(f_id_storage, '')::bigint,
-        f_ukuran_layar
+        NULLIF(f_id_processor, ''), 
+        NULLIF(f_id_ram, ''),       
+        NULLIF(f_id_storage, ''),   
+        f_ukuran_layar,
+        f_baterai -- Masukkan nilainya di sini
     );
 END;
 $$ LANGUAGE plpgsql;
@@ -75,7 +81,7 @@ RETURNS TABLE (
     ram_kapasitas INT,
     ram_tipe VARCHAR,
     storage_kapasitas INT,
-    storage_tipe VARCHAR,
+    storage_tipe VARCHAR   -- <--- Koma di sini sudah dihapus
 ) AS $$
 BEGIN
     RETURN QUERY
@@ -91,12 +97,14 @@ BEGIN
         s.kapasitas_gb,
         s.tipe
     FROM inventori_laptopinventori li
-    LEFT JOIN inventori_processor pro ON li.processor_id = pro.id_processor
-    LEFT JOIN inventori_ram r ON li.ram_id = r.id_ram
-    LEFT JOIN inventori_storage s ON li.storage_id = s.id_storage
+    LEFT JOIN inventori_processor pro ON li.id_processor = pro.id_processor -- Catatan: pastikan nama kolom foreign key-nya sesuai (li.id_processor atau li.processor_id)
+    LEFT JOIN inventori_ram r ON li.id_ram = r.id_ram
+    LEFT JOIN inventori_storage s ON li.id_storage = s.id_storage
     WHERE li.id_laptop_inventori = f_id_laptop_inventori;
 END;
 $$ LANGUAGE plpgsql;
+
+DROP FUNCTION ambil_laptop_inventori
 
 CREATE OR REPLACE FUNCTION ambil_laptop_inventori()
 RETURNS TABLE (
@@ -108,45 +116,63 @@ RETURNS TABLE (
     kondisi VARCHAR,
     status VARCHAR,
     lokasi VARCHAR,
+
     ukuran_layar FLOAT,
+    baterai FLOAT,
+
     nama_processor VARCHAR,
     manufacturer VARCHAR,
     processor_model VARCHAR,
     cores INT,
     threads INT,
+    benchmark_score INTEGER,
+
     ram_kapasitas INT,
     ram_tipe VARCHAR,
+
     storage_kapasitas INT,
     storage_tipe VARCHAR
 )
 AS $$
 BEGIN
-    RETURN QUERY
-    SELECT 
-        li.id_laptop_inventori,
-        li.no_inventori,
-        li.nama_laptop,
-        li.model,
-        li.os,
-        li.kondisi,
-        li.status,
-        li.lokasi,
-        li.ukuran_layar,
-        pro.nama_processor,
-        pro.manufacturer,
-        pro.model,
-        pro.cores,
-        pro.threads,
-        r.kapasitas_gb,
-        r.tipe,
-        s.kapasitas_gb,
-        s.tipe
+RETURN QUERY
+SELECT
+    li.id_laptop_inventori,
+    li.no_inventori,
+    li.nama_laptop,
+    li.model,
+    li.os,
+    li.kondisi,
+    li.status,
+    li.lokasi,
 
-    FROM inventori_laptopinventori li
+    li.ukuran_layar,
+    li.baterai,
 
-    LEFT JOIN inventori_processor pro ON li.processor_id = pro.id_processor
-    LEFT JOIN inventori_ram r ON li.ram_id = r.id_ram
-    LEFT JOIN inventori_storage s ON li.storage_id = s.id_storage;
+    pro.nama_processor,
+    pro.manufacturer,
+    pro.model,
+    pro.cores,
+    pro.threads,
+    pro.benchmark_score,
+
+    r.kapasitas_gb,
+    r.tipe,
+
+    s.kapasitas_gb,
+    s.tipe
+
+FROM inventori_laptopinventori li
+
+LEFT JOIN inventori_processor pro
+    ON li.id_processor = pro.id_processor
+
+LEFT JOIN inventori_ram r
+    ON li.id_ram = r.id_ram
+
+LEFT JOIN inventori_storage s
+    ON li.id_storage = s.id_storage;
+
 END;
 $$ LANGUAGE plpgsql;
 
@@ -163,6 +189,7 @@ RETURNS TABLE (
     status VARCHAR,
     lokasi VARCHAR,
     ukuran_layar FLOAT,
+    baterai FLOAT,
 
     sumber_data VARCHAR,
     jenis_dss VARCHAR,
@@ -186,6 +213,7 @@ BEGIN
         li.status,
         li.lokasi,
         li.ukuran_layar,
+        li.baterai,
 
         ad.sumber_data,
         dp.jenis_dss,

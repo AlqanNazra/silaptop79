@@ -109,18 +109,18 @@ class LaptopPengadaanRepository(ILaptopPengadaanRepositoryImpl):
 
             return rows
         
-    def filter_pengadaan(self, filter_dto: LaptopPengadaanDTO) -> list:
+    def filter_pengadaan(self, filter_dto):
         query = """
             SELECT * FROM GetFilteredLaptopPengadaan(
-                %s,                            -- id_laptop_pengadaan
-                %s, %s, %s,                    -- harga, min_harga, max_harga
-                %s,                            -- gpu
-                %s, %s, %s,                    -- ukuran_layar, min, max
-                %s, %s, %s,                    -- baterai, min, max
-                %s, %s, %s,                    -- nama_processor, manufacturer, processor_model
-                %s, %s, %s,                    -- cores, min_cores, max_cores
-                %s, %s, %s, %s,                -- ram_kapasitas, min, max, tipe
-                %s, %s, %s, %s                 -- storage_kapasitas, min, max, tipe
+                %s,
+                %s, %s, %s,
+                %s,
+                %s, %s, %s,
+                %s, %s, %s,
+                %s, %s, %s,
+                %s, %s, %s,
+                %s, %s, %s, %s,
+                %s, %s, %s, %s
             );
         """
 
@@ -128,5 +128,4 @@ class LaptopPengadaanRepository(ILaptopPengadaanRepositoryImpl):
 
         with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute(query, params)
-            rows = cur.fetchall()
-            return rows
+            return cur.fetchall()
