@@ -13,6 +13,7 @@ urlpatterns = [
     path('pengajuan-laptop/', views.pengajuan_page_view, name='pengajuanlaptop_hc'),
     
     path('detail-pengajuan/', views.detailpengajuan_hc_view, name='detailpengajuan_hc'),
+    path('setujui-pengajuan/', views.setujui_pengajuan_hc_view, name='setujui_pengajuan_hc'),
     path('riwayat-peminjaman/', views.riwayatpeminjamanlaptop_hc_view, name='riwayatpeminjamanlaptop_hc'),
     path('edit-laptop/<str:id_laptop>/', views.editdatalaptop_hc_view, name='editdatalaptop_hc'),
 

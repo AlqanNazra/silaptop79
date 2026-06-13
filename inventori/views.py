@@ -81,6 +81,11 @@ def pengajuan_page_view(request):
         service = PengajuanService()
         semua_pengajuan = service.service_ambil_semua_pengajuan()
         
+        from inventori.models import User
+        users_dict = {u.id_user: u.nama for u in User.objects.all()}
+        for p in semua_pengajuan:
+            p.user_nama = users_dict.get(p.id_user, f"User {p.id_user}")
+
         # Calculate stats
         total = len(semua_pengajuan)
         pending = sum(1 for p in semua_pengajuan if p.status and p.status.lower() == 'pending')
@@ -120,6 +125,17 @@ def tambah_laptop_page(request):
 
     if request.method == 'POST':
         try:
+            import re
+            raw_layar = request.POST.get('ukuran_layar')
+            layar_val = None
+            if raw_layar:
+                match = re.search(r'\d+(?:\.\d+)?', str(raw_layar))
+                if match:
+                    try:
+                        layar_val = float(match.group(0))
+                    except ValueError:
+                        pass
+
             dto = LaptopInventoriDTO(
                 nama_laptop=request.POST.get('nama_laptop'),
                 model=request.POST.get('model'),
@@ -130,7 +146,7 @@ def tambah_laptop_page(request):
                 id_processor=request.POST.get('id_processor') or None,
                 id_ram=request.POST.get('id_ram') or None,
                 id_storage=request.POST.get('id_storage') or None,
-                ukuran_layar=request.POST.get('ukuran_layar') or None,
+                ukuran_layar=layar_val,
             )
             service = CreateLaptopInventoriService()
             service.execute(dto)
@@ -219,6 +235,10 @@ def detailpengajuan_hc_view(request):
             messages.error(request, 'Data pengajuan tidak ditemukan.')
             return redirect('inventori:pengajuanlaptop_hc')
 
+        from inventori.models import User
+        user_obj = User.objects.filter(id_user=pengajuan.id_user).first()
+        pengajuan.user_nama = user_obj.nama if user_obj else pengajuan.id_user
+
         if request.method == 'POST':
             action = request.POST.get('action')
             if action in ['approved', 'rejected']:
@@ -244,6 +264,110 @@ def detailpengajuan_hc_view(request):
         messages.error(request, f'Terjadi kesalahan: {str(e)}')
         return redirect('inventori:pengajuanlaptop_hc')
 
+
+# @login_required
+def setujui_pengajuan_hc_view(request):
+    from inventori.models import LaptopInventori
+    from inventori.services.service_pengajuan import PengajuanService
+    from inventori.repositories.dto.dto_pengajuan import PengajuanDTO
+    from inventori.repositories.dto.dto_peminjaman import PeminjamanDTO
+    import datetime
+
+    pengajuan_id = request.GET.get('id')
+    if not pengajuan_id:
+        messages.error(request, 'ID Pengajuan tidak diberikan.')
+        return redirect('inventori:pengajuanlaptop_hc')
+
+    if request.method == 'POST':
+        laptop_id = request.POST.get('laptop_id')
+        if not laptop_id:
+            messages.error(request, 'Laptop harus dipilih.')
+            return redirect(f"{request.path}?id={pengajuan_id}")
+        
+        try:
+            service = PengajuanService()
+            pengajuan = service.service_cari_pengajuan_by_id(pengajuan_id)
+            if not pengajuan:
+                messages.error(request, 'Pengajuan tidak ditemukan.')
+                return redirect('inventori:pengajuanlaptop_hc')
+
+            # Update status laptop ke dipinjam
+            laptop = LaptopInventori.objects.get(id_laptop_inventori=laptop_id)
+            laptop.status = 'dipinjam'
+            laptop.save()
+
+            # Buat DTO Pengajuan
+            user_id = request.user.id_user if (hasattr(request.user, 'id_user') and request.user.id_user) else 'USR-001'
+            dto_peng = PengajuanDTO(
+                id_pengajuan=pengajuan_id,
+                status='approved',
+                approved_by=user_id
+            )
+
+            # Buat DTO Peminjaman
+            import time
+            id_peminjaman = f"PMJ-{int(time.time())}"
+            dto_pem = PeminjamanDTO(
+                id_peminjaman=id_peminjaman,
+                id_pengajuan=pengajuan_id,
+                id_user=pengajuan.id_user,
+                id_laptop_inventori=laptop_id,
+                tanggal_pinjam=datetime.date.today().strftime('%Y-%m-%d'),
+                status='dipinjam',
+                keterangan='Persetujuan pengajuan laptop'
+            )
+
+            # Eksekusi
+            service.service_approve_dan_pinjam(dto_peng, dto_pem)
+
+            messages.success(request, 'Pengajuan berhasil disetujui dan laptop telah dipinjamkan.')
+            return redirect('inventori:pengajuanlaptop_hc')
+        except Exception as e:
+            messages.error(request, f'Gagal menyetujui pengajuan: {str(e)}')
+            return redirect(f"{request.path}?id={pengajuan_id}")
+
+    # GET request
+    laptops = LaptopInventori.objects.filter(status__in=['tersedia', 'Available', 'Tersedia']).select_related('id_processor', 'id_ram', 'id_storage')
+    
+    # Map attributes for the template
+    for laptop in laptops:
+        laptop.id = laptop.id_laptop_inventori
+        
+        if laptop.id_processor:
+            laptop.processor = laptop.id_processor.nama_processor
+        else:
+            laptop.processor = "-"
+            
+        if laptop.id_ram:
+            laptop.ram = f"{laptop.id_ram.kapasitas_gb} GB {laptop.id_ram.tipe}"
+        else:
+            laptop.ram = "-"
+            
+        if laptop.id_storage:
+            laptop.storage = f"{laptop.id_storage.kapasitas_gb} GB {laptop.id_storage.tipe}"
+        else:
+            laptop.storage = "-"
+            
+        if laptop.ukuran_layar:
+            laptop.screen_size = f"{laptop.ukuran_layar} inch"
+        else:
+            laptop.screen_size = "-"
+            
+        from dss.models import LaptopPengadaan
+        pengadaan = LaptopPengadaan.objects.filter(nama_laptop__icontains=laptop.nama_laptop).first()
+        if pengadaan:
+            laptop.battery_capacity = f"{int(pengadaan.baterai)} mAh" if pengadaan.baterai else "5000 mAh"
+            laptop.weight = f"{pengadaan.berat} kg" if pengadaan.berat else "1.5 kg"
+        else:
+            laptop.battery_capacity = "5000 mAh"
+            laptop.weight = "1.5 kg"
+
+    context = {
+        'pengajuan_id': pengajuan_id,
+        'laptops': laptops
+    }
+    return render(request, 'hc/inventori/setujuipengajuan_hc.html', context)
+
 # @login_required
 def riwayatpeminjamanlaptop_hc_view(request):
     from inventori.services.service_peminjaman import PeminjamanService
@@ -251,7 +375,7 @@ def riwayatpeminjamanlaptop_hc_view(request):
     
     try:
         service = PeminjamanService()
-        list_peminjaman = service.service_ambil_semua_peminjaamn()
+        list_peminjaman = service.service_ambil_semua_peminjaman()
         
         users_dict = {u.id_user: u.nama for u in User.objects.all()}
         users_role_dict = {u.id_user: u.role for u in User.objects.all()}
@@ -277,6 +401,7 @@ def riwayatpeminjamanlaptop_hc_view(request):
         }
         return render(request, 'hc/inventori/riwayatpeminjamanlaptop_hc.html', context)
     except Exception as e:
+        import traceback; traceback.print_exc()
         messages.error(request, f'Gagal memuat riwayat: {str(e)}')
         return redirect('inventori:manajemen_laptop')
 

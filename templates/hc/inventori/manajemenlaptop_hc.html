@@ -373,17 +373,21 @@
                             </td>
                             <td class="col-sn">{{ laptop.no_inventori }}</td>
                             <td>
-                                <div class="status-pill {% if laptop.status == 'tersedia' %}status-available{% elif laptop.status == 'dipinjam' %}status-dipinjam{% else %}status-rusak{% endif %}">
+                                <div
+                                    class="status-pill {% if laptop.status == 'tersedia' %}status-available{% elif laptop.status == 'dipinjam' %}status-dipinjam{% else %}status-rusak{% endif %}">
                                     <span class="dot"></span>{{ laptop.status|title }}
                                 </div>
                             </td>
                             <td>
-                                <a href="{% url 'inventori:detaillaptop_hc' laptop.id_laptop_inventori %}" class="btn-detail" style="text-decoration:none; padding:6px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:12px; color:#475569; font-weight:600;">Detail</a>
+                                <a href="{% url 'inventori:detaillaptop_hc' laptop.id_laptop_inventori %}"
+                                    class="btn-detail"
+                                    style="text-decoration:none; padding:6px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:12px; color:#475569; font-weight:600;">Detail</a>
                             </td>
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="5" style="text-align: center; padding: 40px; color: #64748b;">Belum ada data laptop.</td>
+                            <td colspan="5" style="text-align: center; padding: 40px; color: #64748b;">Belum ada data
+                                laptop.</td>
                         </tr>
                         {% endfor %}
                     </tbody>
