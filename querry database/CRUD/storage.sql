@@ -2,7 +2,7 @@
 -- 10. STORAGE
 -- =============================================
 CREATE TABLE storage (
-    id_storage SERIAL PRIMARY KEY,
+    id_storage  VARCHAR(50),
     kapasitas_gb INTEGER CHECK (kapasitas_gb > 0),
     tipe VARCHAR(100)
 );

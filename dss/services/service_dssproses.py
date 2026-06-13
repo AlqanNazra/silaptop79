@@ -94,11 +94,6 @@ class DssProsesService:
 
         return self.alternatif_repo.tambah_alternatif_dss(data)
     def proses_dss_lengkap(self, dss_data: DssProsesDTO, list_alternatif: map[AlternatifDssDTO]):
-        """
-        Alur:
-        1. Buat proses DSS
-        2. Tambahkan semua alternatif ke DSS
-        """
         hasil_dss = self.buat_proses_dss(dss_data)
         id_dss = dss_data.id_dss
         hasil_alternatif = []
@@ -137,11 +132,6 @@ class DssProsesService:
             }
             for row in data
         ]
-
-    # =====================================================
-    # VALIDATION
-    # =====================================================
-
     def validate_project_roles(self, project_roles: list):
 
         if not project_roles:
@@ -163,10 +153,6 @@ class DssProsesService:
                 raise ValueError(
                     "Persentase role tidak boleh negatif"
                 )
-
-    # =====================================================
-    # SWARA PER ROLE
-    # =====================================================
 
     def process_swara_per_role(self, project_roles: list):
 
@@ -197,10 +183,6 @@ class DssProsesService:
             ]
 
         return swara_per_role
-
-    # =====================================================
-    # AGGREGATION + NORMALIZATION
-    # =====================================================
 
     def process_final_weight(
         self,
@@ -236,11 +218,6 @@ class DssProsesService:
             "aggregated": aggregated_weights,
             "normalized": normalized_weights
         }
-
-    # =====================================================
-    # SAVE ALTERNATIVES
-    # =====================================================
-
     def save_initial_alternatives(
         self,
         data_raw,
@@ -272,52 +249,29 @@ class DssProsesService:
             alternatif_list.append(item)
 
         return alternatif_list
-
-    # =====================================================
-    # SAW PIPELINE
-    # =====================================================
-
     def process_saw_pipeline(
         self,
         alternatif_data,
         normalized_weights
     ):
-
-        # ==========================================
-        # PREPROCESSING
-        # ==========================================
-
         preprocessing_result = (
             self.preprocessingService.preprocessing(
                 alternatif_data
             )
         )
-
-        # ==========================================
-        # MATRIX NORMALIZATION
-        # ==========================================
-
+        for item in preprocessing_result[:5]:
+            print(item)
         normalized_matrix = (
             self.sawCalculationService.normalize_decision_matrix(
                 preprocessing_result
             )
         )
-
-        # ==========================================
-        # SAW SCORING
-        # ==========================================
-
         saw_result = (
             self.sawCalculationService.calculate_saw_score(
                 normalized_matrix,
                 normalized_weights
             )
         )
-
-        # ==========================================
-        # RANKING
-        # ==========================================
-
         ranking = (
             self.sawCalculationService.ranking(
                 saw_result
@@ -334,11 +288,6 @@ class DssProsesService:
             "saw_result": saw_result,
             "ranking": ranking
         }
-
-    # =====================================================
-    # SAVE SAW RESULT
-    # =====================================================
-
     def save_saw_result(
         self,
         id_dss,
@@ -355,27 +304,23 @@ class DssProsesService:
 
         for item in ranking:
 
-            self.repoDetailHasilSAW.tambah_detail_hasil_saw(
+            print("=== ITEM RANKING ===")
+            print(item)
+
+            print("normalisasi =", item.get("normalisasi"))
+            print("skor =", item.get("skor"))
+            print("rank =", item.get("rank"))
+
+            self.repodetailhasilsaw.tambah_detail_hasil_saw(
                 DetailHasilSawDTO(
                     id_hasil=id_hasil,
-                    nilai_normalisasi=item.get(
-                        "normalisasi"
-                    ),
-                    nilai_rangking=item.get(
-                        "skor"
-                    ),
-                    rangking=item.get(
-                        "rank"
-                    )
+                    nilai_normalisasi=item.get("normalisasi"),
+                    nilai_rangking=item.get("skor"),
+                    rangking=item.get("rank")
                 )
             )
 
         return id_hasil
-
-    # =====================================================
-    # SAVE TOP LAPTOP
-    # =====================================================
-
     def save_selected_laptop(
         self,
         ranking,
@@ -416,10 +361,6 @@ class DssProsesService:
                 )
             )
 
-    # =====================================================
-    # MAIN DSS PIPELINE
-    # =====================================================
-
     @transaction.atomic
     def process_dss_saw(
         self,
@@ -431,18 +372,9 @@ class DssProsesService:
         debug=False
     ):
 
-        # ==========================================
-        # VALIDATION
-        # ==========================================
-
         self.validate_project_roles(
             project_roles
         )
-
-        # ==========================================
-        # CREATE DSS PROCESS
-        # ==========================================
-
         id_dss = self.repoDSSProcess.tambah_dss_proses(
             DssProsesDTO(
                 id_user=id_user,
@@ -457,11 +389,6 @@ class DssProsesService:
                 create_at=datetime.now()
             )
         )
-
-        # ==========================================
-        # FILTER DATA
-        # ==========================================
-
         hasil_filter = (
             self.preprocessingService.filtering_data(
                 sumber_data,
@@ -474,13 +401,7 @@ class DssProsesService:
             raise Exception(
                 hasil_filter["message"]
             )
-
         data_raw = hasil_filter["data_raw"]
-
-        # ==========================================
-        # SAVE INITIAL ALTERNATIVES
-        # ==========================================
-
         alternatif_list = (
             self.save_initial_alternatives(
                 data_raw,
@@ -488,72 +409,40 @@ class DssProsesService:
                 sumber_data
             )
         )
-
-        # ==========================================
-        # SWARA PER ROLE
-        # ==========================================
-
         swara_per_role = (
             self.process_swara_per_role(
                 project_roles
             )
         )
-
-        # ==========================================
-        # AGGREGATION + NORMALIZATION
-        # ==========================================
-
         weight_result = (
             self.process_final_weight(
                 project_roles,
                 swara_per_role
             )
         )
-
         normalized_weights = (
             weight_result["normalized"]
         )
-
-        # ==========================================
-        # SAW PIPELINE
-        # ==========================================
-
         saw_pipeline_result = (
             self.process_saw_pipeline(
                 alternatif_list,
                 normalized_weights
             )
         )
-
         ranking = (
             saw_pipeline_result["ranking"]
         )
-
-        # ==========================================
-        # SAVE RESULT
-        # ==========================================
-
         id_hasil = (
             self.save_saw_result(
                 id_dss,
                 ranking
             )
         )
-
-        # ==========================================
-        # SAVE TOP LAPTOP
-        # ==========================================
-
         self.save_selected_laptop(
             ranking,
             id_dss,
             top_n=3
         )
-
-        # ==========================================
-        # DEBUG RESPONSE
-        # ==========================================
-
         if debug:
 
             return {
@@ -574,25 +463,14 @@ class DssProsesService:
                 }
             }
 
-        # ==========================================
-        # FINAL RESPONSE
-        # ==========================================
-
         return {
-
             "status": "success",
-
             "meta": {
-
                 "id_dss": id_dss,
-
                 "id_hasil": id_hasil,
-
                 "total_data": len(ranking)
             },
-
             "data": {
-
                 "ranking": ranking
             }
         }

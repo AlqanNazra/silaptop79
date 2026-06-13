@@ -10,6 +10,11 @@ CREATE TABLE dss_detailhasilsaw (
     FOREIGN KEY (id_hasil) REFERENCES hasil_saw(id_hasil)
 );
 
+select * from dss_detailhasilsaw
+
+alter table dss_detailhasilsaw
+rename column id_hasil_id to id_hasil
+
 CREATE OR REPLACE FUNCTION  
 tambah_detail_hasil_saw(f_id_hasil VARCHAR(100), f_nilai_normalisasi FLOAT, f_nilai_preferensi FLOAT, f_ranking INTEGER)
 RETURNS VOID AS $$

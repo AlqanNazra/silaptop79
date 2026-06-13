@@ -54,6 +54,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP FUNCTION getfilteredlaptopinventori
 -- Filter Inventori
 CREATE OR REPLACE FUNCTION GetFilteredLaptopinventori(
     f_id_laptop_inventori VARCHAR DEFAULT NULL,
@@ -89,10 +90,13 @@ RETURNS TABLE (
     status VARCHAR,
     lokasi VARCHAR,
     ukuran_layar FLOAT,
+    baterai FLOAT,
+    berat FLOAT,
     nama_processor VARCHAR,
     manufacturer VARCHAR,
     processor_model VARCHAR,
     cores INT,
+    benchmark_score INTEGER,
     ram_kapasitas INT,
     ram_tipe VARCHAR,
     storage_kapasitas INT,
@@ -101,20 +105,23 @@ RETURNS TABLE (
 AS $$
 BEGIN
     RETURN QUERY
-    SELECT 
-        li.id_laptop_inventori,
-        li.kondisi,
-        li.status,
-        li.lokasi,
-        li.ukuran_layar,
-        li.nama_processor,
-        li.manufacturer,
-        li.processor_model,
-        li.cores,
-        li.ram_kapasitas,
-        li.ram_tipe,
-        li.storage_kapasitas,
-        li.storage_tipe
+	SELECT
+	    li.id_laptop_inventori,
+	    li.kondisi,
+	    li.status,
+	    li.lokasi,
+	    li.ukuran_layar,
+	    li.baterai,
+	    li.berat,
+	    li.nama_processor,
+	    li.manufacturer,
+	    li.processor_model,
+	    li.cores,
+	    li.benchmark_score,
+	    li.ram_kapasitas,
+	    li.ram_tipe,
+	    li.storage_kapasitas,
+	    li.storage_tipe
 
     FROM ambil_laptop_inventori() li
 
@@ -156,6 +163,8 @@ BEGIN
 
 END;
 $$ LANGUAGE plpgsql;
+
+DROP FUNCTION getfilteredlaptoppengadaan
 
 -- FILTER PENGADAAN
 CREATE OR REPLACE FUNCTION GetFilteredLaptopPengadaan(
@@ -201,10 +210,12 @@ RETURNS TABLE (
     gpu VARCHAR,
     ukuran_layar FLOAT,
     baterai FLOAT,
+    berat FLOAT,
     nama_processor VARCHAR,
     manufacturer VARCHAR,
     processor_model VARCHAR,
     cores INT,
+    benchmark_score INTEGER,
     ram_kapasitas INT,
     ram_tipe VARCHAR,
     storage_kapasitas INT,
@@ -213,21 +224,22 @@ RETURNS TABLE (
 AS $$
 BEGIN
     RETURN QUERY
-    SELECT 
-        lp.id_laptop_pengadaan,
-        lp.harga,
-        lp.gpu,
-        lp.ukuran_layar,
-        lp.baterai,
-        lp.nama_processor,
-        lp.manufacturer,
-        lp.processor_model,
-        lp.cores,
-        lp.ram_kapasitas,
-        lp.ram_tipe,
-        lp.storage_kapasitas,
-        lp.storage_tipe
-
+	SELECT
+	    lp.id_laptop_pengadaan,
+	    lp.harga,
+	    lp.gpu,
+	    lp.ukuran_layar,
+	    lp.baterai,
+	    lp.berat,
+	    lp.nama_processor,
+	    lp.manufacturer,
+	    lp.processor_model,
+	    lp.cores,
+	    lp.benchmark_score,
+	    lp.ram_kapasitas,
+	    lp.ram_tipe,
+	    lp.storage_kapasitas,
+	    lp.storage_tipe
     FROM ambil_laptop_pengadaan() lp
 
     WHERE

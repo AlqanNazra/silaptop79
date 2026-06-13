@@ -3,8 +3,8 @@ DROP TABLE IF EXISTS inventori_project_role;
 
 CREATE TABLE inventori_project_role (
     id_project_role VARCHAR(50) PRIMARY KEY,
-    id_proyek VARCHAR(20) REFERENCES inventori_proyek(id_proyek), -- ✅ Diperbaiki
-    id_role VARCHAR REFERENCES inventori_role(id_role),           -- ✅ Pastikan ini inventori_role atau role
+    id_proyek VARCHAR(20) REFERENCES inventori_proyek(id_proyek), 
+    id_role VARCHAR REFERENCES inventori_role(id_role),          
     persentase_role FLOAT DEFAULT 1
 );
 

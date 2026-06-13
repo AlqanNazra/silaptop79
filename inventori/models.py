@@ -1,9 +1,6 @@
 from django.db import models
 from django.utils import timezone
 
-# =============================================
-# 1. USERS
-# =============================================
 class User(models.Model):
     id_user = models.CharField(primary_key=True, max_length=15)
     nama = models.CharField(max_length=255)
@@ -14,13 +11,9 @@ class User(models.Model):
     def __str__(self):
         return self.nama
 
-
-# =============================================
-# 2. MASTER HARDWARE
-# =============================================
 class Processor(models.Model):
-    id_processor = models.BigAutoField(primary_key=True, db_column='id')
 
+    id_processor = models.BigAutoField(primary_key=True)
     nama_processor = models.CharField(max_length=255)
     manufacturer = models.CharField(max_length=255)
     model = models.CharField(max_length=255)
@@ -29,8 +22,16 @@ class Processor(models.Model):
     base_clock = models.FloatField()
     max_clock = models.FloatField()
     arsitektur = models.CharField(max_length=100)
-    keterangan = models.TextField(null=True, blank=True)
-
+    benchmark_score = models.IntegerField(default=0)
+    benchmark_url = models.TextField(null=True,blank=True)
+    keterangan = models.TextField(null=True,blank=True)
+    class Meta:
+        db_table = "inventori_processor"
+    def __str__(self):
+        return (
+            f"{self.nama_processor} "
+            f"({self.benchmark_score})"
+        )
 
 class RAM(models.Model):
     id_ram = models.BigAutoField(primary_key=True, db_column='id')
@@ -39,17 +40,12 @@ class RAM(models.Model):
     tipe = models.CharField(max_length=50)
     keterangan = models.TextField(null=True, blank=True)
 
-
 class Storage(models.Model):
     id_storage = models.BigAutoField(primary_key=True, db_column='id')
 
     kapasitas_gb = models.IntegerField()
     tipe = models.CharField(max_length=100)
 
-
-# =============================================
-# 3. LAPTOP INVENTORI
-# =============================================
 class LaptopInventori(models.Model):
     id_laptop_inventori = models.CharField(primary_key=True, max_length=100)
 
@@ -84,10 +80,6 @@ class LaptopInventori(models.Model):
 
     ukuran_layar = models.FloatField(null=True, blank=True)
 
-
-# =============================================
-# 4. PENGAJUAN
-# =============================================
 class Pengajuan(models.Model):
     id_pengajuan = models.CharField(primary_key=True, max_length=100)
 
@@ -110,10 +102,6 @@ class Pengajuan(models.Model):
         db_column='approved_by_id'
     )
 
-
-# =============================================
-# 5. PEMINJAMAN
-# =============================================
 class Peminjaman(models.Model):
     id_peminjaman = models.CharField(primary_key=True, max_length=100)
 
@@ -127,10 +115,6 @@ class Peminjaman(models.Model):
     status = models.CharField(max_length=50)
     keterangan = models.TextField(null=True, blank=True)
 
-
-# =============================================
-# 6. RIWAYAT AKTIVITAS
-# =============================================
 class RiwayatAktivitas(models.Model):
     id_aktivitas = models.CharField(primary_key=True, max_length=100)
 
@@ -141,37 +125,18 @@ class RiwayatAktivitas(models.Model):
     keterangan = models.TextField(null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
-    
-    # =====================================================
-# ROLE
-# =====================================================
 
 class Role(models.Model):
-
-    id_role = models.CharField(
-        primary_key=True,
-        max_length=20
-    )
-
-    nama_role = models.CharField(
-        max_length=100,
-        unique=True
-    )
-
-    created_at = models.DateTimeField(
-        default=timezone.now
-    )
-
+    id_role = models.CharField(primary_key=True,max_length=20)
+    nama_role = models.CharField(max_length=100,unique=True)
+    min_ram = models.IntegerField(default=0)
+    min_storage = models.IntegerField(default=0)
+    min_processor_score = models.IntegerField(default=0)
+    created_at = models.DateTimeField(default=timezone.now)
     class Meta:
         db_table = "inventori_role"
-
     def __str__(self):
         return self.nama_role
-
-
-# =====================================================
-# TEKNOLOGI
-# =====================================================
 
 class Teknologi(models.Model):
 
@@ -200,11 +165,6 @@ class Teknologi(models.Model):
 
     def __str__(self):
         return self.nama_teknologi
-
-
-# =====================================================
-# ROLE TEKNOLOGI
-# =====================================================
 
 class RoleTeknologi(models.Model):
 
@@ -248,11 +208,6 @@ class RoleTeknologi(models.Model):
             f"{self.teknologi.nama_teknologi}"
         )
 
-
-# =====================================================
-# PROYEK
-# =====================================================
-
 class Proyek(models.Model):
 
     id_proyek = models.CharField(
@@ -286,11 +241,6 @@ class Proyek(models.Model):
     def __str__(self):
         return self.nama_proyek
 
-
-# =====================================================
-# PROJECT ROLE
-# =====================================================
-
 class ProjectRole(models.Model):
 
     id_project_role = models.CharField(
@@ -318,11 +268,6 @@ class ProjectRole(models.Model):
             "proyek",
             "role"
         )
-
-
-# =====================================================
-# PROJECT TECHNOLOGY
-# =====================================================
 
 class ProjectTechnology(models.Model):
 

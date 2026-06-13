@@ -2,7 +2,7 @@
 -- 9. RAM
 -- =============================================
 CREATE TABLE ram (
-    id_ram SERIAL PRIMARY KEY,
+    id_ram VARCHAR(50) PRIMARY KEY,
     kapasitas_gb INTEGER CHECK (kapasitas_gb > 0),
     tipe VARCHAR(50),
     keterangan TEXT
