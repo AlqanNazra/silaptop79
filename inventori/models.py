@@ -251,6 +251,13 @@ class Proyek(models.Model):
     class Meta:
         db_table = "inventori_proyek"
 
+# =============================================
+# 7. PROYEK
+# =============================================
+class Proyek(models.Model):
+    id_proyek = models.CharField(primary_key=True, max_length=100)
+    nama_proyek = models.CharField(max_length=255)
+
     def __str__(self):
         return self.nama_proyek
 
@@ -307,3 +314,18 @@ class ProjectTechnology(models.Model):
             "proyek",
             "teknologi"
         )
+class RoleProyek(models.Model):
+    id_role = models.CharField(primary_key=True, max_length=100)
+    proyek = models.ForeignKey(Proyek, on_delete=models.CASCADE, related_name='roles')
+    nama_role = models.CharField(max_length=255)
+
+    def __str__(self):
+        return f"{self.proyek.nama_proyek} - {self.nama_role}"
+
+class TeknologiRole(models.Model):
+    id_teknologi = models.CharField(primary_key=True, max_length=100)
+    role_proyek = models.ForeignKey(RoleProyek, on_delete=models.CASCADE, related_name='teknologi')
+    nama_teknologi = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.nama_teknologi
