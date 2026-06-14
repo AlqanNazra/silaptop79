@@ -675,12 +675,20 @@
 
     </script>
 </body>
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            const proyekData = {{ proyek_data_json|safe }};
 
             const selectProyek = document.getElementById('select-proyek');
             const selectRole = document.getElementById('select-role');
             const checkboxesContainer = document.getElementById('teknologi-checkboxes');
 
-            // Populate Proyek dropdown
+            if (!selectProyek || !selectRole || !checkboxesContainer) {
+                console.error("Element tidak ditemukan");
+                return;
+            }
+
             proyekData.forEach(function(proyek) {
                 const opt = document.createElement('option');
                 opt.value = proyek.id_proyek;
@@ -688,75 +696,101 @@
                 selectProyek.appendChild(opt);
             });
 
-            // On Proyek change
             selectProyek.addEventListener('change', function() {
+
                 const selectedProyekId = this.value;
-                
-                // Clear and disable downstream select options
-                selectRole.innerHTML = '<option value="">-- Pilih Role --</option>';
+
+                selectRole.innerHTML =
+                    '<option value="">-- Pilih Role --</option>';
+
                 selectRole.disabled = true;
-                checkboxesContainer.innerHTML = '<span style="color: #94a3b8; font-size: 13px; font-style: italic;">Pilih role terlebih dahulu</span>';
+
+                checkboxesContainer.innerHTML =
+                    '<span style="color:#94a3b8;font-size:13px;font-style:italic;">Pilih role terlebih dahulu</span>';
 
                 if (!selectedProyekId) return;
 
-                const selectedProyek = proyekData.find(p => p.id_proyek === selectedProyekId);
+                const selectedProyek =
+                    proyekData.find(
+                        p => p.id_proyek === selectedProyekId
+                    );
+
                 if (selectedProyek && selectedProyek.roles.length > 0) {
+
                     selectedProyek.roles.forEach(function(role) {
-                        const opt = document.createElement('option');
+
+                        const opt =
+                            document.createElement('option');
+
                         opt.value = role.id_role;
                         opt.textContent = role.nama_role;
+
                         selectRole.appendChild(opt);
                     });
+
                     selectRole.disabled = false;
                 }
             });
 
-            // On Role change
             selectRole.addEventListener('change', function() {
+
                 const selectedRoleId = this.value;
                 const selectedProyekId = selectProyek.value;
 
-                // Clear checkboxes container
                 checkboxesContainer.innerHTML = '';
 
                 if (!selectedRoleId || !selectedProyekId) {
-                    checkboxesContainer.innerHTML = '<span style="color: #94a3b8; font-size: 13px; font-style: italic;">Pilih role terlebih dahulu</span>';
+                    checkboxesContainer.innerHTML =
+                        '<span style="color:#94a3b8;font-size:13px;font-style:italic;">Pilih role terlebih dahulu</span>';
                     return;
                 }
 
-                const selectedProyek = proyekData.find(p => p.id_proyek === selectedProyekId);
-                if (selectedProyek) {
-                    const selectedRole = selectedProyek.roles.find(r => r.id_role === selectedRoleId);
-                    if (selectedRole && selectedRole.teknologi.length > 0) {
-                        selectedRole.teknologi.forEach(function(tech) {
-                            const label = document.createElement('label');
-                            label.style.display = 'flex';
-                            label.style.alignItems = 'center';
-                            label.style.gap = '10px';
-                            label.style.fontSize = '14px';
-                            label.style.fontWeight = '500';
-                            label.style.color = '#334155';
-                            label.style.textTransform = 'none';
-                            label.style.cursor = 'pointer';
+                const selectedProyek =
+                    proyekData.find(
+                        p => p.id_proyek === selectedProyekId
+                    );
 
-                            const checkbox = document.createElement('input');
-                            checkbox.type = 'checkbox';
-                            checkbox.name = 'teknologi[]';
-                            checkbox.value = tech;
-                            checkbox.style.width = '18px';
-                            checkbox.style.height = '18px';
-                            checkbox.style.cursor = 'pointer';
+                if (!selectedProyek) return;
 
-                            label.appendChild(checkbox);
-                            label.appendChild(document.createTextNode(tech));
-                            checkboxesContainer.appendChild(label);
-                        });
-                    } else {
-                        checkboxesContainer.innerHTML = '<span style="color: #94a3b8; font-size: 13px; font-style: italic;">Tidak ada teknologi untuk role ini</span>';
-                    }
+                const selectedRole =
+                    selectedProyek.roles.find(
+                        r => r.id_role === selectedRoleId
+                    );
+
+                if (
+                    selectedRole &&
+                    selectedRole.teknologi &&
+                    selectedRole.teknologi.length > 0
+                ) {
+
+                    selectedRole.teknologi.forEach(function(tech) {
+
+                        const label =
+                            document.createElement('label');
+
+                        const checkbox =
+                            document.createElement('input');
+
+                        checkbox.type = 'checkbox';
+                        checkbox.name = 'teknologi[]';
+                        checkbox.value = tech;
+
+                        label.appendChild(checkbox);
+                        label.appendChild(
+                            document.createTextNode(tech)
+                        );
+
+                        checkboxesContainer.appendChild(label);
+                    });
+
+                } else {
+
+                    checkboxesContainer.innerHTML =
+                        '<span style="color:#94a3b8;font-size:13px;font-style:italic;">Tidak ada teknologi untuk role ini</span>';
                 }
             });
+
         });
-    </script>
+        </script>
 </body>
 </html>

@@ -297,13 +297,10 @@
     <div class="dashboard-wrapper">
         <!-- active_page='manajemen_proyek' to keep sidebar clean -->
         {% include 'it/components/sidebar.html' with active_page='manajemen_proyek' %}
-
         <div class="main-dashboard-content">
-
             <h1 class="page-title">Tambah Proyek Baru</h1>
             <p class="page-subtitle">Silakan lengkapi formulir di bawah ini untuk menambahkan data proyek baru ke dalam
                 sistem.</p>
-
             <form action="{% url 'tambahproyek_it' %}" method="POST">
                 {% csrf_token %}
                 <div class="row-container">
@@ -323,33 +320,89 @@
                                         placeholder="Contoh: Sistem Informasi Koperasi" required>
                                 </div>
                             </div>
-
                             <div
                                 style="margin-top: 28px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
                                 <h4 style="margin: 0; font-size: 14px; font-weight: 700; color: #1e293b;">Role &
                                     Teknologi Proyek</h4>
                             </div>
+                                <div id="roles-container">
+                                    <div class="role-group-box">
+                                        <div class="form-group">
+                                            <label>Role</label>
+                                            <select
+                                                class="form-control role-select"
+                                                name="role_ids[]"
+                                                required>
+                                                <option value="">
+                                                    Pilih Role
+                                                </option>
+                                                {% for role in role_list %}
+                                                <option value="{{ role.id_role }}">
+                                                    {{ role.nama_role }}
+                                                </option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="role-teknologi-container">
+                                            <label>Teknologi</label>
+                                            <div class="tech-list">
+                                                Pilih role terlebih dahulu
+                                            </div>
+                                        </div>
+                                        <div class="role-bobot-container">
+                                            <h4>Bobot Kriteria DSS</h4>
+                                            <div class="form-row">
+                                                <div class="form-group">
+                                                    <label>Processor</label>
+                                                    <input type="number"
+                                                        name="processor_weight[]"
+                                                        class="form-control">
+                                                </div>
 
-                            <div id="roles-container">
-                                <!-- First Role Card -->
-                                <div class="role-group-box">
-                                    <div class="form-row">
-                                        <div class="form-group">
-                                            <label>Nama Role</label>
-                                            <input type="text" class="form-control" name="role_names[]"
-                                                placeholder="Contoh: Backend Developer" required
-                                                style="background-color: white;">
+                                                <div class="form-group">
+                                                    <label>RAM</label>
+                                                    <input type="number"
+                                                        name="ram_weight[]"
+                                                        class="form-control">
+                                                </div>
+                                            </div>
+
+                                            <div class="form-row">
+                                                <div class="form-group">
+                                                    <label>Storage</label>
+                                                    <input type="number"
+                                                        name="storage_weight[]"
+                                                        class="form-control">
+                                                </div>
+
+                                                <div class="form-group">
+                                                    <label>Berat</label>
+                                                    <input type="number"
+                                                        name="berat_weight[]"
+                                                        class="form-control">
+                                                </div>
+                                            </div>
+
+                                            <div class="form-row">
+                                                <div class="form-group">
+                                                    <label>Layar</label>
+                                                    <input type="number"
+                                                        name="layar_weight[]"
+                                                        class="form-control">
+                                                </div>
+
+                                                <div class="form-group">
+                                                    <label>Baterai</label>
+                                                    <input type="number"
+                                                        name="baterai_weight[]"
+                                                        class="form-control">
+                                                </div>
+                                            </div>
+
                                         </div>
-                                        <div class="form-group">
-                                            <label>Teknologi (pisahkan dengan koma)</label>
-                                            <input type="text" class="form-control" name="role_techs[]"
-                                                placeholder="Contoh: Python, Django, PostgreSQL" required
-                                                style="background-color: white;">
-                                        </div>
-                                    </div>
+                                    </div>  
                                 </div>
                             </div>
-
                             <button type="button" id="btn-add-role" class="btn-add-role-dash">
                                 <i class="fa-solid fa-plus"></i> Tambah Role Lainnya
                             </button>
@@ -373,38 +426,242 @@
 
         </div>
     </div>
-
+    {{ role_data_json|json_script:"role-data" }}
     <!-- JavaScript to handle dynamic roles addition -->
     <script>
-        document.getElementById('btn-add-role').addEventListener('click', function () {
-            const container = document.getElementById('roles-container');
+        const roleData =
+        JSON.parse(
+            document.getElementById("role-data").textContent);
+        document.addEventListener(
+            "change",
+            function(e){
 
-            const box = document.createElement('div');
-            box.className = 'role-group-box';
-            box.innerHTML = `
-                <button type="button" class="btn-remove-role" title="Hapus Role">
-                    <i class="fa-solid fa-trash-can"></i>
-                </button>
-                <div class="form-row">
+                if(
+                    e.target.classList.contains(
+                        "role-select"
+                    )
+                ){
+
+                    console.log(
+                        "ROLE CHANGED",
+                        e.target.value
+                    );
+
+                    updateTeknologi(
+                        e.target
+                    );
+                }
+
+            }
+        );
+        function updateTeknologi(selectElement){
+
+            const roleId = selectElement.value;
+
+            const card =
+                selectElement.closest(
+                    ".role-group-box"
+                );
+
+            const techList =
+                card.querySelector(
+                    ".tech-list"
+                );
+
+            const role =
+                roleData.find(
+                    r => r.id === roleId
+                );
+
+            if(!role){
+
+                techList.innerHTML =
+                    "Tidak ada teknologi";
+
+                return;
+            }
+
+            techList.innerHTML =
+                role.teknologi
+                .map(
+                    t =>
+                    `<label class="tech-item">
+                        <input
+                            type="checkbox"
+                            name="teknologi_ids[]"
+                            value="${t.id}"
+                            checked>
+
+                        ${t.nama}
+                    </label>`
+                )
+                .join("");
+                console.log(card);
+                console.log(techList);
+                console.log(role.teknologi);
+        }
+
+        document.addEventListener(
+            "change",
+            function(e){
+
+                if(
+                    e.target.classList.contains(
+                        "role-select"
+                    )
+                ){
+
+                    updateTeknologi(
+                        e.target
+                    );
+
+                }
+
+            }
+        );
+
+        document
+        .getElementById(
+            "btn-add-role"
+        )
+        .addEventListener(
+            "click",
+            function(){
+
+                const container =
+                    document.getElementById(
+                        "roles-container"
+                    );
+
+                const roleOptions = `
+                    <option value="">
+                        Pilih Role
+                    </option>
+
+                    {% for role in role_list %}
+                    <option value="{{ role.id_role }}">
+                        {{ role.nama_role }}
+                    </option>
+                    {% endfor %}
+                `;
+
+                const div =
+                    document.createElement(
+                        "div"
+                    );
+
+                div.className =
+                    "role-group-box";
+
+                div.innerHTML = `
+                    <button
+                        type="button"
+                        class="btn-remove-role">
+
+                        <i class="fa-solid fa-trash"></i>
+
+                    </button>
+
                     <div class="form-group">
-                        <label>Nama Role</label>
-                        <input type="text" class="form-control" name="role_names[]" placeholder="Contoh: Frontend Developer" required style="background-color: white;">
+
+                        <label>Role</label>
+
+                        <select
+                            class="form-control role-select"
+                            name="role_ids[]"
+                            required>
+
+                            ${roleOptions}
+
+                        </select>
+
                     </div>
-                    <div class="form-group">
-                        <label>Teknologi (pisahkan dengan koma)</label>
-                        <input type="text" class="form-control" name="role_techs[]" placeholder="Contoh: VueJS, TailWind, Vite" required style="background-color: white;">
+
+                    <div
+                        class="role-teknologi-container">
+
+                        <label>Teknologi</label>
+
+                        <div class="tech-list">
+
+                            Pilih role terlebih dahulu
+
+                        </div>
+
                     </div>
+                    <div class="role-bobot-container">
+
+                    <h4>Bobot Kriteria DSS</h4>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Processor</label>
+                            <input type="number"
+                                name="processor_weight[]"
+                                class="form-control">
+                        </div>
+
+                        <div class="form-group">
+                            <label>RAM</label>
+                            <input type="number"
+                                name="ram_weight[]"
+                                class="form-control">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Storage</label>
+                            <input type="number"
+                                name="storage_weight[]"
+                                class="form-control">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Berat</label>
+                            <input type="number"
+                                name="berat_weight[]"
+                                class="form-control">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Layar</label>
+                            <input type="number"
+                                name="layar_weight[]"
+                                class="form-control">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Baterai</label>
+                            <input type="number"
+                                name="baterai_weight[]"
+                                class="form-control">
+                        </div>
+                    </div>
+
                 </div>
-            `;
+                `;
 
-            container.appendChild(box);
+                container.appendChild(
+                    div
+                );
 
-            // Handle removal
-            box.querySelector('.btn-remove-role').addEventListener('click', function () {
-                box.remove();
-            });
-        });
+                div.querySelector(
+                    ".btn-remove-role"
+                ).onclick = function(){
+
+                    div.remove();
+
+                };
+            }
+        );
+        console.log("ROLE DATA");
+        console.log(document.getElementById("role-data"));
     </script>
+    
+
 </body>
 
 </html>

@@ -1,7 +1,11 @@
+import datetime
+import json
 from urllib import request
+import uuid
 
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
+from psycopg import transaction
 
 from dss.models import BobotKriteria
 from dss.repositories.repositori_bobot_kriteria import BobotKriteriaRepository
@@ -13,7 +17,7 @@ from .db import get_connection
 # 1. HUMAN CAPITAL (HC) VIEWS
 # ==========================================
 
-from inventori.models import LaptopInventori, Processor, RAM, Storage, User
+from inventori.models import LaptopInventori, Processor, RAM, Role, Storage, Teknologi, TeknologiRole, User
 from inventori.services.service_pengajuan import PengajuanService
 from inventori.services.service_peminjaman import PeminjamanService
 from inventori.dto.dto_laptop_inventori import FilterInventoriDTO, LaptopInventoriDTO
@@ -25,7 +29,9 @@ from inventori.dto.dto_pengajuan import PengajuanDTO
 from inventori.dto.dto_peminjaman import PeminjamanDTO
 from inventori.models import (
     Proyek,
-    RoleTeknologi
+    RoleTeknologi,
+    ProjectRole,
+    ProjectTechnology
 )
 from dss.repositories.repositori_kriteria import KriteriaRepository
 from silaptop79.db import get_connection
@@ -567,26 +573,26 @@ def inputkriteria_hc_view(request):
         "hc/dss/inputkriteria_hc.html",
         context
     )
-    from inventori.models import Proyek
-    import json
-    proyek_qs = Proyek.objects.prefetch_related('roles__teknologi').all()
-    proyek_data = []
-    for p in proyek_qs:
-        roles_data = []
-        for r in p.roles.all():
-            techs = [t.nama_teknologi for t in r.teknologi.all()]
-            roles_data.append({
-                'id_role': r.id_role,
-                'nama_role': r.nama_role,
-                'teknologi': techs
-            })
-        proyek_data.append({
-            'id_proyek': p.id_proyek,
-            'nama_proyek': p.nama_proyek,
-            'roles': roles_data
-        })
-    proyek_json = json.dumps(proyek_data)
-    return render(request, 'hc/dss/inputkriteria_hc.html', {'proyek_json': proyek_json})
+    # from inventori.models import Proyek
+    # import json
+    # proyek_qs = Proyek.objects.prefetch_related('roles__teknologi').all()
+    # proyek_data = []
+    # for p in proyek_qs:
+    #     roles_data = []
+    #     for r in p.roles.all():
+    #         techs = [t.nama_teknologi for t in r.teknologi.all()]
+    #         roles_data.append({
+    #             'id_role': r.id_role,
+    #             'nama_role': r.nama_role,
+    #             'teknologi': techs
+    #         })
+    #     proyek_data.append({
+    #         'id_proyek': p.id_proyek,
+    #         'nama_proyek': p.nama_proyek,
+    #         'roles': roles_data
+    #     })
+    # proyek_json = json.dumps(proyek_data)
+    # return render(request, 'hc/dss/inputkriteria_hc.html', {'proyek_json': proyek_json})
 
 def hasilrekomendasi_hc_view(request):
 
@@ -854,17 +860,17 @@ def dashboard_it_view(request):
 def manajemenlaptop_it_view(request):
     return render(request, 'it/inventori/manajemenlaptop_it.html')
 
-def pengajuanlaptop_it_view(request):
-    from inventori.services.service_pengajuan import PengajuanService
-    from inventori.repositories.dto.dto_pengajuan import PengajuanDTO
+# def pengajuanlaptop_it_view(request):
+#     from inventori.services.service_pengajuan import PengajuanService
+#     from inventori.repositories.dto.dto_pengajuan import PengajuanDTO
     
-    context = {
-        'laptop': laptop,
-        'processors': processors,
-        'rams': rams,
-        'storages': storages,
-    }
-    return render(request, 'it/inventori/editdatalaptop_it.html', context)
+#     context = {
+#         'laptop': laptop,
+#         'processors': processors,
+#         'rams': rams,
+#         'storages': storages,
+#     }
+#     return render(request, 'it/inventori/editdatalaptop_it.html', context)
 
 def inputkriteria_it_view(request):
     import sys
@@ -1278,110 +1284,110 @@ def detailpengadaan_it_view(request):
 def editpengadaan_it_view(request):
     return render(request, 'it/inventori/editpengadaan_it.html')
 
-def manajemenproyek_it_view(request):
-    from inventori.models import Proyek
-    proyek_list = Proyek.objects.prefetch_related('roles__teknologi').all()
-    return render(request, 'it/inventori/manajemenproyek_it.html', {'proyek_list': proyek_list})
+# def manajemenproyek_it_view(request):
+#     from inventori.models import Proyek
+#     proyek_list = Proyek.objects.prefetch_related('roles__teknologi').all()
+#     return render(request, 'it/inventori/manajemenproyek_it.html', {'proyek_list': proyek_list})
 
-def tambahproyek_it_view(request):
-    from inventori.models import Proyek, RoleProyek, TeknologiRole
-    import uuid
+# def tambahproyek_it_view(request):
+#     from inventori.models import Proyek, RoleProyek, TeknologiRole
+#     import uuid
 
-    if request.method == 'POST':
-        try:
-            nama_proyek = request.POST.get('nama_proyek')
-            role_names = request.POST.getlist('role_names[]')
-            role_techs = request.POST.getlist('role_techs[]')
+#     if request.method == 'POST':
+#         try:
+#             nama_proyek = request.POST.get('nama_proyek')
+#             role_names = request.POST.getlist('role_names[]')
+#             role_techs = request.POST.getlist('role_techs[]')
 
-            # Create Proyek
-            proyek = Proyek.objects.create(
-                id_proyek=str(uuid.uuid4())[:8],
-                nama_proyek=nama_proyek
-            )
+#             # Create Proyek
+#             proyek = Proyek.objects.create(
+#                 id_proyek=str(uuid.uuid4())[:8],
+#                 nama_proyek=nama_proyek
+#             )
 
-            # Create Roles and Technologies
-            for name, tech_str in zip(role_names, role_techs):
-                if name.strip():
-                    role_obj = RoleProyek.objects.create(
-                        id_role=str(uuid.uuid4())[:8],
-                        proyek=proyek,
-                        nama_role=name.strip()
-                    )
-                    # Split comma-separated techs
-                    techs = [t.strip() for t in tech_str.split(',') if t.strip()]
-                    for t in techs:
-                        TeknologiRole.objects.create(
-                            id_teknologi=str(uuid.uuid4())[:8],
-                            role_proyek=role_obj,
-                            nama_teknologi=t
-                        )
+#             # Create Roles and Technologies
+#             for name, tech_str in zip(role_names, role_techs):
+#                 if name.strip():
+#                     role_obj = RoleProyek.objects.create(
+#                         id_role=str(uuid.uuid4())[:8],
+#                         proyek=proyek,
+#                         nama_role=name.strip()
+#                     )
+#                     # Split comma-separated techs
+#                     techs = [t.strip() for t in tech_str.split(',') if t.strip()]
+#                     for t in techs:
+#                         TeknologiRole.objects.create(
+#                             id_teknologi=str(uuid.uuid4())[:8],
+#                             role_proyek=role_obj,
+#                             nama_teknologi=t
+#                         )
 
-            messages.success(request, f'Proyek "{nama_proyek}" berhasil ditambahkan!')
-            return redirect('manajemen_proyek_it')
-        except Exception as e:
-            messages.error(request, f'Gagal menambahkan proyek: {str(e)}')
+#             messages.success(request, f'Proyek "{nama_proyek}" berhasil ditambahkan!')
+#             return redirect('manajemen_proyek_it')
+#         except Exception as e:
+#             messages.error(request, f'Gagal menambahkan proyek: {str(e)}')
 
-    return render(request, 'it/inventori/tambahproyek_it.html')
+#     return render(request, 'it/inventori/tambahproyek_it.html')
 
-def editproyek_it_view(request, id_proyek):
-    from inventori.models import Proyek, RoleProyek, TeknologiRole
-    import uuid
+# def editproyek_it_view(request, id_proyek):
+#     from inventori.models import Proyek, RoleProyek, TeknologiRole
+#     import uuid
 
-    try:
-        proyek = Proyek.objects.prefetch_related('roles__teknologi').get(id_proyek=id_proyek)
-    except Proyek.DoesNotExist:
-        messages.error(request, 'Proyek tidak ditemukan.')
-        return redirect('manajemen_proyek_it')
+#     try:
+#         proyek = Proyek.objects.prefetch_related('roles__teknologi').get(id_proyek=id_proyek)
+#     except Proyek.DoesNotExist:
+#         messages.error(request, 'Proyek tidak ditemukan.')
+#         return redirect('manajemen_proyek_it')
 
-    if request.method == 'POST':
-        try:
-            proyek.nama_proyek = request.POST.get('nama_proyek')
-            proyek.save()
+#     if request.method == 'POST':
+#         try:
+#             proyek.nama_proyek = request.POST.get('nama_proyek')
+#             proyek.save()
 
-            # Delete old roles and their technologies
-            proyek.roles.all().delete()
+#             # Delete old roles and their technologies
+#             proyek.roles.all().delete()
 
-            # Re-create roles and technologies
-            role_names = request.POST.getlist('role_names[]')
-            role_techs = request.POST.getlist('role_techs[]')
+#             # Re-create roles and technologies
+#             role_names = request.POST.getlist('role_names[]')
+#             role_techs = request.POST.getlist('role_techs[]')
 
-            for name, tech_str in zip(role_names, role_techs):
-                if name.strip():
-                    role_obj = RoleProyek.objects.create(
-                        id_role=str(uuid.uuid4())[:8],
-                        proyek=proyek,
-                        nama_role=name.strip()
-                    )
-                    techs = [t.strip() for t in tech_str.split(',') if t.strip()]
-                    for t in techs:
-                        TeknologiRole.objects.create(
-                            id_teknologi=str(uuid.uuid4())[:8],
-                            role_proyek=role_obj,
-                            nama_teknologi=t
-                        )
+#             for name, tech_str in zip(role_names, role_techs):
+#                 if name.strip():
+#                     role_obj = RoleProyek.objects.create(
+#                         id_role=str(uuid.uuid4())[:8],
+#                         proyek=proyek,
+#                         nama_role=name.strip()
+#                     )
+#                     techs = [t.strip() for t in tech_str.split(',') if t.strip()]
+#                     for t in techs:
+#                         TeknologiRole.objects.create(
+#                             id_teknologi=str(uuid.uuid4())[:8],
+#                             role_proyek=role_obj,
+#                             nama_teknologi=t
+#                         )
 
-            messages.success(request, f'Proyek "{proyek.nama_proyek}" berhasil diperbarui!')
-            return redirect('manajemen_proyek_it')
-        except Exception as e:
-            messages.error(request, f'Gagal memperbarui proyek: {str(e)}')
+#             messages.success(request, f'Proyek "{proyek.nama_proyek}" berhasil diperbarui!')
+#             return redirect('manajemen_proyek_it')
+#         except Exception as e:
+#             messages.error(request, f'Gagal memperbarui proyek: {str(e)}')
 
-    return render(request, 'it/inventori/editproyek_it.html', {'proyek': proyek})
+#     return render(request, 'it/inventori/editproyek_it.html', {'proyek': proyek})
 
-def hapusproyek_it_view(request, id_proyek):
-    from inventori.models import Proyek
+# def hapusproyek_it_view(request, id_proyek):
+#     from inventori.models import Proyek
 
-    if request.method == 'POST':
-        try:
-            proyek = Proyek.objects.get(id_proyek=id_proyek)
-            nama = proyek.nama_proyek
-            proyek.delete()
-            messages.success(request, f'Proyek "{nama}" berhasil dihapus!')
-        except Proyek.DoesNotExist:
-            messages.error(request, 'Proyek tidak ditemukan.')
-        except Exception as e:
-            messages.error(request, f'Gagal menghapus proyek: {str(e)}')
+#     if request.method == 'POST':
+#         try:
+#             proyek = Proyek.objects.get(id_proyek=id_proyek)
+#             nama = proyek.nama_proyek
+#             proyek.delete()
+#             messages.success(request, f'Proyek "{nama}" berhasil dihapus!')
+#         except Proyek.DoesNotExist:
+#             messages.error(request, 'Proyek tidak ditemukan.')
+#         except Exception as e:
+#             messages.error(request, f'Gagal menghapus proyek: {str(e)}')
 
-    return redirect('manajemen_proyek_it')
+#     return redirect('manajemen_proyek_it')
 
 
 # ==========================================
@@ -1794,55 +1800,153 @@ def setujui_pengajuan_it_view(request):
     })
 def manajemenproyek_it_view(request):
     from inventori.models import Proyek
-    proyek_list = Proyek.objects.prefetch_related('roles__teknologi').all()
-    return render(request, 'it/inventori/manajemenproyek_it.html', {'proyek_list': proyek_list})
-
+    proyek_list = Proyek.objects.all()
+    context = {"proyek_list": proyek_list}
+    return render(
+        request,
+        "it/inventori/manajemenproyek_it.html",
+        context
+    )
 def tambahproyek_it_view(request):
-    from inventori.models import Proyek, RoleProyek, TeknologiRole
-    import uuid
 
-    if request.method == 'POST':
+    if request.method == "POST":
         try:
-            nama_proyek = request.POST.get('nama_proyek')
-            role_names = request.POST.getlist('role_names[]')
-            role_techs = request.POST.getlist('role_techs[]')
-
-            # Create Proyek
-            proyek = Proyek.objects.create(
-                id_proyek=str(uuid.uuid4())[:8],
-                nama_proyek=nama_proyek
+            nama_proyek = request.POST.get(
+                "nama_proyek"
             )
 
-            # Create Roles and Technologies
-            for name, tech_str in zip(role_names, role_techs):
-                if name.strip():
-                    role_obj = RoleProyek.objects.create(
-                        id_role=str(uuid.uuid4())[:8],
-                        proyek=proyek,
-                        nama_role=name.strip()
+            role_ids = request.POST.getlist(
+                "role_ids[]"
+            )
+            processor_weights = request.POST.getlist(
+                "processor_weight[]"
+            )
+
+            ram_weights = request.POST.getlist(
+                "ram_weight[]"
+            )
+
+            storage_weights = request.POST.getlist(
+                "storage_weight[]"
+            )
+
+            berat_weights = request.POST.getlist(
+                "berat_weight[]"
+            )
+
+            layar_weights = request.POST.getlist(
+                "layar_weight[]"
+            )
+
+            baterai_weights = request.POST.getlist(
+                "baterai_weight[]"
+            )
+            with transaction.atomic():   
+                proyek = Proyek.objects.create(
+                    id_proyek=str(uuid.uuid4())[:8],
+                    nama_proyek=nama_proyek
+                )
+
+                teknologi_proyek = set()
+
+                for role_id in role_ids:
+
+                    role = Role.objects.get(
+                        id_role=role_id
                     )
-                    # Split comma-separated techs
-                    techs = [t.strip() for t in tech_str.split(',') if t.strip()]
-                    for t in techs:
-                        TeknologiRole.objects.create(
-                            id_teknologi=str(uuid.uuid4())[:8],
-                            role_proyek=role_obj,
-                            nama_teknologi=t
+
+                    ProjectRole.objects.create(
+                        id_project_role=str(uuid.uuid4())[:8],
+                        proyek=proyek,
+                        role=role,
+                        persentase_role=0
+                    )
+
+                    role_teknologi = (
+                        RoleTeknologi.objects
+                        .select_related("teknologi")
+                        .filter(role=role)
+                    )
+
+                    for rt in role_teknologi:
+
+                        teknologi_proyek.add(
+                            rt.teknologi.id_teknologi
                         )
 
-            messages.success(request, f'Proyek "{nama_proyek}" berhasil ditambahkan!')
-            return redirect('manajemen_proyek_it')
+                for id_teknologi in teknologi_proyek:
+
+                    ProjectTechnology.objects.create(
+                        id_project_technology=
+                        str(uuid.uuid4())[:8],
+
+                        proyek=proyek,
+
+                        teknologi_id=
+                        id_teknologi
+                    )
+
+                messages.success(
+                    request,
+                    f'Proyek "{nama_proyek}" berhasil ditambahkan!'
+                )
+
+                return redirect(
+                    "manajemen_proyek_it"
+                )
+
         except Exception as e:
-            messages.error(request, f'Gagal menambahkan proyek: {str(e)}')
 
-    return render(request, 'it/inventori/tambahproyek_it.html')
+            messages.error(
+                request,
+                str(e)
+            )
 
+    role_list = (
+        Role.objects
+        .all()
+        .order_by(
+            "nama_role"
+        )
+    )
+
+    role_data = []
+
+    for role in role_list:
+
+        teknologi = []
+
+        rels = (
+            RoleTeknologi.objects
+            .select_related("teknologi")
+            .filter(role=role)
+        )
+
+        for rel in rels:
+            teknologi.append({
+                "id": rel.teknologi.id_teknologi,
+                "nama": rel.teknologi.nama_teknologi
+            })
+
+        role_data.append({
+            "id": role.id_role,
+            "nama": role.nama_role,
+            "teknologi": teknologi
+        })
+
+    context = {
+        "role_list": role_list,
+        "role_data_json": role_data
+    }    
+    return render(
+        request,
+        "it/inventori/tambahproyek_it.html",
+        context
+    )
 def editproyek_it_view(request, id_proyek):
-    from inventori.models import Proyek, RoleProyek, TeknologiRole
-    import uuid
 
     try:
-        proyek = Proyek.objects.prefetch_related('roles__teknologi').get(id_proyek=id_proyek)
+        proyek = Proyek.objects.get(id_proyek=id_proyek)
     except Proyek.DoesNotExist:
         messages.error(request, 'Proyek tidak ditemukan.')
         return redirect('manajemen_proyek_it')
@@ -1853,7 +1957,7 @@ def editproyek_it_view(request, id_proyek):
             proyek.save()
 
             # Delete old roles and their technologies
-            proyek.roles.all().delete()
+            proyek.role_teknologi.all().delete()
 
             # Re-create roles and technologies
             role_names = request.POST.getlist('role_names[]')
@@ -1861,7 +1965,7 @@ def editproyek_it_view(request, id_proyek):
 
             for name, tech_str in zip(role_names, role_techs):
                 if name.strip():
-                    role_obj = RoleProyek.objects.create(
+                    role_obj = ProjectRole.objects.create(
                         id_role=str(uuid.uuid4())[:8],
                         proyek=proyek,
                         nama_role=name.strip()
@@ -1945,4 +2049,278 @@ def tambah_komponen_it_view(request):
         'storages': storages,
     })
 
+def manajemen_role_teknologi_it_view(request):
 
+    role_list = (
+        Role.objects
+        .prefetch_related(
+            'roleteknologi_set__teknologi'
+        ).order_by('nama_role')
+    )
+    teknologi_list = (Teknologi.objects.order_by('nama_teknologi'))
+    context = {"role_list": role_list,"teknologi_list": teknologi_list,}
+    return render(
+        request,
+        "it/inventori/manajemen_role_teknologi_it.html",
+        context
+    )
+def tambah_teknologi_it_view(request):
+
+    if request.method == "POST":
+
+        try:
+
+            Teknologi.objects.create(
+                id_teknologi=str(uuid.uuid4())[:8],
+                nama_teknologi=request.POST.get(
+                    "nama_teknologi"
+                ),
+                kategori=request.POST.get(
+                    "kategori"
+                )
+            )
+
+            messages.success(
+                request,
+                "Teknologi berhasil ditambahkan."
+            )
+
+        except Exception as e:
+
+            messages.error(
+                request,
+                str(e)
+            )
+
+    return redirect(
+        "manajemen_role_teknologi_it"
+    )
+def tambah_role_it_view(request):
+
+    if request.method == "POST":
+
+        try:
+
+            role = Role.objects.create(
+                id_role=str(uuid.uuid4())[:8],
+                nama_role=request.POST.get(
+                    "nama_role"
+                ),
+                min_ram=request.POST.get(
+                    "min_ram"
+                ),
+                min_storage=request.POST.get(
+                    "min_storage"
+                ),
+                min_processor_score=request.POST.get(
+                    "min_processor_score"
+                )
+            )
+
+            teknologi_ids = request.POST.getlist(
+                "teknologi"
+            )
+
+            for teknologi_id in teknologi_ids:
+
+                RoleTeknologi.objects.create(
+                    id_role_teknologi=
+                    str(uuid.uuid4())[:12],
+
+                    role=role,
+
+                    teknologi_id=
+                    teknologi_id
+                )
+
+            messages.success(
+                request,
+                "Role berhasil ditambahkan."
+            )
+
+        except Exception as e:
+
+            messages.error(
+                request,
+                str(e)
+            )
+
+    return redirect(
+        "manajemen_role_teknologi_it"
+    )
+def hapus_role_it_view(
+    request,
+    id_role
+):
+
+    try:
+
+        role = Role.objects.get(
+            id_role=id_role
+        )
+
+        role.delete()
+
+        messages.success(
+            request,
+            "Role berhasil dihapus."
+        )
+
+    except Exception as e:
+
+        messages.error(
+            request,
+            str(e)
+        )
+
+    return redirect(
+        "manajemen_role_teknologi_it"
+    )
+    
+def hapus_teknologi_it_view(
+    request,
+    id_teknologi
+):
+
+    try:
+
+        teknologi = Teknologi.objects.get(
+            id_teknologi=id_teknologi
+        )
+
+        teknologi.delete()
+
+        messages.success(
+            request,
+            "Teknologi berhasil dihapus."
+        )
+
+    except Exception as e:
+
+        messages.error(
+            request,
+            str(e)
+        )
+
+    return redirect(
+        "manajemen_role_teknologi_it"
+    )
+from django.shortcuts import get_object_or_404
+
+def edit_role_it_view(request, id_role):
+
+    role = get_object_or_404(
+        Role,
+        id_role=id_role
+    )
+
+    if request.method == "POST":
+
+        try:
+
+            role.nama_role = request.POST.get(
+                "nama_role"
+            )
+
+            role.min_ram = int(
+                request.POST.get(
+                    "min_ram",
+                    0
+                )
+            )
+
+            role.min_storage = int(
+                request.POST.get(
+                    "min_storage",
+                    0
+                )
+            )
+
+            role.min_processor_score = int(
+                request.POST.get(
+                    "min_processor_score",
+                    0
+                )
+            )
+
+            role.save()
+
+            RoleTeknologi.objects.filter(
+                role=role
+            ).delete()
+
+            teknologi_ids = request.POST.getlist(
+                "teknologi"
+            )
+
+            for teknologi_id in teknologi_ids:
+
+                RoleTeknologi.objects.create(
+                    id_role_teknologi=
+                    str(uuid.uuid4())[:12],
+
+                    role=role,
+
+                    teknologi_id=
+                    teknologi_id
+                )
+
+            messages.success(
+                request,
+                "Role berhasil diperbarui."
+            )
+
+        except Exception as e:
+
+            messages.error(
+                request,
+                f"Gagal update role: {str(e)}"
+            )
+
+    return redirect(
+        "manajemen_role_teknologi_it"
+    )
+    
+def edit_teknologi_it_view(
+    request,
+    id_teknologi
+):
+
+    teknologi = get_object_or_404(
+        Teknologi,
+        id_teknologi=id_teknologi
+    )
+
+    if request.method == "POST":
+
+        try:
+
+            teknologi.nama_teknologi = (
+                request.POST.get(
+                    "nama_teknologi"
+                )
+            )
+
+            teknologi.kategori = (
+                request.POST.get(
+                    "kategori"
+                )
+            )
+
+            teknologi.save()
+
+            messages.success(
+                request,
+                "Teknologi berhasil diperbarui."
+            )
+
+        except Exception as e:
+
+            messages.error(
+                request,
+                f"Gagal update teknologi: {str(e)}"
+            )
+
+    return redirect(
+        "manajemen_role_teknologi_it"
+    )

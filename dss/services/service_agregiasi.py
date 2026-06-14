@@ -1,3 +1,4 @@
+from collections import defaultdict
 from datetime import datetime
 
 from dss.repositories.repositori_kriteria import KriteriaRepository
@@ -126,3 +127,47 @@ class AggregationService:
             total += nilai
 
         print("\nTOTAL =", total)
+    def aggregate_teknologi_role(
+        self,
+        list_hasil_teknologi
+    ):
+
+        if not list_hasil_teknologi:
+
+            raise ValueError(
+                "Data teknologi kosong"
+            )
+
+        hasil = {}
+
+        counter = {}
+
+        for teknologi in list_hasil_teknologi:
+
+            for item in teknologi:
+
+                nama = item[
+                    "nama_kriteria"
+                ]
+
+                nilai = item[
+                    "nilai_swara"
+                ]
+
+                if nama not in hasil:
+
+                    hasil[nama] = 0
+                    counter[nama] = 0
+
+                hasil[nama] += nilai
+                counter[nama] += 1
+
+        for nama in hasil:
+
+            hasil[nama] = round(
+                hasil[nama]
+                / counter[nama],
+                6
+            )
+
+        return hasil

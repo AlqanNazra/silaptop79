@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dss', '0002_alternatifdss_detailhasilsaw'),
+        ('dss', '0001_initial'),
     ]
 
     operations = [

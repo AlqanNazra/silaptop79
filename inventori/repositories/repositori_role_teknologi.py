@@ -1,11 +1,7 @@
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from inventori.dto.dto_role_teknologi import RoleTeknologiDTO 
-
-from inventori.repositories.interfaces.interface_role_teknologi import (
-    IRoleTeknologiRepository
-)
-
+from inventori.repositories.interfaces.interface_role_teknologi import IRoleTeknologiRepository
 
 class RoleTeknologiRepository(
     IRoleTeknologiRepository
@@ -22,11 +18,8 @@ class RoleTeknologiRepository(
         """
 
         with self.conn.cursor() as cur:
-
             cur.execute(query)
-
             rows = cur.fetchall()
-
             return rows
 
     def get_by_id(
@@ -91,3 +84,15 @@ class RoleTeknologiRepository(
             )
 
             return True
+    def get_by_role(self,id_role):
+        query = """
+            SELECT
+                *
+            FROM role_teknologi
+            WHERE id_role = %s
+        """
+        with self.conn.cursor(
+            cursor_factory=RealDictCursor
+        ) as cur:
+            cur.execute(query,(id_role,))
+            return cur.fetchall()

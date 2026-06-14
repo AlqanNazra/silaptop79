@@ -3,6 +3,7 @@ import psycopg2
 from typing import List, Dict
 from .interfaces.interface_role import IRoleRepository
 from ..dto.dto_role import RoleDTO
+from psycopg2.extras import RealDictCursor
 
 class RoleRepository(IRoleRepository):
     def __init__(self, conn):
@@ -73,10 +74,29 @@ class RoleRepository(IRoleRepository):
             rows = cur.fetchall()
             return [{"id_kriteria": r[0], "nama_kriteria": r[1], "nilai_bobot": r[2]} for r in rows]
 
-    def get_teknologi(self, id_role: str) -> List[Dict]:
-        # Implementasi analogi dengan get_kriteria
-        pass
-    
+    def get_teknologi(
+        self,
+        id_role
+    ):
+        query = """
+            SELECT
+                id_role_teknologi,
+                id_teknologi,
+                is_default
+            FROM role_teknologi
+            WHERE id_role = %s
+        """
+
+        with self.conn.cursor(
+            cursor_factory=RealDictCursor
+        ) as cur:
+
+            cur.execute(
+                query,
+                (id_role,)
+            )
+
+            return cur.fetchall()
     def get_by_id(self, id_role: str):
         query = """
             SELECT *

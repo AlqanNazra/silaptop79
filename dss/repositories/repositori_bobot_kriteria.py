@@ -143,14 +143,17 @@ class BobotKriteriaRepository(IBobotKriteriaRepositoryImpl):
     ):
         query = """
             SELECT
+                bk.id_bobot,
                 bk.id_kriteria,
                 k.nama_kriteria,
-                bk.nilai_bobot
+                bk.nilai_bobot,
+                bk.nilai_swara
             FROM dss_bobotkriteria bk
             JOIN dss_kriteria k
                 ON k.id_kriteria = bk.id_kriteria
             WHERE bk.id_role_teknologi = %s
             AND bk.is_active = TRUE
+            ORDER BY bk.nilai_bobot DESC
         """
 
         with self._get_dict_cursor() as cur:
@@ -158,4 +161,5 @@ class BobotKriteriaRepository(IBobotKriteriaRepositoryImpl):
                 query,
                 (id_role_teknologi,)
             )
+
             return cur.fetchall()

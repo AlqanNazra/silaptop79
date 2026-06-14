@@ -1,7 +1,10 @@
+from dss.repositories.dto.dto_bobot_kriteria import BobotKriteriaDTO
 from dss.repositories.repositori_bobot_kriteria import BobotKriteriaRepository
 from dss.repositories.repositori_kriteria import KriteriaRepository
 from collections import defaultdict
 import json
+
+from dss.services.service_agregiasi import AggregationService
 
 DEBUG = False  # 🔥 ubah True kalau mau debug
 
@@ -166,9 +169,146 @@ class ServiceSwara:
                         "bobot_akhir": hasil
                     }
                 }
+        except Exception as e:
+            return {"status": "error","message": str(e)}       
+
+    def proses_swara_role_teknologi(self,id_role_teknologi):
+        try:
+            data = (
+                self.repoBK
+                .ambil_bobot_role_teknologi(
+                    id_role_teknologi
+                )
+            )
+            if not data:
+                raise Exception(
+                    f"Data bobot kosong "
+                    f"{id_role_teknologi}"
+                )
+            sorted_data = sorted(
+                data,
+                key=lambda x: x["nilai_bobot"],
+                reverse=True
+            )
+
+            sorted_kriteria = [
+                (
+                    item["nama_kriteria"],
+                    item["nilai_bobot"]
+                )
+                for item in sorted_data
+            ]
+
+            meta = {}
+
+            for item in sorted_data:
+
+                meta[
+                    item["nama_kriteria"]
+                ] = {
+
+                    "id_kriteria":
+                        item["id_kriteria"],
+
+                    "id_bobot":
+                        item["id_bobot"]
+                }
+
+            sj = self.mencari_nilai_sj(
+                sorted_kriteria
+            )
+
+            kj = self.menghitung_kj(
+                sj
+            )
+
+            qj = self.menghitung_qj(
+                kj
+            )
+
+            total = sum(qj)
+
+            hasil = []
+
+            for i in range(len(qj)):
+
+                nama = sorted_kriteria[i][0]
+
+                hasil.append({
+
+                    "id_bobot":
+                        meta[nama]["id_bobot"],
+
+                    "id_kriteria":
+                        meta[nama]["id_kriteria"],
+
+                    "nama_kriteria":
+                        nama,
+
+                    "nilai_swara":
+                        round(
+                            qj[i] / total,
+                            6
+                        )
+                })
+
+            # ====================
+            # UPDATE DATABASE
+            # ====================
+
+            for item in hasil:
+
+                dto = BobotKriteriaDTO(
+                    id_bobot=item["id_bobot"],
+                    nilai_swara=item["nilai_swara"]
+                )
+
+                self.repoBK.update_nilai_swara(
+                    dto
+                )
+
+            return {
+                "status": "success",
+                "data": hasil
+            }
 
         except Exception as e:
-            return {
-                "status": "error",
-                "message": str(e)
-            }
+            return {"status": "error","message": str(e)}
+        
+    def proses_role(
+        self,
+        id_role,
+        role_teknologi_list
+    ):
+        aggregate_service = (
+            AggregationService(
+                self.conn
+            )
+        )
+        hasil_teknologi = []
+        for rt in role_teknologi_list:
+            hasil = (
+                self.proses_swara_role_teknologi(
+                    rt["id_role_teknologi"]
+                )
+            )
+            if hasil["status"] != "success":
+                raise Exception(
+                    hasil["message"]
+                )
+            hasil_teknologi.append(
+                hasil["data"]
+            )
+
+        hasil_role = (
+            aggregate_service
+            .aggregate_teknologi_role(
+                hasil_teknologi
+            )
+        )
+
+        return {
+            "id_role": id_role,
+            "swara_teknologi":hasil_teknologi,
+            "hasil_role":hasil_role
+        }

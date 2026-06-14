@@ -390,7 +390,25 @@
                     {% endfor %}
                 </div>
                 {% endif %}
+                <div class="top-actions">
+                    <div class="search-box">
+                        <input type="text" placeholder="Cari Proyek...">
+                    </div>
 
+                    <div style="display:flex; gap:12px;">
+                        <a href="{% url 'manajemen_role_teknologi_it' %}"
+                        class="btn-secondary">
+                            <i class="fa-solid fa-layer-group"></i>
+                            Kelola Role & Teknologi
+                        </a>
+
+                        <a href="{% url 'tambahproyek_it' %}"
+                        class="btn-primary">
+                            <i class="fa-solid fa-plus"></i>
+                            Tambah Proyek
+                        </a>
+                    </div>
+                </div>
                 <!-- Stat Cards (Only Total Proyek card, centered) -->
                 <div class="stats-row">
                     <div class="stat-card">

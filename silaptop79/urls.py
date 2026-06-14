@@ -3,11 +3,16 @@ from django.urls import path, include
 from django.contrib.auth import views as auth_views
 from core.views import (
     # HC Views
-    dashboard_hc_view, 
+    dashboard_hc_view,
+    edit_role_it_view,
+    edit_teknologi_it_view,
+    hapus_role_it_view,
+    hapus_teknologi_it_view, 
     inputkriteria_hc_view, 
     hasilrekomendasi_hc_view, 
     detailrekomendasi_hc_view,
     detailrekomendasiscrapping_hc_view,
+    manajemen_role_teknologi_it_view,
     notifikasi_hc_view,
 
     # IT Views
@@ -15,6 +20,8 @@ from core.views import (
     manajemenlaptop_it_view,
     pengajuanlaptop_it_view,
     detailpengajuan_it_view,
+    tambah_role_it_view,
+    tambah_teknologi_it_view,
     tambahlaptop_it_view,
     tambahspek_it_view,
     inputkriteria_it_view,
@@ -143,4 +150,45 @@ urlpatterns = [
     path('inputkriteria_hc/', inputkriteria_hc_view, name='inputkriteria_hc'),
     path('hasilrekomendasi_hc/', hasilrekomendasi_hc_view, name='hasilrekomendasi_hc'),
     path("laptop/", laptop_dashboard, name="laptop_dashboard"),
+    path(
+    'it/manajemen-role-teknologi/',
+    manajemen_role_teknologi_it_view,
+    name='manajemen_role_teknologi_it'
+),
+
+path(
+    'it/tambah-role/',
+    tambah_role_it_view,
+    name='tambah_role_it'
+),
+
+path(
+    'it/edit-role/<str:id_role>/',
+    edit_role_it_view,
+    name='edit_role_it'
+),
+
+path(
+    'it/hapus-role/<str:id_role>/',
+    hapus_role_it_view,
+    name='hapus_role_it'
+),
+
+path(
+    'it/tambah-teknologi/',
+    tambah_teknologi_it_view,
+    name='tambah_teknologi_it'
+),
+
+path(
+    'it/edit-teknologi/<str:id_teknologi>/',
+    edit_teknologi_it_view  ,
+    name='edit_teknologi_it'
+),
+
+path(
+    'it/hapus-teknologi/<str:id_teknologi>/',
+    hapus_teknologi_it_view,
+    name='hapus_teknologi_it'
+),
 ]
