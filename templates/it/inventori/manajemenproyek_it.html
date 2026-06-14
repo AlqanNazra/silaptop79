@@ -1,0 +1,520 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manajemen Proyek - SiLaptop79</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1.1">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            min-height: 100vh;
+            background-color: #f8fafc;
+        }
+
+        .dashboard-wrapper {
+            display: flex;
+            width: 100%;
+        }
+
+        .main-dashboard-content {
+            flex: 1;
+            margin-left: 260px;
+            padding: 40px 60px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 800;
+            color: #1e293b;
+            margin-top: 0;
+            margin-bottom: 28px;
+            letter-spacing: -0.5px;
+        }
+
+        /* Stat Cards */
+        .stats-row {
+            display: grid;
+            grid-template-columns: 1fr;
+            margin-bottom: 28px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px 24px;
+            border: 1px solid #f1f5f9;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .stat-card-left {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.7px;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 800;
+            color: #1e293b;
+            line-height: 1;
+        }
+
+        .stat-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .stat-icon.blue-icon {
+            background: #dbeafe;
+            color: #2563eb;
+        }
+
+        /* Top Actions */
+        .top-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 24px;
+        }
+
+        .search-box {
+            flex: 1;
+            max-width: 600px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 20px;
+            background-color: #cbd5e1;
+            font-size: 14px;
+            color: #374151;
+            outline: none;
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+            transition: all 0.2s;
+            box-sizing: border-box;
+        }
+
+        .search-box input::placeholder {
+            color: #64748b;
+        }
+
+        .btn-primary {
+            background-color: #0b57c6;
+            color: white;
+            padding: 14px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(11, 87, 198, 0.2);
+            transition: background 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        .btn-primary:hover {
+            background-color: #09459e;
+        }
+
+        /* Table Wrapper */
+        .table-card {
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+            overflow: hidden;
+            border: 1px solid #f1f5f9;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 20px 24px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        td {
+            padding: 16px 24px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+            font-size: 14px;
+            color: #475569;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .tech-pill {
+            display: inline-block;
+            background-color: #e2e8f0;
+            color: #475569;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-right: 6px;
+            margin-bottom: 4px;
+        }
+
+        .alert-container {
+            margin-bottom: 24px;
+        }
+
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background-color: #dcfce7;
+            color: #16a34a;
+            border: 1px solid #bbf7d0;
+        }
+
+        .alert-error {
+            background-color: #fee2e2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+
+        /* Action buttons */
+        .action-btns {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .btn-action {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 8px 14px;
+            border: none;
+            border-radius: 6px;
+            font-family: 'Inter', sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .btn-edit {
+            background-color: #dbeafe;
+            color: #0b57c6;
+        }
+
+        .btn-edit:hover {
+            background-color: #bfdbfe;
+        }
+
+        .btn-delete {
+            background-color: #fee2e2;
+            color: #dc2626;
+        }
+
+        .btn-delete:hover {
+            background-color: #fecaca;
+        }
+
+        /* Delete Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-box {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 420px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            animation: modalIn 0.2s ease-out;
+        }
+
+        @keyframes modalIn {
+            from { transform: scale(0.95); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: #fee2e2;
+            color: #dc2626;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin: 0 auto 16px;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+
+        .modal-text {
+            font-size: 14px;
+            color: #64748b;
+            line-height: 1.5;
+            margin-bottom: 24px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .modal-btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .modal-btn-cancel {
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        .modal-btn-cancel:hover {
+            background: #e2e8f0;
+        }
+
+        .modal-btn-delete {
+            background: #dc2626;
+            color: white;
+        }
+
+        .modal-btn-delete:hover {
+            background: #b91c1c;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="dashboard-wrapper">
+        <!-- Load Sidebar without highlights -->
+        {% include 'it/components/sidebar.html' with active_page='manajemen_proyek' %}
+
+        <!-- Main Dashboard Content -->
+        <div class="main-dashboard-content">
+            <div style="max-width: 1000px; width: 100%;">
+
+                <h1 class="page-title">Manajemen Data Proyek</h1>
+
+                {% if messages %}
+                <div class="alert-container">
+                    {% for message in messages %}
+                    <div class="alert {% if message.tags == 'error' %}alert-error{% else %}alert-success{% endif %}">
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- Stat Cards (Only Total Proyek card, centered) -->
+                <div class="stats-row">
+                    <div class="stat-card">
+                        <div class="stat-card-left">
+                            <span class="stat-label">Total Proyek</span>
+                            <span class="stat-value">{{ proyek_list|length }}</span>
+                        </div>
+                        <div class="stat-icon blue-icon">
+                            <i class="fa-solid fa-briefcase"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Top Actions -->
+                <div class="top-actions">
+                    <div class="search-box">
+                        <input type="text" placeholder="Cari Proyek...">
+                    </div>
+                    <a href="{% url 'tambahproyek_it' %}" class="btn-primary">
+                        <i class="fa-solid fa-plus"></i> Tambah Proyek
+                    </a>
+                </div>
+
+                <!-- Table Card -->
+                <div class="table-card">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 60px;">NO</th>
+                                <th>PROYEK</th>
+                                <th>DETAIL ROLE & TEKNOLOGI</th>
+                                <th style="width: 140px; text-align: center;">AKSI</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for proyek in proyek_list %}
+                            <tr>
+                                <td style="font-weight: 600; color: #64748b; vertical-align: top; padding-top: 20px;">
+                                    {% if forloop.counter < 10 %}0{% endif %}{{ forloop.counter }}
+                                </td>
+                                <td style="font-weight: 700; color: #1e293b; vertical-align: top; padding-top: 20px; font-size: 15px; width: 35%;">
+                                    {{ proyek.nama_proyek }}
+                                </td>
+                                <td style="padding-top: 16px; padding-bottom: 16px;">
+                                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                                        {% for role in proyek.roles.all %}
+                                        <div style="display: flex; align-items: flex-start; gap: 12px; font-size: 13px;">
+                                            <div style="background-color: #dbeafe; color: #0b57c6; font-weight: 700; padding: 4px 10px; border-radius: 6px; min-width: 180px; text-align: left; box-sizing: border-box;">
+                                                {{ role.nama_role }}
+                                            </div>
+                                            <div style="display: flex; flex-wrap: wrap; gap: 6px; padding-top: 4px;">
+                                                {% for tech in role.teknologi.all %}
+                                                <span class="tech-pill">{{ tech.nama_teknologi }}</span>
+                                                {% empty %}
+                                                <span style="color: #94a3b8; font-style: italic;">Tidak ada teknologi</span>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                        {% empty %}
+                                        <span style="color: #94a3b8; font-style: italic;">Tidak ada data role</span>
+                                        {% endfor %}
+                                    </div>
+                                </td>
+                                <td style="vertical-align: top; padding-top: 20px; text-align: center;">
+                                    <div class="action-btns" style="justify-content: center;">
+                                        <a href="{% url 'editproyek_it' proyek.id_proyek %}" class="btn-action btn-edit" title="Edit">
+                                            <i class="fa-solid fa-pen-to-square"></i> Edit
+                                        </a>
+                                        <button type="button" class="btn-action btn-delete" title="Hapus" onclick="showDeleteModal('{{ proyek.id_proyek }}', '{{ proyek.nama_proyek }}')">
+                                            <i class="fa-solid fa-trash-can"></i> Hapus
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" style="text-align: center; padding: 40px; color: #94a3b8; font-weight: 500;">
+                                    Belum ada data proyek. Silakan tambahkan proyek baru.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div> <!-- End Table Card -->
+
+            </div> <!-- End max-width wrapper -->
+        </div> <!-- End Main Content -->
+    </div> <!-- End Wrapper -->
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal-overlay" id="deleteModal">
+        <div class="modal-box">
+            <div class="modal-icon">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div class="modal-title">Hapus Proyek?</div>
+            <div class="modal-text">Apakah Anda yakin ingin menghapus proyek <strong id="deleteProyekName"></strong>? Semua data role dan teknologi terkait juga akan dihapus.</div>
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-cancel" onclick="hideDeleteModal()">Batal</button>
+                <form id="deleteForm" method="POST" style="margin: 0;">
+                    {% csrf_token %}
+                    <button type="submit" class="modal-btn modal-btn-delete">Ya, Hapus</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showDeleteModal(idProyek, namaProyek) {
+            document.getElementById('deleteProyekName').textContent = '"' + namaProyek + '"';
+            document.getElementById('deleteForm').action = '/it/hapus-proyek/' + idProyek + '/';
+            document.getElementById('deleteModal').classList.add('active');
+        }
+
+        function hideDeleteModal() {
+            document.getElementById('deleteModal').classList.remove('active');
+        }
+
+        // Close modal on overlay click
+        document.getElementById('deleteModal').addEventListener('click', function(e) {
+            if (e.target === this) hideDeleteModal();
+        });
+    </script>
+
+</body>
+
+</html>
