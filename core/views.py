@@ -1,5 +1,13 @@
+from urllib import request
+
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
+
+from dss.models import BobotKriteria
+from dss.repositories.repositori_bobot_kriteria import BobotKriteriaRepository
+from dss.repositories.repositori_bobot_kriteria import BobotKriteriaRepository
+from inventori.repositories.repositori_laptop_inventori import LaptopInventoriRepository
+from .db import get_connection
 
 # ==========================================
 # 1. HUMAN CAPITAL (HC) VIEWS
@@ -8,13 +16,29 @@ from django.http import HttpResponse
 from inventori.models import LaptopInventori, Processor, RAM, Storage, User
 from inventori.services.service_pengajuan import PengajuanService
 from inventori.services.service_peminjaman import PeminjamanService
-from inventori.dto.dto_laptop_inventori import LaptopInventoriDTO
+from inventori.dto.dto_laptop_inventori import FilterInventoriDTO, LaptopInventoriDTO
 from inventori.services.laptop_inventori.create import CreateLaptopInventoriService
 from inventori.services.laptop_inventori.update import UpdateLaptopInventoriService
 from inventori.services.laptop_inventori.delete import DeleteLaptopInventoriService
 from django.contrib import messages
 from inventori.dto.dto_pengajuan import PengajuanDTO
 from inventori.dto.dto_peminjaman import PeminjamanDTO
+from inventori.models import (
+    Proyek,
+    RoleTeknologi
+)
+from dss.repositories.repositori_kriteria import KriteriaRepository
+from silaptop79.db import get_connection
+from inventori.repositories.repositori_role_teknologi import RoleTeknologiRepository
+from inventori.repositories.repositori_role import RoleRepository
+from inventori.services.service_role_teknologi import RoleTeknologiService
+from inventori.services.service_role import RoleService
+from django.contrib import messages
+from inventori.models import RoleTeknologi
+from inventori.repositories.dto.dto_laptop_inventori import FilterInventoriDTO
+from dss.services.service_saw import Servicesaw
+
+
 
 def dashboard_hc_view(request):
     try:
@@ -278,76 +302,454 @@ def editdatalaptop_hc_view(request):
     return render(request, 'hc/inventori/editdatalaptop_hc.html')
 
 def inputkriteria_hc_view(request):
-    import sys
-    import os
-    base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    if base_path not in sys.path:
-        sys.path.append(base_path)
-    from simulate_saw import BASE_BOBOT_RAW
+    conn = get_connection()
 
-    if request.method == 'POST':
+    selected_project = (
+        request.GET.get("id_proyek")
+        or request.POST.get("id_proyek")
+    )
+
+    selected_role_teknologi = (
+        request.GET.get("id_role_teknologi")
+        or request.POST.get("id_role_teknologi")
+    )
+
+    role_requirement = None
+    bobot_role = None
+    # ==========================
+    # LOAD ROLE REQUIREMENT
+    # ==========================
+    if selected_role_teknologi:
         try:
-            b_processor = float(request.POST.get('bobot_processor', 7))
-            b_ram = float(request.POST.get('bobot_ram', 5))
-            b_storage = float(request.POST.get('bobot_storage', 4))
-            b_berat = float(request.POST.get('bobot_berat', 2))
-            b_layar = float(request.POST.get('bobot_layar', 2))
-            b_baterai = float(request.POST.get('bobot_baterai', 6))
+            roletek = (
+                RoleTeknologi.objects
+                .select_related("role")
+                .get(
+                    id_role_teknologi=
+                    selected_role_teknologi
+                )
+            )
+            print("ROLE =", roletek.role)
+            print("RAM =", roletek.role.min_ram)
+            print("STORAGE =", roletek.role.min_storage)
+            print("PROC =", roletek.role.min_processor_score)
+
+
+            role_requirement = {
+                "id_role":
+                    roletek.role.id_role,
+                "nama_role":
+                    roletek.role.nama_role,
+                "min_ram":
+                    roletek.role.min_ram,
+                "min_storage":
+                    roletek.role.min_storage,
+                "min_processor_score":
+                    roletek.role.min_processor_score
+            }
+            repo_bobot = BobotKriteriaRepository(conn)
+            rows = (
+                repo_bobot
+                .ambil_bobot_role_teknologi(
+                    selected_role_teknologi
+                )
+            )
+            bobot_role = {}
+            for row in rows:
+                nama = (
+                    row["nama_kriteria"]
+                    .lower()
+                    .strip()
+                )
+                bobot_role[nama] = (
+                    row["nilai_bobot"]
+                )
+            print("BOBOT =", bobot_role)
+        except Exception as e:
+            print(
+                "ERROR ROLE REQUIREMENT:",
+                str(e)
+            )
+
+    # ==========================
+    # PROSES DSS
+    # ==========================
+    if request.method == "POST":
+
+        print("=" * 50)
+        print("POST DSS")
+        print("POST =", request.POST)
+
+        action = request.POST.get(
+            "action",
+            "load"
+        )
+
+        print("ACTION =", action)
+
+        if action == "load":
+            return redirect(
+                "inputkriteria_hc"
+            )
+
+        try:
 
             raw_weights = [
-                {"id_kriteria": "K01", "nama_kriteria": "processor", "tipe_kriteria": "benefit", "nilai_bobot": b_processor},
-                {"id_kriteria": "K02", "nama_kriteria": "ram",       "tipe_kriteria": "benefit", "nilai_bobot": b_ram},
-                {"id_kriteria": "K03", "nama_kriteria": "storage",   "tipe_kriteria": "benefit", "nilai_bobot": b_storage},
-                {"id_kriteria": "K04", "nama_kriteria": "berat",     "tipe_kriteria": "cost",    "nilai_bobot": b_berat},
-                {"id_kriteria": "K05", "nama_kriteria": "layar",     "tipe_kriteria": "benefit", "nilai_bobot": b_layar},
-                {"id_kriteria": "K06", "nama_kriteria": "baterai",   "tipe_kriteria": "benefit", "nilai_bobot": b_baterai},
+                {
+                    "id_kriteria": "KRIT_0001",
+                    "nama_kriteria": "processor",
+                    "tipe_kriteria": request.POST.get(
+                        "tipe_processor",
+                        "benefit"
+                    ),
+                    "nilai_bobot": float(
+                        request.POST.get(
+                            "bobot_processor",
+                            0
+                        )
+                    )
+                },
+                {
+                    "id_kriteria": "KRIT_0002",
+                    "nama_kriteria": "ram",
+                    "tipe_kriteria": request.POST.get(
+                        "tipe_ram",
+                        "benefit"
+                    ),
+                    "nilai_bobot": float(
+                        request.POST.get(
+                            "bobot_ram",
+                            0
+                        )
+                    )
+                },
+                {
+                    "id_kriteria": "KRIT_0003",
+                    "nama_kriteria": "storage",
+                    "tipe_kriteria": request.POST.get(
+                        "tipe_storage",
+                        "benefit"
+                    ),
+                    "nilai_bobot": float(
+                        request.POST.get(
+                            "bobot_storage",
+                            0
+                        )
+                    )
+                },
+                {
+                    "id_kriteria": "KRIT_0004",
+                    "nama_kriteria": "berat",
+                    "tipe_kriteria": request.POST.get(
+                        "tipe_berat",
+                        "cost"
+                    ),
+                    "nilai_bobot": float(
+                        request.POST.get(
+                            "bobot_berat",
+                            0
+                        )
+                    )
+                },
+                {
+                    "id_kriteria": "KRIT_0005",
+                    "nama_kriteria": "layar",
+                    "tipe_kriteria": request.POST.get(
+                        "tipe_layar",
+                        "benefit"
+                    ),
+                    "nilai_bobot": float(
+                        request.POST.get(
+                            "bobot_layar",
+                            0
+                        )
+                    )
+                },
+                {
+                    "id_kriteria": "KRIT_0006",
+                    "nama_kriteria": "baterai",
+                    "tipe_kriteria": request.POST.get(
+                        "tipe_baterai",
+                        "benefit"
+                    ),
+                    "nilai_bobot": float(
+                        request.POST.get(
+                            "bobot_baterai",
+                            0
+                        )
+                    )
+                }
             ]
-            request.session['dss_raw_weights'] = raw_weights
-            return redirect('hasilrekomendasi_hc')
-        except Exception as e:
-            print("Error processing weights:", e)
 
-    processors = Processor.objects.all()
-    rams = RAM.objects.all()
-    storages = Storage.objects.all()
+            request.session[
+                "selected_project"
+            ] = request.POST.get(
+                "id_proyek"
+            )
+
+            request.session[
+                "selected_role_teknologi"
+            ] = request.POST.get(
+                "id_role_teknologi"
+            )
+
+            request.session[
+                "dss_raw_weights"
+            ] = raw_weights
+
+            request.session[
+                "minimum_requirement"
+            ] = {
+                "processor_score":
+                    request.POST.get(
+                        "min_processor_score"
+                    ),
+                "ram":
+                    request.POST.get(
+                        "min_ram"
+                    ),
+                "storage":
+                    request.POST.get(
+                        "min_storage"
+                    )
+            }
+
+            print(
+                "REDIRECT KE HASIL DSS"
+            )
+
+            return redirect(
+                "hasilrekomendasi_hc"
+            )
+
+        except Exception as e:
+            import traceback
+
+            print(
+                traceback.format_exc()
+            )
+
+            messages.error(
+                request,
+                f"Gagal memproses DSS: {str(e)}"
+            )
+
+    projects = (
+        Proyek.objects
+        .all()
+        .order_by(
+            "nama_proyek"
+        )
+    )
+
+    role_teknologi = (
+        RoleTeknologi.objects
+        .select_related(
+            "role",
+            "teknologi"
+        )
+        .order_by(
+            "role__nama_role",
+            "teknologi__nama_teknologi"
+        )
+    )
 
     context = {
-        'processors': processors,
-        'rams': rams,
-        'storages': storages,
+        "projects": projects,
+        "role_teknologi": role_teknologi,
+        "role_requirement": role_requirement,
+        "bobot_role": bobot_role,
+        "selected_project": selected_project,
+        "selected_role_teknologi": selected_role_teknologi
     }
-    return render(request, 'hc/dss/inputkriteria_hc.html', context)
+    return render(
+        request,
+        "hc/dss/inputkriteria_hc.html",
+        context
+    )
 
 def hasilrekomendasi_hc_view(request):
-    import sys
-    import os
-    base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    if base_path not in sys.path:
-        sys.path.append(base_path)
-    from simulate_saw import DUMMY_LAPTOPS, DummySawService, BASE_BOBOT_RAW
 
-    raw_weights = request.session.get('dss_raw_weights', BASE_BOBOT_RAW)
-    service = DummySawService(raw_weights)
-    
-    data_pre = [d.copy() for d in DUMMY_LAPTOPS]
-    data_normalisasi = service.normalisasi_saw(data_pre)
-    hasil_saw = service.hitung_saw_data(data_normalisasi, ["dummy_role"])
-    ranking = service.ranking_saw(hasil_saw)
-    
-    laptop_map = {l['id']: l for l in DUMMY_LAPTOPS}
-    for i, item in enumerate(ranking, start=1):
-        item["rank"] = i
-        item["detail"] = laptop_map.get(item["id"])
+    try:
+        conn = get_connection()
+        repo_laptop = LaptopInventoriRepository(conn)
+        selected_role_teknologi = request.session.get(
+            "selected_role_teknologi"
+        )
 
-    context = {
-        'ranking': ranking,
-        'top_3': ranking[:3],
-        'total_alternatif': len(ranking),
-        'rata_rata_harga': 15000000,
-        'skor_tertinggi': ranking[0]['skor'] if ranking else 0,
-    }
-    return render(request, 'hc/dss/hasilrekomendasi_hc.html', context)
+        minimum_requirement = request.session.get(
+            "minimum_requirement",
+            {}
+        )
 
+        if not selected_role_teknologi:
+
+            messages.error(
+                request,
+                "Role teknologi belum dipilih"
+            )
+
+            return redirect(
+                "inputkriteria_hc"
+            )
+
+        roletek = (
+            RoleTeknologi.objects
+            .select_related("role")
+            .get(
+                id_role_teknologi=
+                selected_role_teknologi
+            )
+        )
+
+        repo_bobot = BobotKriteriaRepository(conn)
+
+        hasil = repo_bobot.cari_bobot_kriteria_by_roles(
+            [roletek.role.nama_role]
+        )
+
+        print("=" * 50)
+        print("HASIL BOBOT")
+        print(hasil)
+        print("=" * 50)
+
+        role_id = roletek.role.id_role
+
+        filter_data = FilterInventoriDTO(
+            min_ram_kapasitas=int(
+                minimum_requirement.get(
+                    "ram",
+                    0
+                ) or 0
+            ),
+            min_storage=int(
+                minimum_requirement.get(
+                    "storage",
+                    0
+                ) or 0
+            )
+        )
+
+        service = Servicesaw(conn)
+
+        hasil = service.proses_dss_saw(
+            id_user="USR_0001",
+            id_bobot=selected_role_teknologi,
+            sumber_data="inventori",
+            filter_data=filter_data,
+            role=[role_id],
+            debug=True
+        )
+        print("\n=== HASIL SERVICE ===")
+        print(hasil)
+        print(type(hasil))
+
+        if hasil.get("status") != "success":
+
+            print("\n=== ERROR DSS ===")
+            print(hasil)
+
+            messages.error(
+                request,
+                hasil.get(
+                    "message",
+                    "Gagal menjalankan DSS"
+                )
+            )
+
+            return redirect(
+                "inputkriteria_hc"
+            )
+
+        ranking_sesuai = (
+            hasil["data"]
+            ["rekomendasi_sesuai_role"]
+            ["ranking"]
+        )
+
+        ranking_alternatif = (
+            hasil["data"]
+            ["alternatif_lain"]
+            ["ranking"]
+        )    
+        # print("\n=== TEST DETAIL ===")
+        # print(
+        #     repo_laptop.ambil_spek_laptop(
+        #         ranking_sesuai[9]["id"]
+        #     )
+        # )
+        # print("\n=== RANKING PERTAMA ===")
+        # print(ranking_sesuai[0])
+
+        for ranking_list in [ranking_sesuai, ranking_alternatif]:
+
+            for item in ranking_list:
+
+                laptop = repo_laptop.ambil_spek_laptop(
+                    item["id"]
+                )
+
+                item["detail"] = {
+                    "nama": item["id"],
+
+                    "processor":
+                        f"{laptop[0]} {laptop[2]}"
+                        if laptop else "-",
+
+                    "ram":
+                        laptop[6]
+                        if laptop else 0,
+
+                    "storage":
+                        laptop[8]
+                        if laptop else 0,
+
+                    "layar":
+                        laptop[9]
+                        if laptop else 0
+                }
+
+        context = {
+            "ranking_sesuai": ranking_sesuai,
+            "ranking_alternatif": ranking_alternatif,
+
+            "top_3": ranking_sesuai[:3],
+
+            "total_alternatif":
+                len(ranking_sesuai),
+
+            "rata_rata_harga": 0,
+
+            "skor_tertinggi":
+                ranking_sesuai[0]["skor"]
+                if ranking_sesuai
+                else 0,
+
+            "warning":
+                hasil.get("warning")
+        }
+
+        return render(
+            request,
+            "hc/dss/hasilrekomendasi_hc.html",
+            context
+        )
+
+    except Exception as e:
+
+        import traceback
+
+        traceback.print_exc()
+
+        messages.error(
+            request,
+            f"Error DSS: {str(e)}"
+        )
+
+        return redirect(
+            "inputkriteria_hc"
+        )
+        
 def detailrekomendasi_hc_view(request):
     return render(request, 'hc/dss/detailrekomendasi_hc.html')
 
@@ -550,35 +952,123 @@ def inputkriteria_it_view(request):
     return render(request, 'it/dss/inputkriteria_it.html', context)
 
 def hasilrekomendasi_it_view(request):
-    import sys
-    import os
-    base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    if base_path not in sys.path:
-        sys.path.append(base_path)
-    from simulate_saw import DUMMY_LAPTOPS, DummySawService, BASE_BOBOT_RAW
+    conn = get_connection()
 
-    raw_weights = request.session.get('dss_raw_weights', BASE_BOBOT_RAW)
-    service = DummySawService(raw_weights)
-    
-    data_pre = [d.copy() for d in DUMMY_LAPTOPS]
-    data_normalisasi = service.normalisasi_saw(data_pre)
-    hasil_saw = service.hitung_saw_data(data_normalisasi, ["dummy_role"])
-    ranking = service.ranking_saw(hasil_saw)
-    
-    laptop_map = {l['id']: l for l in DUMMY_LAPTOPS}
-    for i, item in enumerate(ranking, start=1):
-        item["rank"] = i
-        item["detail"] = laptop_map.get(item["id"])
+    try:
+        from dss.services.service_saw import Servicesaw
+        from inventori.models import RoleTeknologi
+        from inventori.dto.dto_laptop_inventori import (
+            FilterInventoriDTO
+        )
 
-    context = {
-        'ranking': ranking,
-        'top_3': ranking[:3],
-        'total_alternatif': len(ranking),
-        'rata_rata_harga': 15000000,
-        'skor_tertinggi': ranking[0]['skor'] if ranking else 0,
-    }
-    return render(request, 'it/dss/hasilrekomendasi_it.html', context)
+        selected_role_teknologi = request.session.get(
+            "selected_role_teknologi"
+        )
 
+        minimum_requirement = request.session.get(
+            "minimum_requirement",
+            {}
+        )
+
+        if not selected_role_teknologi:
+            messages.error(
+                request,
+                "Role teknologi belum dipilih"
+            )
+            return redirect(
+                "inputkriteria_it"
+            )
+
+        roletek = (
+            RoleTeknologi.objects
+            .select_related("role")
+            .get(
+                id_role_teknologi=
+                selected_role_teknologi
+            )
+        )
+
+        role_id = roletek.role.id_role
+
+        filter_data = FilterInventoriDTO(
+            min_ram_kapasitas=int(
+                minimum_requirement.get(
+                    "ram",
+                    0
+                ) or 0
+            ),
+            min_storage=int(
+                minimum_requirement.get(
+                    "storage",
+                    0
+                ) or 0
+            )
+        )
+
+        service = Servicesaw(conn)
+
+        hasil = service.proses_dss_saw(
+            id_user="USR_0001",
+            id_bobot=selected_role_teknologi,
+            sumber_data="inventori",
+            filter_data=filter_data,
+            role=[role_id],
+            debug=True
+        )
+
+        if hasil["status"] != "success":
+
+            messages.error(
+                request,
+                hasil.get(
+                    "message",
+                    "Gagal proses DSS"
+                )
+            )
+
+            return redirect(
+                "inputkriteria_it"
+            )
+
+        ranking = (
+            hasil["data"]
+            ["rekomendasi_sesuai_role"]
+            ["ranking"]
+        )
+
+        context = {
+            "ranking": ranking,
+            "top_3": ranking[:3],
+            "total_alternatif":
+                len(ranking),
+            "skor_tertinggi":
+                ranking[0]["skor"]
+                if ranking else 0,
+            "rata_rata_harga": 0,
+            "warning":
+                hasil.get("warning")
+        }
+
+        return render(
+            request,
+            "it/dss/hasilrekomendasi_it.html",
+            context
+        )
+
+    except Exception as e:
+
+        import traceback
+
+        traceback.print_exc()
+
+        messages.error(
+            request,
+            f"Error DSS: {str(e)}"
+        )
+
+        return redirect(
+            "inputkriteria_it"
+        )
 def detailrekomendasi_it_view(request):
     import sys
     import os
@@ -713,14 +1203,23 @@ def dashboard_talent_view(request):
             'recent_pengajuan': []
         }
     return render(request, 'talent/dashboard/dashboard_talent.html', context)
-
 def pengajuanlaptop_talent_view(request):
     try:
-        user_id = request.user.id_user if hasattr(request.user, 'id_user') else None
         service = PengajuanService()
 
+        # Ambil user id
+        user_id = request.POST.get('id_user')
+
+        if not user_id:
+            user_id = (
+                request.user.id_user
+                if hasattr(request.user, 'id_user')
+                else None
+            )
         if request.method == 'POST':
+
             from datetime import datetime
+
             departemen = request.POST.get('departemen') or 'Internal'
             role = request.POST.get('role') or 'Unknown'
             spesifikasi = request.POST.get('spesifikasi') or '-'
@@ -735,29 +1234,61 @@ def pengajuanlaptop_talent_view(request):
                 perusahaan=departemen,
                 status='pending'
             )
-            # The method is named service_tambah_peminjaman but actually creates pengajuan
-            service.service_tambah_pengajuan(dto)
-            messages.success(request, 'Pengajuan laptop berhasil dikirim.')
-            return redirect('dashboard_talent')
 
+            service.service_tambah_pengajuan(dto)
+
+            context = {
+                'show_success_popup': True,
+                'success_message': 'Pengajuan laptop berhasil dikirim dan sedang menunggu persetujuan.',
+                'list_pengajuan': [],
+                'total_pengajuan': 0,
+            }
+
+            return render(
+                request,
+                'talent/inventori/pengajuanlaptop_talent.html',
+                context
+            )
         semua_pengajuan = service.service_ambil_semua_pengajuan()
+
         if user_id:
-            semua_pengajuan = [p for p in semua_pengajuan if getattr(p, 'id_user', None) == user_id]
-            
-        semua_pengajuan.sort(key=lambda x: x.tanggal_pengajuan, reverse=True)
-        
+            semua_pengajuan = [
+                p for p in semua_pengajuan
+                if getattr(p, 'id_user', None) == user_id
+            ]
+
+        semua_pengajuan.sort(
+            key=lambda x: x.tanggal_pengajuan,
+            reverse=True
+        )
+
         context = {
             'list_pengajuan': semua_pengajuan,
             'total_pengajuan': len(semua_pengajuan),
+            'show_success_popup': False,
+            'show_error_popup': False,
         }
+
+        return render(
+            request,
+            'talent/inventori/pengajuanlaptop_talent.html',
+            context
+        )
+
     except Exception as e:
-        messages.error(request, f'Gagal mengirim pengajuan: {str(e)}')
+
         context = {
-            'error_message': f'Gagal memuat data pengajuan: {str(e)}',
+            'show_error_popup': True,
+            'error_message': str(e),
             'list_pengajuan': [],
             'total_pengajuan': 0,
         }
-    return render(request, 'talent/inventori/pengajuanlaptop_talent.html', context)
+
+        return render(
+            request,
+            'talent/inventori/pengajuanlaptop_talent.html',
+            context
+        )
 
 def detaillaptop_talent_view(request):
     user_id = request.user.id_user if hasattr(request.user, 'id_user') else None

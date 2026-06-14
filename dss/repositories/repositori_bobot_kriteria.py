@@ -136,3 +136,26 @@ class BobotKriteriaRepository(IBobotKriteriaRepositoryImpl):
                 else:
                     return result[0]
             return None
+        
+    def ambil_bobot_role_teknologi(
+        self,
+        id_role_teknologi
+    ):
+        query = """
+            SELECT
+                bk.id_kriteria,
+                k.nama_kriteria,
+                bk.nilai_bobot
+            FROM dss_bobotkriteria bk
+            JOIN dss_kriteria k
+                ON k.id_kriteria = bk.id_kriteria
+            WHERE bk.id_role_teknologi = %s
+            AND bk.is_active = TRUE
+        """
+
+        with self._get_dict_cursor() as cur:
+            cur.execute(
+                query,
+                (id_role_teknologi,)
+            )
+            return cur.fetchall()

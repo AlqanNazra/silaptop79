@@ -27,7 +27,7 @@ class LaptopInventoriDetailDTO:
         
 class FilterInventoriDTO:
     """DTO untuk parameter filter laptop inventori"""
-    
+
     def __init__(
         self,
         id_laptop_inventori: str = None,
@@ -73,7 +73,7 @@ class FilterInventoriDTO:
         self.min_storage = min_storage
         self.max_storage = max_storage
         self.storage_tipe = storage_tipe
-
+        
     def get_params(self) -> tuple:
         """Mengembalikan parameter dalam bentuk tuple sesuai urutan function SQL"""
         return (
@@ -97,7 +97,9 @@ class FilterInventoriDTO:
             self.storage_kapasitas,
             self.min_storage,
             self.max_storage,
-            self.storage_tipe
+            self.storage_tipe,
+            self.min_ram_kapasitas,
+            self.min_storage
         )
 
 # Alias sederhana yang dipakai oleh views.py untuk operasi CRUD input

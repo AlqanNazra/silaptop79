@@ -363,29 +363,26 @@
         {% include 'hc/components/sidebar.html' with active_page='input_kriteria' %}
 
         <!-- Main Content -->
-        <div class="main-dashboard-content">
-            <!-- Flash Messages -->
-            {% if messages %}
-            <div style="margin-bottom:20px;">
-                {% for message in messages %}
-                <div style="padding:12px 20px; border-radius:8px; margin-bottom:8px; font-size:14px; font-weight:500;
-                    {% if message.tags == 'success' %}background:#dcfce7; color:#15803d; border:1px solid #bbf7d0;
-                    {% elif message.tags == 'error' %}background:#fee2e2; color:#dc2626; border:1px solid #fecaca;
-                    {% else %}background:#dbeafe; color:#2563eb; border:1px solid #bfdbfe;{% endif %}">
-                    {{ message }}
-                </div>
-                {% endfor %}
-            </div>
-            {% endif %}
+    <div class="main-dashboard-content">
 
-            <h1 class="page-title">Konfigurasi Parameter SAW</h1>
-            <p class="page-subtitle">Lakukan penyesuaian kriteria dan bobot untuk mendapatkan rekomendasi laptop terbaik
-                menggunakan metode Simple Additive Weighting (SAW).</p>
+        <h1 class="page-title">Konfigurasi Parameter SAW</h1>
 
-            <form action="{% url 'inputkriteria_hc' %}" method="POST">
-                {% csrf_token %}
+        <p class="page-subtitle">
+            Pilih Project dan Role Teknologi untuk memuat konfigurasi DSS.
+            Nilai kriteria dan bobot dapat disesuaikan untuk simulasi rekomendasi
+            tanpa mengubah data master sistem.
+        </p>
 
-                <!-- Section A: Pemilihan Role -->
+        <form method="POST" id="mainForm">
+            {% csrf_token %}
+            <input
+                type="hidden"
+                name="action"
+                id="actionType"
+                value="load">
+            <!-- ================================= -->
+            <!-- SECTION A -->
+            <!-- ================================= -->       
                 <div class="card">
                     <div class="section-header">
                         <div class="icon-box">
@@ -394,216 +391,289 @@
                         <h3>Section A: Pemilihan Role</h3>
                     </div>
 
-                    <div class="form-group" style="margin-bottom: 0;">
-                        <label>Pilih Profil Pengguna</label>
-                        <select class="form-control" name="role_profile">
-                            <option value="Programmer" selected>Programmer</option>
-                            <option value="Desainer">Desainer Grafis</option>
-                            <option value="Staff">Staff Administrasi</option>
-                        </select>
-                    </div>
+                    <div class="grid-2-cols">
 
+                        <div class="form-group">
+
+                            <label>Project</label>
+
+                            <select
+                                class="form-control"
+                                name="id_proyek"
+                                id="projectSelect">
+
+                                <option value="">
+                                    Pilih Project
+                                </option>
+
+                                {% for project in projects %}
+
+                                    <option
+                                        value="{{ project.id_proyek }}"
+                                        {% if selected_project|stringformat:"s" == project.id_proyek|stringformat:"s" %}
+                                        selected
+                                        {% endif %}
+                                    >
+                                    {{ project.nama_proyek }}
+                                </option>
+
+                                {% endfor %}
+
+                            </select>
+
+                        </div>
+
+                        <div class="form-group">
+
+                            <label>Role</label>
+
+                            <select
+                                class="form-control"
+                                name="id_role_teknologi"
+                                id="roleTeknologiSelect">
+
+                                <option value="">
+                                    Pilih Role
+                                </option>
+
+                                {% for item in role_teknologi %}
+
+                                <option
+                                    value="{{ item.id_role_teknologi }}"
+                                    {% if selected_role_teknologi == item.id_role_teknologi %}
+                                    selected
+                                    {% endif %}
+                                >
+
+                                    {{ item.role.nama_role }}
+                                    -
+                                    {{ item.teknologi.nama_teknologi }}
+
+                                </option>
+
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div> 
                     <div class="info-alert">
                         <i class="fa-solid fa-circle-info"></i>
-                        <p>Memilih role akan secara otomatis menyesuaikan bobot kriteria (Section C) berdasarkan
-                            kebutuhan standar industri untuk profesi tersebut. Anda tetap dapat menyesuaikan bobot
-                            secara manual.</p>
+                        <p>
+                            Setelah role dipilih, sistem akan memuat konfigurasi
+                            requirement minimum dan bobot DSS berdasarkan role.
+                            Nilai dapat diubah untuk simulasi tanpa mengubah
+                            data master sistem.
+                        </p>
+                    </div>
+                </div>            
+
+            <!-- ================================= -->
+            <!-- SECTION B -->
+            <!-- ================================= -->
+            <div class="card">
+
+                <div class="section-header">
+                    <div class="icon-box">
+                        <i class="fa-solid fa-microchip"></i>
+                    </div>
+                    <h3>Section B: Minimum Requirement</h3>
+                </div>
+
+                <div class="grid-3-cols">
+
+                    <div class="form-group">
+
+                        <label>Minimum Processor Score</label>
+
+                        <input
+                            type="number"
+                            name="min_processor_score"
+                            class="form-control"
+                            id="minProcessor"
+                            value="{{ role_requirement.min_processor_score|default:'' }}">
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label>Minimum RAM (GB)</label>
+
+                        <input
+                            type="number"
+                            name="min_ram"
+                            class="form-control"
+                            id="minRam"
+                            value="{{ role_requirement.min_ram|default:'' }}">
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label>Minimum Storage (GB)</label>
+
+                        <input
+                            type="number"
+                            name="min_storage"
+                            class="form-control"
+                            id="minStorage"
+                            value="{{ role_requirement.min_storage|default:'' }}">
+                    </div>
+                </div>
+            </div>            <!-- ================================= -->
+            <!-- SUMMARY -->
+            <!-- ================================= -->
+
+            <div class="summary-box">
+
+                <div class="title">
+                    Ringkasan DSS
+                </div>
+
+                <ul>
+
+                    <li>
+                        <i class="fa-solid fa-circle dot-blue"></i>
+                        Benefit → Semakin besar semakin baik
+                    </li>
+
+                    <li>
+                        <i class="fa-solid fa-circle dot-cyan"></i>
+                        Cost → Semakin kecil semakin baik
+                    </li>
+
+                    <li>
+                        <i class="fa-solid fa-circle dot-blue"></i>
+                        Nilai dapat dimodifikasi untuk simulasi SAW
+                    </li>
+
+                </ul>
+
+            </div>
+
+            <!-- ================================= -->
+            <!-- SECTION C -->
+            <!-- ================================= -->
+
+            <div class="card">
+
+                <div class="section-header">
+                    <div class="icon-box">
+                        <i class="fa-solid fa-scale-balanced"></i>
+                    </div>
+                    <h3>Section C: Bobot Kriteria</h3>
+                </div>
+                <div class="grid-2-cols">
+                    <div class="form-group">
+                        <label>Processor</label>
+                        <input
+                            type="number"
+                            step="0.01"
+                            name="bobot_processor"
+                            value="{% if bobot_role %}{{ bobot_role.processor|default:'0' }}{% endif %}"
+                            class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>RAM</label>
+                        <input
+                            type="number"
+                            step="0.01"
+                            name="bobot_ram"
+                            value="{% if bobot_role %}{{ bobot_role.ram|default:'0' }}{% endif %}"
+                            class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Storage</label>
+                        <input
+                            type="number"
+                            step="0.01"
+                            name="bobot_storage"
+                            value="{% if bobot_role %}{{ bobot_role.storage|default:'0' }}{% endif %}"
+                            class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Berat</label>
+                        <input
+                            type="number"
+                            step="0.01"
+                            name="bobot_berat"
+                            value="{% if bobot_role %}{{ bobot_role.berat|default:'0' }}{% endif %}"
+                            class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Layar</label>
+                        <input
+                            type="number"
+                            step="0.01"
+                            name="bobot_layar"
+                            value="{% if bobot_role %}{{ bobot_role.layar|default:'0' }}{% endif %}"
+                            class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Baterai</label>
+                        <input
+                            type="number"
+                            step="0.01"
+                            name="bobot_baterai"
+                            value="{% if bobot_role %}{{ bobot_role.baterai|default:'0' }}{% endif %}"
+                            class="form-control">
                     </div>
                 </div>
 
-                <!-- Section B: Spesifikasi Kriteria -->
-                <div class="card">
-                    <div class="section-header">
-                        <div class="icon-box">
-                            <i class="fa-solid fa-bars-staggered"></i>
-                        </div>
-                        <h3>Section B: Spesifikasi Kriteria</h3>
-                    </div>
+            </div>            
+            <!-- ================================= -->
+            <!-- ACTION -->
+            <!-- ================================= -->
 
-                    <!-- Processor Group -->
-                    <div class="group-row">
-                        <div class="group-row-title">
-                            PROCESSOR
-                            <span class="badge badge-benefit">BENEFIT</span>
-                        </div>
-                        <div class="grid-5-cols">
-                            <div class="form-group">
-                                <label>Manufacturer & Model</label>
-                                <select class="form-control" name="id_processor">
-                                    <option value="" disabled selected>Pilih Processor</option>
-                                    {% for proc in processors %}
-                                    <option value="{{ proc.id_processor }}">{{ proc.nama_processor }} ({{ proc.manufacturer }})</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>Cores</label>
-                                <input type="text" class="form-control" value="14">
-                            </div>
-                            <div class="form-group">
-                                <label>Threads</label>
-                                <input type="text" class="form-control" value="20">
-                            </div>
-                            <div class="form-group">
-                                <label>Base Clock (GHz)</label>
-                                <input type="text" class="form-control" value="2.4">
-                            </div>
-                            <div class="form-group">
-                                <label>Architecture</label>
-                                <input type="text" class="form-control" value="Raptor Lake">
-                            </div>
-                        </div>
-                    </div>
+            <div style="margin-top:32px">
+                <button
+                    type="submit"
+                    class="btn btn-secondary"
+                    onclick="document.getElementById('actionType').value='hitung'">
+                    Hitung Rekomendasi
+                </button>
+                <button type="button"class="btn btn-secondary">Gunakan Bobot Default Role
+                </button>
+                <button type="reset"
+                        class="btn btn-link">
+                    Reset
+                </button>
 
-                    <!-- Storage Group -->
-                    <div class="group-row">
-                        <div class="group-row-title">
-                            STORAGE
-                            <span class="badge badge-benefit">BENEFIT</span>
-                        </div>
-                        <div class="grid-2-cols">
-                            <div class="form-group">
-                                <label>Capacity (GB)</label>
-                                <select class="form-control" name="id_storage">
-                                    <option value="" disabled selected>Pilih Storage</option>
-                                    {% for storage in storages %}
-                                    <option value="{{ storage.id_storage }}">{{ storage.kapasitas_gb }} GB {{ storage.tipe }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>Type</label>
-                                <input type="text" class="form-control" value="SSD NVMe Gen4">
-                            </div>
-                        </div>
-                    </div>
+            </div>
 
-                    <!-- RAM Group -->
-                    <div class="group-row">
-                        <div class="group-row-title">
-                            RAM
-                            <span class="badge badge-benefit">BENEFIT</span>
-                        </div>
-                        <div class="grid-2-cols">
-                            <div class="form-group">
-                                <label>Capacity (GB)</label>
-                                <select class="form-control" name="id_ram">
-                                    <option value="" disabled selected>Pilih RAM</option>
-                                    {% for ram in rams %}
-                                    <option value="{{ ram.id_ram }}">{{ ram.kapasitas_gb }} GB {{ ram.tipe }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>Type</label>
-                                <input type="text" class="form-control" value="DDR5">
-                            </div>
-                        </div>
-                    </div>
+        </form>
 
-                    <!-- Mixed Metrics Grid -->
-                    <div class="grid-2-cols" style="margin-top: 32px;">
-                        <div class="form-group">
-                            <label>Harga (Maksimal) <span class="badge badge-cost">COST</span></label>
-                            <input type="text" class="form-control" placeholder="Rp 0">
-                        </div>
-                        <div class="form-group">
-                            <label>Ukuran Layar (Inch) <span class="badge badge-benefit">BENEFIT</span></label>
-                            <input type="text" class="form-control" value="14">
-                        </div>
-
-                        <div class="form-group">
-                            <label>RAM (Min GB) <span class="badge badge-benefit">BENEFIT</span></label>
-                            <input type="text" class="form-control" value="16">
-                        </div>
-                        <div class="form-group">
-                            <label>Storage (Min GB) <span class="badge badge-benefit">BENEFIT</span></label>
-                            <input type="text" class="form-control" value="512">
-                        </div>
-
-                        <div class="form-group">
-                            <label>Baterai (Milliampere-Hour) <span class="badge badge-benefit">BENEFIT</span></label>
-                            <input type="text" class="form-control" value="3000">
-                        </div>
-                        <div class="form-group">
-                            <label>Berat (Maks Kg) <span class="badge badge-cost">COST</span></label>
-                            <input type="text" class="form-control" value="1.5">
-                        </div>
-                    </div>
-
-                </div>
-
-                <!-- Ringkasan Klasifikasi (Between B and C) -->
-                <div class="summary-box">
-                    <div class="title">Ringkasan Klasifikasi</div>
-                    <ul>
-                        <li><i class="fa-solid fa-circle dot-blue"></i> <b>Benefit (Semakin besar semakin baik)</b>
-                            &rarr; Processor, RAM, Storage, Baterai, Ukuran Layar</li>
-                        <li><i class="fa-solid fa-circle dot-cyan" style="color: #0b57c6; background:none;"></i> <span
-                                style="font-weight:bold; color: #0b57c6; box-shadow:inset 0 0 0 1px #0b57c6; border-radius:50%; width:6px; height:6px; display:inline-block;"></span>
-                            <b>Cost (Semakin kecil semakin baik)</b> &rarr; Berat, Harga</li>
-                    </ul>
-                </div>
-
-                <!-- Section C: Bobot Kriteria -->
-                <div class="card">
-                    <div class="section-header">
-                        <div class="icon-box">
-                            <i class="fa-solid fa-scale-balanced"></i>
-                        </div>
-                        <h3>Section C: Bobot Kriteria</h3>
-                    </div>
-
-                    <div class="grid-2-cols-bobot">
-                        <!-- Left Column Bobot -->
-                        <div>
-                            <div class="bobot-row">
-                                <span class="bobot-label">Processor</span>
-                                <input type="text" class="bobot-input" value="7" name="bobot_processor">
-                            </div>
-                            <div class="bobot-row">
-                                <span class="bobot-label">Baterai</span>
-                                <input type="text" class="bobot-input" value="6" name="bobot_baterai">
-                            </div>
-                            <div class="bobot-row">
-                                <span class="bobot-label">Harga</span>
-                                <input type="text" class="bobot-input" value="6" name="bobot_harga">
-                            </div>
-                            <div class="bobot-row">
-                                <span class="bobot-label">Berat</span>
-                                <input type="text" class="bobot-input" value="2" name="bobot_berat">
-                            </div>
-                        </div>
-
-                        <!-- Right Column Bobot -->
-                        <div>
-                            <div class="bobot-row">
-                                <span class="bobot-label">RAM</span>
-                                <input type="text" class="bobot-input" value="5" name="bobot_ram">
-                            </div>
-                            <div class="bobot-row">
-                                <span class="bobot-label">Ukuran Layar</span>
-                                <input type="text" class="bobot-input" value="2" name="bobot_layar">
-                            </div>
-                            <div class="bobot-row">
-                                <span class="bobot-label">Storage</span>
-                                <input type="text" class="bobot-input" value="4" name="bobot_storage">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Action Buttons -->
-                <div style="margin-top: 32px; margin-bottom: 40px;">
-                    <button type="submit" class="btn btn-primary">Hitung Rekomendasi</button>
-                    <button type="button" class="btn btn-secondary">Gunakan Bobot Default Role</button>
-                    <button type="reset" class="btn btn-link">Reset</button>
-                </div>
-
-            </form>
-        </div> <!-- End Main Content -->
+    </div>
     </div> <!-- End Dashboard Wrapper -->
+    <script>
 
+    const roleSelect =
+        document.getElementById("roleTeknologiSelect");
+
+    const projectSelect =
+        document.getElementById("projectSelect");
+
+    function loadRoleData() {
+
+        const projectId = projectSelect.value;
+        const roleId = roleSelect.value;
+
+        if (projectId && roleId) {
+
+            window.location.href =
+                `/inputkriteria_hc/?id_proyek=${projectId}&id_role_teknologi=${roleId}`;
+        }
+    }
+
+    projectSelect.addEventListener(
+        "change",
+        loadRoleData
+    );
+
+    roleSelect.addEventListener(
+        "change",
+        loadRoleData
+    );
+
+    </script>
 </body>
 
 </html>

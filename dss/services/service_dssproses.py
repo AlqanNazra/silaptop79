@@ -160,19 +160,19 @@ class DssProsesService:
 
         for role in project_roles:
 
-            role_id = role["id_role"]
+            id_role = role["id_role"]
 
             hasil_swara = self.swaraService.proses_swara(
-                [role_id]
+                [id_role]
             )
 
             if hasil_swara["status"] != "success":
 
                 raise Exception(
-                    f"Gagal SWARA role {role_id}"
+                    f"Gagal SWARA role {id_role}"
                 )
 
-            swara_per_role[role_id] = [
+            swara_per_role[id_role] = [
                 {
                     "nama_kriteria": item["nama_kriteria"],
                     "nilai_swara": Decimal(

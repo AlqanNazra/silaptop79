@@ -29,5 +29,5 @@ class IRoleService(ABC):
     @abstractmethod
     def hapus_role(self, id_role: str) -> bool: pass
 
-    @abstractmethod
-    def calculate_need_score(self, id_role: str) -> Dict: pass
+    # @abstractmethod
+    # def calculate_need_score(self, id_role: str) -> Dict: pass

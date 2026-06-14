@@ -16,6 +16,34 @@ class Servicepreposesdata:
         self.conn = conn
         self.repoLP = LaptopPengadaanRepository(conn)
         self.repoLI = LaptopInventoriRepository(conn) 
+    def ambil_semua_data(
+        self,
+        sumber_data
+    ):
+        try:
+
+            if sumber_data == "inventori":
+
+                return (
+                    self.repoLI.ambil_laptop()
+                )
+
+            elif sumber_data == "pengadaan":
+
+                return (
+                    self.repoLP.ambil_laptop_pengadaan()
+                )
+
+            return []
+
+        except Exception as e:
+
+            print(
+                "ERROR AMBIL SEMUA DATA:",
+                str(e)
+            )
+
+            return []
     
     def filtering_data(
         self,

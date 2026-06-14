@@ -75,3 +75,75 @@ BEGIN
 
 END;
 $$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION get_role_teknologi_by_id(
+    p_id_role_teknologi VARCHAR
+)
+RETURNS TABLE(
+    id_role_teknologi VARCHAR,
+    id_role VARCHAR,
+    nama_role VARCHAR,
+    id_teknologi VARCHAR,
+    nama_teknologi VARCHAR
+)
+AS
+$$
+BEGIN
+
+RETURN QUERY
+
+SELECT
+    rt.id_role_teknologi,
+    r.id_role,
+    r.nama_role,
+    t.id_teknologi,
+    t.nama_teknologi
+
+FROM role_teknologi rt
+
+JOIN inventori_role r
+    ON r.id_role = rt.id_role
+
+JOIN inventori_teknologi t
+    ON t.id_teknologi = rt.id_teknologi
+
+WHERE rt.id_role_teknologi = p_id_role_teknologi;
+
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION get_all_role_teknologi()
+RETURNS TABLE(
+    id_role_teknologi VARCHAR,
+    id_role VARCHAR,
+    nama_role VARCHAR,
+    id_teknologi VARCHAR,
+    nama_teknologi VARCHAR
+)
+AS
+$$
+BEGIN
+
+RETURN QUERY
+
+SELECT
+    rt.id_role_teknologi,
+    r.id_role,
+    r.nama_role,
+    t.id_teknologi,
+    t.nama_teknologi
+
+FROM role_teknologi rt
+
+JOIN inventori_role r
+    ON r.id_role = rt.id_role
+
+JOIN inventori_teknologi t
+    ON t.id_teknologi = rt.id_teknologi
+
+ORDER BY
+    r.nama_role,
+    t.nama_teknologi;
+
+END;
+$$ LANGUAGE plpgsql;

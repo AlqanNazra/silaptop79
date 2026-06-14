@@ -23,28 +23,40 @@ class Processor(models.Model):
     max_clock = models.FloatField()
     arsitektur = models.CharField(max_length=100)
     benchmark_score = models.IntegerField(default=0)
-    benchmark_url = models.TextField(null=True,blank=True)
-    keterangan = models.TextField(null=True,blank=True)
+
+    keterangan = models.TextField(
+        null=True,
+        blank=True
+    )
+
     class Meta:
         db_table = "inventori_processor"
-    def __str__(self):
-        return (
-            f"{self.nama_processor} "
-            f"({self.benchmark_score})"
-        )
 
 class RAM(models.Model):
-    id_ram = models.BigAutoField(primary_key=True, db_column='id')
+    id_ram = models.BigAutoField(
+        primary_key=True
+    )
 
     kapasitas_gb = models.IntegerField()
     tipe = models.CharField(max_length=50)
-    keterangan = models.TextField(null=True, blank=True)
+    keterangan = models.TextField(
+        null=True,
+        blank=True
+    )
+
+    class Meta:
+        db_table = "inventori_ram"
 
 class Storage(models.Model):
-    id_storage = models.BigAutoField(primary_key=True, db_column='id')
+    id_storage = models.BigAutoField(
+        primary_key=True
+    )
 
     kapasitas_gb = models.IntegerField()
     tipe = models.CharField(max_length=100)
+
+    class Meta:
+        db_table = "inventori_storage"
 
 class LaptopInventori(models.Model):
     id_laptop_inventori = models.CharField(primary_key=True, max_length=100)
@@ -74,16 +86,16 @@ class LaptopInventori(models.Model):
 
     lokasi = models.CharField(max_length=255)
 
-    id_processor = models.ForeignKey(Processor, on_delete=models.SET_NULL, null=True, db_column='processor_id')
-    id_ram = models.ForeignKey(RAM, on_delete=models.SET_NULL, null=True, db_column='ram_id')
-    id_storage = models.ForeignKey(Storage, on_delete=models.SET_NULL, null=True, db_column='storage_id')
+    id_processor = models.ForeignKey(Processor, on_delete=models.SET_NULL, null=True, db_column='id_processor')
+    id_ram = models.ForeignKey(RAM, on_delete=models.SET_NULL, null=True, db_column='id_ram')
+    id_storage = models.ForeignKey(Storage, on_delete=models.SET_NULL, null=True, db_column='id_storage')
 
     ukuran_layar = models.FloatField(null=True, blank=True)
 
 class Pengajuan(models.Model):
     id_pengajuan = models.CharField(primary_key=True, max_length=100)
 
-    id_user = models.ForeignKey(User, on_delete=models.CASCADE, db_column='user_id')
+    id_user = models.ForeignKey(User, on_delete=models.CASCADE, db_column='id_user')
     kebutuhan_role = models.CharField(max_length=100)
     kebutuhan_requirement = models.TextField()
     bulan = models.DateField()
@@ -99,15 +111,15 @@ class Pengajuan(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         related_name='approver',
-        db_column='approved_by_id'
+        db_column='id_approved_by'
     )
 
 class Peminjaman(models.Model):
     id_peminjaman = models.CharField(primary_key=True, max_length=100)
 
-    id_pengajuan = models.ForeignKey(Pengajuan, on_delete=models.CASCADE, db_column='pengajuan_id')
-    id_user = models.ForeignKey(User, on_delete=models.CASCADE, db_column='user_id')
-    id_laptop_inventori = models.ForeignKey(LaptopInventori, on_delete=models.CASCADE, db_column='laptop_id')
+    id_pengajuan = models.ForeignKey(Pengajuan, on_delete=models.CASCADE, db_column='id_pengajuan')
+    id_user = models.ForeignKey(User, on_delete=models.CASCADE, db_column='id_user')
+    id_laptop_inventori = models.ForeignKey(LaptopInventori, on_delete=models.CASCADE, db_column='id_laptop')
 
     tanggal_pinjam = models.DateField()
     tanggal_kembali = models.DateField(null=True, blank=True)
@@ -118,8 +130,8 @@ class Peminjaman(models.Model):
 class RiwayatAktivitas(models.Model):
     id_aktivitas = models.CharField(primary_key=True, max_length=100)
 
-    id_user = models.ForeignKey(User, on_delete=models.CASCADE, db_column='user_id')
-    id_laptop_inventori = models.ForeignKey(LaptopInventori, on_delete=models.CASCADE, db_column='laptop_id')
+    id_user = models.ForeignKey(User, on_delete=models.CASCADE, db_column='id_user')
+    id_laptop_inventori = models.ForeignKey(LaptopInventori, on_delete=models.CASCADE, db_column='id_laptop')
 
     jenis_aktivitas = models.CharField(max_length=100)
     keterangan = models.TextField(null=True, blank=True)
@@ -175,11 +187,13 @@ class RoleTeknologi(models.Model):
 
     role = models.ForeignKey(
         Role,
+        db_column="id_role",
         on_delete=models.CASCADE
     )
 
     teknologi = models.ForeignKey(
         Teknologi,
+        db_column="id_teknologi",
         on_delete=models.CASCADE
     )
 
@@ -192,7 +206,6 @@ class RoleTeknologi(models.Model):
     )
 
     class Meta:
-
         db_table = "role_teknologi"
 
         unique_together = (

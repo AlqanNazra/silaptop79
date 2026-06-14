@@ -67,19 +67,12 @@ class Servicesaw:
         fallback = ( hasil_split["fallback"])
         hasil_role = None
         hasil_fallback = None
-        if role_match:
-            hasil_role = (
+        hasil_role = (
                 self.proses_saw_pipeline(
                     role_match,
                     role
                 )
             )
-        hasil_fallback = (
-            self.proses_saw_pipeline(
-                fallback,
-                role
-            )
-        )
         return {
             "role_result": hasil_role,
             "fallback_result": hasil_fallback,
@@ -92,20 +85,27 @@ class Servicesaw:
 
     def get_role_requirement(
         self,
-        role_id
+        id_role
     ):
-        print("ROLE YANG DICARI =", role_id)
-        role = self.repoRole.get_by_id(role_id)
+        print("ROLE YANG DICARI =", id_role)
+
+        role = self.repoRole.get_by_id(id_role)
+
+        print("\n=== ROLE RAW ===")
+        print(role)
+        print(type(role))
 
         if not role:
             raise Exception(
-                f"Role {role_id} tidak ditemukan"
+                f"Role {id_role} tidak ditemukan"
             )
 
         return {
-            "min_ram": role["min_ram"],
-            "min_storage": role["min_storage"],
-            "min_processor_score": role["min_processor_score"]
+            "id_role": role[0],
+            "nama_role": role[1],
+            "min_ram": role[2],
+            "min_storage": role[3],
+            "min_processor_score": role[4]
         }
     def normalisasi_saw(self, data_preproses):  
         print("\n=== DEBUG NORMALISASI START ===")
@@ -307,10 +307,10 @@ class Servicesaw:
                 )
             )
 
-    def proses_dss_saw(self,id_user,id_bobot,sumber_data,filter_data,role: list,debug=True):
+    def proses_dss_saw(self,id_user,id_bobot,sumber_data,filter_data,role: list,debug=False):
         conn = self.conn
         try:
-            conn.autocommit = False
+            # conn.autocommit = False
             id_dss = self.repodssprosses.tambah_dss_proses(
                 DssProsesDTO(
                     id_user=id_user,
@@ -331,6 +331,17 @@ class Servicesaw:
                 conn.rollback()
                 return hasil_filter
             data_raw = hasil_filter["data"]
+            semua_data = (
+                self.servisPD
+                .ambil_semua_data(
+                    sumber_data
+                )
+            )
+
+            print(
+                "TOTAL DATA INVENTORI =",
+                len(semua_data)
+            )
             print("=== RAW DATA ===")
             print(data_raw[0])
             if not data_raw:
@@ -346,9 +357,10 @@ class Servicesaw:
                     role_requirement
                 )
             )
-            role_match_data = (hasil_split["role_match"])
-            fallback_data = (hasil_split["fallback"])
-            
+
+            role_match_data = (
+                hasil_split["role_match"]
+            )
             # DATASET 1 REKOMENDASI SESUAI ROLE
             ranking_role = []
             hasil_role = None
@@ -364,7 +376,10 @@ class Servicesaw:
                 )
             # DATASET 2 ALTERNATIF LAIN
             hasil_fallback = (
-                self.proses_saw_pipeline(fallback_data,role)
+                self.proses_saw_pipeline(
+                    semua_data,
+                    role
+                )
             )
             ranking_fallback = (hasil_fallback["ranking"])
             
@@ -401,49 +416,49 @@ class Servicesaw:
                 )
             conn.commit()
 
-            if debug == True:
+            # if debug == True:
 
-                print("\n" + "=" * 80)
-                print("HASIL DSS SAW")
-                print("=" * 80)
+                # print("\n" + "=" * 80)
+                # print("HASIL DSS SAW")
+                # print("=" * 80)
 
-                meta = {
-                    "id_dss": id_dss,
-                    "id_hasil_role": id_hasil_role,
-                    "id_hasil_fallback": id_hasil_fallback,
-                    "total_role_match": len(role_match),
-                    "total_fallback": len(fallback)
-                }
+                # meta = {
+                #     "id_dss": id_dss,
+                #     "id_hasil_role": id_hasil_role,
+                #     "id_hasil_fallback": id_hasil_fallback,
+                #     "total_role_match": len(role_match),
+                #     "total_fallback": len(fallback)
+                # }
 
-                print(f"ID DSS            : {meta['id_dss']}")
-                print(f"ID Role Match     : {meta['id_hasil_role']}")
-                print(f"ID Fallback       : {meta['id_hasil_fallback']}")
-                print(f"Total Role Match  : {meta['total_role_match']}")
-                print(f"Total Fallback    : {meta['total_fallback']}")
+                # print(f"ID DSS            : {meta['id_dss']}")
+                # print(f"ID Role Match     : {meta['id_hasil_role']}")
+                # print(f"ID Fallback       : {meta['id_hasil_fallback']}")
+                # print(f"Total Role Match  : {meta['total_role_match']}")
+                # print(f"Total Fallback    : {meta['total_fallback']}")
 
-                print("\n" + "-" * 80)
-                print("REKOMENDASI SESUAI ROLE")
-                print("-" * 80)
+                # print("\n" + "-" * 80)
+                # print("REKOMENDASI SESUAI ROLE")
+                # print("-" * 80)
 
-                for item in ranking_role:
-                    print(
-                        f"Rank {item['rank']:>2} | "
-                        f"{item['id']} | "
-                        f"Score = {item['skor']:.6f}"
-                    )
+                # for item in ranking_role:
+                #     print(
+                #         f"Rank {item['rank']:>2} | "
+                #         f"{item['id']} | "
+                #         f"Score = {item['skor']:.6f}"
+                #     )
 
-                print("\n" + "-" * 80)
-                print("ALTERNATIF LAIN (SEMUA DATA)")
-                print("-" * 80)
+                # print("\n" + "-" * 80)
+                # print("ALTERNATIF LAIN (SEMUA DATA)")
+                # print("-" * 80)
 
-                for item in ranking_fallback:
-                    print(
-                        f"Rank {item['rank']:>2} | "
-                        f"{item['id']} | "
-                        f"Score = {item['skor']:.6f}"
-                    )
+                # for item in ranking_fallback:
+                #     print(
+                #         f"Rank {item['rank']:>2} | "
+                #         f"{item['id']} | "
+                #         f"Score = {item['skor']:.6f}"
+                #     )
 
-                print("=" * 80)
+                # print("=" * 80)
             
             # if debug == True:
             #     return {
@@ -485,11 +500,8 @@ class Servicesaw:
             # ==========================================
             # NORMAL MODE
             # ==========================================
-
             return {
-
                 "status": "success",
-
                 "warning":
                     None
                     if role_match_data
@@ -499,53 +511,47 @@ class Servicesaw:
                         "yang memenuhi minimum "
                         "requirement role"
                     ),
-
                 "meta": {
-
                     "id_dss":
                         id_dss,
-
                     "id_hasil_role":
                         id_hasil_role,
-
                     "id_hasil_fallback":
                         id_hasil_fallback,
-
                     "total_role_match":
                         len(ranking_role),
-
                     "total_fallback":
                         len(ranking_fallback)
                 },
-
                 "data": {
-
                     "rekomendasi_sesuai_role": {
-
                         "ranking":
                             ranking_role
                     },
-
                     "alternatif_lain": {
-
                         "ranking":
                             ranking_fallback
                     }
                 }
             }
+        # except Exception as e:
+        #     conn.rollback()
 
+        #     print("\n=== ERROR DSS ===")
+        #     traceback.print_exc()
+
+        #     return {
+        #         "status": "error",
+        #         "message": str(e)
+        #     }
         except Exception as e:
-
             conn.rollback()
 
-            print("\n=== ERROR DSS ===")
+            import traceback
+
+            print("\n=== ERROR DSS FULL ===")
             traceback.print_exc()
 
-            return {
-                "status": "error",
-                "message": str(e)
-            }
-
+            raise
         finally:
-
             conn.autocommit = True

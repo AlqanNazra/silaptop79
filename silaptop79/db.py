@@ -6,7 +6,7 @@ def get_connection():
             host="127.0.0.1",
             database="TA",
             user="postgres",
-            password="password_baru"
+            password="alqan"
         )
         conn.autocommit = False  # pakai transaction
         print("✅ CONNECTED TO DB")

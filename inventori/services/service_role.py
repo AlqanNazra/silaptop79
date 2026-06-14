@@ -2,8 +2,8 @@
 import logging
 from django.db import transaction, IntegrityError
 from psycopg2 import DatabaseError
-from repositories.interfaces.interface_role import IRoleService, IRoleRepository
-from dto.dto_role import RoleDTO
+from inventori.repositories.interfaces.interface_role import IRoleService, IRoleRepository
+from inventori.dto.dto_role import RoleDTO
 
 logger = logging.getLogger(__name__)
 

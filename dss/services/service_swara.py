@@ -146,7 +146,6 @@ class ServiceSwara:
         return hasil
 
     def proses_swara(self, role: list):
-
         try:
             with self.conn:
                 sorted_kriteria, meta = self.pengurutan_kriteria(role)
@@ -154,12 +153,9 @@ class ServiceSwara:
                 kj = self.menghitung_kj(sj)
                 qj = self.menghitung_qj(kj)
                 hasil = self.normalisasi_bobot(qj, sorted_kriteria, meta)
-
                 total = sum([h["bobot_akhir"] for h in hasil])
-
                 if abs(total - 1) > 0.001:
                     raise Exception("Bobot SWARA tidak valid")
-
                 return {
                     "status": "success",
                     "data": {

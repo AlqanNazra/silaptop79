@@ -17,11 +17,16 @@ class Kriteria(models.Model):
     golongan_kriteria = models.CharField(max_length=255)
 
 class BobotKriteria(models.Model):
-    id_bobot = models.CharField(primary_key=True, max_length=100)
 
-    id_kriteria = models.ForeignKey(Kriteria, on_delete=models.CASCADE)
+    id_kriteria = models.ForeignKey(
+        Kriteria,
+        on_delete=models.CASCADE
+    )
 
-    role = models.CharField(max_length=100)
+    role = models.CharField(
+        max_length=100
+    )
+
     nilai_bobot = models.FloatField()
 
 class DSSProses(models.Model):

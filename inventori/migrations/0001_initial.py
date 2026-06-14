@@ -51,7 +51,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='RAM',
             fields=[
-                ('id_ram', models.BigAutoField(db_column='id', primary_key=True, serialize=False)),
+                ('id_ram', models.BigAutoField(db_column='id_ram', primary_key=True, serialize=False)),
                 ('kapasitas_gb', models.IntegerField()),
                 ('tipe', models.CharField(max_length=50)),
                 ('keterangan', models.TextField(blank=True, null=True)),
@@ -74,7 +74,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Storage',
             fields=[
-                ('id_storage', models.BigAutoField(db_column='id', primary_key=True, serialize=False)),
+                ('id_storage', models.BigAutoField(db_column='id_', primary_key=True, serialize=False)),
                 ('kapasitas_gb', models.IntegerField()),
                 ('tipe', models.CharField(max_length=100)),
             ],
@@ -113,9 +113,9 @@ class Migration(migrations.Migration):
                 ('status', models.CharField(choices=[('tersedia', 'Tersedia'), ('dipinjam', 'Dipinjam'), ('rusak', 'Rusak')], max_length=50)),
                 ('lokasi', models.CharField(max_length=255)),
                 ('ukuran_layar', models.FloatField(blank=True, null=True)),
-                ('id_processor', models.ForeignKey(db_column='processor_id', null=True, on_delete=django.db.models.deletion.SET_NULL, to='inventori.processor')),
-                ('id_ram', models.ForeignKey(db_column='ram_id', null=True, on_delete=django.db.models.deletion.SET_NULL, to='inventori.ram')),
-                ('id_storage', models.ForeignKey(db_column='storage_id', null=True, on_delete=django.db.models.deletion.SET_NULL, to='inventori.storage')),
+                ('id_processor', models.ForeignKey(db_column='id_processor', null=True, on_delete=django.db.models.deletion.SET_NULL, to='inventori.processor')),
+                ('id_ram', models.ForeignKey(db_column='id_ram', null=True, on_delete=django.db.models.deletion.SET_NULL, to='inventori.ram')),
+                ('id_storage', models.ForeignKey(db_column='id_storage', null=True, on_delete=django.db.models.deletion.SET_NULL, to='inventori.storage')),
             ],
         ),
         migrations.CreateModel(

@@ -517,7 +517,7 @@
             <!-- Main Ranking Table -->
             <div class="table-card">
                 <div class="table-header">
-                    <h3>Daftar Peringkat Laptop</h3>
+                    <h3>Daftar Peringkat Laptop Sesuai Role</h3>
                     <div class="sort-select">
                         Urutkan:
                         <select>
@@ -541,7 +541,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for item in ranking %}
+                        {% for item in ranking_sesuai %}
                         <tr>
                             <td style="text-align: center;">
                                 <div style="display: flex; justify-content: center;">
@@ -565,7 +565,9 @@
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="7" style="text-align: center;">Belum ada hasil kalkulasi SAW. Silahkan input kriteria terlebih dahulu.</td>
+                            <td colspan="7" style="text-align:center;">
+                                Tidak ditemukan laptop yang memenuhi role dan minimum requirement.
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -583,7 +585,97 @@
                 </div>
 
             </div> <!-- End Table Card -->
+            <!-- Alternatif Lain -->
+            <div class="table-card" style="margin-top:32px;">
 
+                <div class="table-header">
+                    <h3>Daftar Peringkat Laptop Alternatif Lain</h3>
+
+                    <div class="sort-select">
+                        Alternatif yang tidak memenuhi role utama
+                        namun masih layak direkomendasikan.
+                    </div>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width:80px; text-align:center;">RANK</th>
+                            <th>NAMA LAPTOP</th>
+                            <th>SUMBER DATA</th>
+                            <th>PROCESSOR</th>
+                            <th>RAM</th>
+                            <th>SKOR (SAW)</th>
+                            <th>AKSI</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for item in ranking_alternatif %}
+
+                        <tr>
+
+                            <td style="text-align:center;">
+                                <div style="display:flex; justify-content:center;">
+                                    <div class="rank-cell">
+                                        {{ item.rank }}
+                                    </div>
+                                </div>
+                            </td>
+
+                            <td>
+                                <span class="nama-laptop" style="margin-bottom:0;">
+                                    {{ item.detail.nama }}
+                                </span>
+                            </td>
+
+                            <td>
+                                <span class="source-badge source-internal">
+                                    <i class="fa-solid fa-building"></i>
+                                    Internal
+                                </span>
+                            </td>
+
+                            <td>
+                                Processor Core:
+                                {{ item.detail.processor }}
+                            </td>
+
+                            <td>
+                                <span class="ram-badge">
+                                    {{ item.detail.ram }}GB
+                                </span>
+                            </td>
+
+                            <td>
+                                <span class="score-val">
+                                    {{ item.skor|floatformat:3 }}
+                                </span>
+                            </td>
+
+                            <td>
+                                <button class="btn-detail">
+                                    Detail
+                                </button>
+                            </td>
+
+                        </tr>
+
+                        {% empty %}
+
+                        <tr>
+                            <td colspan="7" style="text-align:center;">
+                                Tidak ada alternatif laptop lain.
+                            </td>
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+                </table>
+
+            </div>
         </div> <!-- End Main Content -->
     </div> <!-- End Dashboard Wrapper -->
 
