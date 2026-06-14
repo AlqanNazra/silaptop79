@@ -852,75 +852,11 @@ def dashboard_it_view(request):
     return render(request, 'it/dashboard/dashboard_it.html', context)
 
 def manajemenlaptop_it_view(request):
-    search_query = request.GET.get('q', '')
-    status_filter = request.GET.get('status', '')
+    return render(request, 'it/inventori/manajemenlaptop_it.html')
 
-    laptops = LaptopInventori.objects.select_related('id_processor', 'id_ram', 'id_storage').all()
-
-    if search_query:
-        laptops = laptops.filter(nama_laptop__icontains=search_query) | \
-                  laptops.filter(no_inventori__icontains=search_query)
-
-    if status_filter:
-        laptops = laptops.filter(status=status_filter)
-
-    context = {
-        'laptops': laptops,
-        'total': laptops.count(),
-        'search_query': search_query,
-        'status_filter': status_filter,
-    }
-    return render(request, 'it/inventori/manajemenlaptop_it.html', context)
-
-
-
-def editdatalaptop_it_view(request, id_laptop):
-    try:
-        laptop = LaptopInventori.objects.get(id_laptop_inventori=id_laptop)
-    except LaptopInventori.DoesNotExist:
-        messages.error(request, 'Laptop tidak ditemukan.')
-        return redirect('manajemen_laptop_it')
-
-    if request.method == 'POST':
-        try:
-            update_service = UpdateLaptopInventoriService()
-            kondisi = request.POST.get('kondisi')
-            status = request.POST.get('status')
-            lokasi = request.POST.get('lokasi')
-
-            if kondisi:
-                update_service.update_kondisi(id_laptop, kondisi)
-            if status:
-                update_service.update_status(id_laptop, status, lokasi)
-
-            # Update spesifikasi
-            id_processor = request.POST.get('id_processor')
-            id_ram = request.POST.get('id_ram')
-            id_storage = request.POST.get('id_storage')
-            
-            if id_processor and id_ram and id_storage:
-                dto = LaptopInventoriDTO(
-                    nama_laptop=laptop.nama_laptop,
-                    model=laptop.model,
-                    os=laptop.os,
-                    kondisi=kondisi or laptop.kondisi,
-                    status=status or laptop.status,
-                    lokasi=lokasi or laptop.lokasi,
-                    id_processor=id_processor,
-                    id_ram=id_ram,
-                    id_storage=id_storage,
-                    id_laptop_inventori=id_laptop
-                )
-                update_service.update_spek(dto)
-
-            messages.success(request, 'Data laptop berhasil diperbarui.')
-            return redirect('detaillaptop_it', id_laptop=id_laptop)
-        except Exception as e:
-            messages.error(request, f'Gagal mengupdate laptop: {str(e)}')
-
-    processors = Processor.objects.all()
-    rams = RAM.objects.all()
-    storages = Storage.objects.all()
+def pengajuanlaptop_it_view(request):
+    from inventori.services.service_pengajuan import PengajuanService
+    from inventori.repositories.dto.dto_pengajuan import PengajuanDTO
     
     context = {
         'laptop': laptop,
@@ -1066,6 +1002,63 @@ def inputkriteria_it_view(request):
         })
     proyek_json = json.dumps(proyek_data)
     return render(request, 'it/dss/inputkriteria_it.html', {'proyek_json': proyek_json})
+    list_pengajuan = []
+    try:
+        service = PengajuanService()
+        list_pengajuan = service.ambil_semua_pengajuan()
+    except Exception:
+        pass
+        
+    if not list_pengajuan:
+        mock_pengajuan = PengajuanDTO(
+            id_pengajuan=1,
+            id_user=1,
+            kebutuhan_role="Engineering",
+            kebutuhan_requirement="MacBook Pro M3 Max",
+            bulan="Oktober",
+            keterangan="Kebutuhan software development berat.",
+            perusahaan="Tujuh Sembilan",
+            status="Pending",
+            tanggal_pengajuan=datetime.date(2023, 10, 24)
+        )
+        mock_pengajuan.status_it = "waiting" # Menunggu Antrean
+        list_pengajuan = [mock_pengajuan]
+        
+    context = {
+        'list_pengajuan': list_pengajuan,
+    }
+    return render(request, 'it/inventori/pengajuanlaptop_it.html', context)
+
+def detailpengajuan_it_view(request):
+    from inventori.services.service_pengajuan import PengajuanService
+    from inventori.repositories.dto.dto_pengajuan import PengajuanDTO
+    
+    if request.method == 'POST':
+        return redirect('pengajuanlaptop_it')
+        
+    pengajuan_id = request.GET.get('id')
+    pengajuan = None
+    if pengajuan_id:
+        try:
+            service = PengajuanService()
+            pengajuan = service.cari_pengajuan_by_id(int(pengajuan_id))
+        except Exception:
+            pass
+            
+    if not pengajuan:
+        pengajuan = PengajuanDTO(
+            id_pengajuan=1,
+            id_user=1,
+            kebutuhan_role="Engineering",
+            kebutuhan_requirement="MacBook Pro M3 Max",
+            bulan="Oktober",
+            keterangan="Kebutuhan software development berat. Proyek terbaru memerlukan kompilasi kernel dan menjalankan multiple virtual containers secara simultan. Perangkat saat ini mengalami bottleneck pada RAM dan CPU thermal throttling.",
+            perusahaan="Tujuh Sembilan",
+            status="Pending",
+            tanggal_pengajuan=datetime.date(2023, 10, 24)
+        )
+        
+    return render(request, 'it/inventori/detailpengajuan_it.html', {'pengajuan': pengajuan})
 
 def hasilrekomendasi_it_view(request):
     conn = get_connection()
@@ -1273,6 +1266,122 @@ def notifikasi_it_view(request):
     return render(request, 'it/inventori/notifikasi_it.html', {
         'notifications': notifications
     })
+    return render(request, 'it/inventori/notifikasi_it.html')
+
+# Procurement management views for IT
+def manajemenpengadaan_it_view(request):
+    return render(request, 'it/inventori/manajemenpengadaan_it.html')
+
+def detailpengadaan_it_view(request):
+    return render(request, 'it/inventori/detailpengadaan_it.html')
+
+def editpengadaan_it_view(request):
+    return render(request, 'it/inventori/editpengadaan_it.html')
+
+def manajemenproyek_it_view(request):
+    from inventori.models import Proyek
+    proyek_list = Proyek.objects.prefetch_related('roles__teknologi').all()
+    return render(request, 'it/inventori/manajemenproyek_it.html', {'proyek_list': proyek_list})
+
+def tambahproyek_it_view(request):
+    from inventori.models import Proyek, RoleProyek, TeknologiRole
+    import uuid
+
+    if request.method == 'POST':
+        try:
+            nama_proyek = request.POST.get('nama_proyek')
+            role_names = request.POST.getlist('role_names[]')
+            role_techs = request.POST.getlist('role_techs[]')
+
+            # Create Proyek
+            proyek = Proyek.objects.create(
+                id_proyek=str(uuid.uuid4())[:8],
+                nama_proyek=nama_proyek
+            )
+
+            # Create Roles and Technologies
+            for name, tech_str in zip(role_names, role_techs):
+                if name.strip():
+                    role_obj = RoleProyek.objects.create(
+                        id_role=str(uuid.uuid4())[:8],
+                        proyek=proyek,
+                        nama_role=name.strip()
+                    )
+                    # Split comma-separated techs
+                    techs = [t.strip() for t in tech_str.split(',') if t.strip()]
+                    for t in techs:
+                        TeknologiRole.objects.create(
+                            id_teknologi=str(uuid.uuid4())[:8],
+                            role_proyek=role_obj,
+                            nama_teknologi=t
+                        )
+
+            messages.success(request, f'Proyek "{nama_proyek}" berhasil ditambahkan!')
+            return redirect('manajemen_proyek_it')
+        except Exception as e:
+            messages.error(request, f'Gagal menambahkan proyek: {str(e)}')
+
+    return render(request, 'it/inventori/tambahproyek_it.html')
+
+def editproyek_it_view(request, id_proyek):
+    from inventori.models import Proyek, RoleProyek, TeknologiRole
+    import uuid
+
+    try:
+        proyek = Proyek.objects.prefetch_related('roles__teknologi').get(id_proyek=id_proyek)
+    except Proyek.DoesNotExist:
+        messages.error(request, 'Proyek tidak ditemukan.')
+        return redirect('manajemen_proyek_it')
+
+    if request.method == 'POST':
+        try:
+            proyek.nama_proyek = request.POST.get('nama_proyek')
+            proyek.save()
+
+            # Delete old roles and their technologies
+            proyek.roles.all().delete()
+
+            # Re-create roles and technologies
+            role_names = request.POST.getlist('role_names[]')
+            role_techs = request.POST.getlist('role_techs[]')
+
+            for name, tech_str in zip(role_names, role_techs):
+                if name.strip():
+                    role_obj = RoleProyek.objects.create(
+                        id_role=str(uuid.uuid4())[:8],
+                        proyek=proyek,
+                        nama_role=name.strip()
+                    )
+                    techs = [t.strip() for t in tech_str.split(',') if t.strip()]
+                    for t in techs:
+                        TeknologiRole.objects.create(
+                            id_teknologi=str(uuid.uuid4())[:8],
+                            role_proyek=role_obj,
+                            nama_teknologi=t
+                        )
+
+            messages.success(request, f'Proyek "{proyek.nama_proyek}" berhasil diperbarui!')
+            return redirect('manajemen_proyek_it')
+        except Exception as e:
+            messages.error(request, f'Gagal memperbarui proyek: {str(e)}')
+
+    return render(request, 'it/inventori/editproyek_it.html', {'proyek': proyek})
+
+def hapusproyek_it_view(request, id_proyek):
+    from inventori.models import Proyek
+
+    if request.method == 'POST':
+        try:
+            proyek = Proyek.objects.get(id_proyek=id_proyek)
+            nama = proyek.nama_proyek
+            proyek.delete()
+            messages.success(request, f'Proyek "{nama}" berhasil dihapus!')
+        except Proyek.DoesNotExist:
+            messages.error(request, 'Proyek tidak ditemukan.')
+        except Exception as e:
+            messages.error(request, f'Gagal menghapus proyek: {str(e)}')
+
+    return redirect('manajemen_proyek_it')
 
 
 # ==========================================
