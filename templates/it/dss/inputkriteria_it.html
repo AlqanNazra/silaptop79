@@ -6,6 +6,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Input Kriteria DSS - SiLaptop79</title>
+    {% comment %} {% if warning_dss %}
+    <div class="alert alert-warning">
+        <strong>
+            Peringatan DSS
+        </strong>
+        <br>
+        {{ warning_dss }}
+        <br><br>
+        Sistem menampilkan alternatif
+        laptop terbaik dari seluruh data
+        yang tersedia.
+    </div>
+    {% endif %} {% endcomment %}
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -32,7 +45,8 @@
 
         .main-dashboard-content {
             flex: 1;
-            margin-left: 260px; /* Adjust based on actual sidebar width */
+            margin-left: 260px;
+            /* Adjust based on actual sidebar width */
             padding: 40px 60px;
             box-sizing: border-box;
         }
@@ -102,7 +116,8 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
             display: flex;
-            justify-content: space-between; /* To push badge to the right */
+            justify-content: space-between;
+            /* To push badge to the right */
             align-items: center;
         }
 
@@ -146,7 +161,7 @@
             grid-template-columns: 1fr 1fr;
             gap: 16px;
         }
-        
+
         .grid-2-cols-bobot {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -161,10 +176,12 @@
             font-weight: 700;
             letter-spacing: 0.5px;
         }
+
         .badge-benefit {
             background-color: #e2e8f0;
             color: #475569;
         }
+
         .badge-cost {
             background-color: #e2e8f0;
             color: #475569;
@@ -176,6 +193,7 @@
             border-bottom: 1px dashed #cbd5e1;
             position: relative;
         }
+
         .group-title {
             position: absolute;
             top: -10px;
@@ -197,10 +215,12 @@
             align-items: flex-start;
             margin-top: 16px;
         }
+
         .info-alert i {
             color: #64748b;
             margin-top: 2px;
         }
+
         .info-alert p {
             margin: 0;
             font-size: 12px;
@@ -217,6 +237,7 @@
             font-size: 12px;
             color: #475569;
         }
+
         .summary-box .title {
             font-weight: 700;
             margin-bottom: 8px;
@@ -224,20 +245,31 @@
             letter-spacing: 0.5px;
             color: #64748b;
         }
+
         .summary-box ul {
             list-style: none;
             padding: 0;
             margin: 0;
         }
+
         .summary-box li {
             margin-bottom: 4px;
             display: flex;
             align-items: center;
             gap: 8px;
         }
-        .summary-box li i { font-size: 6px; }
-        .dot-blue { color: #0b57c6; }
-        .dot-cyan { color: #06b6d4; }
+
+        .summary-box li i {
+            font-size: 6px;
+        }
+
+        .dot-blue {
+            color: #0b57c6;
+        }
+
+        .dot-cyan {
+            color: #06b6d4;
+        }
 
         /* Bobot List */
         .bobot-row {
@@ -247,13 +279,16 @@
             padding: 8px 0;
             border-bottom: 1px solid #f1f5f9;
         }
+
         .bobot-row:last-child {
             border-bottom: none;
         }
+
         .bobot-label {
             font-size: 13px;
             color: #475569;
         }
+
         .bobot-input {
             width: 60px;
             text-align: center;
@@ -281,20 +316,25 @@
             text-align: center;
             margin-bottom: 12px;
         }
+
         .btn-primary {
             background-color: #0b57c6;
             color: white;
         }
+
         .btn-primary:hover {
             background-color: #09459e;
         }
+
         .btn-secondary {
             background-color: #e2e8f0;
             color: #1e293b;
         }
+
         .btn-secondary:hover {
             background-color: #cbd5e1;
         }
+
         .btn-link {
             background: none;
             color: #475569;
@@ -303,6 +343,7 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
+
         .btn-link:hover {
             color: #0f172a;
         }
@@ -311,6 +352,7 @@
         .group-row {
             margin-bottom: 24px;
         }
+
         .group-row-title {
             font-size: 11px;
             font-weight: 700;
@@ -320,10 +362,10 @@
             display: flex;
             justify-content: space-between;
         }
+
         .inline-badge {
             margin-left: 8px;
         }
-
     </style>
 </head>
 
@@ -331,341 +373,757 @@
 
     <div class="dashboard-wrapper">
         <!-- Load Sidebar -> highlight "Input Kriteria" -->
-        {% include 'it/components/sidebar.html' with active_page='input_kriteria' %}
+        {% include 'hc/components/sidebar.html' with active_page='input_kriteria' %}
 
-        <!-- Main Content -->
-        <div class="main-dashboard-content">
+<body>
 
-            <h1 class="page-title">Konfigurasi Parameter SAW</h1>
-            <p class="page-subtitle">Lakukan penyesuaian kriteria dan bobot untuk mendapatkan rekomendasi laptop terbaik menggunakan metode Simple Additive Weighting (SAW).</p>
+<div class="dashboard-wrapper">
 
-            <form action="{% url 'inputkriteria_it' %}" method="POST">
-                {% csrf_token %}
+    {% include 'hc/components/sidebar.html' with active_page='input_kriteria' %}
 
-                <!-- Section A: Pemilihan Role -->
-                <div class="card">
-                    <div class="section-header">
-                        <div class="icon-box">
-                            <i class="fa-solid fa-user-tie"></i>
-                        </div>
-                        <h3>Section A: Pemilihan Role</h3>
+    <div class="main-dashboard-content">
+
+        <h1 class="page-title">Konfigurasi Parameter SAW</h1>
+
+        <p class="page-subtitle">
+            Pilih Project dan Role Teknologi untuk memuat konfigurasi DSS.
+            Nilai kriteria dan bobot dapat disesuaikan untuk simulasi rekomendasi
+            tanpa mengubah data master sistem.
+        </p>
+
+        <form method="POST" id="mainForm">
+
+            {% csrf_token %}
+
+            <input
+                type="hidden"
+                name="jenis_rekomendasi"
+                id="jenisRekomendasi"
+                value="inventori">
+
+            <!-- ================================= -->
+            <!-- PILIHAN SUMBER DATA -->
+            <!-- ================================= -->
+
+            <div class="card">
+
+                <div class="section-header">
+                    <div class="icon-box">
+                        <i class="fa-solid fa-laptop"></i>
                     </div>
-
-                    <div class="grid-2-cols" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
-                        <div class="form-group">
-                            <label>Pilih Proyek</label>
-                            <select class="form-control" name="proyek" id="select-proyek" required>
-                                <option value="">-- Pilih Proyek --</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Pilih Role</label>
-                            <select class="form-control" name="role" id="select-role" required disabled>
-                                <option value="">-- Pilih Role --</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="form-group" style="margin-bottom: 0;">
-                        <label>Pilih Teknologi</label>
-                        <div id="teknologi-container" style="background-color: #f1f5f9; border-radius: 8px; padding: 16px; min-height: 48px; box-sizing: border-box;">
-                            <div id="teknologi-checkboxes" style="display: flex; flex-direction: column; gap: 10px;">
-                                <span style="color: #94a3b8; font-size: 13px; font-style: italic;">Pilih role terlebih dahulu</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="info-alert">
-                        <i class="fa-solid fa-circle-info"></i>
-                        <p>Memilih role akan secara otomatis menyesuaikan bobot kriteria (Section C) berdasarkan kebutuhan standar industri untuk profesi tersebut. Anda tetap dapat menyesuaikan bobot secara manual.</p>
-                    </div>
+                    <h3>Pilihan Sumber Laptop</h3>
                 </div>
 
-                <!-- Section B: Spesifikasi Kriteria -->
-                <div class="card">
-                    <div class="section-header">
-                        <div class="icon-box">
-                            <i class="fa-solid fa-bars-staggered"></i>
-                        </div>
-                        <h3>Section B: Spesifikasi Kriteria</h3>
+                <div style="display:flex; gap:12px; margin-top:12px;">
+
+                    <button
+                        type="button"
+                        id="btnInventori"
+                        class="btn btn-primary">
+                        Inventori
+                    </button>
+
+                    <button
+                        type="button"
+                        id="btnPengadaan"
+                        class="btn btn-secondary">
+                        Pengadaan
+                    </button>
+
+                </div>
+
+            </div>
+
+            <!-- ================================= -->
+            <!-- SECTION A -->
+            <!-- ================================= -->
+
+            <div class="card">
+
+                <div class="section-header">
+                    <div class="icon-box">
+                        <i class="fa-solid fa-user-tie"></i>
                     </div>
 
-                    <!-- Processor Group -->
-                    <div class="group-row">
-                        <div class="group-row-title">
-                            PROCESSOR
-                            <span class="badge badge-benefit">BENEFIT</span>
-                        </div>
-                        <div class="grid-5-cols">
-                            <div class="form-group">
-                                <label>Manufacturer & Model</label>
-                                <select class="form-control" name="id_processor">
-                                    <option value="" disabled selected>Pilih Processor</option>
-                                    {% for proc in processors %}
-                                    <option value="{{ proc.id_processor }}">{{ proc.nama_processor }} ({{ proc.manufacturer }})</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>Cores</label>
-                                <input type="text" class="form-control" value="14">
-                            </div>
-                            <div class="form-group">
-                                <label>Threads</label>
-                                <input type="text" class="form-control" value="20">
-                            </div>
-                            <div class="form-group">
-                                <label>Base Clock (GHz)</label>
-                                <input type="text" class="form-control" value="2.4">
-                            </div>
-                            <div class="form-group">
-                                <label>Architecture</label>
-                                <input type="text" class="form-control" value="Raptor Lake">
-                            </div>
-                        </div>
+                    <h3>Section A: Pemilihan Role</h3>
+                </div>
+
+                <div class="grid-2-cols">
+
+                    <div class="form-group">
+
+                        <label>Project</label>
+
+                        <select
+                            class="form-control"
+                            name="id_proyek"
+                            id="projectSelect">
+
+                            <option value="">
+                                Pilih Project
+                            </option>
+
+                            {% for project in projects %}
+                            <option
+                                value="{{ project.id_proyek }}"
+                                {% if selected_project|stringformat:"s" == project.id_proyek|stringformat:"s" %}
+                                selected
+                                {% endif %}
+                            >
+                                {{ project.nama_proyek }}
+                            </option>
+                            {% endfor %}
+
+                        </select>
+
                     </div>
 
-                    <!-- Storage Group -->
-                    <div class="group-row">
-                        <div class="group-row-title">
-                            STORAGE
-                            <span class="badge badge-benefit">BENEFIT</span>
-                        </div>
-                        <div class="grid-2-cols">
-                            <div class="form-group">
-                                <label>Capacity (GB)</label>
-                                <select class="form-control" name="id_storage">
-                                    <option value="" disabled selected>Pilih Storage</option>
-                                    {% for storage in storages %}
-                                    <option value="{{ storage.id_storage }}">{{ storage.kapasitas_gb }} GB {{ storage.tipe }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>Type</label>
-                                <input type="text" class="form-control" value="SSD NVMe Gen4">
-                            </div>
-                        </div>
-                    </div>
+                    <div class="form-group">
 
-                    <!-- RAM Group -->
-                    <div class="group-row">
-                        <div class="group-row-title">
-                            RAM
-                            <span class="badge badge-benefit">BENEFIT</span>
-                        </div>
-                        <div class="grid-2-cols">
-                            <div class="form-group">
-                                <label>Capacity (GB)</label>
-                                <select class="form-control" name="id_ram">
-                                    <option value="" disabled selected>Pilih RAM</option>
-                                    {% for ram in rams %}
-                                    <option value="{{ ram.id_ram }}">{{ ram.kapasitas_gb }} GB {{ ram.tipe }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>Type</label>
-                                <input type="text" class="form-control" value="DDR5">
-                            </div>
-                        </div>
-                    </div>
+                        <label>Role</label>
 
-                    <!-- Mixed Metrics Grid -->
-                    <div class="grid-2-cols" style="margin-top: 32px;">
-                        <div class="form-group">
-                            <label>Harga (Maksimal) <span class="badge badge-cost">COST</span></label>
-                            <input type="text" class="form-control" placeholder="Rp 0">
-                        </div>
-                        <div class="form-group">
-                            <label>Ukuran Layar (Inch) <span class="badge badge-benefit">BENEFIT</span></label>
-                            <input type="text" class="form-control" value="14">
-                        </div>
+                        <select
+                            class="form-control"
+                            name="id_role_teknologi"
+                            id="roleTeknologiSelect">
 
-                        <div class="form-group">
-                            <label>RAM (Min GB) <span class="badge badge-benefit">BENEFIT</span></label>
-                            <input type="text" class="form-control" value="16">
-                        </div>
-                        <div class="form-group">
-                            <label>Storage (Min GB) <span class="badge badge-benefit">BENEFIT</span></label>
-                            <input type="text" class="form-control" value="512">
-                        </div>
+                            <option value="">
+                                Pilih Role
+                            </option>
 
-                        <div class="form-group">
-                            <label>Baterai (Milliampere-Hour) <span class="badge badge-benefit">BENEFIT</span></label>
-                            <input type="text" class="form-control" value="3000">
-                        </div>
-                        <div class="form-group">
-                            <label>Berat (Maks Kg) <span class="badge badge-cost">COST</span></label>
-                            <input type="text" class="form-control" value="1.5">
-                        </div>
+                            {% for item in role_teknologi %}
+                            <option
+                                value="{{ item.id_role_teknologi }}"
+                                {% if selected_role_teknologi == item.id_role_teknologi %}
+                                selected
+                                {% endif %}
+                            >
+                                {{ item.role.nama_role }}
+                                -
+                                {{ item.teknologi.nama_teknologi }}
+                            </option>
+                            {% endfor %}
+
+                        </select>
+
                     </div>
 
                 </div>
 
-                <!-- Ringkasan Klasifikasi (Between B and C) -->
-                <div class="summary-box">
-                    <div class="title">Ringkasan Klasifikasi</div>
-                    <ul>
-                        <li><i class="fa-solid fa-circle dot-blue"></i> <b>Benefit (Semakin besar semakin baik)</b> &rarr; Processor, RAM, Storage, Baterai, Ukuran Layar</li>
-                        <li><i class="fa-solid fa-circle dot-cyan" style="color: #0b57c6; background:none;"></i> <span style="font-weight:bold; color: #0b57c6; box-shadow:inset 0 0 0 1px #0b57c6; border-radius:50%; width:6px; height:6px; display:inline-block;"></span> <b>Cost (Semakin kecil semakin baik)</b> &rarr; Berat, Harga</li>
-                    </ul>
+                <div class="info-alert">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <p>
+                        Setelah role dipilih, sistem akan memuat konfigurasi
+                        requirement minimum dan bobot DSS berdasarkan role.
+                        Nilai dapat diubah untuk simulasi tanpa mengubah
+                        data master sistem.
+                    </p>
                 </div>
 
-                <!-- Section C: Bobot Kriteria -->
-                <div class="card">
-                    <div class="section-header">
-                        <div class="icon-box">
-                            <i class="fa-solid fa-scale-balanced"></i>
-                        </div>
-                        <h3>Section C: Bobot Kriteria</h3>
+            </div>
+
+            <!-- ================================= -->
+            <!-- SECTION B -->
+            <!-- ================================= -->
+
+            <div class="card">
+
+                <div class="section-header">
+                    <div class="icon-box">
+                        <i class="fa-solid fa-microchip"></i>
                     </div>
 
-                    <div class="grid-2-cols-bobot">
-                        <!-- Left Column Bobot -->
-                        <div>
-                            <div class="bobot-row">
-                                <span class="bobot-label">Processor</span>
-                                <input type="text" class="bobot-input" value="7" name="bobot_processor">
-                            </div>
-                            <div class="bobot-row">
-                                <span class="bobot-label">Baterai</span>
-                                <input type="text" class="bobot-input" value="6" name="bobot_baterai">
-                            </div>
-                            <div class="bobot-row">
-                                <span class="bobot-label">Harga</span>
-                                <input type="text" class="bobot-input" value="6" name="bobot_harga">
-                            </div>
-                            <div class="bobot-row">
-                                <span class="bobot-label">Berat</span>
-                                <input type="text" class="bobot-input" value="2" name="bobot_berat">
-                            </div>
-                        </div>
-                        
-                        <!-- Right Column Bobot -->
-                        <div>
-                            <div class="bobot-row">
-                                <span class="bobot-label">RAM</span>
-                                <input type="text" class="bobot-input" value="5" name="bobot_ram">
-                            </div>
-                            <div class="bobot-row">
-                                <span class="bobot-label">Ukuran Layar</span>
-                                <input type="text" class="bobot-input" value="2" name="bobot_layar">
-                            </div>
-                            <div class="bobot-row">
-                                <span class="bobot-label">Storage</span>
-                                <input type="text" class="bobot-input" value="4" name="bobot_storage">
-                            </div>
-                        </div>
+                    <h3>Section B: Minimum Requirement</h3>
+                </div>
+
+                <div class="grid-3-cols">
+
+                    <div class="form-group">
+
+                        <label>Minimum Processor Score</label>
+
+                        <input
+                            type="number"
+                            name="min_processor_score"
+                            class="form-control"
+                            id="minProcessor"
+                            value="{{ role_requirement.min_processor_score|default:'' }}">
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label>Minimum RAM (GB)</label>
+
+                        <input
+                            type="number"
+                            name="min_ram"
+                            class="form-control"
+                            id="minRam"
+                            value="{{ role_requirement.min_ram|default:'' }}">
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label>Minimum Storage (GB)</label>
+
+                        <input
+                            type="number"
+                            name="min_storage"
+                            class="form-control"
+                            id="minStorage"
+                            value="{{ role_requirement.min_storage|default:'' }}">
+
+                    </div>
+
+                    <!-- HANYA UNTUK PENGADAAN -->
+
+                    <div
+                        class="form-group"
+                        id="minimumHargaContainer"
+                        style="display:none;">
+                        <label>Minimum Harga (Rp)</label>
+                        <input type="number" name="min_harga" id="minHarga" class="form-control" 
+                        min="0" disabled placeholder="Contoh: 10000000">
+                    </div>
+
+                </div>
+
+            </div>
+                        <!-- ================================= -->
+            <!-- SECTION C -->
+            <!-- ================================= -->
+            <div class="card">
+                <div class="section-header">
+                    <div class="icon-box">
+                        <i class="fa-solid fa-scale-balanced"></i>
+                    </div>
+                    <h3>Section C: Bobot Kriteria</h3>
+                </div>
+                <div class="grid-2-cols">
+                    <div class="form-group">
+                        <label>Processor</label>
+                        <input
+                            id="bobotProcessor"
+                            type="number"
+                            step="0.01"
+                            name="bobot_processor"
+                            value="{% if bobot_role %}{{ bobot_role.processor|default:'0' }}{% endif %}"
+                            class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>RAM</label>
+                        <input
+                            id="bobotRam"
+                            type="number"
+                            step="0.01"
+                            name="bobot_ram"
+                            value="{% if bobot_role %}{{ bobot_role.ram|default:'0' }}{% endif %}"
+                            class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Storage</label>
+                        <input
+                            id="bobotStorage"
+                            type="number"
+                            step="0.01"
+                            name="bobot_storage"
+                            value="{% if bobot_role %}{{ bobot_role.storage|default:'0' }}{% endif %}"
+                            class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Berat</label>
+                        <input
+                            id="bobotBerat"
+                            type="number"
+                            step="0.01"
+                            name="bobot_berat"
+                            value="{% if bobot_role %}{{ bobot_role.berat|default:'0' }}{% endif %}"
+                            class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Layar</label>
+                        <input
+                            id="bobotLayar"
+                            type="number"
+                            step="0.01"
+                            name="bobot_layar"
+                            value="{% if bobot_role %}{{ bobot_role.layar|default:'0' }}{% endif %}"
+                            class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Baterai</label>
+                        <input
+                            id="bobotBaterai"
+                            type="number"
+                            step="0.01"
+                            name="bobot_baterai"
+                            value="{% if bobot_role %}{{ bobot_role.baterai|default:'0' }}{% endif %}"
+                            class="form-control">
                     </div>
                 </div>
 
-                <!-- Action Buttons -->
-                <div style="margin-top: 32px; margin-bottom: 40px;">
-                    <button type="submit" class="btn btn-primary">Hitung Rekomendasi</button>
-                    <button type="button" class="btn btn-secondary">Gunakan Bobot Default Role</button>
-                    <button type="reset" class="btn btn-link">Reset</button>
+            </div>
+
+
+            <!-- ================================= -->
+            <!-- SUMMARY -->
+            <!-- ================================= -->
+
+            <div class="summary-box">
+
+                <div class="title">
+                    Ringkasan DSS
                 </div>
 
-            </form>
-        </div> <!-- End Main Content -->
-    </div> <!-- End Dashboard Wrapper -->
+                <ul>
 
-    <script id="proyek-data-json" type="application/json">
-        {{ proyek_json|safe }}
-    </script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const dataEl = document.getElementById('proyek-data-json');
-            if (!dataEl) return;
-            
-            let proyekData = [];
-            try {
-                proyekData = JSON.parse(dataEl.textContent);
-            } catch (e) {
-                console.error("Error parsing proyek data:", e);
-            }
+                    <li>
+                        <i class="fa-solid fa-circle dot-blue"></i>
+                        Benefit → Semakin besar semakin baik
+                    </li>
 
-            const selectProyek = document.getElementById('select-proyek');
-            const selectRole = document.getElementById('select-role');
-            const checkboxesContainer = document.getElementById('teknologi-checkboxes');
+                    <li>
+                        <i class="fa-solid fa-circle dot-cyan"></i>
+                        Cost → Semakin kecil semakin baik
+                    </li>
 
-            // Populate Proyek dropdown
-            proyekData.forEach(function(proyek) {
-                const opt = document.createElement('option');
-                opt.value = proyek.id_proyek;
-                opt.textContent = proyek.nama_proyek;
-                selectProyek.appendChild(opt);
-            });
+                    <li>
+                        <i class="fa-solid fa-circle dot-blue"></i>
+                        Nilai dapat dimodifikasi untuk simulasi SAW
+                    </li>
 
-            // On Proyek change
-            selectProyek.addEventListener('change', function() {
-                const selectedProyekId = this.value;
-                
-                // Clear and disable downstream select options
-                selectRole.innerHTML = '<option value="">-- Pilih Role --</option>';
-                selectRole.disabled = true;
-                checkboxesContainer.innerHTML = '<span style="color: #94a3b8; font-size: 13px; font-style: italic;">Pilih role terlebih dahulu</span>';
+                </ul>
 
-                if (!selectedProyekId) return;
+            </div>
 
-                const selectedProyek = proyekData.find(p => p.id_proyek === selectedProyekId);
-                if (selectedProyek && selectedProyek.roles.length > 0) {
-                    selectedProyek.roles.forEach(function(role) {
-                        const opt = document.createElement('option');
-                        opt.value = role.id_role;
-                        opt.textContent = role.nama_role;
-                        selectRole.appendChild(opt);
-                    });
-                    selectRole.disabled = false;
-                }
-            });
+            <!-- SECTION C TETAP SAMA -->
+            <!-- Tempelkan seluruh Section C milikmu di sini -->
 
-            // On Role change
-            selectRole.addEventListener('change', function() {
-                const selectedRoleId = this.value;
-                const selectedProyekId = selectProyek.value;
+            <div style="margin-top:32px">
 
-                // Clear checkboxes container
-                checkboxesContainer.innerHTML = '';
+                <button
+                    type="submit"
+                    name="action"
+                    value="hitung"
+                    class="btn btn-secondary">
+                    Hitung Rekomendasi
+                </button>
 
-                if (!selectedRoleId || !selectedProyekId) {
-                    checkboxesContainer.innerHTML = '<span style="color: #94a3b8; font-size: 13px; font-style: italic;">Pilih role terlebih dahulu</span>';
-                    return;
-                }
+                <button
+                    type="button"
+                    id="btnDefaultRole"
+                    class="btn btn-secondary">
 
-                const selectedProyek = proyekData.find(p => p.id_proyek === selectedProyekId);
-                if (selectedProyek) {
-                    const selectedRole = selectedProyek.roles.find(r => r.id_role === selectedRoleId);
-                    if (selectedRole && selectedRole.teknologi.length > 0) {
-                        selectedRole.teknologi.forEach(function(tech) {
-                            const label = document.createElement('label');
-                            label.style.display = 'flex';
-                            label.style.alignItems = 'center';
-                            label.style.gap = '10px';
-                            label.style.fontSize = '14px';
-                            label.style.fontWeight = '500';
-                            label.style.color = '#334155';
-                            label.style.textTransform = 'none';
-                            label.style.cursor = 'pointer';
+                    Gunakan Bobot Default Role
 
-                            const checkbox = document.createElement('input');
-                            checkbox.type = 'checkbox';
-                            checkbox.name = 'teknologi[]';
-                            checkbox.value = tech;
-                            checkbox.style.width = '18px';
-                            checkbox.style.height = '18px';
-                            checkbox.style.cursor = 'pointer';
+                </button>
+                {% comment %} 
+                <button
+                    type="reset"
+                    class="btn btn-link">
 
-                            label.appendChild(checkbox);
-                            label.appendChild(document.createTextNode(tech));
-                            checkboxesContainer.appendChild(label);
-                        });
-                    } else {
-                        checkboxesContainer.innerHTML = '<span style="color: #94a3b8; font-size: 13px; font-style: italic;">Tidak ada teknologi untuk role ini</span>';
-                    }
-                }
-            });
+                    Reset
+
+                </button> {% endcomment %}
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+{{ project_role_mapping|json_script:"project-role-data" }}
+
+<script>
+
+const roleSelect =
+    document.getElementById("roleTeknologiSelect");
+
+const projectSelect =
+    document.getElementById("projectSelect");
+
+const projectRoleData =
+    JSON.parse(
+        document.getElementById(
+            "project-role-data"
+        ).textContent
+    );
+
+console.log(
+    "PROJECT ROLE DATA",
+    projectRoleData
+);
+
+function filterRoleByProject() {
+
+    const projectId =
+        projectSelect.value;
+
+    const currentSelectedRole =
+        "{{ selected_role_teknologi|default:'' }}";
+
+    roleSelect.innerHTML =
+        '<option value="">Pilih Role</option>';
+
+    const roles =
+        projectRoleData.filter(
+            item =>
+                item.id_proyek === projectId
+        );
+
+    console.log(
+        "PROJECT:",
+        projectId
+    );
+
+    console.log(
+        "ROLES:",
+        roles
+    );
+
+    roles.forEach(role => {
+
+        const option =
+            document.createElement(
+                "option"
+            );
+
+        option.value =
+            role.id_role_teknologi;
+
+        option.textContent =
+            role.nama;
+
+        if(
+            role.id_role_teknologi ===
+            currentSelectedRole
+        ){
+            option.selected = true;
+        }
+
+        roleSelect.appendChild(
+            option
+        );
+    });
+}
+
+function loadRoleData() {
+
+    const projectId =
+        projectSelect.value;
+
+    const roleId =
+        roleSelect.value;
+
+    const jenis =
+        document.getElementById(
+            "jenisRekomendasi"
+        ).value;
+
+    if(projectId && roleId){
+
+        const url =
+            `${window.location.pathname}?id_proyek=${projectId}&id_role_teknologi=${roleId}&jenis=${jenis}`;
+
+        window.location.href =
+            url;
+    }
+}
+
+projectSelect.addEventListener(
+    "change",
+    filterRoleByProject
+);
+
+roleSelect.addEventListener(
+    "change",
+    loadRoleData
+);
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function() {
+
+        const defaultRoleData = {
+
+        minProcessor:
+            document.getElementById(
+                "minProcessor"
+            ).value,
+
+        minRam:
+            document.getElementById(
+                "minRam"
+            ).value,
+
+        minStorage:
+            document.getElementById(
+                "minStorage"
+            ).value,
+
+        minHarga:
+            document.getElementById(
+                "minHarga"
+            ) ?
+            document.getElementById(
+                "minHarga"
+            ).value
+            : "",
+
+        bobotProcessor:
+            document.getElementById(
+                "bobotProcessor"
+            ).value,
+
+        bobotRam:
+            document.getElementById(
+                "bobotRam"
+            ).value,
+
+        bobotStorage:
+            document.getElementById(
+                "bobotStorage"
+            ).value,
+
+        bobotBerat:
+            document.getElementById(
+                "bobotBerat"
+            ).value,
+
+        bobotLayar:
+            document.getElementById(
+                "bobotLayar"
+            ).value,
+
+        bobotBaterai:
+            document.getElementById(
+                "bobotBaterai"
+            ).value
+    };
+
+    const btnDefaultRole =
+    document.getElementById(
+        "btnDefaultRole"
+    );
+
+btnDefaultRole.addEventListener(
+    "click",
+    function(){
+
+        document.getElementById(
+            "minProcessor"
+        ).value =
+            defaultRoleData.minProcessor;
+
+        document.getElementById(
+            "minRam"
+        ).value =
+            defaultRoleData.minRam;
+
+        document.getElementById(
+            "minStorage"
+        ).value =
+            defaultRoleData.minStorage;
+
+        if(
+            document.getElementById(
+                "minHarga"
+            )
+        ){
+            document.getElementById(
+                "minHarga"
+            ).value =
+                defaultRoleData.minHarga;
+        }
+
+        document.getElementById(
+            "bobotProcessor"
+        ).value =
+            defaultRoleData.bobotProcessor;
+
+        document.getElementById(
+            "bobotRam"
+        ).value =
+            defaultRoleData.bobotRam;
+
+        document.getElementById(
+            "bobotStorage"
+        ).value =
+            defaultRoleData.bobotStorage;
+
+        document.getElementById(
+            "bobotBerat"
+        ).value =
+            defaultRoleData.bobotBerat;
+
+        document.getElementById(
+            "bobotLayar"
+        ).value =
+            defaultRoleData.bobotLayar;
+
+        document.getElementById(
+            "bobotBaterai"
+        ).value =
+            defaultRoleData.bobotBaterai;
+
+        Swal.fire({
+            icon: "success",
+            title: "Berhasil",
+            text:
+                "Konfigurasi dikembalikan ke default role"
         });
-    </script>
+
+    }
+);
+
+        const btnInventori =
+            document.getElementById(
+                "btnInventori"
+            );
+
+        const btnPengadaan =
+            document.getElementById(
+                "btnPengadaan"
+            );
+
+        const jenisInput =
+            document.getElementById(
+                "jenisRekomendasi"
+            );
+
+        const hargaContainer =
+            document.getElementById(
+                "minimumHargaContainer"
+            );
+
+        const minHarga =
+            document.getElementById(
+                "minHarga"
+            );
+
+        function setInventori() {
+
+            jenisInput.value =
+                "inventori";
+
+            hargaContainer.style.display =
+                "none";
+
+            minHarga.disabled =
+                true;
+
+            minHarga.value =
+                "";
+
+            btnInventori.classList.remove(
+                "btn-secondary"
+            );
+
+            btnInventori.classList.add(
+                "btn-primary"
+            );
+
+            btnPengadaan.classList.remove(
+                "btn-primary"
+            );
+
+            btnPengadaan.classList.add(
+                "btn-secondary"
+            );
+        }
+
+        function setPengadaan() {
+
+            jenisInput.value =
+                "pengadaan";
+
+            hargaContainer.style.display =
+                "block";
+
+            minHarga.disabled =
+                false;
+
+            btnPengadaan.classList.remove(
+                "btn-secondary"
+            );
+
+            btnPengadaan.classList.add(
+                "btn-primary"
+            );
+
+            btnInventori.classList.remove(
+                "btn-primary"
+            );
+
+            btnInventori.classList.add(
+                "btn-secondary"
+            );
+        }
+
+        btnInventori.addEventListener(
+            "click",
+            setInventori
+        );
+
+        btnPengadaan.addEventListener(
+            "click",
+            setPengadaan
+        );
+
+        filterRoleByProject();
+
+        const currentJenis =
+            new URLSearchParams(
+                window.location.search
+            ).get("jenis");
+
+        if(currentJenis === "pengadaan"){
+            setPengadaan();
+        }
+        else{
+            setInventori();
+        }
+
+    }
+);
+
+</script>
+{% if warning_dss %}
+<script>
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function(){
+
+        Swal.fire({
+
+            icon: "warning",
+
+            title:
+                "Tidak Ada Laptop Sesuai Role",
+
+            text:
+                "{{ warning_dss|escapejs }}",
+
+            confirmButtonText:
+                "Lihat Alternatif"
+
+        });
+
+    }
+);
+console.log("PROJECT ROLE DATA",projectRoleData);
+console.log("PROJECT",projectId);
+console.log(
+    "ROLES",
+    roles
+);
+</script>
+{% endif %}
+
 </body>
 </html>

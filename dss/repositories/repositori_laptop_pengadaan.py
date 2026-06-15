@@ -1,3 +1,5 @@
+from tkinter import END
+
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from .dto.dto_laptop_pengadaan import LaptopPengadaanDTO
@@ -129,3 +131,38 @@ class LaptopPengadaanRepository(ILaptopPengadaanRepositoryImpl):
         with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute(query, params)
             return cur.fetchall()
+
+    def ambil_laptop_pengadaan_by_id(self, id_laptop_pengadaan):
+        # Menggunakan triple quotes untuk multiline string
+        query = """
+        SELECT 
+            lp.id_laptop_pengadaan,
+            lp.nama_laptop,
+            lp.harga,
+            lp.gpu,
+            lp.ukuran_layar,
+            lp.baterai,
+            lp.berat,
+            pro.nama_processor,
+            pro.manufacturer,
+            pro.model AS processor_model,
+            pro.cores,
+            pro.threads,
+            pro.benchmark_score,
+            r.kapasitas_gb AS ram_kapasitas,
+            r.tipe AS ram_tipe,
+            s.kapasitas_gb AS storage_kapasitas,
+            s.tipe AS storage_tipe
+        FROM dss_laptoppengadaan lp
+        LEFT JOIN inventori_processor pro ON lp.id_processor = pro.id_processor
+        LEFT JOIN inventori_ram r ON lp.id_ram = r.id_ram
+        LEFT JOIN inventori_storage s ON lp.id_storage = s.id_storage
+        WHERE lp.id_laptop_pengadaan = %s;  -- <--- PENTING: Tambahkan ini untuk memfilter berdasarkan ID
+        """
+        
+        params = (id_laptop_pengadaan,)
+
+        with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
+            cur.execute(query, params)
+            row = cur.fetchone()  # Menggunakan fetchone() karena hasilnya pasti cuma 1 data (atau None)
+            return row

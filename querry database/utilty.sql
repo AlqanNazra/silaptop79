@@ -171,8 +171,8 @@ CREATE OR REPLACE FUNCTION GetFilteredLaptopPengadaan(
     f_id_laptop_pengadaan VARCHAR DEFAULT NULL,
 
     f_harga NUMERIC DEFAULT NULL,
-    f_min_harga NUMERIC DEFAULT NULL,
-    f_max_harga NUMERIC DEFAULT NULL,
+    f_min_harga INT DEFAULT NULL,
+    f_max_harga INT DEFAULT NULL,
 
     f_gpu VARCHAR DEFAULT NULL,
 
@@ -206,7 +206,7 @@ CREATE OR REPLACE FUNCTION GetFilteredLaptopPengadaan(
 )
 RETURNS TABLE (
     id_laptop_pengadaan VARCHAR,
-    harga NUMERIC,
+    harga INT,
     gpu VARCHAR,
     ukuran_layar FLOAT,
     baterai FLOAT,

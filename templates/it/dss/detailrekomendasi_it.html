@@ -235,6 +235,30 @@
             justify-content: center;
             gap: 10px;
         }
+        .asset-status{
+            display:inline-block;
+            padding:6px 12px;
+            border-radius:8px;
+            font-size:12px;
+            font-weight:700;
+            text-transform:uppercase;
+            background:#dcfce7;
+            color:#16a34a;
+        }
+        .status-tersedia{
+            background:#dcfce7;
+            color:#16a34a;
+        }
+
+        .status-dipinjam{
+            background:#dbeafe;
+            color:#2563eb;
+        }
+
+        .status-rusak{
+            background:#fee2e2;
+            color:#dc2626;
+        }
     </style>
 </head>
 
@@ -276,43 +300,79 @@
                     <img src="https://images.unsplash.com/photo-1517336714460-d1b16dd1c06d?q=80&w=1000&auto=format&fit=crop"
                         class="laptop-img" alt="Laptop">
                     <div class="laptop-info">
-                        <h2>{{ laptop.nama }}</h2>
-                        <p>High Performance Laptop</p>
+                        <h2>{{ detail.nama_laptop }}</h2>
+                        <p>{{ detail.model }}</p>
                     </div>
                 </div>
 
                 <div class="card">
                     <div class="admin-title">Asset Administration</div>
-                    <div class="admin-item">
-                        <label>Asset ID</label>
-                        <div class="asset-id">DUMMY-{{ laptop.id }}</div>
-                    </div>
-                    <div class="admin-item">
-                        <label>Storage Location</label>
-                        <div style="font-weight: 700; color: #1e293b;">
-                            <i class="fa-solid fa-location-dot" style="color: #0b57c6; margin-right: 8px;"></i>
-                            Warehouse IT-1
+                        <div class="admin-item">
+                            <label>Asset ID</label>
+                            <div class="asset-id">
+                                {{ detail.id_laptop_inventori }}
+                            </div>
                         </div>
-                    </div>
-                    <div class="admin-item">
-                        <label>Warranty Status</label>
-                        <span
-                            style="background: #dcfce7; color: #16a34a; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 800;">ACTIVE</span>
-                    </div>
+                        <div class="admin-item">
+                            <label>Storage Location</label>
+                            <div>
+                                <i class="fa-solid fa-location-dot"></i>
+                                {{ detail.lokasi }}
+                            </div>
+                        </div>
+                        <div class="admin-item">
+                            <label>Status Laptop</label>
+                            <span class="asset-status {% if detail.status == 'tersedia' %} status-tersedia
+                            {% elif detail.status == 'dipinjam' %} status-dipinjam {% else %} status-rusak{% endif %}">
+                            {{ detail.status|upper }}
+                            </span>
+                        </div>
                 </div>
 
                 <div class="card specs-card">
                     <div class="specs-header">
                         <i class="fa-solid fa-microchip"></i> Spesifikasi Laptop
                     </div>
-                    <div class="specs-grid">
-                        <div class="spec-item"><label>Processor</label><span>Intel Core i{{ laptop.processor }} Gen</span></div>
-                        <div class="spec-item"><label>Storage</label><span>{{ laptop.storage }} GB SSD</span></div>
-                        <div class="spec-item"><label>Memory RAM</label><span>{{ laptop.ram }} GB</span></div>
-                        <div class="spec-item"><label>Battery Capacity</label><span>{{ laptop.baterai }} mAh</span></div>
-                        <div class="spec-item"><label>Weight</label><span>{{ laptop.berat }} kg</span></div>
-                        <div class="spec-item"><label>Screen Size</label><span>{{ laptop.layar }} inch</span></div>
-                    </div>
+                        <div class="specs-grid">
+                            <div class="spec-item">
+                                <label>Manufacturer</label>
+                                <span>{{ detail.manufacturer }}</span>
+                            </div>
+                            <div class="spec-item">
+                                <label>Processor</label>
+                                <span>
+                                    {{ detail.manufacturer }}
+                                    {{ detail.processor_model }}
+                                </span>
+                            </div>
+                            <div class="spec-item">
+                                <label>Cores</label>
+                                <span>{{ detail.cores }}</span>
+                            </div>
+                            <div class="spec-item">
+                                <label>Threads</label>
+                                <span>{{ detail.threads }}</span>
+                            </div>
+                            <div class="spec-item">
+                                <label>Benchmark Score</label>
+                                <span>{{ detail.benchmark_score }}</span>
+                            </div>
+                            <div class="spec-item">
+                                <label>RAM</label>
+                                <span>
+                                    {{ detail.ram }} GB
+                                    ({{ detail.ram_tipe }})
+                                </span>
+                            </div>
+                            <div class="spec-item">
+                                <label>Storage</label>
+                                <span>
+                                    {{ detail.storage }} GB
+                                    ({{ detail.storage_tipe }})
+                                </span>
+                            </div>
+
+                        </div>
                 </div>
 
                 <div class="footer-action">

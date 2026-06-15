@@ -388,13 +388,12 @@
         }
 
         /* Pagination */
-        .pagination-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 24px;
-            background-color: #ffffff;
-            border-top: 1px solid #f1f5f9;
+        .pagination-container{
+            display:flex;
+            justify-content:flex-end;
+            align-items:center;
+            padding:18px 24px;
+            border-top:1px solid #f1f5f9;
         }
 
         .pagination-text {
@@ -403,10 +402,9 @@
             font-weight: 500;
         }
 
-        .pagination-controls {
-            display: flex;
-            align-items: center;
-            gap: 8px;
+        .pagination-controls{
+            display:flex;
+            gap:8px;
         }
 
         .page-btn {
@@ -442,10 +440,23 @@
 
     <div class="dashboard-wrapper">
         <!-- Load Sidebar -> highlight "Hasil Rekomendasi" -->
-        {% include 'it/components/sidebar.html' with active_page='hasil_rekomendasi' %}
+        {% include 'hc/components/sidebar.html' with active_page='hasil_rekomendasi' %}
 
         <!-- Main Content -->
         <div class="main-dashboard-content">
+            <!-- Flash Messages -->
+            {% if messages %}
+            <div style="margin-bottom:20px;">
+                {% for message in messages %}
+                <div style="padding:12px 20px; border-radius:8px; margin-bottom:8px; font-size:14px; font-weight:500;
+                    {% if message.tags == 'success' %}background:#dcfce7; color:#15803d; border:1px solid #bbf7d0;
+                    {% elif message.tags == 'error' %}background:#fee2e2; color:#dc2626; border:1px solid #fecaca;
+                    {% else %}background:#dbeafe; color:#2563eb; border:1px solid #bfdbfe;{% endif %}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
 
             <!-- Header Section -->
             <div class="page-header-wrapper" style="align-items: flex-end;">
@@ -463,7 +474,7 @@
                             <button class="btn-action btn-pdf">
                                 <i class="fa-solid fa-download"></i> Cetak PDF
                             </button>
-                            <a href="{% url 'inputkriteria_it' %}" class="btn-action btn-recalc">
+                            <a href="{% url 'inputkriteria_hc' %}" class="btn-action btn-recalc">
                                 <i class="fa-solid fa-arrow-rotate-right"></i> Hitung Ulang
                             </a>
                         </div>
@@ -478,11 +489,19 @@
                     <div class="metric-label">Total Alternatif</div>
                     <div class="metric-value">{{ total_alternatif }} Laptop</div>
                 </div>
+                {% if jenis_rekomendasi == "pengadaan" %}
                 <div class="metric-card">
-                    <div class="metric-icon icon-red"><i class="fa-solid fa-money-bill"></i></div>
-                    <div class="metric-label">Rata-rata Harga</div>
-                    <div class="metric-value">Rp {{ rata_rata_harga|floatformat:0 }}</div>
+                    <div class="metric-icon icon-red">
+                        <i class="fa-solid fa-money-bill"></i>
+                    </div>
+                    <div class="metric-label">
+                        Rata-rata Harga
+                    </div>
+                    <div class="metric-value">
+                        Rp {{ rata_rata_harga|floatformat:0 }}
+                    </div>
                 </div>
+                {% endif %}
                 <div class="metric-card">
                     <div class="metric-icon icon-green"><i class="fa-solid fa-check-circle"></i></div>
                     <div class="metric-label">Skor Tertinggi</div>
@@ -504,13 +523,19 @@
             <!-- Main Ranking Table -->
             <div class="table-card">
                 <div class="table-header">
-                    <h3>Daftar Peringkat Laptop</h3>
+                    <h3>Daftar Peringkat Laptop Sesuai Role</h3>
                     <div class="sort-select">
                         Urutkan:
-                        <select>
-                            <option>Skor SAW (Tertinggi)</option>
-                            <option>Skor SAW (Terendah)</option>
-                            <option>Harga (Termurah)</option>
+                        <select name="sort" id="sortSelect">
+                            <option value="skor_desc" {% if sort_by == "skor_desc" %}selected{% endif %}>
+                                Skor SAW (Tertinggi)
+                            </option>
+                            <option value="skor_asc" {% if sort_by == "skor_asc" %}selected{% endif %}>
+                                Skor SAW (Terendah)
+                            </option>
+                            <option value="harga_asc" {% if sort_by == "harga_asc" %}selected{% endif %}>
+                                Harga (Termurah)
+                            </option>
                         </select>
                     </div>
                 </div>
@@ -523,12 +548,15 @@
                             <th>SUMBER DATA</th>
                             <th>PROSESSOR</th>
                             <th>RAM</th>
+                            {% if jenis_rekomendasi == "pengadaan" %}
+                            <th>HARGA</th>
+                            {% endif %}
                             <th>SKOR (SAW)</th>
                             <th>AKSI</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for item in ranking %}
+                        {% for item in ranking_sesuai %}
                         <tr>
                             <td style="text-align: center;">
                                 <div style="display: flex; justify-content: center;">
@@ -542,41 +570,228 @@
                             </td>
                             <td>
                                 <span class="source-badge source-internal">
-                                    <i class="fa-solid fa-building"></i> Internal Kantor
+                                    <i class="fa-solid fa-building"></i> Internal
                                 </span>
                             </td>
-                            <td>Intel Core i{{ item.detail.processor }} Gen</td>
+                            <td>Processor Core: {{ item.detail.processor }}</td>
                             <td><span class="ram-badge">{{ item.detail.ram }}GB</span></td>
+                            {% if jenis_rekomendasi == "pengadaan" %}
+                            <td>Rp {{ item.detail.harga|floatformat:0 }}</td>
+                            {% endif %}
                             <td><span class="score-val {% if forloop.counter == 1 %}high{% endif %}">{{ item.skor|floatformat:3 }}</span></td>
-                            <td>
-                                <a href="{% url 'detailrekomendasi_it' %}?id={{ item.id }}" style="text-decoration: none;">
-                                    <button class="btn-detail">Detail</button>
-                                </a>
+                            <td><a href="{% url 'detailrekomendasi_it' %}?id={{ item.id }}&jenis={{ jenis_rekomendasi }}" class="btn-detail">
+                                Detail</a>
                             </td>
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="7" style="text-align: center;">Belum ada hasil kalkulasi SAW. Silahkan input kriteria terlebih dahulu.</td>
+                            <td colspan="7" style="text-align:center;">
+                                Tidak ditemukan laptop yang memenuhi role dan minimum requirement.
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
+                {% if ranking_sesuai.paginator.num_pages > 1 %}
 
-                <!-- Pagination footer -->
                 <div class="pagination-container">
-                    <span class="pagination-text">Menampilkan 7 dari 12 rekomendasi laptop</span>
+
                     <div class="pagination-controls">
-                        <button class="page-btn"><i class="fa-solid fa-angle-left"></i></button>
-                        <button class="page-btn active">1</button>
-                        <button class="page-btn">2</button>
-                        <button class="page-btn"><i class="fa-solid fa-angle-right"></i></button>
+
+                        {% if ranking_sesuai.has_previous %}
+                        <a
+                            href="?page={{ ranking_sesuai.previous_page_number }}&sort={{ sort_by }}"
+                            class="page-btn"
+                        >
+                            <i class="fa-solid fa-chevron-left"></i>
+                        </a>
+                        {% endif %}
+
+                        {% for num in ranking_sesuai.paginator.page_range %}
+
+                        <a
+                            href="?page={{ num }}&sort={{ sort_by }}"
+                            class="page-btn {% if ranking_sesuai.number == num %}active{% endif %}"
+                        >
+                            {{ num }}
+                        </a>
+
+                        {% endfor %}
+
+                        {% if ranking_sesuai.has_next %}
+                        <a
+                            href="?page={{ ranking_sesuai.next_page_number }}&alt_page={{ ranking_alternatif.number }}&sort={{ sort_by }}"
+                            class="page-btn"
+                        >
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </a>
+                        {% endif %}
+                    </div>
+
+                </div>
+
+                {% endif %}
+            </div> <!-- End Table Card -->
+            <!-- Alternatif Lain -->
+            <div class="table-card" style="margin-top:32px;">
+
+                <div class="table-header">
+                    <h3>Daftar Peringkat Laptop Alternatif Lain</h3>
+
+                    <div class="sort-select">
+                        Alternatif yang tidak memenuhi role utama
+                        namun masih layak direkomendasikan.
                     </div>
                 </div>
 
-            </div> <!-- End Table Card -->
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width:80px; text-align:center;">RANK</th>
+                            <th>NAMA LAPTOP</th>
+                            <th>SUMBER DATA</th>
+                            <th>PROCESSOR</th>
+                            <th>RAM</th>
+                            {% if jenis_rekomendasi == "pengadaan" %}
+                            <th>HARGA</th>
+                            {% endif %}
+                            <th>SKOR (SAW)</th>
+                            <th>AKSI</th>
+                        </tr>
+                    </thead>
 
+                    <tbody>
+
+                        {% for item in ranking_alternatif %}
+
+                        <tr>
+
+                            <td style="text-align:center;">
+                                <div style="display:flex; justify-content:center;">
+                                    <div class="rank-cell">
+                                        {{ item.rank }}
+                                    </div>
+                                </div>
+                            </td>
+
+                            <td>
+                                <span class="nama-laptop" style="margin-bottom:0;">
+                                    {{ item.detail.nama }}
+                                </span>
+                            </td>
+
+                            <td>
+                                <span class="source-badge source-internal">
+                                    <i class="fa-solid fa-building"></i>
+                                    Internal
+                                </span>
+                            </td>
+
+                            <td>
+                                Processor Core:
+                                {{ item.detail.processor }}
+                            </td>
+                            <td>
+                                <span class="ram-badge">
+                                    {{ item.detail.ram }}GB
+                                </span>
+                            </td>
+                            {% if jenis_rekomendasi == "pengadaan" %}
+                            <td>
+                                Rp {{ item.detail.harga|floatformat:0 }}
+                            </td>
+                            {% endif %}
+                            <td>
+                                <span class="score-val {% if forloop.counter == 1 %}high{% endif %}">
+                                    {{ item.skor|floatformat:3 }}
+                                </span>
+                            </td>
+                            <td>
+                                <button class="btn-detail">
+                                    Detail
+                                </button>
+                            </td>
+
+                        </tr>
+
+                        {% empty %}
+
+                        <tr>
+                            {% if jenis_rekomendasi == "pengadaan" %}
+                            <td colspan="8" style="text-align:center;">
+                            {% else %}
+                            <td colspan="7" style="text-align:center;">
+                            {% endif %}
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+                </table>
+                {% if ranking_alternatif.paginator.num_pages > 1 %}
+
+                <div class="pagination-container">
+                    <div class="pagination-controls">
+
+                        {% if ranking_alternatif.has_previous %}
+                        <a
+                            href="?page={{ ranking_alternatif.number }}&alternatif_page={{ ranking_alternatif.previous_page_number }}&sort={{ sort_by }}"
+                            class="page-btn"
+                        >
+                            <i class="fa-solid fa-chevron-left"></i>
+                        </a>
+                        {% endif %}
+
+                        {% for num in ranking_alternatif.paginator.page_range %}
+                        <a
+                            href="?page={{ ranking_alternatif.number }}&alternatif_page={{ num }}&sort={{ sort_by }}"
+                            class="page-btn {% if ranking_alternatif.number == num %}active{% endif %}"
+                        >
+                            {{ num }}
+                        </a>
+                        {% endfor %}
+
+                        {% if ranking_alternatif.has_next %}
+                        <a
+                            href="?page={{ ranking_alternatif.number }}&alternatif_page={{ ranking_alternatif.next_page_number }}&sort={{ sort_by }}"
+                            class="page-btn"
+                        >
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </a>
+                        {% endif %}
+
+                    </div>
+                </div>
+
+                {% endif %}
+            </div>
         </div> <!-- End Main Content -->
     </div> <!-- End Dashboard Wrapper -->
+    <script>
+    document.getElementById(
+        "sortSelect"
+    ).addEventListener(
+        "change",
+        function () {
+            const sort =
+                this.value;
+            const url =
+                new URL(
+                    window.location.href
+                );
+            url.searchParams.set(
+                "sort",
+                sort
+            );
+            url.searchParams.set(
+                "page",
+                1
+            );
+            window.location.href =
+                url.toString();
+        }
+    );
+</script>
 
 </body>
 

@@ -235,22 +235,60 @@
             justify-content: center;
             gap: 10px;
         }
+        .asset-status{
+            display:inline-block;
+            padding:6px 12px;
+            border-radius:8px;
+            font-size:12px;
+            font-weight:700;
+            text-transform:uppercase;
+            background:#dcfce7;
+            color:#16a34a;
+        }
+        .status-tersedia{
+            background:#dcfce7;
+            color:#16a34a;
+        }
+
+        .status-dipinjam{
+            background:#dbeafe;
+            color:#2563eb;
+        }
+
+        .status-rusak{
+            background:#fee2e2;
+            color:#dc2626;
+        }
     </style>
 </head>
 
 <body>
 
     <div class="dashboard-wrapper">
-        {% include 'hc/components/sidebar.html' with active_page='hasil_rekomendasi' %}
+        {% include 'it/components/sidebar.html' with active_page='hasil_rekomendasi' %}
 
         <div class="main-content">
+            <!-- Flash Messages -->
+            {% if messages %}
+            <div style="margin-bottom:20px;">
+                {% for message in messages %}
+                <div style="padding:12px 20px; border-radius:8px; margin-bottom:8px; font-size:14px; font-weight:500;
+                    {% if message.tags == 'success' %}background:#dcfce7; color:#15803d; border:1px solid #bbf7d0;
+                    {% elif message.tags == 'error' %}background:#fee2e2; color:#dc2626; border:1px solid #fecaca;
+                    {% else %}background:#dbeafe; color:#2563eb; border:1px solid #bfdbfe;{% endif %}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
             <div class="top-nav">
                 <div>
-                    <div class="breadcrumb">Data Laptop / <span>MacBook Pro 16" M3</span></div>
+                    <div class="breadcrumb">Data Laptop / <span>{{ laptop.nama }}</span></div>
                     <h1 class="page-title">Detail Rekomendasi</h1>
                 </div>
                 <div class="nav-buttons">
-                    <a href="{% url 'hasilrekomendasi_hc' %}" class="btn-nav btn-grey">Kembali ke Daftar</a>
+                    <a href="{% url 'hasilrekomendasi_it' %}" class="btn-nav btn-grey">Kembali ke Daftar</a>
                 </div>
             </div>
 
@@ -262,49 +300,87 @@
                     <img src="https://images.unsplash.com/photo-1517336714460-d1b16dd1c06d?q=80&w=1000&auto=format&fit=crop"
                         class="laptop-img" alt="Laptop">
                     <div class="laptop-info">
-                        <h2>MacBook Pro 16" M3</h2>
-                        <p>Apple Silicon M3 Max Chip - Space Black</p>
+                        <h2>{{ detail.nama_laptop }}</h2>
+                        <p>{{ detail.model }}</p>
                     </div>
                 </div>
 
                 <div class="card">
                     <div class="admin-title">Asset Administration</div>
-                    <div class="admin-item">
-                        <label>Asset ID</label>
-                        <div class="asset-id">PLC-LP-2024-B12-045</div>
-                    </div>
-                    <div class="admin-item">
-                        <label>Storage Location</label>
-                        <div style="font-weight: 700; color: #1e293b;">
-                            <i class="fa-solid fa-location-dot" style="color: #0b57c6; margin-right: 8px;"></i>
-                            Warehouse B-12
+                        <div class="admin-item">
+                            <label>Asset ID</label>
+                            <div class="asset-id">
+                                {{ detail.id_laptop_inventori }}
+                            </div>
                         </div>
-                    </div>
-                    <div class="admin-item">
-                        <label>Warranty Status</label>
-                        <span
-                            style="background: #dcfce7; color: #16a34a; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 800;">ACTIVE</span>
-                    </div>
+                        <div class="admin-item">
+                            <label>Storage Location</label>
+                            <div>
+                                <i class="fa-solid fa-location-dot"></i>
+                                {{ detail.lokasi }}
+                            </div>
+                        </div>
+                        <div class="admin-item">
+                            <label>Status Laptop</label>
+                            <span class="asset-status {% if detail.status == 'tersedia' %} status-tersedia
+                            {% elif detail.status == 'dipinjam' %} status-dipinjam {% else %} status-rusak{% endif %}">
+                            {{ detail.status|upper }}
+                            </span>
+                        </div>
                 </div>
 
                 <div class="card specs-card">
                     <div class="specs-header">
                         <i class="fa-solid fa-microchip"></i> Spesifikasi Laptop
                     </div>
-                    <div class="specs-grid">
-                        <div class="spec-item"><label>Processor</label><span>Apple M3 Max (14-core)</span></div>
-                        <div class="spec-item"><label>Storage</label><span>1TB SSD NVMe</span></div>
-                        <div class="spec-item"><label>Memory RAM</label><span>36GB Unified Memory</span></div>
-                        <div class="spec-item"><label>Battery Capacity</label><span>7200 mAh</span></div>
-                        <div class="spec-item"><label>GPU</label><span>30-Core GPU</span></div>
-                        <div class="spec-item"><label>Screen Size</label><span>16.2-inch Liquid Retina</span></div>
-                    </div>
+                        <div class="specs-grid">
+                            <div class="spec-item">
+                                <label>Manufacturer</label>
+                                <span>{{ detail.manufacturer }}</span>
+                            </div>
+                            <div class="spec-item">
+                                <label>Processor</label>
+                                <span>
+                                    {{ detail.manufacturer }}
+                                    {{ detail.processor_model }}
+                                </span>
+                            </div>
+                            <div class="spec-item">
+                                <label>Cores</label>
+                                <span>{{ detail.cores }}</span>
+                            </div>
+                            <div class="spec-item">
+                                <label>Threads</label>
+                                <span>{{ detail.threads }}</span>
+                            </div>
+                            <div class="spec-item">
+                                <label>Benchmark Score</label>
+                                <span>{{ detail.benchmark_score }}</span>
+                            </div>
+                            <div class="spec-item">
+                                <label>RAM</label>
+                                <span>
+                                    {{ detail.ram }} GB
+                                    ({{ detail.ram_tipe }})
+                                </span>
+                            </div>
+                            <div class="spec-item">
+                                <label>Storage</label>
+                                <span>
+                                    {{ detail.storage }} GB
+                                    ({{ detail.storage_tipe }})
+                                </span>
+                            </div>
+
+                        </div>
                 </div>
 
                 <div class="footer-action">
-                    <button class="btn-history">
-                        <i class="fa-solid fa-clock-rotate-left"></i> Lihat Riwayat Peminjaman
-                    </button>
+                    <a href="{% url 'riwayatpeminjamanlaptop_it' %}" style="text-decoration: none; width: 100%;">
+                        <button class="btn-history">
+                            <i class="fa-solid fa-clock-rotate-left"></i> Lihat Riwayat Peminjaman
+                        </button>
+                    </a>
                 </div>
             </div>
         </div>

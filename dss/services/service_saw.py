@@ -342,14 +342,14 @@ class Servicesaw:
                 "TOTAL DATA INVENTORI =",
                 len(semua_data)
             )
-            print("=== RAW DATA ===")
-            print(data_raw[0])
-            if not data_raw:
-                conn.rollback()
-                return {
-                    "status": "error",
-                    "message": "Data laptop tidak ditemukan"
-                }
+            # print("=== RAW DATA ===")
+            # print(data_raw[0])
+            # if not data_raw:
+            #     conn.rollback()
+            #     return {
+            #         "status": "error",
+            #         "message": "Data laptop tidak ditemukan"
+            #     }
             role_requirement = self.get_role_requirement(role[0])
             hasil_split = (
                 self.servisPD.split_role_requirement(

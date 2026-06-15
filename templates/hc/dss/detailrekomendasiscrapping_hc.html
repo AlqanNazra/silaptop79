@@ -164,55 +164,112 @@
 
 <body>
     <div class="dashboard-wrapper">
-        {% include 'hc/components/sidebar.html' with active_page='hasil_rekomendasi' %}
+        {% include 'it/components/sidebar.html' with active_page='hasil_rekomendasi' %}
 
         <div class="main-content">
+            <!-- Flash Messages -->
+            {% if messages %}
+            <div style="margin-bottom:20px;">
+                {% for message in messages %}
+                <div style="padding:12px 20px; border-radius:8px; margin-bottom:8px; font-size:14px; font-weight:500;
+                    {% if message.tags == 'success' %}background:#dcfce7; color:#15803d; border:1px solid #bbf7d0;
+                    {% elif message.tags == 'error' %}background:#fee2e2; color:#dc2626; border:1px solid #fecaca;
+                    {% else %}background:#dbeafe; color:#2563eb; border:1px solid #bfdbfe;{% endif %}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
             <div class="top-nav">
                 <div>
-                    <div class="breadcrumb">DSS Results / <span>MacBook Pro 16" M3</span></div>
+                    <div class="breadcrumb">
+                        DSS Results /
+                        <span>{{ detail.nama_laptop }}</span>
+                    </div>
                     <h1 class="page-title">Detail Rekomendasi</h1>
                 </div>
-                <a href="{% url 'hasilrekomendasi_hc' %}" class="btn-nav">
+                <a href="{% url 'hasilrekomendasi_it' %}" class="btn-nav">
                     <i class="fa-solid fa-arrow-left"></i> Kembali ke Hasil
                 </a>
             </div>
-
-            <div class="price-card">
-                <h2 class="laptop-name">MacBook Pro 16" M3</h2>
-                <p class="laptop-sub">Apple Silicon M3 Max Chip - Space Black</p>
-
-                <span class="price-label">Price</span>
-                <div class="price-value">Rp 15.000.0000</div>
-            </div>
-
+                <div class="price-card">
+                    <h2 class="laptop-name">
+                        {{ detail.nama_laptop }}
+                    </h2>
+                    <p class="laptop-sub">
+                        {{ detail.manufacturer }}
+                        {{ detail.processor_model }}
+                    </p>
+                    <span class="price-label">
+                        Estimated Price
+                    </span>
+                    <div class="price-value">
+                        Rp {{ detail.harga_format }}
+                    </div>
+                </div>
             <div class="specs-card">
                 <div class="specs-header">
                     <i class="fa-solid fa-microchip" style="color: #0b57c6;"></i> Spesifikasi Laptop
                 </div>
-                <div class="specs-grid">
-                    <div class="spec-item">
-                        <label>Processor</label>
-                        <span>Apple M3 Max (14-core)</span>
+                    <div class="specs-grid">
+                        <div class="spec-item">
+                            <label>Manufacturer</label>
+                            <span>{{ detail.manufacturer }}</span>
+                        </div>
+                        <div class="spec-item">
+                            <label>Processor</label>
+                            <span>{{ detail.processor_model }}</span>
+                        </div>
+                        <div class="spec-item">
+                            <label>Cores</label>
+                            <span>{{ detail.cores }}</span>
+                        </div>
+                        <div class="spec-item">
+                            <label>Threads</label>
+                            <span>{{ detail.threads }}</span>
+                        </div>
+                        <div class="spec-item">
+                            <label>Benchmark Score</label>
+                            <span>{{ detail.benchmark_score }}</span>
+                        </div>
+                        <div class="spec-item">
+                            <label>RAM</label>
+                            <span>
+                                {{ detail.ram }} GB
+                                ({{ detail.ram_tipe }})
+                            </span>
+                        </div>
+                        <div class="spec-item">
+                            <label>Storage</label>
+                            <span>
+                                {{ detail.storage }} GB
+                                ({{ detail.storage_tipe }})
+                            </span>
+                        </div>
+                        <div class="spec-item">
+                            <label>GPU</label>
+                            <span>{{ detail.gpu }}</span>
+                        </div>
+                        <div class="spec-item">
+                            <label>Screen Size</label>
+                            <span>{{ detail.layar }}"</span>
+                        </div>
+                        <div class="spec-item">
+                            <label>Battery</label>
+                            <span>{{ detail.baterai }}</span>
+                        </div>
+                        <div class="spec-item">
+                            <label>Weight</label>
+                            <span>{{ detail.berat }} kg</span>
+                        </div>
+                        <div class="spec-item">
+                            <label>Price</label>
+                            <span>
+                                Rp {{ detail.harga }}
+                            </span>
+                        </div>
                     </div>
-                    <div class="spec-item">
-                        <label>Processor</label>
-                        <span>Apple M3 Max (14-core)</span>
-                    </div>
-                    <div class="spec-item">
-                        <label>Storage</label>
-                        <span>1TB SSD NVMe</span>
-                    </div>
-                    <div class="spec-item">
-                        <label>Memory RAM</label>
-                        <span>36GB Unified Memory</span>
-                    </div>
-                    <div class="spec-item">
-                        <label>Battery Capacity</label>
-                        <span>7200 mAh</span>
-                    </div>
-                    <div class="spec-item">
-                        <label>GPU</label>
-                        <span>30-Core GPU</span>
                     </div>
                 </div>
             </div>

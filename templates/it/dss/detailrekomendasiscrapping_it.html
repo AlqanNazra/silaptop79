@@ -183,50 +183,93 @@
 
             <div class="top-nav">
                 <div>
-                    <div class="breadcrumb">DSS Results / <span>{{ laptop.nama }}</span></div>
+                    <div class="breadcrumb">
+                        DSS Results /
+                        <span>{{ detail.nama_laptop }}</span>
+                    </div>
                     <h1 class="page-title">Detail Rekomendasi</h1>
                 </div>
                 <a href="{% url 'hasilrekomendasi_it' %}" class="btn-nav">
                     <i class="fa-solid fa-arrow-left"></i> Kembali ke Hasil
                 </a>
             </div>
-
-            <div class="price-card">
-                <h2 class="laptop-name">{{ laptop.nama }}</h2>
-                <p class="laptop-sub">High Performance Laptop</p>
-
-                <span class="price-label">Estimated Price</span>
-                <div class="price-value">Rp 15.000.000</div>
-            </div>
-
+                <div class="price-card">
+                    <h2 class="laptop-name">
+                        {{ detail.nama_laptop }}
+                    </h2>
+                    <p class="laptop-sub">
+                        {{ detail.manufacturer }}
+                        {{ detail.processor_model }}
+                    </p>
+                    <span class="price-label">
+                        Estimated Price
+                    </span>
+                    <div class="price-value">
+                        Rp {{ detail.harga_format }}
+                    </div>
+                </div>
             <div class="specs-card">
                 <div class="specs-header">
                     <i class="fa-solid fa-microchip" style="color: #0b57c6;"></i> Spesifikasi Laptop
                 </div>
-                <div class="specs-grid">
-                    <div class="spec-item">
-                        <label>Processor</label>
-                        <span>Intel Core i{{ laptop.processor }} Gen</span>
+                    <div class="specs-grid">
+                        <div class="spec-item">
+                            <label>Manufacturer</label>
+                            <span>{{ detail.manufacturer }}</span>
+                        </div>
+                        <div class="spec-item">
+                            <label>Processor</label>
+                            <span>{{ detail.processor_model }}</span>
+                        </div>
+                        <div class="spec-item">
+                            <label>Cores</label>
+                            <span>{{ detail.cores }}</span>
+                        </div>
+                        <div class="spec-item">
+                            <label>Threads</label>
+                            <span>{{ detail.threads }}</span>
+                        </div>
+                        <div class="spec-item">
+                            <label>Benchmark Score</label>
+                            <span>{{ detail.benchmark_score }}</span>
+                        </div>
+                        <div class="spec-item">
+                            <label>RAM</label>
+                            <span>
+                                {{ detail.ram }} GB
+                                ({{ detail.ram_tipe }})
+                            </span>
+                        </div>
+                        <div class="spec-item">
+                            <label>Storage</label>
+                            <span>
+                                {{ detail.storage }} GB
+                                ({{ detail.storage_tipe }})
+                            </span>
+                        </div>
+                        <div class="spec-item">
+                            <label>GPU</label>
+                            <span>{{ detail.gpu }}</span>
+                        </div>
+                        <div class="spec-item">
+                            <label>Screen Size</label>
+                            <span>{{ detail.layar }}"</span>
+                        </div>
+                        <div class="spec-item">
+                            <label>Battery</label>
+                            <span>{{ detail.baterai }}</span>
+                        </div>
+                        <div class="spec-item">
+                            <label>Weight</label>
+                            <span>{{ detail.berat }} kg</span>
+                        </div>
+                        <div class="spec-item">
+                            <label>Price</label>
+                            <span>
+                                Rp {{ detail.harga }}
+                            </span>
+                        </div>
                     </div>
-                    <div class="spec-item">
-                        <label>Storage</label>
-                        <span>{{ laptop.storage }} GB SSD</span>
-                    </div>
-                    <div class="spec-item">
-                        <label>Memory RAM</label>
-                        <span>{{ laptop.ram }} GB</span>
-                    </div>
-                    <div class="spec-item">
-                        <label>Battery Capacity</label>
-                        <span>{{ laptop.baterai }} mAh</span>
-                    </div>
-                    <div class="spec-item">
-                        <label>Weight</label>
-                        <span>{{ laptop.berat }} kg</span>
-                    </div>
-                    <div class="spec-item">
-                        <label>Screen Size</label>
-                        <span>{{ laptop.layar }} inch</span>
                     </div>
                 </div>
             </div>

@@ -286,3 +286,88 @@ BEGIN
     RETURN 'Spesifikasi berhasil diupdate!';
 END;
 $$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION ambil_detail_laptop_inventori(
+    f_id_laptop VARCHAR
+)
+RETURNS TABLE (
+
+    id_laptop_inventori VARCHAR,
+    no_inventori VARCHAR,
+
+    nama_laptop VARCHAR,
+    model VARCHAR,
+    os VARCHAR,
+
+    kondisi VARCHAR,
+    status VARCHAR,
+    lokasi VARCHAR,
+
+    ukuran_layar FLOAT,
+    baterai FLOAT,
+
+    nama_processor VARCHAR,
+    manufacturer VARCHAR,
+    processor_model VARCHAR,
+
+    cores INT,
+    threads INT,
+    benchmark_score INTEGER,
+
+    ram_kapasitas INT,
+    ram_tipe VARCHAR,
+
+    storage_kapasitas INT,
+    storage_tipe VARCHAR
+
+)
+AS $$
+BEGIN
+
+RETURN QUERY
+
+SELECT
+
+    li.id_laptop_inventori,
+    li.no_inventori,
+
+    li.nama_laptop,
+    li.model,
+    li.os,
+
+    li.kondisi,
+    li.status,
+    li.lokasi,
+
+    li.ukuran_layar,
+    li.baterai,
+
+    pro.nama_processor,
+    pro.manufacturer,
+    pro.model,
+
+    pro.cores,
+    pro.threads,
+    pro.benchmark_score,
+
+    r.kapasitas_gb,
+    r.tipe,
+
+    s.kapasitas_gb,
+    s.tipe
+
+FROM inventori_laptopinventori li
+
+LEFT JOIN inventori_processor pro
+ON li.id_processor = pro.id_processor
+
+LEFT JOIN inventori_ram r
+ON li.id_ram = r.id_ram
+
+LEFT JOIN inventori_storage s
+ON li.id_storage = s.id_storage
+
+WHERE li.id_laptop_inventori = f_id_laptop;
+
+END;
+$$ LANGUAGE plpgsql;

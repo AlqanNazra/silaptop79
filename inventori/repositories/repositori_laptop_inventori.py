@@ -19,9 +19,9 @@ class LaptopInventoriRepository(ILaptopInventoriRepository):
             cur.execute("SELECT * FROM ambil_laptop_inventori()")
             return cur.fetchall()
 
-    def ambil_spek_laptop(self, id_laptop):
-        with self.conn.cursor() as cur:
-            cur.execute("SELECT * FROM ambil_spek_laptop(%s)", (id_laptop,))
+    def ambil_spek_laptop(self,id_laptop):
+        with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
+            cur.execute("""SELECT *FROM ambil_spek_laptop(%s)""",(id_laptop,))
             return cur.fetchone()
 
     def update_kondisi(self, id_laptop, kondisi):
@@ -63,3 +63,16 @@ class LaptopInventoriRepository(ILaptopInventoriRepository):
         with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute(query, params)
             return cur.fetchall()
+        
+    def ambil_detail_laptop(self, id_laptop):
+        query = """
+        SELECT *
+        FROM ambil_detail_laptop_inventori(%s)
+        """
+
+        with self.conn.cursor(
+            cursor_factory=RealDictCursor
+        ) as cur:
+
+            cur.execute(query, (id_laptop,))
+            return cur.fetchone()
