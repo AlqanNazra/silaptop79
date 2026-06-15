@@ -1,0 +1,795 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelola Akun Talent - SiLaptop79</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1.1">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            min-height: 100vh;
+            background-color: #f8fafc;
+        }
+
+        .dashboard-wrapper {
+            display: flex;
+            width: 100%;
+        }
+
+        .main-dashboard-content {
+            flex: 1;
+            margin-left: 260px;
+            padding: 40px 60px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 800;
+            color: #1e293b;
+            margin-top: 0;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .page-subtitle {
+            font-size: 14px;
+            color: #64748b;
+            margin-bottom: 32px;
+            max-width: 620px;
+            line-height: 1.6;
+        }
+
+        /* Statistics Cards */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: #ffffff;
+            border-radius: 16px;
+            border: 1px solid #f1f5f9;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+            padding: 24px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
+        }
+
+        .stat-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 12px;
+            background-color: rgba(11, 87, 198, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #0b57c6;
+            font-size: 24px;
+        }
+
+        .stat-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #64748b;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 800;
+            color: #1e293b;
+            margin: 4px 0 0 0;
+        }
+
+        /* Form & Filter Styles */
+        .row-container {
+            display: grid;
+            grid-template-columns: 1.1fr 1.9fr;
+            gap: 32px;
+            align-items: start;
+        }
+
+        .card {
+            background: #ffffff;
+            border-radius: 16px;
+            border: 1px solid #f1f5f9;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+            overflow: hidden;
+            padding: 28px;
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-top: 0;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .card-title-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-title i {
+            color: #0b57c6;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            background-color: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            color: #334155;
+            transition: all 0.2s;
+            box-sizing: border-box;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #0b57c6;
+            box-shadow: 0 0 0 3px rgba(11, 87, 198, 0.1);
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            background-color: #0b57c6;
+            color: white;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s;
+            box-shadow: 0 4px 12px rgba(11, 87, 198, 0.15);
+        }
+
+        .btn-submit:hover {
+            background-color: #09459e;
+        }
+
+        /* Filter Controls */
+        .filter-section {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .search-wrapper {
+            flex: 1;
+            min-width: 200px;
+            position: relative;
+        }
+
+        .search-wrapper i {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        .search-wrapper .form-control {
+            padding-left: 40px;
+        }
+
+        .sort-wrapper {
+            width: 180px;
+        }
+
+        /* Password Result Box */
+        .password-box {
+            background-color: #ecfdf5;
+            border: 1px dashed #10b981;
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin-bottom: 24px;
+            color: #065f46;
+        }
+
+        .password-title {
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .password-value {
+            font-family: monospace;
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            background: white;
+            padding: 6px 12px;
+            border-radius: 4px;
+            display: inline-block;
+            border: 1px solid #a7f3d0;
+            color: #047857;
+        }
+
+        /* Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 16px 20px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        td {
+            padding: 14px 20px;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 14px;
+            color: #475569;
+        }
+
+        .role-pill {
+            background-color: #e0f2fe;
+            color: #0369a1;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .btn-detail {
+            background-color: #f1f5f9;
+            color: #475569;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .btn-detail:hover {
+            background-color: #0b57c6;
+            color: #ffffff;
+            border-color: #0b57c6;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-content {
+            background-color: #ffffff;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+            overflow: hidden;
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: #f8fafc;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 700;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-header h3 i {
+            color: #0b57c6;
+        }
+
+        .btn-close-modal {
+            background: none;
+            border: none;
+            color: #64748b;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .btn-close-modal:hover {
+            background-color: #f1f5f9;
+            color: #0f172a;
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .modal-detail-row {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 16px;
+            position: relative;
+        }
+
+        .modal-detail-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .modal-detail-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .modal-detail-value-container {
+            display: flex;
+            align-items: center;
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 10px 14px;
+            gap: 12px;
+        }
+
+        .modal-detail-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1e293b;
+            flex: 1;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .modal-detail-value.monospace {
+            font-family: monospace;
+            font-size: 15px;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-copy {
+            background: none;
+            border: none;
+            color: #64748b;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 6px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .btn-copy:hover {
+            background-color: #e2e8f0;
+            color: #0b57c6;
+        }
+
+        /* Toast notification */
+        .toast-notification {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background-color: #0f172a;
+            color: #ffffff;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 2000;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            pointer-events: none;
+        }
+
+        .toast-notification.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .toast-notification i {
+            color: #10b981;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="dashboard-wrapper">
+        <!-- Sidebar -->
+        {% include 'hc/components/sidebar.html' with active_page='kelola_talent' %}
+
+        <!-- Main Dashboard Content -->
+        <div class="main-dashboard-content">
+
+            <h1 class="page-title">Kelola Akun Talent</h1>
+            <p class="page-subtitle">Registrasikan data Talent baru untuk mengakses sistem inventori laptop PT Padepokan Tujuh Sembilan.</p>
+
+            <!-- Statistics Section -->
+            <div class="stats-container">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fa-solid fa-users"></i>
+                    </div>
+                    <div class="stat-info">
+                        <p class="stat-title">Total Talent Terdaftar</p>
+                        <h3 class="stat-value">{{ total_talent }}</h3>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Flash Messages -->
+            {% include 'components/messages_popup.html' %}
+
+            <!-- Output Password Baru -->
+            {% if generated_password %}
+            <div class="password-box">
+                <div class="password-title">
+                    <i class="fa-solid fa-key"></i> Password Berhasil Dibuat untuk <strong>{{ created_username }}</strong>:
+                </div>
+                <div>Username: <strong style="font-family: monospace;">{{ created_username }}</strong></div>
+                <div>Email: <strong style="font-family: monospace;">{{ created_email }}</strong></div>
+                <div style="margin-top: 10px;">
+                    Password: <span class="password-value">{{ generated_password }}</span>
+                </div>
+                <div style="font-size: 11px; margin-top: 8px; color: #047857; font-style: italic;">
+                    *Salin password ini sekarang. Password ini disimpan di sistem dalam format hash/enkripsi.
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="row-container">
+
+                <!-- Left: Form Input -->
+                <div class="card">
+                    <div class="card-title">
+                        <span class="card-title-left">
+                            <i class="fa-solid fa-user-plus"></i> Tambah Akun Baru
+                        </span>
+                    </div>
+                    <form method="POST" action="">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label>Username / Nama Lengkap</label>
+                            <input type="text" class="form-control" name="username" placeholder="Contoh: Budi Santoso" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Email Perusahaan</label>
+                            <input type="email" class="form-control" name="email" placeholder="Contoh: budi@padepokan79.com" required>
+                        </div>
+                        <button type="submit" class="btn-submit">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Generate Akun & Password
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Right: Daftar Talent -->
+                <div class="card" style="padding: 0;">
+                    <div style="padding: 28px 28px 12px 28px;">
+                        <div class="card-title" style="margin: 0 0 20px 0;">
+                            <span class="card-title-left">
+                                <i class="fa-solid fa-users"></i> Daftar Akun Talent Terdaftar
+                            </span>
+                        </div>
+
+                        <!-- Filter Form -->
+                        <form id="filter-form" method="GET" action="">
+                            <div class="filter-section">
+                                <div class="search-wrapper">
+                                    <i class="fa-solid fa-magnifying-glass"></i>
+                                    <input type="text" id="search-input" name="q" class="form-control" placeholder="Cari nama, email, atau ID user..." value="{{ search_query }}">
+                                </div>
+                                <div class="sort-wrapper">
+                                    <select name="sort" id="sort-select" class="form-control">
+                                        <option value="id_user" {% if sort_by == 'id_user' %}selected{% endif %}>Sort by ID User</option>
+                                        <option value="nama" {% if sort_by == 'nama' %}selected{% endif %}>Sort by Nama</option>
+                                        <option value="email" {% if sort_by == 'email' %}selected{% endif %}>Sort by Email</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <table style="width: 100%;">
+                        <thead>
+                            <tr>
+                                <th>ID USER</th>
+                                <th>NAMA / USERNAME</th>
+                                <th>EMAIL</th>
+                                <th>ROLE</th>
+                                <th>AKSI</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for talent in talents %}
+                            <tr>
+                                <td style="font-family: monospace; font-weight: bold; color: #0b57c6;">{{ talent.id_user }}</td>
+                                <td style="font-weight: 600; color: #1e293b;">{{ talent.nama }}</td>
+                                <td>{{ talent.email|default:"-" }}</td>
+                                <td><span class="role-pill">{{ talent.role }}</span></td>
+                                <td>
+                                    <button class="btn-detail" type="button" 
+                                            data-id="{{ talent.id_user }}" 
+                                            data-nama="{{ talent.nama }}" 
+                                            data-email="{{ talent.email|default:'-' }}"
+                                            data-password="{{ talent.password }}">
+                                        <i class="fa-solid fa-eye"></i> Detail
+                                    </button>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" style="text-align: center; padding: 40px; color: #94a3b8;">Belum ada akun Talent terdaftar.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Modal Detail Kredensial -->
+    <div class="modal-overlay" id="detail-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-id-card"></i> Detail Kredensial Talent</h3>
+                <button type="button" class="btn-close-modal" id="close-modal-btn">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-detail-row">
+                    <span class="modal-detail-label">ID User</span>
+                    <div class="modal-detail-value-container">
+                        <span class="modal-detail-value monospace" id="modal-id-user">-</span>
+                        <button type="button" class="btn-copy" onclick="copyToClipboard('modal-id-user')">
+                            <i class="fa-regular fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="modal-detail-row">
+                    <span class="modal-detail-label">Username / Nama Lengkap</span>
+                    <div class="modal-detail-value-container">
+                        <span class="modal-detail-value" id="modal-nama">-</span>
+                        <button type="button" class="btn-copy" onclick="copyToClipboard('modal-nama')">
+                            <i class="fa-regular fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="modal-detail-row">
+                    <span class="modal-detail-label">Email Perusahaan</span>
+                    <div class="modal-detail-value-container">
+                        <span class="modal-detail-value" id="modal-email">-</span>
+                        <button type="button" class="btn-copy" onclick="copyToClipboard('modal-email')">
+                            <i class="fa-regular fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="modal-detail-row">
+                    <span class="modal-detail-label">Password Sistem (Plain Text)</span>
+                    <div class="modal-detail-value-container" style="background-color: #fffbeb; border-color: #fde68a;">
+                        <span class="modal-detail-value monospace" id="modal-password" style="color: #b45309;">-</span>
+                        <button type="button" class="btn-copy" onclick="copyToClipboard('modal-password')" style="color: #b45309;">
+                            <i class="fa-regular fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div class="toast-notification" id="toast">
+        <i class="fa-solid fa-circle-check"></i> <span id="toast-message">Berhasil disalin!</span>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Auto Filtering Setup
+            const filterForm = document.getElementById("filter-form");
+            const searchInput = document.getElementById("search-input");
+            const sortSelect = document.getElementById("sort-select");
+            let debounceTimer;
+
+            if (sortSelect) {
+                sortSelect.addEventListener("change", function() {
+                    filterForm.submit();
+                });
+            }
+
+            if (searchInput) {
+                searchInput.addEventListener("input", function() {
+                    clearTimeout(debounceTimer);
+                    debounceTimer = setTimeout(function() {
+                        filterForm.submit();
+                    }, 500);
+                });
+
+                // Focus behavior: let user type continuously without losing cursor focus on reload
+                if (searchInput.value.length > 0) {
+                    const val = searchInput.value;
+                    searchInput.value = '';
+                    searchInput.focus();
+                    searchInput.value = val;
+                }
+            }
+
+            // Modal Setup
+            const modal = document.getElementById("detail-modal");
+            const closeModalBtn = document.getElementById("close-modal-btn");
+            const detailButtons = document.querySelectorAll(".btn-detail");
+
+            const modalIdUser = document.getElementById("modal-id-user");
+            const modalNama = document.getElementById("modal-nama");
+            const modalEmail = document.getElementById("modal-email");
+            const modalPassword = document.getElementById("modal-password");
+
+            // Open Modal on Detail Button click
+            detailButtons.forEach(button => {
+                button.addEventListener("click", function() {
+                    const idUser = this.getAttribute("data-id");
+                    const nama = this.getAttribute("data-nama");
+                    const email = this.getAttribute("data-email");
+                    const password = this.getAttribute("data-password");
+
+                    modalIdUser.textContent = idUser;
+                    modalNama.textContent = nama;
+                    modalEmail.textContent = email;
+                    modalPassword.textContent = password || "(Tidak di-set/Kosong)";
+
+                    modal.classList.add("active");
+                });
+            });
+
+            // Close Modal
+            closeModalBtn.addEventListener("click", function() {
+                modal.classList.remove("active");
+            });
+
+            // Close Modal on outside click
+            modal.addEventListener("click", function(e) {
+                if (e.target === modal) {
+                    modal.classList.remove("active");
+                }
+            });
+        });
+
+        // Copy to clipboard utility
+        function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            if (!element) return;
+            
+            const textToCopy = element.textContent;
+            
+            navigator.clipboard.writeText(textToCopy).then(function() {
+                showToast("Informasi berhasil disalin ke clipboard!");
+            }, function(err) {
+                console.error("Gagal menyalin text: ", err);
+            });
+        }
+
+        // Show toast notification
+        function showToast(message) {
+            const toast = document.getElementById("toast");
+            const toastMsg = document.getElementById("toast-message");
+            
+            toastMsg.textContent = message;
+            toast.classList.add("show");
+            
+            setTimeout(function() {
+                toast.classList.remove("show");
+            }, 3000);
+        }
+    </script>
+</body>
+
+</html>

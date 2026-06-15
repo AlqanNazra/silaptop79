@@ -56,14 +56,25 @@ def manajemen_laptop_page(request):
     laptops = LaptopInventori.objects.select_related('id_processor', 'id_ram', 'id_storage').all()
 
     if search_query:
-        laptops = laptops.filter(nama_laptop__icontains=search_query) | \
-                  laptops.filter(no_inventori__icontains=search_query)
+        from django.db.models import Q
+        laptops = laptops.filter(
+            Q(nama_laptop__icontains=search_query) |
+            Q(no_inventori__icontains=search_query) |
+            Q(model__icontains=search_query)
+        )
 
     if status_filter:
         laptops = laptops.filter(status=status_filter)
 
+    laptops = laptops.order_by('id_laptop_inventori')
+
+    from django.core.paginator import Paginator
+    paginator = Paginator(laptops, 5)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
     context = {
-        'laptops': laptops,
+        'laptops': page_obj,
         'total': laptops.count(),
         'search_query': search_query,
         'status_filter': status_filter,
@@ -77,6 +88,9 @@ def pengajuan_page_view(request):
     Halaman daftar pengajuan laptop.
     Mengambil data dari PengajuanService lalu render ke template.
     """
+    search_query = request.GET.get('q', '').strip()
+    status_filter = request.GET.get('status', '').strip()
+
     try:
         service = PengajuanService()
         semua_pengajuan = service.service_ambil_semua_pengajuan()
@@ -86,18 +100,44 @@ def pengajuan_page_view(request):
         for p in semua_pengajuan:
             p.user_nama = users_dict.get(p.id_user, f"User {p.id_user}")
 
-        # Calculate stats
+        # Calculate stats on full list
         total = len(semua_pengajuan)
         pending = sum(1 for p in semua_pengajuan if p.status and p.status.lower() == 'pending')
         disetujui = sum(1 for p in semua_pengajuan if p.status and p.status.lower() == 'approved')
         ditolak = sum(1 for p in semua_pengajuan if p.status and p.status.lower() == 'rejected')
         
+        # Apply filters
+        filtered_pengajuan = semua_pengajuan
+        if search_query:
+            q_lower = search_query.lower()
+            filtered_pengajuan = [
+                p for p in filtered_pengajuan
+                if q_lower in getattr(p, 'id_pengajuan', '').lower() or
+                   q_lower in getattr(p, 'kebutuhan_role', '').lower() or
+                   q_lower in getattr(p, 'perusahaan', '').lower() or
+                   q_lower in p.user_nama.lower()
+            ]
+
+        if status_filter:
+            filtered_pengajuan = [
+                p for p in filtered_pengajuan
+                if getattr(p, 'status', '').lower() == status_filter.lower()
+            ]
+
+        # Pagination
+        from django.core.paginator import Paginator
+        paginator = Paginator(filtered_pengajuan, 5)
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+
         context = {
-            'list_pengajuan': semua_pengajuan,
+            'list_pengajuan': page_obj,
             'total_pengajuan': total,
             'total_pending': pending,
             'total_disetujui': disetujui,
             'total_ditolak': ditolak,
+            'search_query': search_query,
+            'status_filter': status_filter,
         }
     except Exception as e:
         messages.error(request, f'Gagal memuat data pengajuan: {str(e)}')
@@ -107,6 +147,8 @@ def pengajuan_page_view(request):
             'total_pending': 0,
             'total_disetujui': 0,
             'total_ditolak': 0,
+            'search_query': search_query,
+            'status_filter': status_filter,
         }
 
     return render(request, 'hc/inventori/pengajuanlaptop_hc.html', context)
@@ -368,11 +410,13 @@ def setujui_pengajuan_hc_view(request):
     }
     return render(request, 'hc/inventori/setujuipengajuan_hc.html', context)
 
-# @login_required
 def riwayatpeminjamanlaptop_hc_view(request):
     from inventori.services.service_peminjaman import PeminjamanService
     from inventori.models import User, LaptopInventori
     
+    search_query = request.GET.get('q', '').strip()
+    status_filter = request.GET.get('status', '').strip()
+
     try:
         service = PeminjamanService()
         list_peminjaman = service.service_ambil_semua_peminjaman()
@@ -394,10 +438,35 @@ def riwayatpeminjamanlaptop_hc_view(request):
         if sorted_p:
             peminjam_terakhir = sorted_p[0].user_nama
             
+        # Apply filters
+        filtered_p = sorted_p
+        if search_query:
+            q_lower = search_query.lower()
+            filtered_p = [
+                p for p in filtered_p
+                if q_lower in p.user_nama.lower() or
+                   q_lower in p.laptop_nama.lower() or
+                   q_lower in getattr(p, 'status', '').lower()
+            ]
+
+        if status_filter:
+            filtered_p = [
+                p for p in filtered_p
+                if getattr(p, 'status', '').lower() == status_filter.lower()
+            ]
+
+        # Pagination
+        from django.core.paginator import Paginator
+        paginator = Paginator(filtered_p, 5)
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+
         context = {
-            'list_peminjaman': list_peminjaman,
+            'list_peminjaman': page_obj,
             'total_peminjaman': total_peminjaman,
             'peminjam_terakhir': peminjam_terakhir,
+            'search_query': search_query,
+            'status_filter': status_filter,
         }
         return render(request, 'hc/inventori/riwayatpeminjamanlaptop_hc.html', context)
     except Exception as e:

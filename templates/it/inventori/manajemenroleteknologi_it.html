@@ -5,826 +5,982 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manajemen Role & Teknologi - SiLaptop79</title>
-    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1.1">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1.1">
+    
     <style>
-            .main-dashboard-content {
-                flex: 1;
-                margin-left: 300px;
-                padding: 40px 50px;
-                box-sizing: border-box;
-            }
-            .tabs-container {
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
             display: flex;
+            min-height: 100vh;
+            background-color: #f8fafc;
+        }
+
+        .dashboard-wrapper {
+            display: flex;
+            width: 100%;
+        }
+
+        .main-dashboard-content {
+            flex: 1;
+            margin-left: 260px;
+            padding: 40px 60px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 800;
+            color: #1e293b;
+            margin-top: 0;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .page-subtitle {
+            font-size: 14px;
+            color: #64748b;
+            margin-bottom: 32px;
+            max-width: 620px;
+            line-height: 1.6;
+        }
+
+        /* Statistics Cards */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: #ffffff;
+            border-radius: 16px;
+            border: 1px solid #f1f5f9;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+            padding: 24px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
+        }
+
+        .stat-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .stat-icon.blue-icon {
+            background-color: rgba(11, 87, 198, 0.08);
+            color: #0b57c6;
+        }
+
+        .stat-icon.purple-icon {
+            background-color: rgba(147, 51, 234, 0.08);
+            color: #9333ea;
+        }
+
+        .stat-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #64748b;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 800;
+            color: #1e293b;
+            margin: 4px 0 0 0;
+        }
+
+        /* Tabs Styles */
+        .tabs-container {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 28px;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 12px;
+        }
+
+        .tab-btn {
+            padding: 12px 24px;
+            border: none;
+            background: #e2e8f0;
+            color: #475569;
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
             gap: 8px;
+        }
+
+        .tab-btn.active {
+            background: #0b57c6;
+            color: white;
+            box-shadow: 0 4px 12px rgba(11, 87, 198, 0.15);
+        }
+
+        .tab-btn:hover:not(.active) {
+            background: #cbd5e1;
+            color: #0f172a;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Layout Grid */
+        .row-container {
+            display: grid;
+            grid-template-columns: 1.1fr 1.9fr;
+            gap: 32px;
+            align-items: start;
+        }
+
+        .card {
+            background: #ffffff;
+            border-radius: 16px;
+            border: 1px solid #f1f5f9;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+            overflow: hidden;
+            padding: 28px;
+            box-sizing: border-box;
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-top: 0;
             margin-bottom: 24px;
-            }
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
 
-            .tab-btn {
-                padding: 12px 24px;
-                border: none;
-                background: #e2e8f0;
-                color: #64748b;
-                border-radius: 8px;
-                font-family: 'Inter', sans-serif;
-                font-size: 14px;
-                font-weight: 600;
-                cursor: pointer;
-                transition: all .2s;
-            }
+        .card-title-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
 
-            .tab-btn.active {
-                background: #0b57c6;
-                color: white;
-            }
+        .card-title i {
+            color: #0b57c6;
+        }
 
-            .tab-content {
-                display: none;
-            }
+        /* Form Styles */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
 
-            .tab-content.active {
-                display: block;
-            }
-            .form-card {
-                background: white;
-                border-radius: 16px;
-                padding: 28px;
-                border: 1px solid #f1f5f9;
-                margin-bottom: 24px;
-                box-shadow: 0 4px 20px rgba(0,0,0,.02);
-            }
-            .form-grid {
-                display: grid;
-                grid-template-columns: repeat(2,1fr);
-                gap: 20px;
-                margin-bottom: 20px;
-            }
+        .form-grid.two-cols {
+            grid-template-columns: 1fr 1fr;
+        }
 
-            .form-group {
-                display: flex;
-                flex-direction: column;
-                gap: 8px;
-            }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
 
-            .form-group label {
-                font-size: 13px;
-                font-weight: 700;
-                color: #475569;
-            }
+        .form-group label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #0f172a;
+        }
 
-            .form-group input,
-            .form-group select {
-                padding: 12px 14px;
-                border: 1px solid #cbd5e1;
-                border-radius: 8px;
-                font-family: 'Inter', sans-serif;
-                font-size: 14px;
-            }
-            .tech-checkboxes {
-                display: grid;
-                grid-template-columns: repeat(3,1fr);
-                gap: 10px;
-                margin-top: 10px;
-            }
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            background-color: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            color: #334155;
+            transition: all 0.2s;
+            box-sizing: border-box;
+        }
 
-            .tech-checkboxes label {
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                background: #f8fafc;
-                border: 1px solid #e2e8f0;
-                border-radius: 8px;
-                padding: 10px;
-                cursor: pointer;
-                font-size: 13px;
-            }
-            .btn-secondary {
-                background: #f1f5f9;
-                color: #475569;
-                padding: 14px 24px;
-                border-radius: 8px;
-                font-weight: 600;
-                text-decoration: none;
-                display: inline-flex;
-                align-items: center;
-                gap: 8px;
-            }
+        .form-control:focus {
+            outline: none;
+            border-color: #0b57c6;
+            box-shadow: 0 0 0 3px rgba(11, 87, 198, 0.1);
+        }
 
-            .btn-secondary:hover {
-                background: #e2e8f0;
-            }
-            .edit-modal-content {
-                text-align: left;
-            }
+        /* Checkbox badges */
+        .tech-checkboxes {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 14px;
+            background-color: #f8fafc;
+        }
 
-            .edit-modal-content .form-group {
-                margin-bottom: 16px;
-            }
-                            .modal-overlay{
-                    display:none;
-                    position:fixed;
-                    top:0;
-                    left:0;
-                    width:100%;
-                    height:100%;
-                    background:rgba(0,0,0,.5);
-                    z-index:99999;
-                    justify-content:center;
-                    align-items:center;
-                }
+        .tech-checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            color: #475569;
+            user-select: none;
+            transition: all 0.2s;
+        }
 
-                .modal-overlay.active{
-                    display:flex;
-                }
+        .tech-checkbox-item:hover {
+            border-color: #0b57c6;
+            background-color: rgba(11, 87, 198, 0.02);
+        }
 
-                .modal-box{
-                    background:#fff;
-                    width:100%;
-                    max-width:650px;
-                    border-radius:16px;
-                    padding:24px;
-                    box-shadow:0 20px 60px rgba(0,0,0,.25);
-                }
+        .tech-checkbox-item input {
+            margin: 0;
+            cursor: pointer;
+        }
 
-                .modal-title{
-                    margin-top:0;
-                    margin-bottom:20px;
-                    font-size:20px;
-                    font-weight:700;
-                }
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            background-color: #0b57c6;
+            color: white;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s;
+            box-shadow: 0 4px 12px rgba(11, 87, 198, 0.15);
+        }
 
-                .modal-actions{
-                    display:flex;
-                    justify-content:flex-end;
-                    gap:10px;
-                    margin-top:20px;
-                }
+        .btn-submit:hover {
+            background-color: #09459e;
+        }
 
-                .modal-btn{
-                    border:none;
-                    padding:10px 18px;
-                    border-radius:8px;
-                    cursor:pointer;
-                    font-weight:600;
-                }
+        /* Filter Controls */
+        .search-wrapper {
+            position: relative;
+            margin-bottom: 20px;
+        }
 
-                .modal-btn-cancel{
-                    background:#e2e8f0;
-                }
+        .search-wrapper i {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 14px;
+        }
 
-                .modal-btn-delete{
-                    color:white;
-                }
-            @media(max-width: 768px){
+        .search-wrapper .form-control {
+            padding-left: 40px;
+        }
 
-                .main-dashboard-content{
-                    margin-left:0;
-                    padding:20px;
-                }
+        /* Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
 
-                .form-grid{
-                    grid-template-columns:1fr;
-                }
+        th {
+            text-align: left;
+            padding: 16px 20px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            border-bottom: 1px solid #f1f5f9;
+        }
 
-                .tech-checkboxes{
-                    grid-template-columns:1fr;
-                }
+        td {
+            padding: 14px 20px;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 14px;
+            color: #475569;
+            vertical-align: top;
+        }
 
-                .top-actions{
-                    flex-direction:column;
-                    align-items:stretch;
-                }
-                .tech-item{
-                    display:flex;
-                    align-items:center;
-                    gap:8px;
-                    padding:10px 12px;
-                    border:1px solid #e2e8f0;
-                    border-radius:8px;
-                    background:#f8fafc;
-                    cursor:pointer;
-                }
-                .stats-row{
-                    display:grid;
-                    grid-template-columns:repeat(2,1fr);
-                    gap:20px;
-                    margin-bottom:24px;
-                }
-                .table-card{
-                    background:#ffffff;
-                    border-radius:16px;
-                    border:1px solid #f1f5f9;
-                    overflow:hidden;
-                    box-shadow:0 4px 20px rgba(0,0,0,.02);
-                    margin-top:24px;
-                }
+        tbody tr {
+            transition: background 0.2s;
+        }
 
-                .table-card table{
-                    width:100%;
-                    border-collapse:collapse;
-                }
+        tbody tr:hover {
+            background-color: #f8fafc;
+        }
 
-                .table-card th{
-                    text-align:left;
-                    padding:18px 24px;
-                    font-size:11px;
-                    font-weight:700;
-                    color:#94a3b8;
-                    text-transform:uppercase;
-                    letter-spacing:.8px;
-                    border-bottom:1px solid #f1f5f9;
-                }
+        .requirement-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            font-size: 13px;
+        }
 
-                .table-card td{
-                    padding:18px 24px;
-                    border-bottom:1px solid #f1f5f9;
-                    vertical-align:top;
-                    font-size:14px;
-                    color:#475569;
-                }
+        .requirement-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #475569;
+        }
 
-                .table-card tbody tr:last-child td{
-                    border-bottom:none;
-                }
+        .requirement-item i {
+            color: #64748b;
+            font-size: 12px;
+            width: 14px;
+        }
 
-                .table-card tbody tr:hover{
-                    background:#f8fafc;
-                }
-                .requirement-box{
-                    display:flex;
-                    flex-direction:column;
-                    gap:6px;
-                    font-size:13px;
-                }
+        .tech-pill {
+            display: inline-block;
+            background-color: #eff6ff;
+            color: #1d4ed8;
+            border: 1px solid #dbeafe;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-right: 4px;
+            margin-bottom: 4px;
+        }
 
-                .requirement-box div{
-                    color:#475569;
-                }
-                .tech-pill{
-                    display:inline-block;
-                    background:#dbeafe;
-                    color:#0b57c6;
-                    padding:5px 10px;
-                    border-radius:6px;
-                    font-size:12px;
-                    font-weight:600;
-                    margin-right:6px;
-                    margin-bottom:6px;
-                }
-                .action-btns{
-                    display:flex;
-                    gap:8px;
-                }
+        /* Action Buttons */
+        .action-btns {
+            display: flex;
+            gap: 6px;
+        }
 
-                .btn-action{
-                    display:inline-flex;
-                    align-items:center;
-                    gap:6px;
-                    padding:8px 12px;
-                    border:none;
-                    border-radius:6px;
-                    font-size:12px;
-                    font-weight:600;
-                    cursor:pointer;
-                }
+        .btn-action {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 8px 12px;
+            border: 1px solid transparent;
+            border-radius: 6px;
+            font-family: 'Inter', sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
 
-                .btn-edit{
-                    background:#dbeafe;
-                    color:#0b57c6;
-                }
+        .btn-edit {
+            background-color: #eff6ff;
+            color: #1d4ed8;
+            border-color: #dbeafe;
+        }
 
-                .btn-delete{
-                    background:#fee2e2;
-                    color:#dc2626;
-                }
-            }
-        </style>
-    </head>
+        .btn-edit:hover {
+            background-color: #dbeafe;
+        }
+
+        .btn-delete {
+            background-color: #fef2f2;
+            color: #b91c1c;
+            border-color: #fee2e2;
+        }
+
+        .btn-delete:hover {
+            background-color: #fee2e2;
+        }
+
+        /* Modal Overlay */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-box {
+            background: white;
+            border-radius: 16px;
+            padding: 28px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            animation: modalIn 0.2s ease-out;
+        }
+
+        @keyframes modalIn {
+            from { transform: scale(0.95); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-title {
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-title i {
+            color: #0b57c6;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 24px;
+        }
+
+        .modal-btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            border: 1px solid transparent;
+        }
+
+        .modal-btn-cancel {
+            background: #f1f5f9;
+            color: #475569;
+            border-color: #cbd5e1;
+        }
+
+        .modal-btn-cancel:hover {
+            background: #e2e8f0;
+        }
+
+        .modal-btn-save {
+            background-color: #0b57c6;
+            color: white;
+        }
+
+        .modal-btn-save:hover {
+            background-color: #09459e;
+        }
+    </style>
+</head>
 <body>
 
 <div class="dashboard-wrapper">
+    <!-- Load Sidebar -->
     {% include 'it/components/sidebar.html' with active_page='manajemen_role_teknologi' %}
 
+    <!-- Main Dashboard Content -->
     <div class="main-dashboard-content">
-        <div style="max-width:1200px;width:100%;">
-
         <h1 class="page-title">Manajemen Role & Teknologi</h1>
+        <p class="page-subtitle">Atur spesifikasi hardware minimum untuk tiap role talent serta kelola tumpukan teknologi pendukung.</p>
 
-        {% if messages %}
-        <div style="margin-bottom:20px;">
-            {% for message in messages %}
-            <div class="alert {% if message.tags == 'error' %}alert-error{% else %}alert-success{% endif %}">
-                {{ message }}
-            </div>
-            {% endfor %}
-        </div>
-        {% endif %}
+        {% include 'components/messages_popup.html' %}
 
-        <div class="stats-row">
+        <!-- Statistics Section -->
+        <div class="stats-container">
             <div class="stat-card">
-                <div class="stat-card-left">
+                <div class="stat-icon blue-icon">
+                    <i class="fa-solid fa-user-tag"></i>
+                </div>
+                <div class="stat-info">
                     <span class="stat-label">Total Role</span>
-                    <span class="stat-value">{{ role_list|length }}</span>
+                    <span class="stat-value">{{ role_list.paginator.count }}</span>
                 </div>
             </div>
 
             <div class="stat-card">
-                <div class="stat-card-left">
+                <div class="stat-icon purple-icon">
+                    <i class="fa-solid fa-laptop-code"></i>
+                </div>
+                <div class="stat-info">
                     <span class="stat-label">Total Teknologi</span>
-                    <span class="stat-value">{{ teknologi_list|length }}</span>
+                    <span class="stat-value">{{ teknologi_list.paginator.count }}</span>
                 </div>
             </div>
         </div>
 
+        <!-- Tabs Navigation -->
         <div class="tabs-container">
-            <button class="tab-btn active" onclick="switchTab('role')">
-                <i class="fa-solid fa-users"></i> Role
+            <button class="tab-btn {% if active_tab == 'role' %}active{% endif %}" onclick="switchTab('role')">
+                <i class="fa-solid fa-user-gear"></i> Kebutuhan Role
             </button>
-            <button class="tab-btn" onclick="switchTab('teknologi')">
-                <i class="fa-solid fa-microchip"></i> Teknologi
+            <button class="tab-btn {% if active_tab == 'teknologi' %}active{% endif %}" onclick="switchTab('teknologi')">
+                <i class="fa-solid fa-code"></i> Teknologi Pendukung
             </button>
         </div>
 
-        <div id="tab-role" class="tab-content active">
-
-            <form method="POST" action="{% url 'tambah_role_it' %}">
-                {% csrf_token %}
-
-                <div class="form-card">
-                    <div class="section-header">
-                        <h3 style="
-                            margin-top:0;
-                            margin-bottom:24px;
-                            font-size:18px;
-                            font-weight:700;
-                            color:#1e293b;
-                        ">
-                            Tambah Role
-                        </h3>
-                    </div>
-
-                    <div class="section-body">
-
+        <!-- Tab Content: Role -->
+        <div id="tab-role" class="tab-content {% if active_tab == 'role' %}active{% endif %}">
+            <div class="row-container">
+                
+                <!-- Left: Add Role Form -->
+                <div class="card">
+                    <h3 class="card-title">
+                        <span class="card-title-left">
+                            <i class="fa-solid fa-plus-circle"></i> Tambah Role Baru
+                        </span>
+                    </h3>
+                    
+                    <form method="POST" action="{% url 'tambah_role_it' %}">
+                        {% csrf_token %}
+                        
                         <div class="form-grid">
                             <div class="form-group">
                                 <label>Nama Role</label>
-                                <input type="text" name="nama_role" class="form-control" required>
+                                <input type="text" name="nama_role" class="form-control" placeholder="Contoh: Frontend Developer" required>
+                            </div>
+                        </div>
+
+                        <div class="form-grid two-cols">
+                            <div class="form-group">
+                                <label>Min RAM (GB)</label>
+                                <input type="number" name="min_ram" class="form-control" placeholder="8" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Min Storage (GB)</label>
+                                <input type="number" name="min_storage" class="form-control" placeholder="256" required>
                             </div>
                         </div>
 
                         <div class="form-grid">
                             <div class="form-group">
-                                <label>Minimum RAM</label>
-                                <input type="number" name="min_ram" class="form-control" required>
-                            </div>
-
-                            <div class="form-group">
-                                <label>Minimum Storage</label>
-                                <input type="number" name="min_storage" class="form-control" required>
+                                <label>Min Processor Benchmark Score</label>
+                                <input type="number" name="min_processor_score" class="form-control" placeholder="5000" required>
                             </div>
                         </div>
 
-                        <div class="form-grid">
-                            <div class="form-group">
-                                <label>Minimum Processor Score</label>
-                                <input type="number" name="min_processor_score" class="form-control" required>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
+                        <div class="form-group" style="margin-bottom: 24px;">
                             <label>Teknologi Pendukung</label>
-
                             <div class="tech-checkboxes">
                                 {% for teknologi in teknologi_list %}
-                                <label class="tech-item">
-                                    <input type="checkbox"
-                                           name="teknologi"
-                                           value="{{ teknologi.id_teknologi }}">
+                                <label class="tech-checkbox-item">
+                                    <input type="checkbox" name="teknologi" value="{{ teknologi.id_teknologi }}">
                                     {{ teknologi.nama_teknologi }}
                                 </label>
+                                {% empty %}
+                                <span style="color: #94a3b8; font-size: 12px; font-style: italic;">Belum ada teknologi pendukung.</span>
                                 {% endfor %}
                             </div>
                         </div>
 
-                        <div class="actions-bar">
-                            <button type="submit" class="btn btn-primary">
-                                Simpan Role
-                            </button>
-                        </div>
-
-                    </div>
+                        <button type="submit" class="btn-submit">
+                            <i class="fa-solid fa-save"></i> Simpan Role
+                        </button>
+                    </form>
                 </div>
-            </form>
 
-            <div class="table-card">
-                    <div style="padding:20px 24px;border-bottom:1px solid #f1f5f9;">
-                        <h3 style="margin:0;font-size:18px;font-weight:700;color:#1e293b;">
-                            Daftar Role
+                <!-- Right: Role Table List -->
+                <div class="card" style="padding: 0;">
+                    <div style="padding: 28px 28px 12px 28px;">
+                        <h3 class="card-title" style="margin: 0 0 20px 0;">
+                            <span class="card-title-left">
+                                <i class="fa-solid fa-list-check"></i> Daftar Role Terdaftar
+                            </span>
                         </h3>
+                        
+                        <!-- Search Form -->
+                        <form method="GET" action="" class="search-wrapper">
+                            <input type="hidden" name="tab" value="role">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <input type="text" name="q_role" placeholder="Cari nama role..." value="{{ search_role }}" class="form-control">
+                        </form>
                     </div>
-                <h4>Daftar Role</h4>
-                    <div>
-                        <table>
-                            <thead>
+
+                    <table>
+                        <thead>
                             <tr>
                                 <th>Role</th>
-                                <th>Requirement</th>
+                                <th>Requirement Minimum</th>
                                 <th>Teknologi</th>
-                                <th>Aksi</th>
+                                <th style="width: 140px; text-align: center;">Aksi</th>
                             </tr>
-                            </thead>
-
-                            <tbody>
+                        </thead>
+                        <tbody>
                             {% for role in role_list %}
                             <tr>
-                                <td style="font-weight:700;color:#1e293b;">
-                                    {{ role.nama_role }}
-                                </td>
+                                <td style="font-weight: 700; color: #1e293b;">{{ role.nama_role }}</td>
                                 <td>
-                                    <div class="requirement-box">
-                                        <div>RAM: {{ role.min_ram }} GB</div>
-                                        <div>Storage: {{ role.min_storage }} GB</div>
-                                        <div>Processor: {{ role.min_processor_score }}</div>
+                                    <div class="requirement-list">
+                                        <div class="requirement-item">
+                                            <i class="fa-solid fa-memory"></i> RAM: {{ role.min_ram }} GB
+                                        </div>
+                                        <div class="requirement-item">
+                                            <i class="fa-solid fa-hard-drive"></i> Storage: {{ role.min_storage }} GB
+                                        </div>
+                                        <div class="requirement-item">
+                                            <i class="fa-solid fa-microchip"></i> CPU Score: {{ role.min_processor_score }}
+                                        </div>
                                     </div>
                                 </td>
                                 <td>
                                     {% for rel in role.roleteknologi_set.all %}
-                                        <span class="tech-pill">
-                                            {{ rel.teknologi.nama_teknologi }}
-                                        </span>
+                                    <span class="tech-pill">{{ rel.teknologi.nama_teknologi }}</span>
                                     {% empty %}
-                                        -
+                                    <span style="color: #94a3b8; font-style: italic; font-size: 13px;">Belum ada teknologi</span>
                                     {% endfor %}
                                 </td>
-
-                                <td>
-                                    <button
-                                        class="btn-action btn-edit"
-                                        type="button"
-                                        onclick="openEditRole(
-                                            '{{ role.id_role }}',
-                                            '{{ role.nama_role }}',
-                                            '{{ role.min_ram }}',
-                                            '{{ role.min_storage }}',
-                                            '{{ role.min_processor_score }}'
-                                        )">
-                                        <i class="fa-solid fa-pen"></i>
-                                        Edit
-                                    </button>
-
-                                    <button type="button"
-                                            class="btn-action btn-delete"
+                                <td align="center">
+                                    <div class="action-btns">
+                                        <button class="btn-action btn-edit" type="button"
+                                            onclick="openEditRole(
+                                                '{{ role.id_role }}',
+                                                '{{ role.nama_role }}',
+                                                '{{ role.min_ram }}',
+                                                '{{ role.min_storage }}',
+                                                '{{ role.min_processor_score }}'
+                                            )">
+                                            <i class="fa-solid fa-pen"></i> Edit
+                                        </button>
+                                        <button type="button" class="btn-action btn-delete"
                                             onclick="openDeleteRole('{{ role.id_role }}','{{ role.nama_role }}')">
-                                        <i class="fa-solid fa-trash"></i>
-                                        Hapus
-                                    </button>
+                                            <i class="fa-solid fa-trash-can"></i> Hapus
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" style="text-align: center; padding: 40px; color: #94a3b8;">Tidak ada data role.</td>
+                            </tr>
                             {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-            </div>
+                        </tbody>
+                    </table>
 
+                    <!-- Pagination -->
+                    {% if role_list.paginator.count > 0 %}
+                    <div class="pagination-container" style="display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-top: 1px solid #f1f5f9;">
+                        <span class="pagination-text" style="font-size: 13px; color: #64748b;">Menampilkan {{ role_list.start_index }} - {{ role_list.end_index }} dari {{ role_list.paginator.count }} role</span>
+                        <div class="pagination-controls" style="display: flex; gap: 6px; align-items: center;">
+                            {% if role_list.has_previous %}
+                                <a href="?page_role={{ role_list.previous_page_number }}&tab=role{% if search_role %}&q_role={{ search_role }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">
+                                    <i class="fa-solid fa-chevron-left"></i>
+                                </a>
+                            {% endif %}
+                            
+                            {% for num in role_list.paginator.page_range %}
+                                {% if role_list.number == num %}
+                                    <span class="page-btn active" style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; background: #0b57c6; color: white; font-weight: bold; font-size: 12px;">{{ num }}</span>
+                                {% elif num > role_list.number|add:'-3' and num < role_list.number|add:'3' %}
+                                    <a href="?page_role={{ num }}&tab=role{% if search_role %}&q_role={{ search_role }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">{{ num }}</a>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if role_list.has_next %}
+                                <a href="?page_role={{ role_list.next_page_number }}&tab=role{% if search_role %}&q_role={{ search_role }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">
+                                    <i class="fa-solid fa-chevron-right"></i>
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+            </div>
         </div>
 
-        <div id="tab-teknologi" class="tab-content">
-
-            <form method="POST" action="{% url 'tambah_teknologi_it' %}">
-                {% csrf_token %}
-
-                <div class="form-card">
-                    <div class="section-body">
-
+        <!-- Tab Content: Teknologi -->
+        <div id="tab-teknologi" class="tab-content {% if active_tab == 'teknologi' %}active{% endif %}">
+            <div class="row-container">
+                
+                <!-- Left: Add Tech Form -->
+                <div class="card">
+                    <h3 class="card-title">
+                        <span class="card-title-left">
+                            <i class="fa-solid fa-plus-circle"></i> Tambah Teknologi Baru
+                        </span>
+                    </h3>
+                    
+                    <form method="POST" action="{% url 'tambah_teknologi_it' %}">
+                        {% csrf_token %}
+                        
                         <div class="form-grid">
                             <div class="form-group">
                                 <label>Nama Teknologi</label>
-                                <input type="text"
-                                       name="nama_teknologi"
-                                       class="form-control"
-                                       required>
+                                <input type="text" name="nama_teknologi" class="form-control" placeholder="Contoh: ReactJS" required>
                             </div>
-
                             <div class="form-group">
                                 <label>Kategori</label>
-                                <input type="text"
-                                       name="kategori"
-                                       class="form-control">
+                                <input type="text" name="kategori" class="form-control" placeholder="Contoh: Frontend Library" required>
                             </div>
                         </div>
 
-                        <div class="actions-bar">
-                            <button type="submit" class="btn btn-primary">
-                                Simpan Teknologi
-                            </button>
-                        </div>
-
-                    </div>
+                        <button type="submit" class="btn-submit" style="margin-top: 12px;">
+                            <i class="fa-solid fa-save"></i> Simpan Teknologi
+                        </button>
+                    </form>
                 </div>
-            </form>
-                <div class="table-card">
+
+                <!-- Right: Tech Table List -->
+                <div class="card" style="padding: 0;">
+                    <div style="padding: 28px 28px 12px 28px;">
+                        <h3 class="card-title" style="margin: 0 0 20px 0;">
+                            <span class="card-title-left">
+                                <i class="fa-solid fa-microchip"></i> Daftar Teknologi Terdaftar
+                            </span>
+                        </h3>
+                        
+                        <!-- Search Form -->
+                        <form method="GET" action="" class="search-wrapper">
+                            <input type="hidden" name="tab" value="teknologi">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <input type="text" name="q_tech" placeholder="Cari nama atau kategori teknologi..." value="{{ search_tech }}" class="form-control">
+                        </form>
+                    </div>
+
                     <table>
                         <thead>
-                        <tr>
-                            <th>Nama Teknologi</th>
-                            <th>Kategori</th>
-                            <th>Aksi</th>
-                        </tr>
+                            <tr>
+                                <th>Nama Teknologi</th>
+                                <th>Kategori</th>
+                                <th style="width: 140px; text-align: center;">Aksi</th>
+                            </tr>
                         </thead>
-
                         <tbody>
-                        {% for teknologi in teknologi_list %}
-                        <tr>
-                            <td>{{ teknologi.nama_teknologi }}</td>
-                            <td>{{ teknologi.kategori }}</td>
-                            <td>
-                                <button type="button"
-                                        class="btn-action btn-edit"
-                                        onclick="openEditTeknologi(
-                                            '{{ teknologi.id_teknologi }}',
-                                            '{{ teknologi.nama_teknologi }}',
-                                            '{{ teknologi.kategori|default:'' }}'
-                                        )">
-                                        <i class="fa-solid fa-pen"></i>
-                                    Edit
-                                </button>
-
-                                <button type="button"
-                                        class="btn-action btn-delete"
-                                        onclick="openDeleteTeknologi(
-                                            '{{ teknologi.id_teknologi }}',
-                                            '{{ teknologi.nama_teknologi }}'
-                                        )">
-                                    <i class="fa-solid fa-trash"></i>
-                                    Hapus
-                                </button>
-                            </td>
-                        </tr>
-                        {% endfor %}
+                            {% for teknologi in teknologi_list %}
+                            <tr>
+                                <td style="font-weight: 700; color: #1e293b;">{{ teknologi.nama_teknologi }}</td>
+                                <td><span class="role-badge" style="background-color: rgba(147, 51, 234, 0.05); color: #9333ea; border-color: rgba(147, 51, 234, 0.1);">{{ teknologi.kategori }}</span></td>
+                                <td align="center">
+                                    <div class="action-btns">
+                                        <button type="button" class="btn-action btn-edit"
+                                            onclick="openEditTeknologi(
+                                                '{{ teknologi.id_teknologi }}',
+                                                '{{ teknologi.nama_teknologi }}',
+                                                '{{ teknologi.kategori|default:'' }}'
+                                            )">
+                                            <i class="fa-solid fa-pen"></i> Edit
+                                        </button>
+                                        <button type="button" class="btn-action btn-delete"
+                                            onclick="openDeleteTeknologi(
+                                                '{{ teknologi.id_teknologi }}',
+                                                '{{ teknologi.nama_teknologi }}'
+                                            )">
+                                            <i class="fa-solid fa-trash-can"></i> Hapus
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="3" style="text-align: center; padding: 40px; color: #94a3b8;">Tidak ada data teknologi.</td>
+                            </tr>
+                            {% endfor %}
                         </tbody>
                     </table>
+
+                    <!-- Pagination -->
+                    {% if teknologi_list.paginator.count > 0 %}
+                    <div class="pagination-container" style="display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-top: 1px solid #f1f5f9;">
+                        <span class="pagination-text" style="font-size: 13px; color: #64748b;">Menampilkan {{ teknologi_list.start_index }} - {{ teknologi_list.end_index }} dari {{ teknologi_list.paginator.count }} teknologi</span>
+                        <div class="pagination-controls" style="display: flex; gap: 6px; align-items: center;">
+                            {% if teknologi_list.has_previous %}
+                                <a href="?page_tech={{ teknologi_list.previous_page_number }}&tab=teknologi{% if search_tech %}&q_tech={{ search_tech }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">
+                                    <i class="fa-solid fa-chevron-left"></i>
+                                </a>
+                            {% endif %}
+                            
+                            {% for num in teknologi_list.paginator.page_range %}
+                                {% if teknologi_list.number == num %}
+                                    <span class="page-btn active" style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; background: #0b57c6; color: white; font-weight: bold; font-size: 12px;">{{ num }}</span>
+                                {% elif num > teknologi_list.number|add:'-3' and num < teknologi_list.number|add:'3' %}
+                                    <a href="?page_tech={{ num }}&tab=teknologi{% if search_tech %}&q_tech={{ search_tech }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">{{ num }}</a>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if teknologi_list.has_next %}
+                                <a href="?page_tech={{ teknologi_list.next_page_number }}&tab=teknologi{% if search_tech %}&q_tech={{ search_tech }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">
+                                    <i class="fa-solid fa-chevron-right"></i>
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
                 </div>
+
             </div>
         </div>
 
     </div>
 </div>
+
+<!-- Modal: Edit Role -->
 <div class="modal-overlay" id="editRoleModal">
-
-    <div class="modal-box" style="max-width:650px; text-align:left;">
-
-        <h3 class="modal-title">
-            Edit Role
-        </h3>
-
+    <div class="modal-box">
+        <h3 class="modal-title"><i class="fa-solid fa-user-gear"></i> Edit Kebutuhan Role</h3>
         <form id="editRoleForm" method="POST">
-
             {% csrf_token %}
-
             <div class="form-grid">
-
                 <div class="form-group">
                     <label>Nama Role</label>
-                    <input
-                        type="text"
-                        name="nama_role"
-                        id="edit_nama_role"
-                        class="form-control"
-                        required>
+                    <input type="text" name="nama_role" id="edit_nama_role" class="form-control" required>
                 </div>
-
                 <div class="form-group">
-                    <label>Minimum RAM</label>
-                    <input
-                        type="number"
-                        name="min_ram"
-                        id="edit_min_ram"
-                        class="form-control"
-                        required>
+                    <label>Minimum RAM (GB)</label>
+                    <input type="number" name="min_ram" id="edit_min_ram" class="form-control" required>
                 </div>
-
                 <div class="form-group">
-                    <label>Minimum Storage</label>
-                    <input
-                        type="number"
-                        name="min_storage"
-                        id="edit_min_storage"
-                        class="form-control"
-                        required>
+                    <label>Minimum Storage (GB)</label>
+                    <input type="number" name="min_storage" id="edit_min_storage" class="form-control" required>
                 </div>
-
                 <div class="form-group">
-                    <label>Processor Score</label>
-                    <input
-                        type="number"
-                        name="min_processor_score"
-                        id="edit_min_processor_score"
-                        class="form-control"
-                        required>
+                    <label>Min CPU Benchmark Score</label>
+                    <input type="number" name="min_processor_score" id="edit_min_processor_score" class="form-control" required>
                 </div>
-
             </div>
-
             <div class="modal-actions">
-
-                <button
-                    type="button"
-                    class="modal-btn modal-btn-cancel"
-                    onclick="closeEditRoleModal()">
-
-                    Batal
-
-                </button>
-
-                <button
-                    type="submit"
-                    class="modal-btn modal-btn-delete"
-                    style="background:#0b57c6;">
-
-                    Simpan Perubahan
-
-                </button>
-
+                <button type="button" class="modal-btn modal-btn-cancel" onclick="closeEditRoleModal()">Batal</button>
+                <button type="submit" class="modal-btn modal-btn-save">Simpan Perubahan</button>
             </div>
-
         </form>
-
     </div>
-
 </div>
 
+<!-- Modal: Edit Teknologi -->
 <div class="modal-overlay" id="editTeknologiModal">
-
     <div class="modal-box">
-
-        <h3 class="modal-title">
-            Edit Teknologi
-        </h3>
-
+        <h3 class="modal-title"><i class="fa-solid fa-code"></i> Edit Teknologi</h3>
         <form id="editTeknologiForm" method="POST">
-
             {% csrf_token %}
-
-            <div class="form-group">
-
-                <label>
-                    Nama Teknologi
-                </label>
-
-                <input
-                    type="text"
-                    id="edit_nama_teknologi"
-                    name="nama_teknologi"
-                    class="form-control">
-
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Nama Teknologi</label>
+                    <input type="text" id="edit_nama_teknologi" name="nama_teknologi" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Kategori</label>
+                    <input type="text" id="edit_kategori" name="kategori" class="form-control" required>
+                </div>
             </div>
-
-            <div class="form-group">
-
-                <label>
-                    Kategori
-                </label>
-
-                <input
-                    type="text"
-                    id="edit_kategori"
-                    name="kategori"
-                    class="form-control">
-
-            </div>
-
             <div class="modal-actions">
-
-                <button
-                    type="button"
-                    class="modal-btn modal-btn-cancel"
-                    onclick="closeEditTeknologiModal()">
-
-                    Batal
-
-                </button>
-
-                <button
-                    type="submit"
-                    class="modal-btn modal-btn-delete"
-                    style="background:#0b57c6;">
-
-                    Simpan
-
-                </button>
-
+                <button type="button" class="modal-btn modal-btn-cancel" onclick="closeEditTeknologiModal()">Batal</button>
+                <button type="submit" class="modal-btn modal-btn-save">Simpan Perubahan</button>
             </div>
-
         </form>
-
     </div>
-
 </div>
+
 <script>
-function openEditTeknologi(
-    id,
-    nama,
-    kategori
-){
-        console.log("TEKNOLOGI CLICKED");
-
-    document.getElementById(
-        "edit_nama_teknologi"
-    ).value = nama;
-
-    document.getElementById(
-        "edit_kategori"
-    ).value = kategori;
-
-    document.getElementById(
-        "editTeknologiForm"
-    ).action =
-        "/it/edit-teknologi/" + id + "/";
-
-    document.getElementById(
-        "editTeknologiModal"
-    ).classList.add(
-        "active"
-    );
-}
-
-function closeEditTeknologiModal(){
-
-    document.getElementById(
-        "editTeknologiModal"
-    ).classList.remove(
-        "active"
-    );
-}
-
-function switchTab(tabName){
-    document.querySelectorAll('.tab-content').forEach(el=>el.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(el=>el.classList.remove('active'));
-    document.getElementById('tab-'+tabName).classList.add('active');
-    event.target.classList.add('active');
-}
-
-function openEditRole(
-    id,
-    nama,
-    ram,
-    storage,
-    processor
-){
-    console.log("ROLE CLICKED");
-
-    document.getElementById("editRoleModal")
-        .classList.add("active");
-
-    document.getElementById(
-        "edit_nama_role"
-    ).value = nama;
-
-    document.getElementById(
-        "edit_min_ram"
-    ).value = ram;
-
-    document.getElementById(
-        "edit_min_storage"
-    ).value = storage;
-
-    document.getElementById(
-        "edit_min_processor_score"
-    ).value = processor;
-
-    document.getElementById(
-        "editRoleForm"
-    ).action =
-        "/it/edit-role/" + id + "/";
-
-    document.getElementById(
-        "editRoleModal"
-    ).classList.add(
-        "active"
-    );
-}
-
-function closeEditRoleModal(){
-
-    document.getElementById(
-        "editRoleModal"
-    ).classList.remove(
-        "active"
-    );
-}
-
-function openDeleteRole(id,nama){
-    if(confirm('Hapus role '+nama+' ?')){
-        window.location='/it/hapus-role/'+id+'/';
+    // Tab switching logic
+    function switchTab(tabName) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        
+        document.getElementById('tab-' + tabName).classList.add('active');
+        
+        // Add active class to clicked button
+        const btn = document.querySelector(`button[onclick="switchTab('${tabName}')"]`);
+        if (btn) btn.classList.add('active');
+        
+        // Update URL hash or parameter if desired (optional)
+        const url = new URL(window.location);
+        url.searchParams.set('tab', tabName);
+        window.history.pushState({}, '', url);
     }
-}
 
-
-function openDeleteTeknologi(id,nama){
-    if(confirm('Hapus teknologi '+nama+' ?')){
-        window.location='/it/hapus-teknologi/'+id+'/';
+    // Modal: Edit Role
+    function openEditRole(id, nama, ram, storage, processor) {
+        document.getElementById("edit_nama_role").value = nama;
+        document.getElementById("edit_min_ram").value = ram;
+        document.getElementById("edit_min_storage").value = storage;
+        document.getElementById("edit_min_processor_score").value = processor;
+        
+        document.getElementById("editRoleForm").action = "/it/edit-role/" + id + "/";
+        document.getElementById("editRoleModal").classList.add("active");
     }
-}
+
+    function closeEditRoleModal() {
+        document.getElementById("editRoleModal").classList.remove("active");
+    }
+
+    // Modal: Edit Teknologi
+    function openEditTeknologi(id, nama, kategori) {
+        document.getElementById("edit_nama_teknologi").value = nama;
+        document.getElementById("edit_kategori").value = kategori;
+        
+        document.getElementById("editTeknologiForm").action = "/it/edit-teknologi/" + id + "/";
+        document.getElementById("editTeknologiModal").classList.add("active");
+    }
+
+    function closeEditTeknologiModal() {
+        document.getElementById("editTeknologiModal").classList.remove("active");
+    }
+
+    // Deletion confirmation
+    function openDeleteRole(id, nama) {
+        if (confirm('Apakah Anda yakin ingin menghapus role "' + nama + '"?')) {
+            window.location = '/it/hapus-role/' + id + '/';
+        }
+    }
+
+    function openDeleteTeknologi(id, nama) {
+        if (confirm('Apakah Anda yakin ingin menghapus teknologi "' + nama + '"?')) {
+            window.location = '/it/hapus-teknologi/' + id + '/';
+        }
+    }
+
+    // Close modals on overlay click
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+        overlay.addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.classList.remove('active');
+            }
+        });
+    });
 </script>
 
 </body>

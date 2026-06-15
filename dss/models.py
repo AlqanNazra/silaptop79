@@ -140,7 +140,8 @@ class DetailHasilSAW(models.Model):
     id_hasil = models.ForeignKey(
         HasilSAW, 
         on_delete=models.CASCADE,
-        related_name='detail_set'
+        related_name='detail_set',
+        db_column='id_hasil'
     )
     
     nilai_normalisasi = models.FloatField()

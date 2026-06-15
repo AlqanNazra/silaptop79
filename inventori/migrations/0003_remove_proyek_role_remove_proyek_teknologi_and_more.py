@@ -11,14 +11,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name='proyek',
-            name='role',
-        ),
-        migrations.RemoveField(
-            model_name='proyek',
-            name='teknologi',
-        ),
         migrations.CreateModel(
             name='RoleProyek',
             fields=[

@@ -14,6 +14,7 @@ from core.views import (
     detailrekomendasiscrapping_hc_view,
     manajemen_role_teknologi_it_view,
     notifikasi_hc_view,
+    manajementalent_hc_view,
 
     # IT Views
     dashboard_it_view,
@@ -101,6 +102,7 @@ urlpatterns = [
     path('hc/detail-rekomendasi/', detailrekomendasi_hc_view, name='detailrekomendasi_hc'),
     path('hc/detail-scrapping/', detailrekomendasiscrapping_hc_view, name='detailrekomendasiscrapping_hc'),
     path('hc/notifikasi/', notifikasi_hc_view, name='notifikasi_hc'),
+    path('hc/manajemen-talent/', manajementalent_hc_view, name='manajementalent_hc'),
 
     # ==========================================
     # INFORMATION TECHNOLOGY (IT) ROUTES
@@ -153,7 +155,7 @@ urlpatterns = [
     path(
     'it/manajemen-role-teknologi/',
     manajemen_role_teknologi_it_view,
-    name='manajemen_role_teknologi_it'
+    name='manajemenroleteknologi_it'
 ),
 
 path(

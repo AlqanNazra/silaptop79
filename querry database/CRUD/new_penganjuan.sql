@@ -110,7 +110,7 @@ RETURNS TABLE (
 BEGIN 
     RETURN QUERY
     SELECT 
-        p.id_pengajuan,p.user_id,
+        p.id_pengajuan,p.id_user,
         p.kebutuhan_role,p.kebutuhan_requirement
         ,p.bulan,p.keterangan,p.perusahaan,
         p.status,p.tanggal_pengajuan
@@ -134,7 +134,7 @@ BEGIN
     RETURN QUERY
     SELECT 
         p.id_pengajuan,
-        p.user_id,
+        p.id_user,
         p.kebutuhan_role,
         p.kebutuhan_requirement,
         p.bulan,

@@ -56,7 +56,7 @@ class Migration(migrations.Migration):
                 ('nilai_normalisasi', models.FloatField()),
                 ('nilai_preferensi', models.FloatField()),
                 ('ranking', models.IntegerField()),
-                ('id_hasil', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='detail_set', to='dss.hasilsaw')),
+                ('id_hasil', models.ForeignKey(db_column='id_hasil', on_delete=django.db.models.deletion.CASCADE, related_name='detail_set', to='dss.hasilsaw')),
             ],
             options={
                 'db_table': 'dss_detailhasilsaw',

@@ -282,18 +282,7 @@
             <p class="page-subtitle">Halaman testing untuk menambahkan database komponen Processor, RAM, dan Storage Laptop.</p>
 
             <!-- Flash Messages -->
-            {% if messages %}
-            <div style="margin-bottom: 24px;">
-                {% for message in messages %}
-                <div style="padding: 14px 20px; border-radius: 8px; margin-bottom: 10px; font-size: 14px; font-weight: 500;
-                    {% if message.tags == 'success' %}background-color: #dcfce7; color: #15803d; border: 1px solid #bbf7d0;
-                    {% elif message.tags == 'error' %}background-color: #fee2e2; color: #b91c1c; border: 1px solid #fecaca;
-                    {% else %}background-color: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe;{% endif %}">
-                    {{ message }}
-                </div>
-                {% endfor %}
-            </div>
-            {% endif %}
+            {% include 'components/messages_popup.html' %}
 
             <!-- Tabs -->
             <div class="tabs-container">
