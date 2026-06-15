@@ -33,7 +33,7 @@ CREATE OR REPLACE FUNCTION tambah_laptop_inventori(
     f_id_ram VARCHAR,       
     f_id_storage VARCHAR,   
     f_ukuran_layar FLOAT,
-    f_baterai FLOAT -- Tambahkan ini di parameter ke-11
+    f_baterai FLOAT 
 )
 RETURNS VOID AS $$
 BEGIN
