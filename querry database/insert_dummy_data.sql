@@ -55,7 +55,7 @@ INSERT INTO dss_kriteria (id_kriteria, nama_kriteria, tipe_kriteria) VALUES
 ON CONFLICT (id_kriteria) DO NOTHING;
 
 -- 7. INSERT PENGAJUAN (inventori_pengajuan)
-INSERT INTO inventori_pengajuan (id_pengajuan, perusahaan, keterangan, kebutuhan_role, kebutuhan_requirement, status, tanggal_pengajuan, user_id, bulan) VALUES 
+INSERT INTO inventori_pengajuan (id_pengajuan, perusahaan, keterangan, kebutuhan_role, kebutuhan_requirement, status, tanggal_pengajuan, id_user, bulan) VALUES 
 ('REQ-001', 'PT. Silaptop 79', 'Butuh laptop untuk desain grafis dan editing video ringan', 'UI/UX Designer', 'High Performance', 'Pending', CURRENT_DATE, 'U003', CURRENT_DATE),
 ('REQ-002', 'PT. Silaptop 79', 'Laptop untuk entry data harian', 'Data Entry', 'Standar', 'Approved', CURRENT_DATE, 'U004', CURRENT_DATE)
 ON CONFLICT (id_pengajuan) DO NOTHING;

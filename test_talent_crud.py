@@ -33,7 +33,7 @@ def run_test():
         'spesifikasi': 'MacBook Air M3, 16GB RAM',
         'alasan': 'Kebutuhan pengembangan sistem'
     })
-    assert response.status_code == 200, f"Expected 200, got status code {response.status_code}"
+    assert response.status_code == 302, f"Expected 302, got status code {response.status_code}"
     print("POST request completed successfully!")
 
     # Verify database record

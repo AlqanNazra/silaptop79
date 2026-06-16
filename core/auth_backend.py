@@ -42,7 +42,8 @@ class InventoriAuthBackend(BaseBackend):
                 django_user.nama = custom_user.nama
                 django_user.role = custom_user.role
             else:
-                django_user.id_user = django_user.username
+                first_custom = CustomUser.objects.filter(role__iexact="HC").first() or CustomUser.objects.first()
+                django_user.id_user = first_custom.id_user if first_custom else django_user.username
                 django_user.nama = django_user.first_name or django_user.username
                 django_user.role = "HC" if django_user.is_superuser else "Employee"
             return django_user

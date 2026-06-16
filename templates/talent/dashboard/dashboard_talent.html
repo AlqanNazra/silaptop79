@@ -368,6 +368,49 @@
             font-weight: 600;
             color: #1E293B;
         }
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 16px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+
+        .status-badge.pending {
+            background-color: #EFF6FF;
+            color: #1D4ED8;
+        }
+
+        .status-badge.pending::before {
+            background-color: #3B82F6;
+        }
+
+        .status-badge.approved {
+            background-color: #F0FDF4;
+            color: #15803D;
+        }
+
+        .status-badge.approved::before {
+            background-color: #22C55E;
+        }
+
+        .status-badge.rejected {
+            background-color: #FEF2F2;
+            color: #991B1B;
+        }
+
+        .status-badge.rejected::before {
+            background-color: #EF4444;
+        }
     </style>
 </head>
 
@@ -437,7 +480,7 @@
                                 </svg>
                                 MENUNGGU
                             </div>
-                            <p class="stat-box-value">0</p>
+                            <p class="stat-box-value">{{ total_pending }}</p>
                             <p class="stat-box-desc">Pengajuan laptop diproses</p>
                         </div>
 
@@ -452,7 +495,7 @@
                                 </svg>
                                 DITOLAK
                             </div>
-                            <p class="stat-box-value">01</p>
+                            <p class="stat-box-value">{{ total_ditolak }}</p>
                             <p class="stat-box-desc">Total Pengajuan Ditolak</p>
                         </div>
 
@@ -467,7 +510,7 @@
                                 </svg>
                                 DISETUJUI
                             </div>
-                            <p class="stat-box-value">01</p>
+                            <p class="stat-box-value">{{ total_disetujui }}</p>
                             <p class="stat-box-desc">Total Pengajuan Disetujui</p>
                         </div>
 
@@ -481,7 +524,7 @@
                                 </svg>
                                 SELESAI
                             </div>
-                            <p class="stat-box-value">02</p>
+                            <p class="stat-box-value">{{ total_selesai }}</p>
                             <p class="stat-box-desc">Total riwayat pengembalian</p>
                         </div>
                     </div>
@@ -493,11 +536,12 @@
                                 <tr>
                                     <th>KEBUTUHAN ROLE</th>
                                     <th>PERUSAHAAN</th>
-                                    <th>TANGGAL PENMGAJUAN</th>
-                                    <th>TANGGAL PEMBERIAN</th>
+                                    <th>TANGGAL PENGAJUAN</th>
+                                    <th>STATUS</th>
                                 </tr>
                             </thead>
                             <tbody>
+                                {% for p in recent_pengajuan %}
                                 <tr>
                                     <td>
                                         <div class="laptop-cell">
@@ -509,31 +553,22 @@
                                                     <line x1="12" y1="17" x2="12" y2="21"></line>
                                                 </svg>
                                             </div>
-                                            <span class="laptop-name-cell">MacBook Air M2</span>
+                                            <span class="laptop-name-cell">{{ p.kebutuhan_role }}</span>
                                         </div>
                                     </td>
-                                    <td>Padepokan</td>
-                                    <td>24 Mar 2026</td>
-                                    <td>24 Mar 2026</td>
-                                </tr>
-                                <tr>
+                                    <td>{{ p.perusahaan }}</td>
+                                    <td>{{ p.tanggal_pengajuan|date:"d M Y" }}</td>
                                     <td>
-                                        <div class="laptop-cell">
-                                            <div class="laptop-icon-sm">
-                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                                                    stroke="currentColor" stroke-width="2">
-                                                    <rect x="2" y="3" width="20" height="14" rx="2"></rect>
-                                                    <line x1="8" y1="21" x2="16" y2="21"></line>
-                                                    <line x1="12" y1="17" x2="12" y2="21"></line>
-                                                </svg>
-                                            </div>
-                                            <span class="laptop-name-cell">MacBook Air M2</span>
-                                        </div>
+                                        <span class="status-badge {{ p.status|lower }}">
+                                            {{ p.status|capfirst }}
+                                        </span>
                                     </td>
-                                    <td>Telkom</td>
-                                    <td>24 Mar 2026</td>
-                                    <td>24 Mar 2026</td>
                                 </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" style="text-align: center; color: #64748B; padding: 24px;">Belum ada riwayat pengajuan laptop.</td>
+                                </tr>
+                                {% endfor %}
                             </tbody>
                         </table>
                     </div>

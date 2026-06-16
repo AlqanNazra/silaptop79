@@ -333,11 +333,6 @@ def setujui_pengajuan_hc_view(request):
                 messages.error(request, 'Pengajuan tidak ditemukan.')
                 return redirect('inventori:pengajuanlaptop_hc')
 
-            # Update status laptop ke dipinjam
-            laptop = LaptopInventori.objects.get(id_laptop_inventori=laptop_id)
-            laptop.status = 'dipinjam'
-            laptop.save()
-
             # Buat DTO Pengajuan
             user_id = request.user.id_user if (hasattr(request.user, 'id_user') and request.user.id_user) else 'USR-001'
             dto_peng = PengajuanDTO(

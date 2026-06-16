@@ -360,7 +360,7 @@
             </div>
 
             <!-- Approval Form -->
-            <form method="POST" action="">
+            <form id="approvalForm" method="POST" action="">
                 {% csrf_token %}
 
                 <!-- Card 1: General Information -->
@@ -500,12 +500,7 @@
         }
 
         function submitApprovalForm() {
-            const form = document.querySelector('form');
-            form.submit();
-            // After submitting, redirect back to HC pengajuan list
-            setTimeout(() => {
-                window.location.href = "{% url 'pengajuanlaptop_hc' %}";
-            }, 100);
+            document.getElementById('approvalForm').submit();
         }
     </script>
 </body>

@@ -1745,36 +1745,7 @@ def editdatalaptop_it_view(request):
     return render(request, 'it/inventori/editdatalaptop_it.html')
 
 
-def detailpengajuan_it_view(request):
-    from inventori.services.service_pengajuan import PengajuanService
-    from inventori.repositories.dto.dto_pengajuan import PengajuanDTO
-    
-    if request.method == 'POST':
-        return redirect('pengajuanlaptop_it')
-        
-    pengajuan_id = request.GET.get('id')
-    pengajuan = None
-    if pengajuan_id:
-        try:
-            service = PengajuanService()
-            pengajuan = service.cari_pengajuan_by_id(int(pengajuan_id))
-        except Exception:
-            pass
-            
-    if not pengajuan:
-        pengajuan = PengajuanDTO(
-            id_pengajuan=1,
-            id_user=1,
-            kebutuhan_role="Engineering",
-            kebutuhan_requirement="MacBook Pro M3 Max",
-            bulan="Oktober",
-            keterangan="Kebutuhan software development berat. Proyek terbaru memerlukan kompilasi kernel dan menjalankan multiple virtual containers secara simultan. Perangkat saat ini mengalami bottleneck pada RAM dan CPU thermal throttling.",
-            perusahaan="Tujuh Sembilan",
-            status="Pending",
-            tanggal_pengajuan=datetime.date(2023, 10, 24)
-        )
-        
-    return render(request, 'it/inventori/detailpengajuan_it.html', {'pengajuan': pengajuan})
+
 
 def hasilrekomendasi_it_view(request):
     conn = get_connection()
@@ -2547,11 +2518,6 @@ def setujui_pengajuan_it_view(request):
             if not pengajuan:
                 messages.error(request, 'Pengajuan tidak ditemukan.')
                 return redirect('pengajuanlaptop_it')
-
-            # Update status laptop ke dipinjam
-            laptop = LaptopInventori.objects.get(id_laptop_inventori=laptop_id)
-            laptop.status = 'dipinjam'
-            laptop.save()
 
             # Buat DTO Pengajuan
             user_id = request.user.id_user if (hasattr(request.user, 'id_user') and request.user.id_user) else 'USR-002'

@@ -33,7 +33,7 @@ CREATE TABLE inventori_pengajuan (
 -- BEGIN
 --     INSERT INTO inventori_pengajuan (
 --         id_pengajuan,
---         user_id,
+--         id_user,
 --         kebutuhan_role,
 --         kebutuhan_requirement,
 --         bulan,
@@ -72,7 +72,7 @@ RETURNS VOID AS $$
 BEGIN
     INSERT INTO inventori_pengajuan (
         id_pengajuan,
-        user_id,
+        id_user,
         kebutuhan_role,
         kebutuhan_requirement,
         bulan,
@@ -171,7 +171,7 @@ BEGIN
     SET 
         status = f_status,
         tanggal_approval = CURRENT_TIMESTAMP,
-        approved_by_id = f_approved_by
+        id_approved_by = f_approved_by
     WHERE id_pengajuan = f_id_pengajuan;
 
     RETURN 'Pengajuan berhasil diupdate menjadi ' || f_status;

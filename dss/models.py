@@ -17,9 +17,10 @@ class Kriteria(models.Model):
     golongan_kriteria = models.CharField(max_length=255)
 
 class BobotKriteria(models.Model):
-
+    id_bobot = models.CharField(primary_key=True, max_length=100)
     id_kriteria = models.ForeignKey(
         Kriteria,
+        db_column="kriteria_id",
         on_delete=models.CASCADE
     )
 
@@ -99,6 +100,7 @@ class LaptopPengadaan(models.Model):
 
     id_processor = models.ForeignKey(
         'inventori.Processor',
+        db_column='processor_id',
         on_delete=models.SET_NULL,
         null=True,
         blank=True
@@ -106,6 +108,7 @@ class LaptopPengadaan(models.Model):
 
     id_ram = models.ForeignKey(
         'inventori.RAM',
+        db_column='ram_id',
         on_delete=models.SET_NULL,
         null=True,
         blank=True
@@ -113,6 +116,7 @@ class LaptopPengadaan(models.Model):
 
     id_storage = models.ForeignKey(
         'inventori.Storage',
+        db_column='storage_id',
         on_delete=models.SET_NULL,
         null=True,
         blank=True
