@@ -14,6 +14,10 @@ from core.views import (
     detailrekomendasiscrapping_hc_view,
     manajemen_role_teknologi_it_view,
     notifikasi_hc_view,
+    manajemenuser_hc_view,
+    tambahuser_hc_view,
+    edit_user_hc_view,
+    hapus_user_hc_view,
 
     # IT Views
     dashboard_it_view,
@@ -57,6 +61,7 @@ from core.views import (
     # Home View
     home_view,
     login_redirect_view,
+    profile_view,
 )
 from inventori.views import (
     manajemen_laptop_page as manajemenlaptop_hc_view,
@@ -101,6 +106,10 @@ urlpatterns = [
     path('hc/detail-rekomendasi/', detailrekomendasi_hc_view, name='detailrekomendasi_hc'),
     path('hc/detail-scrapping/', detailrekomendasiscrapping_hc_view, name='detailrekomendasiscrapping_hc'),
     path('hc/notifikasi/', notifikasi_hc_view, name='notifikasi_hc'),
+    path('hc/manajemen-user/', manajemenuser_hc_view, name='manajemenuser_hc'),
+    path('hc/tambah-user/', tambahuser_hc_view, name='tambahuser_hc'),
+    path('hc/edit-user/', edit_user_hc_view, name='edit_user_hc'),
+    path('hc/hapus-user/', hapus_user_hc_view, name='hapus_user_hc'),
 
     # ==========================================
     # INFORMATION TECHNOLOGY (IT) ROUTES
@@ -191,4 +200,6 @@ path(
     hapus_teknologi_it_view,
     name='hapus_teknologi_it'
 ),
+
+    path('profile/', profile_view, name='profile'),
 ]
