@@ -7,15 +7,12 @@ sys.path.append(os.getcwd())
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "silaptop79.settings")
 django.setup()
 
-from django.db import connection
-
-with connection.cursor() as cursor:
-    cursor.execute("""
-        SELECT column_name, data_type 
-        FROM information_schema.columns 
-        WHERE table_name = 'inventori_laptopinventori';
-    """)
-    rows = cursor.fetchall()
-    print("Columns in inventori_laptopinventori:")
-    for row in rows:
-        print(row)
+from django.test import Client
+client = Client()
+try:
+    print("Sending GET request to /hc/manajemen-user/...")
+    response = client.get('/hc/manajemen-user/')
+    print("Response Status Code:", response.status_code)
+except Exception as e:
+    import traceback
+    traceback.print_exc()

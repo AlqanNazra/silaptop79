@@ -14,14 +14,11 @@ from core.views import (
     detailrekomendasiscrapping_hc_view,
     manajemen_role_teknologi_it_view,
     notifikasi_hc_view,
-<<<<<<< HEAD
     manajementalent_hc_view,
-=======
     manajemenuser_hc_view,
     tambahuser_hc_view,
     edit_user_hc_view,
     hapus_user_hc_view,
->>>>>>> origin/dev-lina
 
     # IT Views
     dashboard_it_view,
@@ -206,8 +203,5 @@ path(
     name='hapus_teknologi_it'
 ),
 
-<<<<<<< HEAD
-=======
     path('profile/', profile_view, name='profile'),
->>>>>>> origin/dev-lina
 ]

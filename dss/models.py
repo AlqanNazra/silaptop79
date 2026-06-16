@@ -33,8 +33,8 @@ class BobotKriteria(models.Model):
 class DSSProses(models.Model):
     id_dss = models.CharField(primary_key=True, max_length=100)
 
-    id_user = models.ForeignKey(User, on_delete=models.CASCADE)
-    id_bobot = models.ForeignKey(BobotKriteria, on_delete=models.CASCADE)
+    id_user = models.ForeignKey(User, on_delete=models.CASCADE, db_column='user_id')
+    id_bobot = models.ForeignKey(BobotKriteria, on_delete=models.CASCADE, db_column='bobot_id')
 
     role_dss = models.CharField(max_length=100)
     jenis_dss = models.CharField(max_length=100)

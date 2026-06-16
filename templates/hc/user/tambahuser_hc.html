@@ -561,13 +561,13 @@
                                     <option value="" disabled {% if not form_data.role %}selected{% endif %}>
                                         -- Pilih Role --
                                     </option>
-                                    <option value="HC" {% if form_data.role=='HC' %}selected{% endif %}>
+                                    <option value="HC" {% if form_data.role == 'HC' %}selected{% endif %}>
                                         Human Capital (HC)
                                     </option>
-                                    <option value="IT" {% if form_data.role=='IT' %}selected{% endif %}>
+                                    <option value="IT" {% if form_data.role == 'IT' %}selected{% endif %}>
                                         IT Infrastructure
                                     </option>
-                                    <option value="Talent" {% if form_data.role=='Talent' %}selected{% endif %}>
+                                    <option value="Talent" {% if form_data.role == 'Talent' %}selected{% endif %}>
                                         Talent
                                     </option>
                                 </select>
