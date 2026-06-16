@@ -5,7 +5,7 @@ import uuid
 
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
-from psycopg import transaction
+from django.db import transaction
 
 from dss.models import BobotKriteria
 from dss.repositories.dto.dto_laptop_pengadaan import FilterPengadaanDTO
@@ -56,21 +56,127 @@ def dashboard_hc_view(request):
         semua_pengajuan = service.service_ambil_semua_pengajuan()
         total_pengajuan = len(semua_pengajuan)
         pengajuan_pending = sum(1 for p in semua_pengajuan if p.status and p.status.lower() == 'pending')
-    except Exception:
+
+        # Ambil data peminjaman
+        peminjaman_service = PeminjamanService()
+        peminjaman_list = peminjaman_service.service_ambil_semua_peminjaman()
+        
+        # Mapping nama laptop dan user ke list peminjaman
+        from inventori.models import User
+        users_dict = {u.id_user: u.nama for u in User.objects.all()}
+        laptops_dict = {l.id_laptop_inventori: l.nama_laptop for l in LaptopInventori.objects.all()}
+        
+        riwayat_pinjam = []
+        for p in peminjaman_list:
+            # Ambil detail nama user & nama laptop
+            nama_user = users_dict.get(p.id_user, f"User {p.id_user}")
+            nama_laptop = laptops_dict.get(p.id_laptop_inventori, f"Laptop {p.id_laptop_inventori}")
+            riwayat_pinjam.append({
+                'nama_laptop': nama_laptop,
+                'nama_user': nama_user,
+                'tanggal_pinjam': p.tanggal_pinjam,
+                'status': p.status or 'aktif'
+            })
+            
+        # Urutkan berdasarkan tanggal pinjam terbaru, batasi 5 saja
+        riwayat_pinjam.sort(key=lambda x: x['tanggal_pinjam'] if x['tanggal_pinjam'] else datetime.date.min, reverse=True)
+        riwayat_pinjam = riwayat_pinjam[:5]
+        
+    except Exception as e:
         total_laptop = 0
         total_pengajuan = 0
         pengajuan_pending = 0
+        riwayat_pinjam = []
 
     context = {
         'total_laptop': total_laptop,
         'total_pengajuan': total_pengajuan,
         'pengajuan_pending': pengajuan_pending,
+        'riwayat_pinjam': riwayat_pinjam,
     }
     return render(request, 'hc/dashboard/dashboard_hc.html', context)
 def manajemenlaptop_hc_view(request):
     return render(request, 'hc/inventori/manajemenlaptop_hc.html')
 
+def manajementalent_hc_view(request):
+    import random
+    import string
+    from inventori.models import User
+    from django.db.models import Q
+    
+    generated_password = None
+    created_username = None
+    created_email = None
+
+    if request.method == 'POST':
+        nama = request.POST.get('username')
+        email = request.POST.get('email')
+        
+        if nama and email:
+            # Generate random password 8 chars
+            chars = string.ascii_letters + string.digits
+            generated_password = ''.join(random.choice(chars) for _ in range(8))
+            
+            # Generate unique ID USR-xxx
+            random_id = f"USR-{random.randint(100, 999)}"
+            while User.objects.filter(id_user=random_id).exists():
+                random_id = f"USR-{random.randint(100, 999)}"
+                
+            try:
+                # Simpan user baru (role Talent)
+                User.objects.create(
+                    id_user=random_id,
+                    nama=nama,
+                    email=email,
+                    password=generated_password, # Disimpan plain text dulu sesuai spesifikasi user
+                    role='Talent'
+                )
+                created_username = nama
+                created_email = email
+                messages.success(request, f'Akun Talent "{nama}" berhasil dibuat!')
+            except Exception as e:
+                messages.error(request, f'Gagal membuat akun: {str(e)}')
+                generated_password = None
+
+    # Get query params
+    search_query = request.GET.get('q', '').strip()
+    sort_by = request.GET.get('sort', 'id_user') # Default sort by id_user
+
+    # Base query for talent
+    talents_qs = User.objects.filter(role__iexact='talent')
+    total_talent = talents_qs.count()
+
+    # Search filter
+    if search_query:
+        talents_qs = talents_qs.filter(
+            Q(nama__icontains=search_query) | 
+            Q(email__icontains=search_query) |
+            Q(id_user__icontains=search_query)
+        )
+
+    # Sort logic
+    if sort_by == 'nama':
+        talents_qs = talents_qs.order_by('nama')
+    elif sort_by == 'email':
+        talents_qs = talents_qs.order_by('email')
+    else:
+        talents_qs = talents_qs.order_by('id_user')
+
+    context = {
+        'talents': talents_qs,
+        'total_talent': total_talent,
+        'search_query': search_query,
+        'sort_by': sort_by,
+        'generated_password': generated_password,
+        'created_username': created_username,
+        'created_email': created_email,
+    }
+    return render(request, 'hc/users/manajementalent_hc.html', context)
+
 def pengajuanlaptop_it_view(request):
+    search_query = request.GET.get('q', '')
+    status_filter = request.GET.get('status', '')
+
     try:
         service = PengajuanService()
         semua_pengajuan = service.service_ambil_semua_pengajuan()
@@ -105,15 +211,38 @@ def pengajuanlaptop_it_view(request):
                 p.status_it = 'rejected'
         
         # Sort by date descending
-        semua_pengajuan.sort(key=lambda x: x.tanggal_pengajuan, reverse=True)
+        semua_pengajuan.sort(key=lambda x: x.tanggal_pengajuan if x.tanggal_pengajuan else datetime.date.min, reverse=True)
         
         total_pengajuan = len(semua_pengajuan)
         total_pending = sum(1 for p in semua_pengajuan if p.status and p.status.lower() == 'pending')
         total_disetujui = sum(1 for p in semua_pengajuan if p.status and p.status.lower() == 'approved')
         total_ditolak = sum(1 for p in semua_pengajuan if p.status and p.status.lower() == 'rejected')
 
+        # Filter search
+        if search_query:
+            q_lower = search_query.lower()
+            semua_pengajuan = [
+                p for p in semua_pengajuan
+                if q_lower in getattr(p, 'user_nama', '').lower() or
+                   q_lower in str(getattr(p, 'id_pengajuan', '')).lower() or
+                   q_lower in getattr(p, 'spesifikasi_tambahan', '').lower()
+            ]
+
+        # Filter status
+        if status_filter:
+            status_lower = status_filter.lower()
+            semua_pengajuan = [
+                p for p in semua_pengajuan
+                if getattr(p, 'status', '').lower() == status_lower
+            ]
+
+        from django.core.paginator import Paginator
+        paginator = Paginator(semua_pengajuan, 5)
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+
         context = {
-            'list_pengajuan': semua_pengajuan,
+            'list_pengajuan': page_obj,
             'total_pengajuan': total_pengajuan,
             'total_pending': total_pending,
             'total_disetujui': total_disetujui,
@@ -122,6 +251,8 @@ def pengajuanlaptop_it_view(request):
             'total_dikonfigurasi': total_dikonfigurasi,
             'total_selesai': total_selesai,
             'total_mendesak': total_mendesak,
+            'search_query': search_query,
+            'status_filter': status_filter,
         }
     except Exception as e:
         context = {
@@ -135,6 +266,8 @@ def pengajuanlaptop_it_view(request):
             'total_dikonfigurasi': 0,
             'total_selesai': 0,
             'total_mendesak': 0,
+            'search_query': search_query,
+            'status_filter': status_filter,
         }
 
     return render(request, 'it/inventori/pengajuanlaptop_it.html', context)
@@ -274,6 +407,9 @@ def detaillaptop_it_view(request, id_laptop):
     return render(request, 'it/inventori/detaillaptop_it.html', context)
 
 def riwayatpeminjamanlaptop_it_view(request):
+    search_query = request.GET.get('q', '')
+    status_filter = request.GET.get('status', '')
+
     try:
         service = PeminjamanService()
         riwayat_list = service.service_ambil_semua_peminjaamn()
@@ -292,11 +428,36 @@ def riwayatpeminjamanlaptop_it_view(request):
         sorted_p = sorted(riwayat_list, key=lambda x: str(x.tanggal_pinjam) if x.tanggal_pinjam else "", reverse=True)
         if sorted_p:
             peminjam_terakhir = sorted_p[0].user_nama
+
+        # Filter search
+        if search_query:
+            q_lower = search_query.lower()
+            riwayat_list = [
+                p for p in riwayat_list
+                if q_lower in getattr(p, 'user_nama', '').lower() or
+                   q_lower in getattr(p, 'laptop_nama', '').lower() or
+                   q_lower in str(getattr(p, 'id_peminjaman', '')).lower()
+            ]
+
+        # Filter status
+        if status_filter:
+            status_lower = status_filter.lower()
+            riwayat_list = [
+                p for p in riwayat_list
+                if getattr(p, 'status', '').lower() == status_lower
+            ]
+
+        from django.core.paginator import Paginator
+        paginator = Paginator(riwayat_list, 5)
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
             
         context = {
-            'list_peminjaman': riwayat_list,
+            'list_peminjaman': page_obj,
             'total_peminjaman': total_peminjaman,
             'peminjam_terakhir': peminjam_terakhir,
+            'search_query': search_query,
+            'status_filter': status_filter,
         }
     except Exception as e:
         messages.error(request, f'Gagal memuat riwayat: {str(e)}')
@@ -304,6 +465,8 @@ def riwayatpeminjamanlaptop_it_view(request):
             'list_peminjaman': [],
             'total_peminjaman': 0,
             'peminjam_terakhir': "-",
+            'search_query': search_query,
+            'status_filter': status_filter,
         }
     return render(request, 'it/inventori/riwayatpeminjamanlaptop_it.html', context)
 
@@ -1063,7 +1226,37 @@ def dashboard_it_view(request):
     return render(request, 'it/dashboard/dashboard_it.html', context)
 
 def manajemenlaptop_it_view(request):
-    return render(request, 'it/inventori/manajemenlaptop_it.html')
+    search_query = request.GET.get('q', '')
+    status_filter = request.GET.get('status', '')
+
+    from inventori.models import LaptopInventori
+    laptops = LaptopInventori.objects.select_related('id_processor', 'id_ram', 'id_storage').all()
+
+    if search_query:
+        from django.db.models import Q
+        laptops = laptops.filter(
+            Q(nama_laptop__icontains=search_query) |
+            Q(no_inventori__icontains=search_query) |
+            Q(model__icontains=search_query)
+        )
+
+    if status_filter:
+        laptops = laptops.filter(status=status_filter)
+
+    laptops = laptops.order_by('id_laptop_inventori')
+
+    from django.core.paginator import Paginator
+    paginator = Paginator(laptops, 5)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        'laptops': page_obj,
+        'total': laptops.count(),
+        'search_query': search_query,
+        'status_filter': status_filter,
+    }
+    return render(request, 'it/inventori/manajemenlaptop_it.html', context)
 
 # def pengajuanlaptop_it_view(request):
 #     from inventori.services.service_pengajuan import PengajuanService
@@ -1491,8 +1684,7 @@ def inputkriteria_it_view(request):
     )
 
 
-def tambahlaptop_it_view(request):
-    return render(request, 'it/inventori/tambahlaptop_it.html')
+
 
 def tambahspek_it_view(request):
     from inventori.models import Processor, RAM, Storage
@@ -1911,7 +2103,31 @@ def notifikasi_it_view(request):
 
 # Procurement management views for IT
 def manajemenpengadaan_it_view(request):
-    return render(request, 'it/inventori/manajemenpengadaan_it.html')
+    search_query = request.GET.get('q', '')
+    
+    mock_pengadaan = [
+        {"id": 1, "name": "MacBook Pro M3 Max 14-inch", "brand": "Apple Inc."},
+        {"id": 2, "name": "ThinkPad X1 Carbon Gen 10", "brand": "Lenovo"},
+        {"id": 3, "name": "ASUS ROG Zephyrus G14", "brand": "ASUS"},
+    ]
+    
+    if search_query:
+        mock_pengadaan = [
+            item for item in mock_pengadaan
+            if search_query.lower() in item["name"].lower() or search_query.lower() in item["brand"].lower()
+        ]
+        
+    from django.core.paginator import Paginator
+    paginator = Paginator(mock_pengadaan, 5)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'pengadaan_list': page_obj,
+        'search_query': search_query,
+        'total': len(mock_pengadaan),
+    }
+    return render(request, 'it/inventori/manajemenpengadaan_it.html', context)
 
 def detailpengadaan_it_view(request):
     return render(request, 'it/inventori/detailpengadaan_it.html')
@@ -1964,6 +2180,9 @@ def dashboard_talent_view(request):
         }
     return render(request, 'talent/dashboard/dashboard_talent.html', context)
 def pengajuanlaptop_talent_view(request):
+    search_query = request.GET.get('q', '')
+    status_filter = request.GET.get('status', '')
+
     try:
         service = PengajuanService()
 
@@ -1996,19 +2215,9 @@ def pengajuanlaptop_talent_view(request):
             )
 
             service.service_tambah_pengajuan(dto)
+            messages.success(request, 'Pengajuan laptop berhasil dikirim dan sedang menunggu persetujuan.')
+            return redirect('pengajuanlaptop_talent')
 
-            context = {
-                'show_success_popup': True,
-                'success_message': 'Pengajuan laptop berhasil dikirim dan sedang menunggu persetujuan.',
-                'list_pengajuan': [],
-                'total_pengajuan': 0,
-            }
-
-            return render(
-                request,
-                'talent/inventori/pengajuanlaptop_talent.html',
-                context
-            )
         semua_pengajuan = service.service_ambil_semua_pengajuan()
 
         if user_id:
@@ -2017,16 +2226,40 @@ def pengajuanlaptop_talent_view(request):
                 if getattr(p, 'id_user', None) == user_id
             ]
 
+        # Filter search
+        if search_query:
+            q_lower = search_query.lower()
+            semua_pengajuan = [
+                p for p in semua_pengajuan
+                if q_lower in getattr(p, 'kebutuhan_role', '').lower() or
+                   q_lower in getattr(p, 'kebutuhan_requirement', '').lower() or
+                   q_lower in str(getattr(p, 'id_pengajuan', '')).lower()
+            ]
+
+        # Filter status
+        if status_filter:
+            status_lower = status_filter.lower()
+            semua_pengajuan = [
+                p for p in semua_pengajuan
+                if getattr(p, 'status', '').lower() == status_lower
+            ]
+
+        import datetime as dt
         semua_pengajuan.sort(
-            key=lambda x: x.tanggal_pengajuan,
+            key=lambda x: x.tanggal_pengajuan if x.tanggal_pengajuan else dt.date.min,
             reverse=True
         )
 
+        from django.core.paginator import Paginator
+        paginator = Paginator(semua_pengajuan, 5)
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+
         context = {
-            'list_pengajuan': semua_pengajuan,
+            'list_pengajuan': page_obj,
             'total_pengajuan': len(semua_pengajuan),
-            'show_success_popup': False,
-            'show_error_popup': False,
+            'search_query': search_query,
+            'status_filter': status_filter,
         }
 
         return render(
@@ -2036,14 +2269,13 @@ def pengajuanlaptop_talent_view(request):
         )
 
     except Exception as e:
-
+        messages.error(request, f'Terjadi kesalahan: {str(e)}')
         context = {
-            'show_error_popup': True,
-            'error_message': str(e),
             'list_pengajuan': [],
             'total_pengajuan': 0,
+            'search_query': search_query,
+            'status_filter': status_filter,
         }
-
         return render(
             request,
             'talent/inventori/pengajuanlaptop_talent.html',
@@ -2071,6 +2303,9 @@ def detaillaptop_talent_view(request):
     return render(request, 'talent/inventori/detaillaptop_talent.html', context)
 
 def riwayatpeminjamanlaptop_talent_view(request):
+    search_query = request.GET.get('q', '')
+    status_filter = request.GET.get('status', '')
+
     try:
         user_id = request.user.id_user if hasattr(request.user, 'id_user') else None
         service = PeminjamanService()
@@ -2097,14 +2332,39 @@ def riwayatpeminjamanlaptop_talent_view(request):
         active_laptop = None
         if active_peminjaman:
             active_laptop = LaptopInventori.objects.filter(id_laptop_inventori=active_peminjaman.id_laptop_inventori).first()
+
+        # Filter search
+        if search_query:
+            q_lower = search_query.lower()
+            riwayat_list = [
+                p for p in riwayat_list
+                if q_lower in getattr(p, 'nama_laptop', '').lower() or
+                   q_lower in str(getattr(p, 'id_peminjaman', '')).lower() or
+                   q_lower in getattr(p, 'no_inventori', '').lower()
+            ]
+
+        # Filter status
+        if status_filter:
+            status_lower = status_filter.lower()
+            riwayat_list = [
+                p for p in riwayat_list
+                if getattr(p, 'status', '').lower() == status_lower
+            ]
+
+        from django.core.paginator import Paginator
+        paginator = Paginator(riwayat_list, 5)
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
             
         context = {
-            'riwayat_list': riwayat_list,
+            'riwayat_list': page_obj,
             'total_peminjaman': total_peminjaman,
             'total_aktif': total_aktif,
             'total_selesai': total_selesai,
             'active_peminjaman': active_peminjaman,
             'active_laptop': active_laptop,
+            'search_query': search_query,
+            'status_filter': status_filter,
         }
     except Exception as e:
         context = {
@@ -2115,6 +2375,8 @@ def riwayatpeminjamanlaptop_talent_view(request):
             'total_selesai': 0,
             'active_peminjaman': None,
             'active_laptop': None,
+            'search_query': search_query,
+            'status_filter': status_filter,
         }
     return render(request, 'talent/inventori/riwayatpeminjamanlaptop_talent.html', context)
 
@@ -2221,7 +2483,31 @@ def home_view(request):
 
 # Procurement management views for IT (Added to fix NoReverseMatch)
 def manajemenpengadaan_it_view(request):
-    return render(request, 'it/inventori/manajemenpengadaan_it.html')
+    search_query = request.GET.get('q', '')
+    
+    mock_pengadaan = [
+        {"id": 1, "name": "MacBook Pro M3 Max 14-inch", "brand": "Apple Inc."},
+        {"id": 2, "name": "ThinkPad X1 Carbon Gen 10", "brand": "Lenovo"},
+        {"id": 3, "name": "ASUS ROG Zephyrus G14", "brand": "ASUS"},
+    ]
+    
+    if search_query:
+        mock_pengadaan = [
+            item for item in mock_pengadaan
+            if search_query.lower() in item["name"].lower() or search_query.lower() in item["brand"].lower()
+        ]
+        
+    from django.core.paginator import Paginator
+    paginator = Paginator(mock_pengadaan, 5)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'pengadaan_list': page_obj,
+        'search_query': search_query,
+        'total': len(mock_pengadaan),
+    }
+    return render(request, 'it/inventori/manajemenpengadaan_it.html', context)
 
 def detailpengadaan_it_view(request):
     return render(request, 'it/inventori/detailpengadaan_it.html')
@@ -2329,8 +2615,25 @@ def setujui_pengajuan_it_view(request):
     })
 def manajemenproyek_it_view(request):
     from inventori.models import Proyek
-    proyek_list = Proyek.objects.all()
-    context = {"proyek_list": proyek_list}
+    from django.core.paginator import Paginator
+    from django.db.models import Q
+
+    search_query = request.GET.get('q', '')
+    proyek_list = Proyek.objects.prefetch_related('roles__teknologi').all()
+
+    if search_query:
+        proyek_list = proyek_list.filter(Q(nama_proyek__icontains=search_query))
+
+    proyek_list = proyek_list.order_by('id_proyek')
+
+    paginator = Paginator(proyek_list, 5)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        "proyek_list": page_obj,
+        "search_query": search_query,
+    }
     return render(
         request,
         "it/inventori/manajemenproyek_it.html",
@@ -2579,18 +2882,40 @@ def tambah_komponen_it_view(request):
     })
 
 def manajemen_role_teknologi_it_view(request):
+    from django.core.paginator import Paginator
+    from django.db.models import Q
 
-    role_list = (
-        Role.objects
-        .prefetch_related(
-            'roleteknologi_set__teknologi'
-        ).order_by('nama_role')
-    )
-    teknologi_list = (Teknologi.objects.order_by('nama_teknologi'))
-    context = {"role_list": role_list,"teknologi_list": teknologi_list,}
+    search_role = request.GET.get('q_role', '')
+    search_tech = request.GET.get('q_tech', '')
+
+    role_list = Role.objects.prefetch_related('roleteknologi_set__teknologi').order_by('nama_role')
+    teknologi_list = Teknologi.objects.order_by('nama_teknologi')
+
+    if search_role:
+        role_list = role_list.filter(Q(nama_role__icontains=search_role))
+    if search_tech:
+        teknologi_list = teknologi_list.filter(Q(nama_teknologi__icontains=search_tech) | Q(kategori__icontains=search_tech))
+
+    paginator_role = Paginator(role_list, 5)
+    page_role = request.GET.get('page_role')
+    role_obj = paginator_role.get_page(page_role)
+
+    paginator_tech = Paginator(teknologi_list, 5)
+    page_tech = request.GET.get('page_tech')
+    tech_obj = paginator_tech.get_page(page_tech)
+
+    active_tab = request.GET.get('tab', 'role')
+
+    context = {
+        "role_list": role_obj,
+        "teknologi_list": tech_obj,
+        "search_role": search_role,
+        "search_tech": search_tech,
+        "active_tab": active_tab,
+    }
     return render(
         request,
-        "it/inventori/manajemen_role_teknologi_it.html",
+        "it/inventori/manajemenroleteknologi_it.html",
         context
     )
 def tambah_teknologi_it_view(request):
@@ -2622,7 +2947,7 @@ def tambah_teknologi_it_view(request):
             )
 
     return redirect(
-        "manajemen_role_teknologi_it"
+        "manajemenroleteknologi_it"
     )
 def tambah_role_it_view(request):
 
@@ -2675,7 +3000,7 @@ def tambah_role_it_view(request):
             )
 
     return redirect(
-        "manajemen_role_teknologi_it"
+        "manajemenroleteknologi_it"
     )
 def hapus_role_it_view(
     request,
@@ -2703,7 +3028,7 @@ def hapus_role_it_view(
         )
 
     return redirect(
-        "manajemen_role_teknologi_it"
+        "manajemenroleteknologi_it"
     )
     
 def hapus_teknologi_it_view(
@@ -2732,7 +3057,7 @@ def hapus_teknologi_it_view(
         )
 
     return redirect(
-        "manajemen_role_teknologi_it"
+        "manajemenroleteknologi_it"
     )
 from django.shortcuts import get_object_or_404
 
@@ -2807,7 +3132,7 @@ def edit_role_it_view(request, id_role):
             )
 
     return redirect(
-        "manajemen_role_teknologi_it"
+        "manajemenroleteknologi_it"
     )
     
 def edit_teknologi_it_view(
@@ -2851,5 +3176,5 @@ def edit_teknologi_it_view(
             )
 
     return redirect(
-        "manajemen_role_teknologi_it"
+        "manajemenroleteknologi_it"
     )

@@ -416,16 +416,18 @@
 
         <!-- Main Dashboard Content -->
         <div class="main-dashboard-content">
-            <div style="max-width: 900px; width: 100%;">
+            <div style="width: 100%;">
 
                 <h1 class="page-title">Kelola Data Pengadaan</h1>
+
+                {% include 'components/messages_popup.html' %}
 
                 <!-- Stat Cards -->
                 <div class="stats-row" style="grid-template-columns: 1fr 1fr;">
                     <div class="stat-card">
                         <div class="stat-card-left">
                             <span class="stat-label">Total Laptop</span>
-                            <span class="stat-value">3</span>
+                            <span class="stat-value">{{ total }}</span>
                         </div>
                         <div class="stat-icon gray-icon">
                             <i class="fa-solid fa-laptop"></i>
@@ -444,14 +446,18 @@
                 </div>
 
                 <!-- Top Actions -->
-                <div class="top-actions">
-                    <div class="search-box">
-                        <input type="text" placeholder="Cari Item...">
+                <form id="filter-form" method="GET" action="" class="top-actions" style="margin-bottom: 24px; display: flex; gap: 16px; align-items: center; justify-content: space-between; width: 100%;">
+                    <div class="search-box" style="flex: 1; max-width: 500px; display: flex; gap: 8px;">
+                        <input type="text" id="search-input" name="q" placeholder="Cari Item..." value="{{ search_query }}" style="width: 100%; padding: 12px 16px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: 'Inter', sans-serif; background: #ffffff;">
                     </div>
-                    <a href="#" class="btn-primary">
+                    
+                    <div style="display: flex; gap: 12px; align-items: center;">
+                        <a href="?" class="btn-secondary" style="padding: 12px 20px; border-radius: 8px; text-decoration: none; background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; font-size: 14px; font-weight: 600; font-family: 'Inter', sans-serif;">Reset</a>
+                    </div>
+                    <a href="#" class="btn-primary" style="background-color: #0b57c6; color: white; padding: 12px 20px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
                         <i class="fa-solid fa-plus"></i> Tambah Pengadaan
                     </a>
-                </div>
+                </form>
 
                 <!-- Table Card -->
                 <div class="table-card">
@@ -464,73 +470,51 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <!-- Data 1 -->
+                            {% for item in pengadaan_list %}
                             <tr>
-                                <td class="col-no">01</td>
+                                <td class="col-no">{{ forloop.counter0|add:pengadaan_list.start_index }}</td>
                                 <td>
                                     <div class="laptop-cell">
                                         <div class="laptop-icon"><i class="fa-solid fa-laptop"></i></div>
                                         <div class="laptop-text">
-                                            <span class="laptop-name">MacBook Pro M3 Max 14-inch</span>
-                                            <span class="laptop-brand">Apple Inc.</span>
+                                            <span class="laptop-name">{{ item.name }}</span>
+                                            <span class="laptop-brand">{{ item.brand }}</span>
                                         </div>
                                     </div>
                                 </td>
                                 <td style="text-align: right;"><a href="{% url 'detailpengadaan_it' %}"
                                         class="btn-detail">Detail</a></td>
                             </tr>
-
-                            <!-- Data 2 -->
+                            {% empty %}
                             <tr>
-                                <td class="col-no">02</td>
-                                <td>
-                                    <div class="laptop-cell">
-                                        <div class="laptop-icon"><i class="fa-solid fa-laptop"></i></div>
-                                        <div class="laptop-text">
-                                            <span class="laptop-name">ThinkPad X1 Carbon Gen 10</span>
-                                            <span class="laptop-brand">Lenovo</span>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td style="text-align: right;"><a href="{% url 'detailpengadaan_it' %}"
-                                        class="btn-detail">Detail</a></td>
+                                <td colspan="3" style="text-align: center; padding: 40px; color: #64748b;">Belum ada data pengadaan.</td>
                             </tr>
-
-                            <!-- Data 3 -->
-                            <tr>
-                                <td class="col-no">03</td>
-                                <td>
-                                    <div class="laptop-cell">
-                                        <div class="laptop-icon"><i class="fa-solid fa-laptop"></i></div>
-                                        <div class="laptop-text">
-                                            <span class="laptop-name">ASUS ROG Zephyrus G14</span>
-                                            <span class="laptop-brand">ASUS</span>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td style="text-align: right;"><a href="{% url 'detailpengadaan_it' %}"
-                                        class="btn-detail">Detail</a></td>
-                            </tr>
-
+                            {% endfor %}
                         </tbody>
                     </table>
 
-                    <div class="pagination-container">
-                        <span class="pagination-text">Menampilkan 1–3 dari 3 pengadaan</span>
-                        <div class="pagination-controls">
-                            <button class="page-btn">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                    <polyline points="15 18 9 12 15 6"></polyline>
-                                </svg>
-                            </button>
-                            <button class="page-btn active">1</button>
-                            <button class="page-btn">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                    <polyline points="9 18 15 12 9 6"></polyline>
-                                </svg>
-                            </button>
+                    <div class="pagination-container" style="display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-top: 1px solid #f1f5f9;">
+                        <span class="pagination-text">Menampilkan {{ pengadaan_list.start_index }} - {{ pengadaan_list.end_index }} dari {{ total }} pengadaan</span>
+                        <div class="pagination-controls" style="display: flex; gap: 6px; align-items: center;">
+                            {% if pengadaan_list.has_previous %}
+                                <a href="?page={{ pengadaan_list.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">
+                                    <i class="fa-solid fa-chevron-left"></i>
+                                </a>
+                            {% endif %}
+                            
+                            {% for num in pengadaan_list.paginator.page_range %}
+                                {% if pengadaan_list.number == num %}
+                                    <span class="page-btn active" style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; background: #0b57c6; color: white; font-weight: bold; font-size: 12px;">{{ num }}</span>
+                                {% elif num > pengadaan_list.number|add:'-3' and num < pengadaan_list.number|add:'3' %}
+                                    <a href="?page={{ num }}{% if search_query %}&q={{ search_query }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">{{ num }}</a>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if pengadaan_list.has_next %}
+                                <a href="?page={{ pengadaan_list.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">
+                                    <i class="fa-solid fa-chevron-right"></i>
+                                </a>
+                            {% endif %}
                         </div>
                     </div>
 
@@ -540,6 +524,30 @@
         </div> <!-- End Main Content -->
     </div> <!-- End Wrapper -->
 
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const filterForm = document.getElementById("filter-form");
+            const searchInput = document.getElementById("search-input");
+            let debounceTimer;
+
+            if (searchInput) {
+                searchInput.addEventListener("input", function() {
+                    clearTimeout(debounceTimer);
+                    debounceTimer = setTimeout(function() {
+                        filterForm.submit();
+                    }, 500);
+                });
+
+                // Focus kursor di akhir
+                if (searchInput.value.length > 0) {
+                    const val = searchInput.value;
+                    searchInput.value = '';
+                    searchInput.focus();
+                    searchInput.value = val;
+                }
+            }
+        });
+    </script>
 </body>
 
 </html>

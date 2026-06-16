@@ -313,18 +313,7 @@
 
     <div class="main-content">
         <!-- Flash Messages -->
-        {% if messages %}
-        <div style="margin-bottom:20px;">
-            {% for message in messages %}
-            <div style="padding:12px 20px; border-radius:8px; margin-bottom:8px; font-size:14px; font-weight:500;
-                {% if message.tags == 'success' %}background:#dcfce7; color:#15803d; border:1px solid #bbf7d0;
-                {% elif message.tags == 'error' %}background:#fee2e2; color:#dc2626; border:1px solid #fecaca;
-                {% else %}background:#dbeafe; color:#2563eb; border:1px solid #bfdbfe;{% endif %}">
-                {{ message }}
-            </div>
-            {% endfor %}
-        </div>
-        {% endif %}
+        {% include 'components/messages_popup.html' %}
 
         <div class="top-nav">
             <div>
@@ -353,13 +342,23 @@
             </div>
         </div>
 
+        <!-- Search and Filter Form -->
+        <div style="margin-bottom: 24px;">
+            <form method="GET" action="" style="display: flex; gap: 12px; width: 100%;">
+                <input type="text" name="q" placeholder="Cari nama peminjam, laptop, atau ID..." value="{{ search_query }}" style="flex: 1; padding: 12px 16px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px;">
+                <select name="status" style="padding: 12px 16px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background: white;">
+                    <option value="">Semua Status Peminjaman</option>
+                    <option value="dipinjam" {% if status_filter == 'dipinjam' %}selected{% endif %}>Dipinjam</option>
+                    <option value="kembali" {% if status_filter == 'kembali' %}selected{% endif %}>Kembali</option>
+                    <option value="selesai" {% if status_filter == 'selesai' %}selected{% endif %}>Selesai</option>
+                </select>
+                <button type="submit" style="background-color: #0b57c6; color: white; padding: 12px 24px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">Cari</button>
+            </form>
+        </div>
+
         <div class="table-card">
             <div class="table-header">
                 <h2>Daftar Peminjam</h2>
-                <div class="header-actions">
-                    <button class="btn-filter"><i class="fa-solid fa-sliders"></i> Filter</button>
-                    <button class="btn-export"><i class="fa-solid fa-file-export"></i> Export</button>
-                </div>
             </div>
 
             <table>
@@ -399,15 +398,35 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="5" style="text-align: center; color: #94a3b8; padding: 30px;">Tidak ada riwayat
-                            peminjaman.</td>
+                        <td colspan="5" style="text-align: center; color: #94a3b8; padding: 30px;">Tidak ada riwayat peminjaman.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
 
-            <div class="pagination">
-                <span>Menampilkan {{ total_peminjaman }} peminjaman</span>
+            <div class="pagination-container" style="display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-top: 1px solid #f1f5f9;">
+                <span class="pagination-text" style="font-size: 13px; color: #64748b;">Menampilkan {{ list_peminjaman.start_index }} - {{ list_peminjaman.end_index }} dari {{ total_peminjaman }} peminjaman</span>
+                <div class="pagination-controls" style="display: flex; gap: 6px; align-items: center;">
+                    {% if list_peminjaman.has_previous %}
+                        <a href="?page={{ list_peminjaman.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">
+                            <i class="fa-solid fa-chevron-left"></i>
+                        </a>
+                    {% endif %}
+                    
+                    {% for num in list_peminjaman.paginator.page_range %}
+                        {% if list_peminjaman.number == num %}
+                            <span class="page-btn active" style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; background: #0b57c6; color: white; font-weight: bold; font-size: 12px;">{{ num }}</span>
+                        {% elif num > list_peminjaman.number|add:'-3' and num < list_peminjaman.number|add:'3' %}
+                            <a href="?page={{ num }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">{{ num }}</a>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if list_peminjaman.has_next %}
+                        <a href="?page={{ list_peminjaman.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </a>
+                    {% endif %}
+                </div>
             </div>
         </div>
     </div>

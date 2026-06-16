@@ -323,57 +323,51 @@
             <h1 class="page-title">Inventori Laptop Perusahaan</h1>
 
             <!-- Flash Messages -->
-            {% if messages %}
-            <div style="margin-bottom:20px;">
-                {% for message in messages %}
-                <div style="padding:12px 20px; border-radius:8px; margin-bottom:8px; font-size:14px; font-weight:500;
-                    {% if message.tags == 'success' %}background:#dcfce7; color:#15803d; border:1px solid #bbf7d0;
-                    {% elif message.tags == 'error' %}background:#fee2e2; color:#dc2626; border:1px solid #fecaca;
-                    {% else %}background:#dbeafe; color:#2563eb; border:1px solid #bfdbfe;{% endif %}">
-                    {{ message }}
-                </div>
-                {% endfor %}
-            </div>
-            {% endif %}
+            {% include 'components/messages_popup.html' %}
 
             <!-- Top Actions -->
-            <form method="GET" action="" class="top-actions"
+            <form id="filter-form" method="GET" action="" class="top-actions"
                 style="margin-bottom: 24px; width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 24px;">
-                <div class="search-box" style="flex: 1; max-width: 600px; display: flex; gap: 10px;">
-                    <input type="text" name="q" value="{{ search_query }}" placeholder="Cari serial number atau merk..."
-                        style="flex: 1; padding: 14px 20px; border: none; border-radius: 20px; background-color: #d1d5db; font-size: 14px; color: #374151; outline: none;">
-                    <select name="status"
-                        style="padding: 10px 15px; border-radius: 20px; border: none; background-color: #d1d5db; color: #374151; font-weight: 500; outline: none;">
+                <div class="search-box" style="flex: 1; max-width: 500px; display: flex; gap: 8px;">
+                    <input type="text" id="search-input" name="q" value="{{ search_query }}" placeholder="Cari serial number, model, atau merk..."
+                        style="width: 100%; padding: 12px 16px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: 'Inter', sans-serif; background: #ffffff;">
+                </div>
+                
+                <div style="display: flex; gap: 12px; align-items: center;">
+                    <select id="status-select" name="status"
+                        style="padding: 12px 16px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: 'Inter', sans-serif; font-weight: 500; color: #475569; background: white; cursor: pointer;">
                         <option value="">Semua Status</option>
                         <option value="tersedia" {% if status_filter == 'tersedia' %}selected{% endif %}>Tersedia</option>
                         <option value="dipinjam" {% if status_filter == 'dipinjam' %}selected{% endif %}>Dipinjam</option>
                         <option value="rusak" {% if status_filter == 'rusak' %}selected{% endif %}>Rusak</option>
                     </select>
-                    <button type="submit" class="btn-primary" style="border-radius: 20px; padding: 10px 24px;"><i
-                            class="fa-solid fa-magnifying-glass"></i> Cari</button>
+                    
+                    <a href="?" class="btn-secondary" style="padding: 12px 20px; border-radius: 8px; text-decoration: none; background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; font-size: 14px; font-weight: 600; font-family: 'Inter', sans-serif;">Reset</a>
                 </div>
                 <a href="{% url 'tambahlaptop_it' %}" class="btn-primary"
-                    style="text-decoration: none; text-align: center; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border-radius: 8px;">
+                    style="text-decoration: none; text-align: center; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border-radius: 8px; padding: 12px 20px; font-weight: 600; font-family: 'Inter', sans-serif; background: #0b57c6; color: white; border: none;">
                     <i class="fa-solid fa-plus"></i> Tambah Laptop Baru
                 </a>
             </form>
 
             <!-- Table Card -->
-            <div class="table-card">
+            <div class="table-card" style="background: #ffffff; border-radius: 16px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02); overflow: hidden; border: 1px solid #f1f5f9; margin-top: 24px;">
                 <table>
                     <thead>
                         <tr>
-                            <th class="col-no">NO</th>
-                            <th>NAMA LAPTOP</th>
+                            <th style="width: 60px;">NO</th>
+                            <th>LAPTOP</th>
                             <th>SERIAL NUMBER</th>
                             <th>STATUS</th>
-                            <th style="width: 80px;">AKSI</th>
+                            <th style="width: 100px;">AKSI</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for laptop in laptops %}
                         <tr>
-                            <td class="col-no">{{ forloop.counter|stringformat:"02d" }}</td>
+                            <td class="col-no" style="font-weight: 600; color: #64748b; vertical-align: middle;">
+                                {{ forloop.counter0|add:laptops.start_index }}
+                            </td>
                             <td>
                                 <div class="laptop-cell">
                                     <div class="laptop-icon"><i class="fa-solid fa-laptop"></i></div>
@@ -386,7 +380,7 @@
                             <td class="col-sn">{{ laptop.no_inventori }}</td>
                             <td>
                                 <div
-                                    class="status-pill {% if laptop.status == 'tersedia' %}status-available{% elif laptop.status == 'dipinjam' %}status-dipinjam{% else %}status-rusak{% endif %}">
+                                    class="status-pill {% if laptop.status == 'tersedia' or laptop.status == 'Available' or laptop.status == 'Tersedia' %}status-available{% elif laptop.status == 'dipinjam' or laptop.status == 'Dipinjam' %}status-dipinjam{% else %}status-rusak{% endif %}">
                                     <span class="dot"></span>{{ laptop.status|title }}
                                 </div>
                             </td>
@@ -397,33 +391,34 @@
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="5" style="text-align: center; padding: 40px; color: #64748b;">Belum ada data
-                                laptop.</td>
+                            <td colspan="5" style="text-align: center; padding: 40px; color: #64748b;">Belum ada data laptop.</td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
 
-                <div class="pagination-container">
-                    <span class="pagination-text">Menampilkan {{ laptops|length }} dari {{ total }} aset</span>
-                    <div class="pagination-controls">
-                        <button class="page-btn">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                <polyline points="15 18 9 12 15 6"></polyline>
-                            </svg>
-                        </button>
-                        <button class="page-btn active">1</button>
-                        <button class="page-btn">2</button>
-                        <button class="page-btn">3</button>
-                        <span style="color:#64748b; font-size:12px; margin:0 4px;">...</span>
-                        <button class="page-btn">12</button>
-                        <button class="page-btn">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                <polyline points="9 18 15 12 9 6"></polyline>
-                            </svg>
-                        </button>
+                <div class="pagination-container" style="display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-top: 1px solid #f1f5f9;">
+                    <span class="pagination-text">Menampilkan {{ laptops.start_index }} - {{ laptops.end_index }} dari {{ total }} aset</span>
+                    <div class="pagination-controls" style="display: flex; gap: 6px; align-items: center;">
+                        {% if laptops.has_previous %}
+                            <a href="?page={{ laptops.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">
+                                <i class="fa-solid fa-chevron-left"></i>
+                            </a>
+                        {% endif %}
+                        
+                        {% for num in laptops.paginator.page_range %}
+                            {% if laptops.number == num %}
+                                <span class="page-btn active" style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; background: #0b57c6; color: white; font-weight: bold; font-size: 12px;">{{ num }}</span>
+                            {% elif num > laptops.number|add:'-3' and num < laptops.number|add:'3' %}
+                                <a href="?page={{ num }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">{{ num }}</a>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if laptops.has_next %}
+                            <a href="?page={{ laptops.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">
+                                <i class="fa-solid fa-chevron-right"></i>
+                            </a>
+                        {% endif %}
                     </div>
                 </div>
 
@@ -432,6 +427,37 @@
         </div> <!-- End Main Content -->
     </div> <!-- End Wrapper -->
 
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const filterForm = document.getElementById("filter-form");
+            const searchInput = document.getElementById("search-input");
+            const statusSelect = document.getElementById("status-select");
+            let debounceTimer;
+
+            if (statusSelect) {
+                statusSelect.addEventListener("change", function() {
+                    filterForm.submit();
+                });
+            }
+
+            if (searchInput) {
+                searchInput.addEventListener("input", function() {
+                    clearTimeout(debounceTimer);
+                    debounceTimer = setTimeout(function() {
+                        filterForm.submit();
+                    }, 500);
+                });
+
+                // Focus behavior: let user type continuously
+                if (searchInput.value.length > 0) {
+                    const val = searchInput.value;
+                    searchInput.value = '';
+                    searchInput.focus();
+                    searchInput.value = val;
+                }
+            }
+        });
+    </script>
 </body>
 
 </html>

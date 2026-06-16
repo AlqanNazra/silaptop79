@@ -51,7 +51,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='RAM',
             fields=[
-                ('id_ram', models.BigAutoField(db_column='id_ram', primary_key=True, serialize=False)),
+                ('id_ram', models.BigAutoField(primary_key=True, serialize=False)),
                 ('kapasitas_gb', models.IntegerField()),
                 ('tipe', models.CharField(max_length=50)),
                 ('keterangan', models.TextField(blank=True, null=True)),
@@ -74,7 +74,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Storage',
             fields=[
-                ('id_storage', models.BigAutoField(db_column='id_', primary_key=True, serialize=False)),
+                ('id_storage', models.BigAutoField(primary_key=True, serialize=False)),
                 ('kapasitas_gb', models.IntegerField()),
                 ('tipe', models.CharField(max_length=100)),
             ],

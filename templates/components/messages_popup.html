@@ -1,0 +1,15 @@
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        {% if messages %}
+            {% for message in messages %}
+                Swal.fire({
+                    icon: "{% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}",
+                    title: "{% if message.tags == 'success' %}Berhasil{% elif message.tags == 'error' %}Gagal{% elif message.tags == 'warning' %}Peringatan{% else %}Informasi{% endif %}",
+                    text: "{{ message|escapejs }}",
+                    confirmButtonColor: '#0b57c6'
+                });
+            {% endfor %}
+        {% endif %}
+    });
+</script>

@@ -51,11 +51,7 @@ class Migration(migrations.Migration):
             name='id_user',
             field=models.ForeignKey(db_column='id_user', on_delete=django.db.models.deletion.CASCADE, to='inventori.user'),
         ),
-        migrations.AlterField(
-            model_name='ram',
-            name='id_ram',
-            field=models.BigAutoField(primary_key=True, serialize=False),
-        ),
+
         migrations.AlterField(
             model_name='riwayataktivitas',
             name='id_laptop_inventori',
@@ -76,11 +72,7 @@ class Migration(migrations.Migration):
             name='teknologi',
             field=models.ForeignKey(db_column='id_teknologi', on_delete=django.db.models.deletion.CASCADE, to='inventori.teknologi'),
         ),
-        migrations.AlterField(
-            model_name='storage',
-            name='id_storage',
-            field=models.BigAutoField(primary_key=True, serialize=False),
-        ),
+
         migrations.AlterModelTable(
             name='ram',
             table='inventori_ram',

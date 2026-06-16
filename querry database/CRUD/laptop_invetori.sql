@@ -1,26 +1,7 @@
 -- =============================================
 -- 12. LAPTOP INVENTORI
 -- =============================================
-CREATE TABLE inventori (
-    id_laptop_inventori VARCHAR(100) PRIMARY KEY,
-    no_inventori VARCHAR(100) UNIQUE,
-    nama_laptop VARCHAR(255),
-    model VARCHAR(255),
-    os VARCHAR(100),
-    kondisi VARCHAR(50)     CHECK (kondisi IN ('baik','rusak ringan','rusak berat')),
-    status VARCHAR(50) CHECK (status IN ('tersedia','dipinjam','rusak')),
-    lokasi VARCHAR(255),
-    id_processor VARCHAR(50),
-    id_ram VARCHAR(50),
-    id_storage VARCHAR(100),
-    ukuran_layar FLOAT,
-    baterai FLOAT,
-    FOREIGN KEY (id_processor) REFERENCES inventori_processor(id_processor),
-    FOREIGN KEY (id_ram) REFERENCES inventori_ram(id_ram),
-    FOREIGN KEY (id_storage) REFERENCES inventori_storage(id_storage)
-);
 
-select * from inventori_processor
 
 CREATE OR REPLACE FUNCTION tambah_laptop_inventori(
     f_nama_laptop VARCHAR,
@@ -46,9 +27,9 @@ BEGIN
         kondisi,
         status,
         lokasi,
-        id_processor, 
-        id_ram,
-        id_storage,
+        processor_id, 
+        ram_id,
+        storage_id,
         ukuran_layar,
         baterai -- Tambahkan kolom target
     )
@@ -61,9 +42,9 @@ BEGIN
         f_kondisi,
         f_status,
         f_lokasi,
-        NULLIF(f_id_processor, ''), 
-        NULLIF(f_id_ram, ''),       
-        NULLIF(f_id_storage, ''),   
+        NULLIF(f_id_processor, '')::bigint, 
+        NULLIF(f_id_ram, '')::bigint,       
+        NULLIF(f_id_storage, '')::bigint,   
         f_ukuran_layar,
         f_baterai -- Masukkan nilainya di sini
     );
@@ -104,7 +85,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-DROP FUNCTION ambil_laptop_inventori
+DROP FUNCTION IF EXISTS ambil_laptop_inventori();
 
 CREATE OR REPLACE FUNCTION ambil_laptop_inventori()
 RETURNS TABLE (

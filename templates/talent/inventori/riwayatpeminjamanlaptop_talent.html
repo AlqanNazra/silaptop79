@@ -428,18 +428,7 @@
             </div>
 
             <!-- Flash Messages -->
-            {% if messages %}
-            <div style="margin-bottom:20px;">
-                {% for message in messages %}
-                <div style="padding:12px 20px; border-radius:8px; margin-bottom:8px; font-size:14px; font-weight:500;
-                    {% if message.tags == 'success' %}background:#dcfce7; color:#15803d; border:1px solid #bbf7d0;
-                    {% elif message.tags == 'error' %}background:#fee2e2; color:#dc2626; border:1px solid #fecaca;
-                    {% else %}background:#dbeafe; color:#2563eb; border:1px solid #bfdbfe;{% endif %}">
-                    {{ message }}
-                </div>
-                {% endfor %}
-            </div>
-            {% endif %}
+            {% include 'components/messages_popup.html' %}
 
             <!-- Active Device Card -->
             {% if active_peminjaman and active_laptop %}
@@ -492,36 +481,26 @@
             </div>
             {% endif %}
 
+            <!-- Search and Filter Form -->
+            <div style="margin-bottom: 24px;">
+                <form method="GET" action="" style="display: flex; gap: 12px; width: 100%;">
+                    <input type="text" name="q" placeholder="Cari nama laptop, no seri, atau ID..." value="{{ search_query }}" style="flex: 1; padding: 12px 16px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px;">
+                    <select name="status" style="padding: 12px 16px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background: white;">
+                        <option value="">Semua Status</option>
+                        <option value="dipinjam" {% if status_filter == 'dipinjam' %}selected{% endif %}>Dipinjam</option>
+                        <option value="selesai" {% if status_filter == 'selesai' %}selected{% endif %}>Selesai</option>
+                        <option value="dikembalikan" {% if status_filter == 'dikembalikan' %}selected{% endif %}>Dikembalikan</option>
+                    </select>
+                    <button type="submit" style="background-color: #0b57c6; color: white; padding: 12px 24px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">Cari</button>
+                </form>
+            </div>
+
             <!-- History Log Perangkat Card -->
             <div class="history-card">
                 <div class="log-header">
                     <div class="log-title">
                         <h3>Riwayat Log Perangkat</h3>
                         <p>Catatan lengkap penugasan aset Anda sebelumnya</p>
-                    </div>
-                    <div class="log-actions">
-                        <button class="btn-action-outline">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                <line x1="4" y1="21" x2="4" y2="14"></line>
-                                <line x1="4" y1="10" x2="4" y2="3"></line>
-                                <line x1="12" y1="21" x2="12" y2="12"></line>
-                                <line x1="12" y1="8" x2="12" y2="3"></line>
-                                <line x1="20" y1="21" x2="20" y2="16"></line>
-                                <line x1="20" y1="12" x2="20" y2="3"></line>
-                                <line x1="1" y1="14" x2="7" y2="14"></line>
-                                <line x1="9" y1="8" x2="15" y2="8"></line>
-                                <line x1="17" y1="16" x2="23" y2="16"></line>
-                            </svg>
-                            Filter
-                        </button>
-                        <button class="btn-action-outline">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                <polyline points="7 10 12 15 17 10"></polyline>
-                                <line x1="12" y1="15" x2="12" y2="3"></line>
-                            </svg>
-                            Ekspor
-                        </button>
                     </div>
                 </div>
 
@@ -594,20 +573,28 @@
                     </table>
                 </div>
 
-                <div class="pagination-row">
-                    <span class="pagination-text">Menampilkan {{ riwayat_list|length }} riwayat</span>
-                    <div class="pagination-buttons">
-                        <button class="btn-pagination">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                <polyline points="15 18 9 12 15 6"></polyline>
-                            </svg>
-                        </button>
-                        <button class="btn-pagination active">1</button>
-                        <button class="btn-pagination">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                <polyline points="9 18 15 12 9 6"></polyline>
-                            </svg>
-                        </button>
+                <div class="pagination-row" style="display: flex; justify-content: space-between; align-items: center; padding: 20px 32px; border-top: 1px solid #F1F5F9;">
+                    <span class="pagination-text">Menampilkan {{ riwayat_list.start_index }} - {{ riwayat_list.end_index }} dari {{ total_peminjaman }} riwayat</span>
+                    <div class="pagination-buttons" style="display: flex; gap: 6px; align-items: center;">
+                        {% if riwayat_list.has_previous %}
+                            <a href="?page={{ riwayat_list.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" class="btn-pagination" style="text-decoration: none; display: flex; align-items: center; justify-content: center;">
+                                <i class="fa-solid fa-chevron-left"></i>
+                            </a>
+                        {% endif %}
+                        
+                        {% for num in riwayat_list.paginator.page_range %}
+                            {% if riwayat_list.number == num %}
+                                <span class="btn-pagination active" style="display: flex; align-items: center; justify-content: center;">{{ num }}</span>
+                            {% elif num > riwayat_list.number|add:'-3' and num < riwayat_list.number|add:'3' %}
+                                <a href="?page={{ num }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" class="btn-pagination" style="text-decoration: none; display: flex; align-items: center; justify-content: center;">{{ num }}</a>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if riwayat_list.has_next %}
+                            <a href="?page={{ riwayat_list.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" class="btn-pagination" style="text-decoration: none; display: flex; align-items: center; justify-content: center;">
+                                <i class="fa-solid fa-chevron-right"></i>
+                            </a>
+                        {% endif %}
                     </div>
                 </div>
             </div>

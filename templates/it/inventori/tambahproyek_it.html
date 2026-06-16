@@ -55,7 +55,7 @@
         .row-container {
             display: grid;
             grid-template-columns: 2fr 1fr;
-            gap: 24px;
+            gap: 28px;
             align-items: start;
             margin-bottom: 32px;
         }
@@ -63,43 +63,43 @@
         /* Section Card Left */
         .section-card {
             background: #ffffff;
-            border-radius: 12px;
+            border-radius: 16px;
             border: 1px solid #f1f5f9;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
             overflow: hidden;
-            border-left: 4px solid #0b57c6;
         }
 
         .section-header {
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 20px 28px;
+            padding: 24px 28px;
             border-bottom: 1px solid #f1f5f9;
+            background-color: #f8fafc;
         }
 
         .section-icon {
-            width: 28px;
-            height: 28px;
-            border-radius: 8px;
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 13px;
-            color: white;
+            font-size: 16px;
+            color: #0b57c6;
+            background-color: rgba(11, 87, 198, 0.08);
             flex-shrink: 0;
-            background-color: #0b57c6;
         }
 
         .section-title {
-            font-size: 15px;
+            font-size: 16px;
             font-weight: 700;
             color: #1e293b;
             margin: 0;
         }
 
         .section-body {
-            padding: 24px 28px;
+            padding: 28px;
         }
 
         /* Form Layout */
@@ -118,7 +118,7 @@
         .form-group {
             display: flex;
             flex-direction: column;
-            gap: 7px;
+            gap: 8px;
         }
 
         .form-group label {
@@ -130,8 +130,8 @@
         .form-control {
             width: 100%;
             padding: 12px 16px;
-            background-color: #f1f5f9;
-            border: 1px solid transparent;
+            background-color: #ffffff;
+            border: 1px solid #cbd5e1;
             border-radius: 8px;
             font-family: 'Inter', sans-serif;
             font-size: 14px;
@@ -142,8 +142,9 @@
 
         .form-control:focus {
             outline: none;
-            border-color: #cbd5e1;
-            background-color: #e2e8f0;
+            border-color: #0b57c6;
+            background-color: #ffffff;
+            box-shadow: 0 0 0 3px rgba(11, 87, 198, 0.1);
         }
 
         .form-control::placeholder {
@@ -153,26 +154,34 @@
         /* Control Card Right */
         .control-card {
             background: #ffffff;
-            border-radius: 12px;
+            border-radius: 16px;
             border: 1px solid #f1f5f9;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
-            padding: 24px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+            padding: 28px;
             box-sizing: border-box;
-            border-top: 4px solid #0b57c6;
+            position: sticky;
+            top: 40px;
         }
 
         .control-title {
-            font-size: 15px;
+            font-size: 16px;
             font-weight: 700;
             color: #1e293b;
             margin-top: 0;
-            margin-bottom: 8px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .control-title i {
+            color: #0b57c6;
         }
 
         .control-text {
-            font-size: 12px;
+            font-size: 13px;
             color: #64748b;
-            line-height: 1.5;
+            line-height: 1.6;
             margin-bottom: 24px;
         }
 
@@ -207,63 +216,60 @@
             gap: 10px;
             width: 100%;
             padding: 13px;
-            border: none;
+            border: 1px solid #e2e8f0;
             border-radius: 8px;
-            background-color: #f1f5f9;
-            color: #dc2626;
+            background-color: #ffffff;
+            color: #64748b;
             font-family: 'Inter', sans-serif;
             font-size: 14px;
-            font-weight: 700;
+            font-weight: 600;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: all 0.2s;
             text-decoration: none;
             box-sizing: border-box;
         }
 
         .btn-cancel:hover {
-            background-color: #e2e8f0;
-        }
-
-        .encryption-status {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 11px;
-            color: #0b57c6;
-            font-weight: 600;
-            margin-top: 20px;
-            border-top: 1px solid #f1f5f9;
-            padding-top: 16px;
+            background-color: #f1f5f9;
+            color: #0f172a;
         }
 
         /* Role Dynamic Box */
         .role-group-box {
             background-color: #f8fafc;
-            border: 1px dashed #cbd5e1;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
             position: relative;
+            transition: border-color 0.2s;
+        }
+
+        .role-group-box:hover {
+            border-color: #cbd5e1;
         }
 
         .btn-remove-role {
             position: absolute;
-            top: 12px;
-            right: 12px;
+            top: 20px;
+            right: 20px;
             background: none;
             border: none;
             color: #ef4444;
             cursor: pointer;
-            font-size: 14px;
-            padding: 4px;
+            font-size: 15px;
+            padding: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 4px;
+            border-radius: 6px;
+            transition: all 0.2s;
+            background-color: #fee2e2;
         }
 
         .btn-remove-role:hover {
-            background-color: #fee2e2;
+            background-color: #fca5a5;
+            color: #7f1d1d;
         }
 
         .btn-add-role-dash {
@@ -272,13 +278,13 @@
             justify-content: center;
             gap: 8px;
             width: 100%;
-            padding: 12px;
-            border: 1px dashed #cbd5e1;
+            padding: 14px;
+            border: 2px dashed #cbd5e1;
             border-radius: 8px;
             background: none;
             color: #0b57c6;
             font-family: 'Inter', sans-serif;
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s;
@@ -286,8 +292,64 @@
         }
 
         .btn-add-role-dash:hover {
-            background-color: #f1f5f9;
-            border-color: #94a3b8;
+            background-color: rgba(11, 87, 198, 0.04);
+            border-color: #0b57c6;
+        }
+
+        /* Technology Pill checkboxes style */
+        .tech-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+            padding: 12px;
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            min-height: 44px;
+            box-sizing: border-box;
+        }
+
+        .tech-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #f1f5f9;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #475569;
+            cursor: pointer;
+            border: 1px solid #e2e8f0;
+            user-select: none;
+        }
+
+        .tech-item input {
+            margin: 0;
+            cursor: pointer;
+        }
+
+        .role-bobot-container {
+            margin-top: 24px;
+            border-top: 1px solid #cbd5e1;
+            padding-top: 20px;
+        }
+
+        .role-bobot-container h4 {
+            margin: 0 0 16px 0;
+            font-size: 13px;
+            font-weight: 700;
+            color: #1e293b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .role-bobot-container h4 i {
+            color: #b45309;
         }
     </style>
 </head>
@@ -295,373 +357,227 @@
 <body>
 
     <div class="dashboard-wrapper">
-        <!-- active_page='manajemen_proyek' to keep sidebar clean -->
         {% include 'it/components/sidebar.html' with active_page='manajemen_proyek' %}
+        
         <div class="main-dashboard-content">
             <h1 class="page-title">Tambah Proyek Baru</h1>
-            <p class="page-subtitle">Silakan lengkapi formulir di bawah ini untuk menambahkan data proyek baru ke dalam
-                sistem.</p>
+            <p class="page-subtitle">Daftarkan proyek baru serta konfigurasikan role, tumpukan teknologi, dan bobot DSS kriteria laptop pendukungnya.</p>
+            
             <form action="{% url 'tambahproyek_it' %}" method="POST">
                 {% csrf_token %}
                 <div class="row-container">
+                    
                     <!-- Left: Fields -->
                     <div class="section-card">
                         <div class="section-header">
                             <div class="section-icon">
                                 <i class="fa-solid fa-briefcase"></i>
                             </div>
-                            <h3 class="section-title">Detail Proyek</h3>
+                            <h3 class="section-title">Detail Informasi Proyek</h3>
                         </div>
                         <div class="section-body">
                             <div class="form-row full">
                                 <div class="form-group">
                                     <label>Nama Proyek</label>
                                     <input type="text" class="form-control" name="nama_proyek"
-                                        placeholder="Contoh: Sistem Informasi Koperasi" required>
+                                        placeholder="Contoh: Sistem Informasi Koperasi" required style="font-weight: 600;">
                                 </div>
                             </div>
-                            <div
-                                style="margin-top: 28px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
-                                <h4 style="margin: 0; font-size: 14px; font-weight: 700; color: #1e293b;">Role &
-                                    Teknologi Proyek</h4>
+                            
+                            <div style="margin-top: 32px; margin-bottom: 16px; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px;">
+                                <h4 style="margin: 0; font-size: 15px; font-weight: 800; color: #1e293b; display: flex; align-items: center; gap: 8px;">
+                                    <i class="fa-solid fa-users-gear" style="color: #0b57c6;"></i> Kebutuhan Role & Konfigurasi DSS
+                                </h4>
                             </div>
-                                <div id="roles-container">
-                                    <div class="role-group-box">
-                                        <div class="form-group">
-                                            <label>Role</label>
-                                            <select
-                                                class="form-control role-select"
-                                                name="role_ids[]"
-                                                required>
-                                                <option value="">
-                                                    Pilih Role
-                                                </option>
-                                                {% for role in role_list %}
-                                                <option value="{{ role.id_role }}">
-                                                    {{ role.nama_role }}
-                                                </option>
-                                                {% endfor %}
-                                            </select>
+
+                            <div id="roles-container">
+                                <!-- Default Role Box -->
+                                <div class="role-group-box">
+                                    <div class="form-group">
+                                        <label>Role Talent</label>
+                                        <select class="form-control role-select" name="role_ids[]" required>
+                                            <option value="">Pilih Kebutuhan Role</option>
+                                            {% for role in role_list %}
+                                            <option value="{{ role.id_role }}">{{ role.nama_role }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="role-teknologi-container" style="margin-top: 16px;">
+                                        <label>Teknologi Pendukung</label>
+                                        <div class="tech-list">
+                                            <span style="color: #94a3b8; font-size: 13px; font-style: italic;">Pilih role terlebih dahulu untuk memuat teknologi terkait.</span>
                                         </div>
-                                        <div class="role-teknologi-container">
-                                            <label>Teknologi</label>
-                                            <div class="tech-list">
-                                                Pilih role terlebih dahulu
+                                    </div>
+                                    
+                                    <div class="role-bobot-container">
+                                        <h4><i class="fa-solid fa-sliders"></i> Bobot Kriteria Kebutuhan Laptop (Skala 1 - 5)</h4>
+                                        <div class="form-row">
+                                            <div class="form-group">
+                                                <label>Processor (Kapasitas & Benchmark)</label>
+                                                <input type="number" name="processor_weight[]" min="1" max="5" value="3" class="form-control" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>RAM (Multitasking)</label>
+                                                <input type="number" name="ram_weight[]" min="1" max="5" value="3" class="form-control" required>
                                             </div>
                                         </div>
-                                        <div class="role-bobot-container">
-                                            <h4>Bobot Kriteria DSS</h4>
-                                            <div class="form-row">
-                                                <div class="form-group">
-                                                    <label>Processor</label>
-                                                    <input type="number"
-                                                        name="processor_weight[]"
-                                                        class="form-control">
-                                                </div>
 
-                                                <div class="form-group">
-                                                    <label>RAM</label>
-                                                    <input type="number"
-                                                        name="ram_weight[]"
-                                                        class="form-control">
-                                                </div>
+                                        <div class="form-row">
+                                            <div class="form-group">
+                                                <label>Storage (Kecepatan & Kapasitas)</label>
+                                                <input type="number" name="storage_weight[]" min="1" max="5" value="3" class="form-control" required>
                                             </div>
-
-                                            <div class="form-row">
-                                                <div class="form-group">
-                                                    <label>Storage</label>
-                                                    <input type="number"
-                                                        name="storage_weight[]"
-                                                        class="form-control">
-                                                </div>
-
-                                                <div class="form-group">
-                                                    <label>Berat</label>
-                                                    <input type="number"
-                                                        name="berat_weight[]"
-                                                        class="form-control">
-                                                </div>
+                                            <div class="form-group">
+                                                <label>Berat (Mobilitas Laptop)</label>
+                                                <input type="number" name="berat_weight[]" min="1" max="5" value="3" class="form-control" required>
                                             </div>
-
-                                            <div class="form-row">
-                                                <div class="form-group">
-                                                    <label>Layar</label>
-                                                    <input type="number"
-                                                        name="layar_weight[]"
-                                                        class="form-control">
-                                                </div>
-
-                                                <div class="form-group">
-                                                    <label>Baterai</label>
-                                                    <input type="number"
-                                                        name="baterai_weight[]"
-                                                        class="form-control">
-                                                </div>
-                                            </div>
-
                                         </div>
-                                    </div>  
-                                </div>
+
+                                        <div class="form-row">
+                                            <div class="form-group">
+                                                <label>Ukuran Layar (Kenyamanan Visual)</label>
+                                                <input type="number" name="layar_weight[]" min="1" max="5" value="3" class="form-control" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Daya Baterai (Ketahanan Kerja)</label>
+                                                <input type="number" name="baterai_weight[]" min="1" max="5" value="3" class="form-control" required>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>  
                             </div>
+
                             <button type="button" id="btn-add-role" class="btn-add-role-dash">
-                                <i class="fa-solid fa-plus"></i> Tambah Role Lainnya
+                                <i class="fa-solid fa-plus-circle"></i> Tambah Role Proyek Lainnya
                             </button>
                         </div>
                     </div>
-
+                    
                     <!-- Right: Control Box -->
                     <div class="control-card">
-                        <h4 class="control-title">Input Proyek</h4>
-                        <p class="control-text">Pastikan semua data proyek sudah sesuai dengan perencanaan divisi
-                            terkait.</p>
+                        <h4 class="control-title"><i class="fa-solid fa-circle-check"></i> Simpan Data</h4>
+                        <p class="control-text">Pastikan semua data input role, tumpukan teknologi, dan bobot DSS telah sesuai dengan kebutuhan proyek sebelum menyimpan.</p>
+                        
                         <button type="submit" class="btn-submit">
-                            <i class="fa-solid fa-lock"></i> Simpan Data
+                            <i class="fa-solid fa-floppy-disk"></i> Simpan Proyek
                         </button>
                         <a href="{% url 'manajemen_proyek_it' %}" class="btn-cancel">
-                            <i class="fa-solid fa-xmark"></i> Batal
+                            <i class="fa-solid fa-arrow-left"></i> Kembali
                         </a>
                     </div>
                 </div>
             </form>
-
+            
         </div>
     </div>
+
     {{ role_data_json|json_script:"role-data" }}
-    <!-- JavaScript to handle dynamic roles addition -->
+
     <script>
-        const roleData =
-        JSON.parse(
-            document.getElementById("role-data").textContent);
-        document.addEventListener(
-            "change",
-            function(e){
+        const roleData = JSON.parse(document.getElementById("role-data").textContent);
 
-                if(
-                    e.target.classList.contains(
-                        "role-select"
-                    )
-                ){
-
-                    console.log(
-                        "ROLE CHANGED",
-                        e.target.value
-                    );
-
-                    updateTeknologi(
-                        e.target
-                    );
-                }
-
+        document.addEventListener("change", function(e) {
+            if (e.target.classList.contains("role-select")) {
+                updateTeknologi(e.target);
             }
-        );
-        function updateTeknologi(selectElement){
+        });
 
+        function updateTeknologi(selectElement) {
             const roleId = selectElement.value;
+            const card = selectElement.closest(".role-group-box");
+            const techList = card.querySelector(".tech-list");
+            const role = roleData.find(r => r.id == roleId);
 
-            const card =
-                selectElement.closest(
-                    ".role-group-box"
-                );
-
-            const techList =
-                card.querySelector(
-                    ".tech-list"
-                );
-
-            const role =
-                roleData.find(
-                    r => r.id === roleId
-                );
-
-            if(!role){
-
-                techList.innerHTML =
-                    "Tidak ada teknologi";
-
+            if (!role || !role.teknologi.length) {
+                techList.innerHTML = `<span style="color: #94a3b8; font-size: 13px; font-style: italic;">Tidak ada teknologi terkait role ini.</span>`;
                 return;
             }
 
-            techList.innerHTML =
-                role.teknologi
-                .map(
-                    t =>
-                    `<label class="tech-item">
-                        <input
-                            type="checkbox"
-                            name="teknologi_ids[]"
-                            value="${t.id}"
-                            checked>
-
+            techList.innerHTML = role.teknologi
+                .map(t => `
+                    <span class="tech-item">
+                        <i class="fa-solid fa-circle-check" style="color: #10b981;"></i>
                         ${t.nama}
-                    </label>`
-                )
-                .join("");
-                console.log(card);
-                console.log(techList);
-                console.log(role.teknologi);
+                    </span>
+                `).join("");
         }
 
-        document.addEventListener(
-            "change",
-            function(e){
+        // Add dynamically more Role panels
+        document.getElementById("btn-add-role").addEventListener("click", function() {
+            const container = document.getElementById("roles-container");
+            const roleOptions = `
+                <option value="">Pilih Kebutuhan Role</option>
+                {% for role in role_list %}
+                <option value="{{ role.id_role }}">{{ role.nama_role }}</option>
+                {% endfor %}
+            `;
 
-                if(
-                    e.target.classList.contains(
-                        "role-select"
-                    )
-                ){
+            const div = document.createElement("div");
+            div.className = "role-group-box";
+            div.innerHTML = `
+                <button type="button" class="btn-remove-role" title="Hapus Panel Role">
+                    <i class="fa-solid fa-trash-can"></i> Hapus
+                </button>
 
-                    updateTeknologi(
-                        e.target
-                    );
-
-                }
-
-            }
-        );
-
-        document
-        .getElementById(
-            "btn-add-role"
-        )
-        .addEventListener(
-            "click",
-            function(){
-
-                const container =
-                    document.getElementById(
-                        "roles-container"
-                    );
-
-                const roleOptions = `
-                    <option value="">
-                        Pilih Role
-                    </option>
-
-                    {% for role in role_list %}
-                    <option value="{{ role.id_role }}">
-                        {{ role.nama_role }}
-                    </option>
-                    {% endfor %}
-                `;
-
-                const div =
-                    document.createElement(
-                        "div"
-                    );
-
-                div.className =
-                    "role-group-box";
-
-                div.innerHTML = `
-                    <button
-                        type="button"
-                        class="btn-remove-role">
-
-                        <i class="fa-solid fa-trash"></i>
-
-                    </button>
-
-                    <div class="form-group">
-
-                        <label>Role</label>
-
-                        <select
-                            class="form-control role-select"
-                            name="role_ids[]"
-                            required>
-
-                            ${roleOptions}
-
-                        </select>
-
-                    </div>
-
-                    <div
-                        class="role-teknologi-container">
-
-                        <label>Teknologi</label>
-
-                        <div class="tech-list">
-
-                            Pilih role terlebih dahulu
-
-                        </div>
-
-                    </div>
-                    <div class="role-bobot-container">
-
-                    <h4>Bobot Kriteria DSS</h4>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Processor</label>
-                            <input type="number"
-                                name="processor_weight[]"
-                                class="form-control">
-                        </div>
-
-                        <div class="form-group">
-                            <label>RAM</label>
-                            <input type="number"
-                                name="ram_weight[]"
-                                class="form-control">
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Storage</label>
-                            <input type="number"
-                                name="storage_weight[]"
-                                class="form-control">
-                        </div>
-
-                        <div class="form-group">
-                            <label>Berat</label>
-                            <input type="number"
-                                name="berat_weight[]"
-                                class="form-control">
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Layar</label>
-                            <input type="number"
-                                name="layar_weight[]"
-                                class="form-control">
-                        </div>
-
-                        <div class="form-group">
-                            <label>Baterai</label>
-                            <input type="number"
-                                name="baterai_weight[]"
-                                class="form-control">
-                        </div>
-                    </div>
-
+                <div class="form-group">
+                    <label>Role Talent</label>
+                    <select class="form-control role-select" name="role_ids[]" required>
+                        ${roleOptions}
+                    </select>
                 </div>
-                `;
 
-                container.appendChild(
-                    div
-                );
+                <div class="role-teknologi-container" style="margin-top: 16px;">
+                    <label>Teknologi Pendukung</label>
+                    <div class="tech-list">
+                        <span style="color: #94a3b8; font-size: 13px; font-style: italic;">Pilih role terlebih dahulu untuk memuat teknologi terkait.</span>
+                    </div>
+                </div>
 
-                div.querySelector(
-                    ".btn-remove-role"
-                ).onclick = function(){
+                <div class="role-bobot-container">
+                    <h4><i class="fa-solid fa-sliders"></i> Bobot Kriteria Kebutuhan Laptop (Skala 1 - 5)</h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Processor (Kapasitas & Benchmark)</label>
+                            <input type="number" name="processor_weight[]" min="1" max="5" value="3" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label>RAM (Multitasking)</label>
+                            <input type="number" name="ram_weight[]" min="1" max="5" value="3" class="form-control" required>
+                        </div>
+                    </div>
 
-                    div.remove();
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Storage (Kecepatan & Kapasitas)</label>
+                            <input type="number" name="storage_weight[]" min="1" max="5" value="3" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Berat (Mobilitas Laptop)</label>
+                            <input type="number" name="berat_weight[]" min="1" max="5" value="3" class="form-control" required>
+                        </div>
+                    </div>
 
-                };
-            }
-        );
-        console.log("ROLE DATA");
-        console.log(document.getElementById("role-data"));
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Ukuran Layar (Kenyamanan Visual)</label>
+                            <input type="number" name="layar_weight[]" min="1" max="5" value="3" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Daya Baterai (Ketahanan Kerja)</label>
+                            <input type="number" name="baterai_weight[]" min="1" max="5" value="3" class="form-control" required>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            container.appendChild(div);
+
+            div.querySelector(".btn-remove-role").onclick = function() {
+                div.remove();
+            };
+        });
     </script>
-    
-
 </body>
 
 </html>

@@ -44,8 +44,8 @@ BEGIN
     RETURN QUERY
     SELECT 
         p.id_peminjaman::VARCHAR,
-        p.user_id::VARCHAR,
-        p.laptop_id::VARCHAR,
+        p.id_user::VARCHAR,
+        p.id_laptop::VARCHAR,
         p.tanggal_pinjam,
         p.tanggal_kembali,
         p.status::VARCHAR,
@@ -68,8 +68,8 @@ BEGIN
     RETURN QUERY
     SELECT 
         p.id_peminjaman::VARCHAR,
-        p.user_id::VARCHAR,
-        p.laptop_id::VARCHAR,
+        p.id_user::VARCHAR,
+        p.id_laptop::VARCHAR,
         p.tanggal_pinjam,
         p.tanggal_kembali,
         p.status::VARCHAR,
@@ -125,7 +125,7 @@ BEGIN
 
     IF EXISTS (
         SELECT 1 FROM inventori_peminjaman
-        WHERE laptop_id = f_id_laptop
+        WHERE id_laptop = f_id_laptop
         AND status = 'dipinjam'
     ) THEN
         RETURN 'Laptop sedang dipinjam';
@@ -143,9 +143,9 @@ BEGIN
     -- insert peminjaman
     INSERT INTO inventori_peminjaman(
         id_peminjaman,
-        pengajuan_id,
-        user_id,
-        laptop_id,
+        id_pengajuan,
+        id_user,
+        id_laptop,
         tanggal_pinjam,
         tanggal_kembali,
         status,
@@ -180,7 +180,7 @@ RETURNS TEXT AS $$
 DECLARE
     v_id_laptop VARCHAR;
 BEGIN 
-    SELECT laptop_id INTO v_id_laptop 
+    SELECT id_laptop INTO v_id_laptop 
     FROM inventori_peminjaman 
     WHERE id_peminjaman = f_id_peminjaman;
 

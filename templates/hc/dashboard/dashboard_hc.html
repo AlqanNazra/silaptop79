@@ -533,34 +533,26 @@
                     </div>
 
                 </div>
-
                 <!-- Activity Table Section -->
                 <div class="activity-section">
                     <div class="section-header">
                         <div class="section-title">
-                            <h3>Aktivitas Perhitungan</h3>
-                            <p>Log riwayat pemilihan laptop oleh pengguna sistem.</p>
+                            <h3>Riwayat Laptop yang Dipinjam</h3>
+                            <p>Log riwayat laptop yang sedang dan telah dipinjam oleh Talent.</p>
                         </div>
-                        <button class="btn-export-light">
-                            Ekspor Data
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                <polyline points="7 10 12 15 17 10"></polyline>
-                                <line x1="12" y1="15" x2="12" y2="3"></line>
-                            </svg>
-                        </button>
                     </div>
 
                     <table class="activity-table">
                         <thead>
                             <tr>
                                 <th>PRODUK LAPTOP</th>
-                                <th>TANGGAL PERHITUNGAN</th>
-                                <th>HASIL</th>
+                                <th>PENGGUNA (TALENT)</th>
+                                <th>TANGGAL PINJAM</th>
+                                <th>STATUS</th>
                             </tr>
                         </thead>
                         <tbody>
+                            {% for pinjam in riwayat_pinjam %}
                             <tr>
                                 <td>
                                     <div class="product-cell">
@@ -572,66 +564,25 @@
                                                 <line x1="2" y1="20" x2="22" y2="20"></line>
                                             </svg>
                                         </div>
-                                        MacBook Air M2
+                                        {{ pinjam.nama_laptop }}
                                     </div>
                                 </td>
-                                <td><span class="date-text">24 Mar 2026, 14:20</span></td>
-                                <td class="score-text">0.985</td>
-                            </tr>
-                            <tr>
+                                <td><span style="font-weight: 500; color: #334155;">{{ pinjam.nama_user }}</span></td>
+                                <td><span class="date-text">{{ pinjam.tanggal_pinjam }}</span></td>
                                 <td>
-                                    <div class="product-cell">
-                                        <div class="product-icon">
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                                                stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                                stroke-linejoin="round">
-                                                <rect x="3" y="4" width="18" height="12" rx="2" ry="2"></rect>
-                                                <line x1="2" y1="20" x2="22" y2="20"></line>
-                                            </svg>
-                                        </div>
-                                        ASUS ROG Zephyrus
-                                    </div>
+                                    <span style="text-transform: capitalize; font-weight: 600; font-size: 13px; color: {% if pinjam.status == 'selesai' %}#16a34a{% else %}#2563eb{% endif %};">
+                                        {{ pinjam.status }}
+                                    </span>
                                 </td>
-                                <td><span class="date-text">23 Mar 2026, 09:15</span></td>
-                                <td class="score-text">0.912</td>
                             </tr>
+                            {% empty %}
                             <tr>
-                                <td>
-                                    <div class="product-cell">
-                                        <div class="product-icon">
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                                                stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                                stroke-linejoin="round">
-                                                <rect x="3" y="4" width="18" height="12" rx="2" ry="2"></rect>
-                                                <line x1="2" y1="20" x2="22" y2="20"></line>
-                                            </svg>
-                                        </div>
-                                        Dell XPS 13 Plus
-                                    </div>
-                                </td>
-                                <td><span class="date-text">22 Mar 2026, 18:45</span></td>
-                                <td class="score-text">0.884</td>
+                                <td colspan="4" style="text-align: center; padding: 40px; color: #94A3B8;">Belum ada riwayat peminjaman laptop.</td>
                             </tr>
-                            <tr>
-                                <td>
-                                    <div class="product-cell">
-                                        <div class="product-icon">
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                                                stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                                stroke-linejoin="round">
-                                                <rect x="3" y="4" width="18" height="12" rx="2" ry="2"></rect>
-                                                <line x1="2" y1="20" x2="22" y2="20"></line>
-                                            </svg>
-                                        </div>
-                                        Lenovo Legion Pro 5
-                                    </div>
-                                </td>
-                                <td><span class="date-text">20 Mar 2026, 11:30</span></td>
-                                <td class="score-text">0.856</td>
-                            </tr>
+                            {% endfor %}
                         </tbody>
                     </table>
-                </div>
+                </div>iv>
 
             </div> <!-- End Content Padding -->
 
