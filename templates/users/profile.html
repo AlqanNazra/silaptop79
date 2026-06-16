@@ -1,0 +1,791 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil Saya - SiLaptop79</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1.1">
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background: #F8FAFC;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .dashboard-wrapper {
+            display: flex;
+            width: 100%;
+        }
+
+        .sidebar {
+            flex-shrink: 0;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.03);
+        }
+
+        .main-dashboard-content {
+            flex: 1;
+            margin-left: 260px;
+            padding: 40px 48px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+        }
+
+        /* ── Page Header ── */
+        .page-header-row {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: #94A3B8;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .breadcrumb a {
+            color: #94A3B8;
+            text-decoration: none;
+            transition: color .2s;
+        }
+
+        .breadcrumb a:hover {
+            color: #005FAA;
+        }
+
+        .breadcrumb-current {
+            color: #005FAA;
+        }
+
+        .page-title {
+            font-size: 26px;
+            font-weight: 800;
+            color: #0F172A;
+            margin: 0 0 4px;
+            letter-spacing: -0.4px;
+        }
+
+        .page-sub {
+            font-size: 14px;
+            color: #64748B;
+            margin: 0;
+        }
+
+        /* ── Flash ── */
+        .flash-wrap {
+            margin-bottom: 8px;
+        }
+
+        .flash {
+            padding: 13px 18px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: fadeIn .3s ease;
+        }
+
+        .flash-success {
+            background: #DCFCE7;
+            color: #15803D;
+            border: 1px solid #BBF7D0;
+        }
+
+        .flash-error {
+            background: #FEE2E2;
+            color: #DC2626;
+            border: 1px solid #FECACA;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-6px)
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        /* ── Layout Grid ── */
+        .profile-grid {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 32px;
+            align-items: start;
+        }
+
+        /* ── Left Column Card (Visual Summary) ── */
+        .summary-card {
+            background: #FFFFFF;
+            border-radius: 16px;
+            border: 1px solid #E2E8F0;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, .02);
+            padding: 32px 24px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .avatar-circle {
+            width: 96px;
+            height: 96px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            color: #FFFFFF;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Dynamic colors for Role Avatar */
+        .color-hc {
+            background: linear-gradient(135deg, #0284C7, #0EA5E9); /* Sky Blue */
+        }
+        .color-it {
+            background: linear-gradient(135deg, #4F46E5, #6366F1); /* Indigo */
+        }
+        .color-talent {
+            background: linear-gradient(135deg, #10B981, #34D399); /* Emerald Green */
+        }
+
+        .summary-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: #0F172A;
+            margin: 0 0 6px 0;
+            word-break: break-word;
+        }
+
+        .summary-id {
+            font-size: 13px;
+            font-family: monospace;
+            color: #94A3B8;
+            background: #F8FAFC;
+            padding: 4px 8px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+            border: 1px dashed #E2E8F0;
+        }
+
+        .role-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 99px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-hc {
+            background: #E0F2FE;
+            color: #0369A1;
+        }
+        .badge-it {
+            background: #EEF2FF;
+            color: #4338CA;
+        }
+        .badge-talent {
+            background: #D1FAE5;
+            color: #065F46;
+        }
+
+        /* ── Right Column Cards ── */
+        .form-container-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+        }
+
+        .form-card {
+            background: #FFFFFF;
+            border-radius: 16px;
+            border: 1px solid #E2E8F0;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, .02);
+            overflow: hidden;
+        }
+
+        .form-card-header {
+            padding: 24px 28px 18px;
+            border-bottom: 1px solid #F1F5F9;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .form-card-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #FFFFFF;
+            flex-shrink: 0;
+        }
+
+        .icon-blue {
+            background: #0284C7;
+        }
+
+        .icon-indigo {
+            background: #4F46E5;
+        }
+
+        .form-card-header h2 {
+            margin: 0 0 3px;
+            font-size: 17px;
+            font-weight: 700;
+            color: #0F172A;
+        }
+
+        .form-card-header p {
+            margin: 0;
+            font-size: 13px;
+            color: #64748B;
+        }
+
+        .form-body {
+            padding: 28px;
+        }
+
+        /* ── Fields ── */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .form-row-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 7px;
+        }
+
+        .req {
+            color: #EF4444;
+            margin-left: 2px;
+        }
+
+        .opt {
+            font-size: 11px;
+            color: #94A3B8;
+            font-weight: 400;
+            margin-left: 4px;
+        }
+
+        .field-wrap {
+            position: relative;
+        }
+
+        .field-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94A3B8;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 12px 14px 12px 42px;
+            border: 1.5px solid #E2E8F0;
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            color: #0F172A;
+            background: #FAFAFA;
+            outline: none;
+            transition: all .2s;
+            box-sizing: border-box;
+        }
+
+        input:focus {
+            border-color: #0284C7;
+            background: #FFFFFF;
+            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.1);
+        }
+
+        input::placeholder {
+            color: #CBD5E1;
+        }
+
+        input:read-only {
+            background: #F1F5F9;
+            color: #64748B;
+            cursor: not-allowed;
+            border-color: #E2E8F0;
+        }
+
+        .field-hint {
+            margin-top: 5px;
+            font-size: 12px;
+            color: #94A3B8;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #94A3B8;
+            background: none;
+            border: none;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            transition: color .2s;
+        }
+
+        .password-toggle:hover {
+            color: #475569;
+        }
+
+        /* ── Actions ── */
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            padding: 20px 28px;
+            border-top: 1px solid #F1F5F9;
+            background: #FAFAFA;
+        }
+
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 11px 24px;
+            background: #005FAA;
+            color: #FFFFFF;
+            border: none;
+            border-radius: 9px;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: all .2s;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1.5px);
+            background: #004B87;
+            box-shadow: 0 4px 12px rgba(0, 95, 170, 0.2);
+        }
+
+        .btn-primary:focus {
+            outline: none;
+            background: #004B87;
+            box-shadow: 0 0 0 3px rgba(0, 95, 170, 0.3);
+        }
+
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 11px 20px;
+            background: #E2E8F0;
+            color: #475569;
+            border: none;
+            border-radius: 9px;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all .2s;
+            outline: none;
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-1.5px);
+            background: #CBD5E1;
+            color: #1E293B;
+        }
+
+        .btn-secondary:focus {
+            outline: none;
+            background: #CBD5E1;
+            box-shadow: 0 0 0 3px rgba(148, 163, 184, 0.4);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-wrapper">
+        <!-- Load Sidebar dynamically based on User's Role -->
+        {% if custom_user.role|upper == 'HC' %}
+            {% include 'hc/components/sidebar.html' with active_page='profile' %}
+        {% elif custom_user.role|upper == 'IT' %}
+            {% include 'it/components/sidebar.html' with active_page='profile' %}
+        {% else %}
+            {% include 'talent/components/sidebar.html' with active_page='profile' %}
+        {% endif %}
+
+        <!-- Main Dashboard Content -->
+        <div class="main-dashboard-content">
+
+            <!-- Flash Messages -->
+            {% if messages %}
+            <div class="flash-wrap">
+                {% for message in messages %}
+                <div class="flash {% if message.tags == 'success' %}flash-success{% elif message.tags == 'error' %}flash-error{% endif %}">
+                    {% if message.tags == 'success' %}
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                        <polyline points="22 4 12 14.01 9 11.01" />
+                    </svg>
+                    {% else %}
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="15" y1="9" x2="9" y2="15" />
+                        <line x1="9" y1="9" x2="15" y2="15" />
+                    </svg>
+                    {% endif %}
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Page Header -->
+            <div class="page-header-row">
+                <div>
+                    <div class="breadcrumb">
+                        {% if custom_user.role|upper == 'HC' %}
+                            <a href="{% url 'dashboardhc' %}">Dashboard</a>
+                        {% elif custom_user.role|upper == 'IT' %}
+                            <a href="{% url 'dashboard_it' %}">Dashboard</a>
+                        {% else %}
+                            <a href="{% url 'dashboard_talent' %}">Dashboard</a>
+                        {% endif %}
+                        <span style="color:#CBD5E1">›</span>
+                        <span class="breadcrumb-current">Profil Saya</span>
+                    </div>
+                    <h1 class="page-title">Profil Saya</h1>
+                    <p class="page-sub">Kelola informasi data diri dan keamanan akun Anda.</p>
+                </div>
+            </div>
+
+            <!-- Profile Content Layout Grid -->
+            <div class="profile-grid">
+
+                <!-- Left Column: Summary Card -->
+                <div class="summary-card">
+                    <div class="avatar-circle {% if custom_user.role|upper == 'HC' %}color-hc{% elif custom_user.role|upper == 'IT' %}color-it{% else %}color-talent{% endif %}">
+                        {{ custom_user.nama|slice:":2"|upper }}
+                    </div>
+                    <h3 class="summary-name">{{ custom_user.nama }}</h3>
+                    <div class="summary-id">{{ custom_user.id_user }}</div>
+                    
+                    <span class="role-badge {% if custom_user.role|upper == 'HC' %}badge-hc{% elif custom_user.role|upper == 'IT' %}badge-it{% else %}badge-talent{% endif %}">
+                        {% if custom_user.role|upper == 'HC' %}
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                                <circle cx="9" cy="7" r="4" />
+                            </svg>
+                            Human Capital
+                        {% elif custom_user.role|upper == 'IT' %}
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+                                <line x1="8" y1="21" x2="16" y2="21" />
+                                <line x1="12" y1="17" x2="12" y2="21" />
+                            </svg>
+                            IT Infrastructure
+                        {% else %}
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                                <circle cx="12" cy="7" r="4" />
+                            </svg>
+                            Talent IT
+                        {% endif %}
+                    </span>
+                </div>
+
+                <!-- Right Column: Stack of Form Cards -->
+                <div class="form-container-stack">
+                    
+                    <!-- Card 1: Informasi Profil -->
+                    <div class="form-card">
+                        <div class="form-card-header">
+                            <div class="form-card-icon icon-blue">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                                    <circle cx="12" cy="7" r="4" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h2>Informasi Profil</h2>
+                                <p>Perbarui informasi nama lengkap dan alamat email Anda.</p>
+                            </div>
+                        </div>
+
+                        <form method="POST" action="{% url 'profile' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="update_info">
+                            
+                            <div class="form-body">
+                                <div class="form-row-2">
+                                    <div class="form-group">
+                                        <label>ID Pengguna <span class="opt">(Read-only)</span></label>
+                                        <div class="field-wrap">
+                                            <span class="field-icon">
+                                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                                                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                                                </svg>
+                                            </span>
+                                            <input type="text" value="{{ custom_user.id_user }}" readonly>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Role Jabatan <span class="opt">(Read-only)</span></label>
+                                        <div class="field-wrap">
+                                            <span class="field-icon">
+                                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                                                    <circle cx="9" cy="7" r="4"/>
+                                                </svg>
+                                            </span>
+                                            <input type="text" value="{% if custom_user.role|upper == 'HC' %}Human Capital (HC){% elif custom_user.role|upper == 'IT' %}IT Infrastructure{% else %}Talent IT{% endif %}" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="nama">Nama Lengkap <span class="req">*</span></label>
+                                    <div class="field-wrap">
+                                        <span class="field-icon">
+                                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                                                <circle cx="12" cy="7" r="4" />
+                                            </svg>
+                                        </span>
+                                        <input type="text" id="nama" name="nama" value="{{ custom_user.nama }}" required placeholder="Nama Lengkap">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="email">Alamat Email <span class="opt">(opsional)</span></label>
+                                    <div class="field-wrap">
+                                        <span class="field-icon">
+                                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                                                <polyline points="22,6 12,13 2,6" />
+                                            </svg>
+                                        </span>
+                                        <input type="email" id="email" name="email" value="{{ custom_user.email|default:'' }}" placeholder="nama@perusahaan.com">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="submit" class="btn-primary">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                                        <polyline points="17 21 17 13 7 13 7 21" />
+                                        <polyline points="7 3 7 8 15 8" />
+                                    </svg>
+                                    Perbarui Profil
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Card 2: Ubah Password -->
+                    <div class="form-card">
+                        <div class="form-card-header">
+                            <div class="form-card-icon icon-indigo">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h2>Ubah Password Keamanan</h2>
+                                <p>Pastikan menggunakan password yang kuat dan aman untuk akun Anda.</p>
+                            </div>
+                        </div>
+
+                        <form method="POST" action="{% url 'profile' %}" id="formPassword">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="update_password">
+
+                            <div class="form-body">
+                                <div class="form-group">
+                                    <label for="password_lama">Password Lama Anda <span class="req">*</span></label>
+                                    <div class="field-wrap">
+                                        <span class="field-icon">
+                                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                                                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                                            </svg>
+                                        </span>
+                                        <input type="password" id="password_lama" name="password_lama" required placeholder="Masukkan password saat ini">
+                                        <button type="button" class="password-toggle" onclick="togglePw('password_lama', this)">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                                <circle cx="12" cy="12" r="3" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="form-row-2">
+                                    <div class="form-group">
+                                        <label for="password_baru">Password Baru <span class="req">*</span></label>
+                                        <div class="field-wrap">
+                                            <span class="field-icon">
+                                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                                                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                                                </svg>
+                                            </span>
+                                            <input type="password" id="password_baru" name="password_baru" required minlength="8" placeholder="Minimal 8 karakter">
+                                            <button type="button" class="password-toggle" onclick="togglePw('password_baru', this)">
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                                    <circle cx="12" cy="12" r="3" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                        <p class="field-hint">Minimal 8 karakter.</p>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="konfirmasi_password">Konfirmasi Password Baru <span class="req">*</span></label>
+                                        <div class="field-wrap">
+                                            <span class="field-icon">
+                                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                                                </svg>
+                                            </span>
+                                            <input type="password" id="konfirmasi_password" name="konfirmasi_password" required placeholder="Ulangi password baru">
+                                            <button type="button" class="password-toggle" onclick="togglePw('konfirmasi_password', this)">
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                                    <circle cx="12" cy="12" r="3" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                        <p id="pw-match-hint" class="field-hint" style="min-height:16px;">&nbsp;</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="submit" class="btn-primary" id="btnSubmitPassword">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                                        <polyline points="17 21 17 13 7 13 7 21" />
+                                        <polyline points="7 3 7 8 15 8" />
+                                    </svg>
+                                    Simpan Password
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                </div> <!-- End Stack -->
+
+            </div> <!-- End Grid Layout -->
+
+        </div> <!-- End Main Content -->
+    </div> <!-- End Wrapper -->
+
+    <script>
+        function togglePw(id, btn) {
+            const inp = document.getElementById(id);
+            const show = inp.type === 'password';
+            inp.type = show ? 'text' : 'password';
+            btn.innerHTML = show
+                ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>'
+                : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+        }
+
+        const pw = document.getElementById('password_baru');
+        const cpw = document.getElementById('konfirmasi_password');
+        const hint = document.getElementById('pw-match-hint');
+
+        function checkMatch() {
+            if (!cpw.value) {
+                hint.innerHTML = '&nbsp;';
+                hint.style.color = '#94A3B8';
+                cpw.style.borderColor = '#E2E8F0';
+                return;
+            }
+            if (pw.value === cpw.value) {
+                hint.textContent = '✓ Password cocok';
+                hint.style.color = '#16A34A';
+                cpw.style.borderColor = '#22C55E';
+            } else {
+                hint.textContent = '✗ Password tidak cocok';
+                hint.style.color = '#DC2626';
+                cpw.style.borderColor = '#EF4444';
+            }
+        }
+        
+        pw.addEventListener('input', checkMatch);
+        cpw.addEventListener('input', checkMatch);
+
+        document.getElementById('formPassword').addEventListener('submit', function (e) {
+            if (pw.value !== cpw.value) {
+                e.preventDefault();
+                cpw.focus();
+                hint.textContent = '✗ Password tidak cocok!';
+                hint.style.color = '#DC2626';
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -4,9 +4,9 @@ import traceback
 from urllib import request
 import uuid
 
-from django.shortcuts import get_object_or_404, render, redirect
-from django.http import HttpResponse, JsonResponse
-from django.db import connection, transaction
+from django.shortcuts import render, redirect
+from django.http import HttpResponse
+from psycopg import transaction
 
 from dss.models import BobotKriteria
 from dss.repositories.dto.dto_laptop_pengadaan import FilterPengadaanDTO
@@ -3706,3 +3706,241 @@ def edit_teknologi_it_view(
     return redirect(
         "manajemenroleteknologi_it"
     )
+
+# ==========================================
+# HC USER MANAGEMENT VIEWS
+# ==========================================
+
+def _generate_user_id():
+    """Generate ID pengguna otomatis dengan format USR_XXXX."""
+    from inventori.models import User
+    existing = (
+        User.objects
+        .filter(id_user__startswith='USR_')
+        .values_list('id_user', flat=True)
+    )
+    max_num = 0
+    for uid in existing:
+        try:
+            num = int(uid.split('_')[1])
+            if num > max_num:
+                max_num = num
+        except (IndexError, ValueError):
+            pass
+    return f"USR_{max_num + 1:04d}"
+
+
+def manajemenuser_hc_view(request):
+    """Halaman list semua pengguna dengan fitur search & filter."""
+    from inventori.models import User
+
+    list_user = User.objects.all().order_by('id_user')
+    total_user = list_user.count()
+    total_hc = list_user.filter(role='HC').count()
+    total_it = list_user.filter(role='IT').count()
+    total_talent = list_user.filter(role='Talent').count()
+
+    context = {
+        'list_user': list_user,
+        'total_user': total_user,
+        'total_hc': total_hc,
+        'total_it': total_it,
+        'total_talent': total_talent,
+    }
+    return render(request, 'hc/user/manajemenuser_hc.html', context)
+
+
+def tambahuser_hc_view(request):
+    """Halaman form tambah pengguna baru. ID digenerate otomatis."""
+    from inventori.models import User
+
+    if request.method == 'POST':
+        nama                = request.POST.get('nama', '').strip()
+        email               = request.POST.get('email', '').strip() or None
+        role                = request.POST.get('role', '').strip()
+        password            = request.POST.get('password', '')
+        konfirmasi_password = request.POST.get('konfirmasi_password', '')
+
+        form_data = {'nama': nama, 'email': email, 'role': role}
+
+        if not nama or not role or not password:
+            messages.error(request, 'Nama, role, dan password wajib diisi.')
+            return render(request, 'hc/user/tambahuser_hc.html', {'form_data': form_data})
+
+        if password != konfirmasi_password:
+            messages.error(request, 'Password dan konfirmasi password tidak cocok.')
+            return render(request, 'hc/user/tambahuser_hc.html', {'form_data': form_data})
+
+        if len(password) < 8:
+            messages.error(request, 'Password minimal 8 karakter.')
+            return render(request, 'hc/user/tambahuser_hc.html', {'form_data': form_data})
+
+        if email and User.objects.filter(email=email).exists():
+            messages.error(request, f'Email "{email}" sudah terdaftar.')
+            return render(request, 'hc/user/tambahuser_hc.html', {'form_data': form_data})
+
+        try:
+            new_id = _generate_user_id()
+            User.objects.create(
+                id_user=new_id,
+                nama=nama,
+                email=email,
+                role=role,
+                password=password,
+            )
+            messages.success(request, f'Pengguna "{nama}" ({role}) berhasil ditambahkan dengan ID {new_id}.')
+            return redirect('manajemenuser_hc')
+
+        except Exception as e:
+            messages.error(request, f'Gagal menambahkan pengguna: {str(e)}')
+
+    return render(request, 'hc/user/tambahuser_hc.html', {'form_data': {}})
+
+
+def edit_user_hc_view(request):
+    """Edit data pengguna (nama, email, role, password)."""
+    from inventori.models import User
+
+    if request.method == 'POST':
+        id_user  = request.POST.get('id_user', '').strip()
+        nama     = request.POST.get('nama', '').strip()
+        email    = request.POST.get('email', '').strip() or None
+        role     = request.POST.get('role', '').strip()
+        password = request.POST.get('password', '')
+
+        if not id_user or not nama or not role:
+            messages.error(request, 'Data tidak lengkap.')
+            return redirect('manajemenuser_hc')
+
+        try:
+            user = User.objects.get(id_user=id_user)
+            user.nama = nama
+            user.email = email
+            user.role = role
+            if password:
+                if len(password) < 8:
+                    messages.error(request, 'Password baru minimal 8 karakter.')
+                    return redirect('manajemenuser_hc')
+                user.password = password
+            user.save()
+            messages.success(request, f'Data pengguna "{nama}" berhasil diperbarui.')
+        except User.DoesNotExist:
+            messages.error(request, 'Pengguna tidak ditemukan.')
+        except Exception as e:
+            messages.error(request, f'Gagal mengubah data: {str(e)}')
+
+    return redirect('manajemenuser_hc')
+
+
+def hapus_user_hc_view(request):
+    """Hapus pengguna dari sistem."""
+    from inventori.models import User
+
+    if request.method == 'POST':
+        id_user = request.POST.get('id_user', '').strip()
+
+        if not id_user:
+            messages.error(request, 'ID Pengguna tidak diberikan.')
+            return redirect('manajemenuser_hc')
+
+        try:
+            user = User.objects.get(id_user=id_user)
+            nama = user.nama
+            user.delete()
+            messages.success(request, f'Pengguna "{nama}" berhasil dihapus dari sistem.')
+        except User.DoesNotExist:
+            messages.error(request, 'Pengguna tidak ditemukan.')
+        except Exception as e:
+            messages.error(request, f'Gagal menghapus pengguna: {str(e)}')
+
+    return redirect('manajemenuser_hc')
+
+
+def profile_view(request):
+    """Menampilkan dan mengelola data profil pengguna serta perubahan password."""
+    if not request.user.is_authenticated:
+        return redirect('login')
+
+    from inventori.models import User as CustomUser
+    from django.contrib.auth import update_session_auth_hash
+    from django.contrib.auth.models import User as DjangoUser
+    from django.contrib import messages
+
+    # Get custom user from database using username (which holds id_user)
+    custom_user = CustomUser.objects.filter(id_user=request.user.username).first()
+    if not custom_user:
+        messages.error(request, 'Data pengguna kustom tidak ditemukan.')
+        return redirect('login_redirect')
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+
+        if action == 'update_info':
+            nama = request.POST.get('nama', '').strip()
+            email = request.POST.get('email', '').strip() or None
+
+            if not nama:
+                messages.error(request, 'Nama Lengkap wajib diisi.')
+            else:
+                try:
+                    # Cek email duplikat di user lain
+                    if email and CustomUser.objects.filter(email=email).exclude(id_user=custom_user.id_user).exists():
+                        messages.error(request, f'Email "{email}" sudah terdaftar oleh pengguna lain.')
+                    else:
+                        custom_user.nama = nama
+                        custom_user.email = email
+                        custom_user.save()
+
+                        # Sinkronisasi ke standard Django User
+                        django_user = DjangoUser.objects.filter(username=custom_user.id_user).first()
+                        if django_user:
+                            django_user.first_name = nama
+                            django_user.email = email or ""
+                            django_user.save()
+
+                        # Sinkronisasi data di session request
+                        request.user.nama = nama
+                        request.user.email = email or ""
+
+                        messages.success(request, 'Informasi profil berhasil diperbarui.')
+                except Exception as e:
+                    messages.error(request, f'Gagal memperbarui profil: {str(e)}')
+
+        elif action == 'update_password':
+            password_lama = request.POST.get('password_lama', '')
+            password_baru = request.POST.get('password_baru', '')
+            konfirmasi_password = request.POST.get('konfirmasi_password', '')
+
+            if not password_lama or not password_baru or not konfirmasi_password:
+                messages.error(request, 'Semua kolom password wajib diisi.')
+            elif custom_user.password != password_lama:
+                messages.error(request, 'Password lama yang Anda masukkan salah.')
+            elif password_baru != konfirmasi_password:
+                messages.error(request, 'Password baru dan konfirmasi password tidak cocok.')
+            elif len(password_baru) < 8:
+                messages.error(request, 'Password baru minimal 8 karakter.')
+            else:
+                try:
+                    # Simpan plaintext password untuk sistem kustom
+                    custom_user.password = password_baru
+                    custom_user.save()
+
+                    # Simpan hashed password untuk Django Standard User agar session tetap valid
+                    django_user = DjangoUser.objects.filter(username=custom_user.id_user).first()
+                    if django_user:
+                        django_user.set_password(password_baru)
+                        django_user.save()
+                        update_session_auth_hash(request, django_user)
+
+                    messages.success(request, 'Password berhasil diperbarui.')
+                except Exception as e:
+                    messages.error(request, f'Gagal memperbarui password: {str(e)}')
+
+        return redirect('profile')
+
+    context = {
+        'custom_user': custom_user,
+        'active_page': 'profile',
+    }
+    return render(request, 'users/profile.html', context)
+
