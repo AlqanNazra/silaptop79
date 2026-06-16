@@ -239,5 +239,11 @@ class BobotKriteriaRepository(IBobotKriteriaRepositoryImpl):
                     data.id_kriteria
                 )
             )
+            print(
+            data.id_role_teknologi,
+            data.id_kriteria,
+            data.nilai_bobot
+        )
+            print("ROW UPDATED:",cur.rowcount)
 
         return True
