@@ -1,6 +1,7 @@
 from datetime import datetime
 import traceback
 
+from dss.services.service_bobotkriteria import ServiceBobotKriteria
 from dss.services.service_swara import ServiceSwara
 from dss.services.service_preposesdata import Servicepreposesdata
 
@@ -23,6 +24,8 @@ from inventori.dto.dto_role import RoleDTO
 from inventori.repositories.repositori_laptop_inventori import LaptopInventoriRepository
 from dss.repositories.repositori_laptop_pengadaan import LaptopPengadaanRepository
 from decimal import Decimal
+
+from inventori.repositories.repositori_role_teknologi import RoleTeknologiRepository
 class Servicesaw:
 
     def __init__(self, conn):
@@ -39,6 +42,8 @@ class Servicesaw:
         self.repoInventori = LaptopInventoriRepository(conn)
         self.repoPengadaan = LaptopPengadaanRepository(conn)
         self.repoRole = RoleRepository(conn)
+        self.servisBobotKriteria = ServiceBobotKriteria(conn)
+        self.repoRoleTeknologi = RoleTeknologiRepository(conn)
 
     def serialize(self, data):
         def convert(val):
@@ -168,20 +173,33 @@ class Servicesaw:
         return hasil_normalisasi
     
     def get_bobot_saw(self, role: list):
-        if not role:
-            raise ValueError("Role tidak boleh kosong")
 
-        hasil = self.servisBK.proses_swara(role)
+        role_teknologi_list = (
+            self.repoRoleTeknologi
+            .get_by_role(role[0])
+        )
 
-        if hasil["status"] != "success":
-            raise Exception(hasil["message"])
+        hasil_role = (
+            self.servisBK.proses_role(
+                role[0],
+                role_teknologi_list
+            )
+        )
+        print("\n====================")
+        print("BOBOT HASIL AGREGASI ROLE")
+        print("====================")
+
+
+        for k,v in hasil_role["hasil_role"].items():
+
+            print(
+                k,
+                "=",
+                v
+            )
         
-        bobot_list = hasil["data"]["bobot_akhir"]
 
-        return {
-            item["nama_kriteria"]: item["bobot_akhir"]
-            for item in bobot_list
-        }
+        return hasil_role["hasil_role"]
     
     def hitung_saw_data(self, data_normalisasi, role: list):
         if not data_normalisasi:

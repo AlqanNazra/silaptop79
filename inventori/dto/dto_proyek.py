@@ -4,7 +4,7 @@ class ProyekDTO:
         self,
         id_proyek=None,
         nama_proyek=None,
-        client_perusahaan=None,
+        user_perusahaan=None,
         mulai_proyek=None,
         akhir_proyek=None,
         created_at=None,
@@ -12,7 +12,7 @@ class ProyekDTO:
     ):
         self.id_proyek = id_proyek
         self.nama_proyek = nama_proyek
-        self.client_perusahaan = client_perusahaan
+        self.user_perusahaan = user_perusahaan
         self.mulai_proyek = mulai_proyek
         self.akhir_proyek = akhir_proyek
         self.created_at = created_at

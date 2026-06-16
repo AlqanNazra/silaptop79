@@ -1,3 +1,4 @@
+from django.db import connection
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from .dto.dto_bobot_kriteria import BobotKriteriaDTO
@@ -26,19 +27,35 @@ class BobotKriteriaRepository(IBobotKriteriaRepositoryImpl):
     # =========================
     # CREATE
     # =========================
-    def tambah_bobot_kriteria(self, data: BobotKriteriaDTO):
-        query = """
-        SELECT tambah_bobot_kriteria(%s, %s, %s);
-        """
-
+    def tambah_bobot_kriteria(self,data: BobotKriteriaDTO):
+        query = """SELECT tambah_bobot_kriteria(%s,%s,%s);"""
+        print("\nSQL INSERT BOBOT")
+        print(
+            data.id_role_teknologi,
+            data.id_kriteria,
+            data.nilai_bobot
+        )
         with self.conn.cursor() as cur:
-            cur.execute(query, (
-                str(data.id_kriteria),
-                data.role,
-                data.nilai_bobot
-            ))
-
-            return "Berhasil tambah bobot kriteria"
+            cur.execute(
+                query,
+                (
+                    data.id_role_teknologi,
+                    data.id_kriteria,
+                    data.nilai_bobot
+                )
+            )
+            result = cur.fetchone()
+            print(
+                "DB RESULT:",
+                result
+            )
+            if result:
+                if isinstance(result, dict):
+                    return list(
+                        result.values()
+                    )[0]
+                return result[0]
+            return None
 
     # =========================
     # READ BY ID
@@ -104,21 +121,41 @@ class BobotKriteriaRepository(IBobotKriteriaRepositoryImpl):
                     return result[0]
             return None
         
-    def update_nilai_swara(self, data: BobotKriteriaDTO):
-        query = "SELECT update_nilai_swara(%s, %s)"
+    def update_nilai_swara(self, data):
+
+        query = """
+        SELECT update_nilai_swara(
+            %s,
+            %s
+        )
+        """
+
+        print(
+            "UPDATE PARAM",
+            data.id_bobot,
+            data.nilai_swara
+        )
+
         with self.conn.cursor() as cur:
-            cur.execute(query, (
-                data.id_bobot,
-                data.nilai_swara
-            ))
+
+            cur.execute(
+                query,
+                (
+                    data.id_bobot,
+                    data.nilai_swara
+                )
+            )
+
             result = cur.fetchone()
 
-            if result:
-                if isinstance(result, dict):
-                    return list(result.values())[0]
-                else:
-                    return result[0]
-            return None
+            self.conn.commit()
+
+            print(
+                "DB RESULT",
+                result
+            )
+
+            return result[0]
 
     # =========================
     # DELETE
@@ -163,3 +200,44 @@ class BobotKriteriaRepository(IBobotKriteriaRepositoryImpl):
             )
 
             return cur.fetchall()
+        
+    def update_bobot_role_teknologi(
+        self,
+        data
+    ):
+
+        query = """
+        UPDATE dss_bobotkriteria
+        SET
+
+            nilai_bobot = %s
+
+        WHERE
+
+            id_role_teknologi = %s
+
+            AND
+
+            id_kriteria = %s
+
+            AND
+
+            is_active = TRUE
+        """
+
+        with self.conn.cursor() as cur:
+
+            cur.execute(
+
+                query,
+
+                (
+                    data.nilai_bobot,
+
+                    data.id_role_teknologi,
+
+                    data.id_kriteria
+                )
+            )
+
+        return True

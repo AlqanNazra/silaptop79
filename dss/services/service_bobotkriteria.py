@@ -180,3 +180,108 @@ class ServiceBobotKriteria:
                 "status": "error",
                 "message": str(e)
             }
+            
+    def input_bobot_role_teknologi(
+        self,
+        id_role_teknologi,
+        list_bobot
+    ):
+        print("\n====================")
+        print("SERVICE BOBOT")
+        print("====================")
+
+        print(
+            "ROLE TEKNOLOGI:",
+            id_role_teknologi
+        )
+        try:
+
+            with self.conn:
+
+                for item in list_bobot:
+
+                    dto = BobotKriteriaDTO(
+
+                        id_role_teknologi=
+                            id_role_teknologi,
+
+                        id_kriteria=
+                            item["id_kriteria"],
+
+                        nilai_bobot=
+                            float(
+                                item["nilai_bobot"]
+                            ),
+
+                        nilai_swara=None
+                    )
+                    print(
+                        "KRITERIA:",
+                        item["id_kriteria"],
+                        "BOBOT:",
+                        item["nilai_bobot"]
+                    )
+
+                    self.repoBK.tambah_bobot_kriteria(
+                        dto
+                    )
+
+            return {
+                "status": "success",
+                "message":
+                    "Berhasil input bobot"
+            }
+
+        except Exception as e:
+
+            return {
+                "status": "error",
+                "message": str(e)
+            }
+    def update_bobot_role_teknologi(
+        self,
+        id_role_teknologi,
+        list_bobot
+    ):
+
+        try:
+
+            with self.conn:
+
+                for item in list_bobot:
+
+                    dto = BobotKriteriaDTO(
+
+                        id_role_teknologi=
+                            id_role_teknologi,
+
+                        id_kriteria=
+                            item["id_kriteria"],
+
+                        nilai_bobot=
+                            item["nilai_bobot"]
+                    )
+
+                    self.repoBK.update_bobot_role_teknologi(
+                        dto
+                    )
+
+            return {
+
+                "status":
+                    "success",
+
+                "message":
+                    "Bobot berhasil diperbarui"
+            }
+
+        except Exception as e:
+
+            return {
+
+                "status":
+                    "error",
+
+                "message":
+                    str(e)
+            }

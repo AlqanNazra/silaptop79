@@ -14,7 +14,7 @@ class ProyekValidation:
                 "Nama proyek wajib diisi"
             )
 
-        if not data.client_perusahaan:
+        if not data.user_perusahaan:
             raise ValueError(
                 "Client perusahaan wajib diisi"
             )
@@ -35,37 +35,21 @@ class ProyekService:
     ):
         self.proyek_repo = proyek_repo
         self.conn = conn
+    
         
     def tambah_proyek(self, data):
-
         ProyekValidation.validate_input(data)
-
         try:
-
             with transaction.atomic():
-
-                self.proyek_repo.tambah(data)
-
+                id_proyek = (self.proyek_repo.tambah(data))
                 self.conn.commit()
-
-                logger.info(
-                    f"Tambah proyek sukses "
-                    f"{data.nama_proyek}"
-                )
-
                 return {
                     "success": True,
-                    "message": "Berhasil tambah proyek"
+                    "id_proyek": id_proyek
                 }
-
         except Exception as e:
-
             self.conn.rollback()
-
-            logger.error(str(e))
-
             raise Exception(str(e))
-
     def update_proyek(self, data):
 
         try:

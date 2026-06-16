@@ -20,12 +20,14 @@ CREATE OR REPLACE FUNCTION tambah_role_teknologi(
     p_id_role VARCHAR,
     p_id_teknologi VARCHAR
 )
-RETURNS BOOLEAN AS
+RETURNS VARCHAR AS
 $$
 DECLARE
     v_role INTEGER;
     v_teknologi INTEGER;
     v_duplicate INTEGER;
+
+    v_id_role_teknologi VARCHAR;
 BEGIN
 
     SELECT COUNT(*)
@@ -56,25 +58,29 @@ BEGIN
         RAISE EXCEPTION 'Role teknologi sudah ada';
     END IF;
 
+    v_id_role_teknologi :=
+        f_generate_id(
+            'ROLETEK',
+            'role_teknologi',
+            'id_role_teknologi'
+        );
+
     INSERT INTO role_teknologi(
         id_role_teknologi,
         id_role,
         id_teknologi
     )
     VALUES(
-        f_generate_id(
-            'ROLETEK',
-            'role_teknologi',
-            'id_role_teknologi'
-        ),
+        v_id_role_teknologi,
         p_id_role,
         p_id_teknologi
     );
 
-    RETURN TRUE;
+    RETURN v_id_role_teknologi;
 
 END;
 $$ LANGUAGE plpgsql;
+
 
 CREATE OR REPLACE FUNCTION get_role_teknologi_by_id(
     p_id_role_teknologi VARCHAR

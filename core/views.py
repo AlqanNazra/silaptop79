@@ -1,18 +1,28 @@
 import datetime
 import json
+import traceback
 from urllib import request
 import uuid
 
-from django.shortcuts import render, redirect
-from django.http import HttpResponse
-from django.db import transaction
+from django.shortcuts import get_object_or_404, render, redirect
+from django.http import HttpResponse, JsonResponse
+from django.db import connection, transaction
 
 from dss.models import BobotKriteria
 from dss.repositories.dto.dto_laptop_pengadaan import FilterPengadaanDTO
 from dss.repositories.repositori_bobot_kriteria import BobotKriteriaRepository
 from dss.repositories.repositori_bobot_kriteria import BobotKriteriaRepository
 from dss.repositories.repositori_laptop_pengadaan import LaptopPengadaanRepository
+from dss.services.service_bobotkriteria import ServiceBobotKriteria
+from dss.services.service_swara import ServiceSwara
+from inventori.dto.dto_projectrole import ProjectRoleDTO
+from inventori.dto.dto_proyek import ProyekDTO
+from inventori.dto.dto_role_teknologi import RoleTeknologiDTO
 from inventori.repositories.repositori_laptop_inventori import LaptopInventoriRepository
+from inventori.repositories.repositori_projectrole import ProjectRoleRepository
+from inventori.repositories.repositori_proyek import ProyekRepository
+from inventori.services.service_projectrole import ProjectRoleService
+from inventori.services.service_proyek import ProyekService
 from .db import get_connection
 
 # ==========================================
@@ -1683,9 +1693,6 @@ def inputkriteria_it_view(request):
         context
     )
 
-
-
-
 def tambahspek_it_view(request):
     from inventori.models import Processor, RAM, Storage
     import uuid
@@ -2618,8 +2625,11 @@ def manajemenproyek_it_view(request):
     from django.core.paginator import Paginator
     from django.db.models import Q
 
+
     search_query = request.GET.get('q', '')
-    proyek_list = Proyek.objects.prefetch_related('roles__teknologi').all()
+    proyek_list = Proyek.objects.prefetch_related(
+        'projectrole_set__role__roleteknologi_set__teknologi'
+    )
 
     if search_query:
         proyek_list = proyek_list.filter(Q(nama_proyek__icontains=search_query))
@@ -2640,87 +2650,62 @@ def manajemenproyek_it_view(request):
         context
     )
 def tambahproyek_it_view(request):
+    conn = get_connection()
+    proyek_repo = ProyekRepository(conn)
+    projectrole_repo = ProjectRoleRepository(conn)
+    service_proyek = ProyekService(proyek_repo,conn)
+    service_projectrole = ProjectRoleService(projectrole_repo,conn)
 
     if request.method == "POST":
+        print(request.POST)
         try:
-            nama_proyek = request.POST.get(
-                "nama_proyek"
+            proyek_data = ProyekDTO(
+                nama_proyek=request.POST.get(
+                    "nama_proyek"
+                ),
+                user_perusahaan=request.POST.get(
+                    "user_perusahaan"
+                ),
+                mulai_proyek=request.POST.get(
+                    "mulai_proyek"
+                ),
+                akhir_proyek=request.POST.get(
+                    "akhir_proyek"
+                )
             )
 
             role_ids = request.POST.getlist(
                 "role_ids[]"
             )
-            processor_weights = request.POST.getlist(
-                "processor_weight[]"
-            )
 
-            ram_weights = request.POST.getlist(
-                "ram_weight[]"
-            )
+            with transaction.atomic():
 
-            storage_weights = request.POST.getlist(
-                "storage_weight[]"
-            )
-
-            berat_weights = request.POST.getlist(
-                "berat_weight[]"
-            )
-
-            layar_weights = request.POST.getlist(
-                "layar_weight[]"
-            )
-
-            baterai_weights = request.POST.getlist(
-                "baterai_weight[]"
-            )
-            with transaction.atomic():   
-                proyek = Proyek.objects.create(
-                    id_proyek=str(uuid.uuid4())[:8],
-                    nama_proyek=nama_proyek
+                result = (
+                    service_proyek
+                    .tambah_proyek(
+                        proyek_data
+                    )
                 )
 
-                teknologi_proyek = set()
+                id_proyek = (
+                    result["id_proyek"]
+                )
 
                 for role_id in role_ids:
 
-                    role = Role.objects.get(
-                        id_role=role_id
-                    )
-
-                    ProjectRole.objects.create(
-                        id_project_role=str(uuid.uuid4())[:8],
-                        proyek=proyek,
-                        role=role,
-                        persentase_role=0
-                    )
-
-                    role_teknologi = (
-                        RoleTeknologi.objects
-                        .select_related("teknologi")
-                        .filter(role=role)
-                    )
-
-                    for rt in role_teknologi:
-
-                        teknologi_proyek.add(
-                            rt.teknologi.id_teknologi
+                    (
+                        service_projectrole
+                        .tambah_projectrole(
+                            ProjectRoleDTO(
+                                id_proyek=id_proyek,
+                                id_role=role_id
+                            )
                         )
-
-                for id_teknologi in teknologi_proyek:
-
-                    ProjectTechnology.objects.create(
-                        id_project_technology=
-                        str(uuid.uuid4())[:8],
-
-                        proyek=proyek,
-
-                        teknologi_id=
-                        id_teknologi
                     )
 
                 messages.success(
                     request,
-                    f'Proyek "{nama_proyek}" berhasil ditambahkan!'
+                    "Proyek berhasil ditambahkan"
                 )
 
                 return redirect(
@@ -2728,6 +2713,13 @@ def tambahproyek_it_view(request):
                 )
 
         except Exception as e:
+
+            traceback.print_exc()
+
+            print(
+                "ERROR:",
+                str(e)
+            )
 
             messages.error(
                 request,
@@ -2750,14 +2742,22 @@ def tambahproyek_it_view(request):
 
         rels = (
             RoleTeknologi.objects
-            .select_related("teknologi")
-            .filter(role=role)
+            .select_related(
+                "teknologi"
+            )
+            .filter(
+                role=role
+            )
         )
 
         for rel in rels:
+
             teknologi.append({
-                "id": rel.teknologi.id_teknologi,
-                "nama": rel.teknologi.nama_teknologi
+                "id":
+                rel.teknologi.id_teknologi,
+
+                "nama":
+                rel.teknologi.nama_teknologi
             })
 
         role_data.append({
@@ -2766,15 +2766,14 @@ def tambahproyek_it_view(request):
             "teknologi": teknologi
         })
 
-    context = {
-        "role_list": role_list,
-        "role_data_json": role_data
-    }    
+    context = {"role_list": role_list,"role_data_json": role_data}
+
     return render(
         request,
         "it/inventori/tambahproyek_it.html",
         context
     )
+                
 def editproyek_it_view(request, id_proyek):
 
     try:
@@ -2832,7 +2831,6 @@ def hapusproyek_it_view(request, id_proyek):
             messages.error(request, f'Gagal menghapus proyek: {str(e)}')
 
     return redirect('manajemen_proyek_it')
-
 
 def tambah_komponen_it_view(request):
     from inventori.models import Processor, RAM, Storage
@@ -2949,43 +2947,380 @@ def tambah_teknologi_it_view(request):
     return redirect(
         "manajemenroleteknologi_it"
     )
+
 def tambah_role_it_view(request):
+    from django.shortcuts import redirect
+    from django.contrib import messages
+    import uuid
+    import traceback
+    from  inventori.repositories.repositori_role_teknologi import RoleTeknologiRepository
+    conn = get_connection()
+    role_teknologi_repo = RoleTeknologiRepository(conn)
 
     if request.method == "POST":
 
         try:
 
+            print("\n===================================")
+            print("MULAI TAMBAH ROLE")
+            print("===================================")
+
+            print("\nPOST DATA:")
+            print(dict(request.POST))
+
+            # ==========================
+            # CREATE ROLE
+            # ==========================
+
             role = Role.objects.create(
-                id_role=str(uuid.uuid4())[:8],
-                nama_role=request.POST.get(
-                    "nama_role"
-                ),
-                min_ram=request.POST.get(
-                    "min_ram"
-                ),
-                min_storage=request.POST.get(
-                    "min_storage"
-                ),
-                min_processor_score=request.POST.get(
-                    "min_processor_score"
+
+                id_role=
+                    str(uuid.uuid4())[:8],
+
+                nama_role=
+                    request.POST.get(
+                        "nama_role"
+                    ),
+
+                min_ram=
+                    request.POST.get(
+                        "min_ram"
+                    ),
+
+                min_storage=
+                    request.POST.get(
+                        "min_storage"
+                    ),
+
+                min_processor_score=
+                    request.POST.get(
+                        "min_processor_score"
+                    )
+            )
+
+            print("\n====================")
+            print("ROLE CREATED")
+            print("====================")
+
+            print(
+                "ID ROLE :",
+                role.id_role
+            )
+
+            print(
+                "NAMA    :",
+                role.nama_role
+            )
+
+            print(
+                "RAM     :",
+                role.min_ram
+            )
+
+            print(
+                "STORAGE :",
+                role.min_storage
+            )
+
+            print(
+                "CPU     :",
+                role.min_processor_score
+            )
+
+            # ==========================
+            # AMBIL TEKNOLOGI
+            # ==========================
+
+            teknologi_ids = (
+                request.POST.getlist(
+                    "teknologi"
                 )
             )
 
-            teknologi_ids = request.POST.getlist(
-                "teknologi"
+            print("\nTEKNOLOGI TERPILIH")
+            print(teknologi_ids)
+
+            # ==========================
+            # SERVICE BOBOT
+            # ==========================
+
+            service_bobot = (
+                ServiceBobotKriteria(
+                    conn
+                )
             )
+
+            KRITERIA_MAPPING = {
+
+                "processor":
+                    "KRIT_0001",
+
+                "ram":
+                    "KRIT_0002",
+
+                "storage":
+                    "KRIT_0003",
+
+                "berat":
+                    "KRIT_0004",
+
+                "layar":
+                    "KRIT_0005",
+
+                "baterai":
+                    "KRIT_0006"
+            }
+
+            # ==========================
+            # LOOP TEKNOLOGI
+            # ==========================
 
             for teknologi_id in teknologi_ids:
 
-                RoleTeknologi.objects.create(
-                    id_role_teknologi=
-                    str(uuid.uuid4())[:12],
-
-                    role=role,
-
-                    teknologi_id=
+                print("\n===================================")
+                print(
+                    "PROSES TEKNOLOGI:",
                     teknologi_id
                 )
+                print("===================================")
+
+                # ----------------------
+                # CREATE ROLE TEKNOLOGI
+                # ----------------------
+                dto_role_teknologi = (
+                    RoleTeknologiDTO(
+                        id_role=
+                            role.id_role,
+
+                        id_teknologi=
+                            teknologi_id
+                    )
+                )
+
+                id_role_teknologi = (
+                    role_teknologi_repo
+                    .tambah(
+                        dto_role_teknologi
+                    )
+                )
+
+                print(
+                    "\nDEBUG ROLE TEKNOLOGI"
+                )
+
+                print(
+                    "ID:",
+                    id_role_teknologi
+                )
+
+                print(
+                    "TYPE:",
+                    type(
+                        id_role_teknologi
+                    )
+                )
+
+                # ----------------------
+                # AMBIL BOBOT FORM
+                # ----------------------
+
+                processor = request.POST.get(
+                    f"processor_weight_{teknologi_id}"
+                )
+
+                ram = request.POST.get(
+                    f"ram_weight_{teknologi_id}"
+                )
+
+                storage = request.POST.get(
+                    f"storage_weight_{teknologi_id}"
+                )
+
+                berat = request.POST.get(
+                    f"berat_weight_{teknologi_id}"
+                )
+
+                layar = request.POST.get(
+                    f"layar_weight_{teknologi_id}"
+                )
+
+                baterai = request.POST.get(
+                    f"baterai_weight_{teknologi_id}"
+                )
+
+                print("\nDEBUG BOBOT")
+
+                print(
+                    "processor =",
+                    processor
+                )
+
+                print(
+                    "ram       =",
+                    ram
+                )
+
+                print(
+                    "storage   =",
+                    storage
+                )
+
+                print(
+                    "berat     =",
+                    berat
+                )
+
+                print(
+                    "layar     =",
+                    layar
+                )
+
+                print(
+                    "baterai   =",
+                    baterai
+                )
+
+                # ----------------------
+                # LIST BOBOT
+                # ----------------------
+
+                list_bobot = [
+
+                    {
+                        "id_kriteria":
+                            KRITERIA_MAPPING[
+                                "processor"
+                            ],
+
+                        "nilai_bobot":
+                            float(processor or 0)
+                    },
+
+                    {
+                        "id_kriteria":
+                            KRITERIA_MAPPING[
+                                "ram"
+                            ],
+
+                        "nilai_bobot":
+                            float(ram or 0)
+                    },
+
+                    {
+                        "id_kriteria":
+                            KRITERIA_MAPPING[
+                                "storage"
+                            ],
+
+                        "nilai_bobot":
+                            float(storage or 0)
+                    },
+
+                    {
+                        "id_kriteria":
+                            KRITERIA_MAPPING[
+                                "berat"
+                            ],
+
+                        "nilai_bobot":
+                            float(berat or 0)
+                    },
+
+                    {
+                        "id_kriteria":
+                            KRITERIA_MAPPING[
+                                "layar"
+                            ],
+
+                        "nilai_bobot":
+                            float(layar or 0)
+                    },
+
+                    {
+                        "id_kriteria":
+                            KRITERIA_MAPPING[
+                                "baterai"
+                            ],
+
+                        "nilai_bobot":
+                            float(baterai or 0)
+                    }
+                ]
+
+                print("\nLIST BOBOT")
+
+                for item in list_bobot:
+
+                    print(
+                        item["id_kriteria"],
+                        item["nilai_bobot"]
+                    )
+
+                # ----------------------
+                # SAVE BOBOT
+                # ----------------------
+
+                result = (
+                    service_bobot
+                    .input_bobot_role_teknologi(
+                        id_role_teknologi,
+                        list_bobot
+                    )
+                )
+
+                print(
+                    "\nHASIL SERVICE:"
+                )
+
+                print(result)
+
+                if (
+                    result["status"]
+                    !=
+                    "success"
+                ):
+
+                    raise Exception(
+                        result["message"]
+                    )
+            # ==========================
+            # PROSES SWARA
+            # ==========================
+            print("\n===================================")
+            print("PROSES SWARA")
+            print("===================================")
+
+            service_swara = (
+                ServiceSwara(conn)
+            )
+
+            hasil_swara = (
+                service_swara
+                .proses_swara_role_teknologi(
+                    id_role_teknologi
+                )
+            )
+
+            print(
+                "\nHASIL SWARA"
+            )
+
+            print(
+                hasil_swara
+            )
+
+            if (
+                hasil_swara["status"]
+                !=
+                "success"
+            ):
+                raise Exception(
+                    hasil_swara["message"]
+                )
+
+            print("\n===================================")
+            print("SELESAI TAMBAH ROLE")
+            print("===================================")
 
             messages.success(
                 request,
@@ -2993,6 +3328,13 @@ def tambah_role_it_view(request):
             )
 
         except Exception as e:
+
+            traceback.print_exc()
+
+            print(
+                "\nERROR:",
+                str(e)
+            )
 
             messages.error(
                 request,
@@ -3002,6 +3344,8 @@ def tambah_role_it_view(request):
     return redirect(
         "manajemenroleteknologi_it"
     )
+    
+    
 def hapus_role_it_view(
     request,
     id_role
@@ -3059,7 +3403,6 @@ def hapus_teknologi_it_view(
     return redirect(
         "manajemenroleteknologi_it"
     )
-from django.shortcuts import get_object_or_404
 
 def edit_role_it_view(request, id_role):
 
@@ -3068,56 +3411,275 @@ def edit_role_it_view(request, id_role):
         id_role=id_role
     )
 
+    # ====================================
+    # GET DATA UNTUK MODAL EDIT
+    # ====================================
+
+    if request.method == "GET":
+
+        role_teknologi_list = (
+            RoleTeknologi.objects
+            .filter(role=role)
+            .select_related("teknologi")
+        )
+
+        data_teknologi = []
+
+        repo_bobot = (
+            BobotKriteriaRepository(
+                connection
+            )
+        )
+
+        for rt in role_teknologi_list:
+
+            bobot_list = (
+                repo_bobot
+                .ambil_bobot_role_teknologi(
+                    rt.id_role_teknologi
+                )
+            )
+
+            data_teknologi.append({
+
+                "id_role_teknologi":
+                    rt.id_role_teknologi,
+
+                "id_teknologi":
+                    rt.teknologi.id_teknologi,
+
+                "nama_teknologi":
+                    rt.teknologi.nama_teknologi,
+
+                "bobot":
+                    bobot_list
+
+            })
+
+        return JsonResponse({
+
+            "id_role":
+                role.id_role,
+
+            "nama_role":
+                role.nama_role,
+
+            "min_ram":
+                role.min_ram,
+
+            "min_storage":
+                role.min_storage,
+
+            "min_processor_score":
+                role.min_processor_score,
+
+            "teknologi":
+                data_teknologi
+
+        })
+
+    # ====================================
+    # UPDATE ROLE
+    # ====================================
+
     if request.method == "POST":
 
         try:
 
-            role.nama_role = request.POST.get(
-                "nama_role"
-            )
+            with transaction.atomic():
 
-            role.min_ram = int(
-                request.POST.get(
-                    "min_ram",
-                    0
+                role.nama_role = (
+                    request.POST.get(
+                        "nama_role"
+                    )
                 )
-            )
 
-            role.min_storage = int(
-                request.POST.get(
-                    "min_storage",
-                    0
+                role.min_ram = int(
+                    request.POST.get(
+                        "min_ram",
+                        0
+                    )
                 )
-            )
 
-            role.min_processor_score = int(
-                request.POST.get(
-                    "min_processor_score",
-                    0
+                role.min_storage = int(
+                    request.POST.get(
+                        "min_storage",
+                        0
+                    )
                 )
-            )
 
-            role.save()
-
-            RoleTeknologi.objects.filter(
-                role=role
-            ).delete()
-
-            teknologi_ids = request.POST.getlist(
-                "teknologi"
-            )
-
-            for teknologi_id in teknologi_ids:
-
-                RoleTeknologi.objects.create(
-                    id_role_teknologi=
-                    str(uuid.uuid4())[:12],
-
-                    role=role,
-
-                    teknologi_id=
-                    teknologi_id
+                role.min_processor_score = int(
+                    request.POST.get(
+                        "min_processor_score",
+                        0
+                    )
                 )
+
+                role.save()
+
+                # ==========================
+                # HAPUS ROLE TEKNOLOGI LAMA
+                # ==========================
+
+                RoleTeknologi.objects.filter(
+                    role=role
+                ).delete()
+
+                # ==========================
+                # SIMPAN TEKNOLOGI BARU
+                # ==========================
+
+                teknologi_ids = (
+                    request.POST.getlist(
+                        "teknologi"
+                    )
+                )
+
+                KRITERIA_MAPPING = {
+
+                    "processor":
+                        "KR001",
+
+                    "ram":
+                        "KR002",
+
+                    "storage":
+                        "KR003",
+
+                    "berat":
+                        "KR004",
+
+                    "layar":
+                        "KR005",
+
+                    "baterai":
+                        "KR006"
+                }
+
+                service_bobot = (
+                    ServiceBobotKriteria(
+                        connection
+                    )
+                )
+
+                for teknologi_id in teknologi_ids:
+
+                    role_teknologi = (
+                        RoleTeknologi.objects.create(
+
+                            id_role_teknologi=
+                                str(
+                                    uuid.uuid4()
+                                )[:12],
+
+                            role=role,
+
+                            teknologi_id=
+                                teknologi_id
+                        )
+                    )
+
+                    list_bobot = [
+
+                        {
+                            "id_kriteria":
+                                KRITERIA_MAPPING[
+                                    "processor"
+                                ],
+
+                            "nilai_bobot":
+                                request.POST.get(
+                                    f"processor_weight_{teknologi_id}",
+                                    3
+                                )
+                        },
+
+                        {
+                            "id_kriteria":
+                                KRITERIA_MAPPING[
+                                    "ram"
+                                ],
+
+                            "nilai_bobot":
+                                request.POST.get(
+                                    f"ram_weight_{teknologi_id}",
+                                    3
+                                )
+                        },
+
+                        {
+                            "id_kriteria":
+                                KRITERIA_MAPPING[
+                                    "storage"
+                                ],
+
+                            "nilai_bobot":
+                                request.POST.get(
+                                    f"storage_weight_{teknologi_id}",
+                                    3
+                                )
+                        },
+
+                        {
+                            "id_kriteria":
+                                KRITERIA_MAPPING[
+                                    "berat"
+                                ],
+
+                            "nilai_bobot":
+                                request.POST.get(
+                                    f"berat_weight_{teknologi_id}",
+                                    3
+                                )
+                        },
+
+                        {
+                            "id_kriteria":
+                                KRITERIA_MAPPING[
+                                    "layar"
+                                ],
+
+                            "nilai_bobot":
+                                request.POST.get(
+                                    f"layar_weight_{teknologi_id}",
+                                    3
+                                )
+                        },
+
+                        {
+                            "id_kriteria":
+                                KRITERIA_MAPPING[
+                                    "baterai"
+                                ],
+
+                            "nilai_bobot":
+                                request.POST.get(
+                                    f"baterai_weight_{teknologi_id}",
+                                    3
+                                )
+                        }
+
+                    ]
+
+                    result = (
+                        service_bobot
+                        .input_bobot_role_teknologi(
+                            role_teknologi
+                            .id_role_teknologi,
+
+                            list_bobot
+                        )
+                    )
+
+                    if (
+                        result["status"]
+                        !=
+                        "success"
+                    ):
+
+                        raise Exception(
+                            result["message"]
+                        )
 
             messages.success(
                 request,
@@ -3131,9 +3693,9 @@ def edit_role_it_view(request, id_role):
                 f"Gagal update role: {str(e)}"
             )
 
-    return redirect(
-        "manajemenroleteknologi_it"
-    )
+        return redirect(
+            "manajemenroleteknologi_it"
+        )
     
 def edit_teknologi_it_view(
     request,

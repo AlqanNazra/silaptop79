@@ -55,3 +55,6 @@ class IBobotKriteriaRepositoryImpl(IBobotkriteriaRepository):
 
     def update_nilai_swara(self, id_bobot):
         pass
+    
+    def tambah_bobot_kriteria(self,data):
+        pass

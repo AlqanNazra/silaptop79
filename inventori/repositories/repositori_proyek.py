@@ -1,6 +1,6 @@
 import logging
 
-from interfaces.interface_repositori_proyek import IProyekRepository
+from .interfaces.interface_repositori_proyek import IProyekRepository
 
 logger = logging.getLogger(__name__)
 
@@ -14,26 +14,18 @@ class ProyekRepository(IProyekRepository):
     # TAMBAH
     # ===================================
     def tambah(self, data):
-
-        query = """
-        SELECT tambah_proyek(%s,%s,%s,%s);
-        """
-
+        query = """SELECT tambah_proyek(%s,%s,%s,%s);"""
         with self.conn.cursor() as cur:
-
-            cur.execute(query, (
-                data.nama_proyek,
-                data.client_perusahaan,
-                data.mulai_proyek,
-                data.akhir_proyek
-            ))
-
-            logger.info(
-                f"Tambah proyek sukses "
-                f"{data.nama_proyek}"
+            cur.execute(
+                query,
+                (
+                    data.nama_proyek,
+                    data.user_perusahaan,
+                    data.mulai_proyek,
+                    data.akhir_proyek
+                )
             )
-
-            return True
+            return cur.fetchone()[0]
 
     # ===================================
     # UPDATE
@@ -49,7 +41,7 @@ class ProyekRepository(IProyekRepository):
             cur.execute(query, (
                 data.id_proyek,
                 data.nama_proyek,
-                data.client_perusahaan,
+                data.user_perusahaan,
                 data.mulai_proyek,
                 data.akhir_proyek
             ))

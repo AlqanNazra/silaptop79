@@ -603,21 +603,37 @@
                                 <input type="number" name="min_processor_score" class="form-control" placeholder="5000" required>
                             </div>
                         </div>
+                        <div class="form-group" style="margin-bottom:24px;">
+                        <label>Teknologi Pendukung</label>
 
-                        <div class="form-group" style="margin-bottom: 24px;">
-                            <label>Teknologi Pendukung</label>
-                            <div class="tech-checkboxes">
-                                {% for teknologi in teknologi_list %}
-                                <label class="tech-checkbox-item">
-                                    <input type="checkbox" name="teknologi" value="{{ teknologi.id_teknologi }}">
-                                    {{ teknologi.nama_teknologi }}
-                                </label>
-                                {% empty %}
-                                <span style="color: #94a3b8; font-size: 12px; font-style: italic;">Belum ada teknologi pendukung.</span>
-                                {% endfor %}
-                            </div>
+                        <div class="tech-checkboxes">
+
+                            {% for teknologi in teknologi_list %}
+
+                            <label class="tech-checkbox-item">
+
+                                <input
+                                    type="checkbox"
+                                    class="teknologi-checkbox"
+                                    name="teknologi"
+                                    value="{{ teknologi.id_teknologi }}"
+                                    data-nama="{{ teknologi.nama_teknologi }}">
+
+                                {{ teknologi.nama_teknologi }}
+
+                            </label>
+
+                            {% empty %}
+
+                            <span style="color:#94a3b8;">
+                                Belum ada teknologi terdaftar
+                            </span>
+
+                            {% endfor %}
+
                         </div>
-
+                    </div>
+                    <div id="teknologi-weight-container"></div>
                         <button type="submit" class="btn-submit">
                             <i class="fa-solid fa-save"></i> Simpan Role
                         </button>
@@ -860,31 +876,122 @@
 
 <!-- Modal: Edit Role -->
 <div class="modal-overlay" id="editRoleModal">
-    <div class="modal-box">
-        <h3 class="modal-title"><i class="fa-solid fa-user-gear"></i> Edit Kebutuhan Role</h3>
+    <div class="modal-box" style="max-width:1000px; width:95%;">
+
+        <h3 class="modal-title">
+            <i class="fa-solid fa-user-gear"></i>
+            Edit Kebutuhan Role
+        </h3>
+
         <form id="editRoleForm" method="POST">
+
             {% csrf_token %}
+
             <div class="form-grid">
+
                 <div class="form-group">
                     <label>Nama Role</label>
-                    <input type="text" name="nama_role" id="edit_nama_role" class="form-control" required>
+
+                    <input
+                        type="text"
+                        name="nama_role"
+                        id="edit_nama_role"
+                        class="form-control"
+                        required>
                 </div>
+
                 <div class="form-group">
                     <label>Minimum RAM (GB)</label>
-                    <input type="number" name="min_ram" id="edit_min_ram" class="form-control" required>
+
+                    <input
+                        type="number"
+                        name="min_ram"
+                        id="edit_min_ram"
+                        class="form-control"
+                        required>
                 </div>
+
                 <div class="form-group">
                     <label>Minimum Storage (GB)</label>
-                    <input type="number" name="min_storage" id="edit_min_storage" class="form-control" required>
+
+                    <input
+                        type="number"
+                        name="min_storage"
+                        id="edit_min_storage"
+                        class="form-control"
+                        required>
                 </div>
+
                 <div class="form-group">
                     <label>Min CPU Benchmark Score</label>
-                    <input type="number" name="min_processor_score" id="edit_min_processor_score" class="form-control" required>
+
+                    <input
+                        type="number"
+                        name="min_processor_score"
+                        id="edit_min_processor_score"
+                        class="form-control"
+                        required>
+                </div>
+
+            </div>
+
+            <!-- Teknologi -->
+            <hr style="margin:20px 0;">
+
+            <h4>
+                <i class="fa-solid fa-microchip"></i>
+                Teknologi Pendukung
+            </h4>
+
+            <div
+                class="tech-checkboxes"
+                id="edit_teknologi_container">
+
+            </div>
+
+            <!-- Bobot -->
+            <hr style="margin:20px 0;">
+
+            <h4>
+                <i class="fa-solid fa-sliders"></i>
+                Bobot Kriteria
+            </h4>
+
+            <div
+                id="edit_bobot_container">
+
+            </div>
+
+            <!-- SWARA -->
+            <hr style="margin:20px 0;">
+
+            <h4>
+                <i class="fa-solid fa-chart-line"></i>
+                Hasil SWARA
+            </h4>
+
+            <div
+                id="edit_swara_container">
+                <div
+                    style="
+                    padding:12px;
+                    background:#f8fafc;
+                    border-radius:8px;">
+                    Belum ada hasil SWARA
                 </div>
             </div>
             <div class="modal-actions">
-                <button type="button" class="modal-btn modal-btn-cancel" onclick="closeEditRoleModal()">Batal</button>
-                <button type="submit" class="modal-btn modal-btn-save">Simpan Perubahan</button>
+                <button
+                    type="button"
+                    class="modal-btn modal-btn-cancel"
+                    onclick="closeEditRoleModal()">
+                    Batal
+                </button>
+                <button
+                    type="submit"
+                    class="modal-btn modal-btn-save">
+                    Simpan Perubahan
+                </button>
             </div>
         </form>
     </div>
@@ -972,6 +1079,361 @@
             window.location = '/it/hapus-teknologi/' + id + '/';
         }
     }
+
+    function openEditRoleModal(
+        roleId
+    ){
+
+        fetch(
+            `/role/${roleId}/detail/`
+        )
+
+        .then(
+            response => response.json()
+        )
+
+        .then(
+            data => {
+
+                document
+                .getElementById(
+                    'edit_nama_role'
+                )
+                .value =
+                data.nama_role;
+                const teknologiContainer =
+                document.getElementById('edit_teknologi_container');
+                teknologiContainer.innerHTML = '';
+                data.teknologi.forEach(t => {
+                    teknologiContainer.innerHTML += `
+                        <label
+                            class="tech-checkbox-item">
+                            <input
+                                type="checkbox"
+                                checked
+                                name="teknologi"
+                                value="${t.id_teknologi}">
+                            ${t.nama_teknologi}
+                        </label>
+                    `;
+                });
+                const bobotContainer =
+                document.getElementById(
+                    'edit_bobot_container'
+                );
+                bobotContainer.innerHTML = '';
+                data.teknologi.forEach(t => {
+                    bobotContainer.innerHTML +=
+                    createEditBobotForm(
+                        t.id_teknologi,
+                        t.nama_teknologi
+                    );
+                });
+                data.teknologi.forEach(t => {
+                    t.bobot.forEach(b => {
+                        const nama =
+                        b.nama_kriteria.toLowerCase();
+                        const input =
+                        document.querySelector(
+                            `[name="${nama}_weight_${t.id_teknologi}"]`
+                        );
+                        if(input){
+                            input.value =
+                                b.nilai_bobot;
+                        }
+                    });
+                });
+                const swaraContainer =
+                document.getElementById(
+                    'edit_swara_container'
+                );
+                swaraContainer.innerHTML = '';
+                data.teknologi.forEach(t => {
+
+                let html = `
+
+                    <div
+                        class="swara-card"
+                        style="
+                            margin-bottom:15px;
+                            padding:15px;
+                            background:#f8fafc;
+                            border-radius:10px;
+                        ">
+
+                        <h5>
+                            ${t.nama_teknologi}
+                        </h5>
+
+                        <table
+                            style="
+                                width:100%;
+                                margin-top:10px;
+                            ">
+                `;
+
+                t.bobot.forEach(b => {
+
+                    html += `
+                        <tr>
+                            <td>
+                                ${b.nama_kriteria}
+                            </td>
+
+                            <td>
+                                ${b.nilai_swara ?? '-'}
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                html += `
+                        </table>
+                    </div>
+                `;
+
+                swaraContainer.innerHTML += html;
+
+            });
+            }
+        );
+
+    }
+
+
+    function createBobotForm(teknologiId, teknologiNama) {
+
+        return `
+            <div class="role-bobot-container teknologi-weight-card"
+                id="weight-${teknologiId}"
+                style="margin-top:20px;">
+
+                <h4>
+                    <i class="fa-solid fa-laptop-code"></i>
+                    ${teknologiNama}
+                </h4>
+
+                <h5>
+                    Tentukan urutan kepentingan kriteria laptop untuk teknologi ini
+                </h5>
+
+                <input type="hidden"
+                    name="teknologi_selected[]"
+                    value="${teknologiId}">
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Processor</label>
+                        <input
+                            type="number"
+                            name="processor_weight_${teknologiId}"
+                            min="1"
+                            max="6"
+                            value="3"
+                            class="form-control">
+                    </div>
+
+                    <div class="form-group">
+                        <label>RAM</label>
+                        <input
+                            type="number"
+                            name="ram_weight_${teknologiId}"
+                            min="1"
+                            max="6"
+                            value="3"
+                            class="form-control">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Storage</label>
+                        <input
+                            type="number"
+                            name="storage_weight_${teknologiId}"
+                            min="1"
+                            max="6"
+                            value="3"
+                            class="form-control">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Berat</label>
+                        <input
+                            type="number"
+                            name="berat_weight_${teknologiId}"
+                            min="1"
+                            max="6"
+                            value="3"
+                            class="form-control">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Ukuran Layar</label>
+                        <input
+                            type="number"
+                            name="layar_weight_${teknologiId}"
+                            min="1"
+                            max="6"
+                            value="3"
+                            class="form-control">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Daya Baterai</label>
+                        <input
+                            type="number"
+                            name="baterai_weight_${teknologiId}"
+                            min="1"
+                            max="6"
+                            value="3"
+                            class="form-control">
+                    </div>
+                </div>
+
+            </div>
+        `;
+    }
+
+    function createEditBobotForm(
+        teknologiId,
+        teknologiNama
+    ) {
+
+        return `
+
+        <div
+            class="role-bobot-container"
+            id="edit-weight-${teknologiId}">
+
+            <h5>
+                ${teknologiNama}
+            </h5>
+
+            <div class="form-row">
+
+                <div class="form-group">
+                    <label>Processor</label>
+
+                    <input
+                        type="number"
+                        min="1"
+                        max="6"
+                        name="processor_weight_${teknologiId}"
+                        class="form-control">
+                </div>
+
+                <div class="form-group">
+                    <label>RAM</label>
+
+                    <input
+                        type="number"
+                        min="1"
+                        max="6"
+                        name="ram_weight_${teknologiId}"
+                        class="form-control">
+                </div>
+
+            </div>
+
+            <div class="form-row">
+
+                <div class="form-group">
+                    <label>Storage</label>
+
+                    <input
+                        type="number"
+                        min="1"
+                        max="6"
+                        name="storage_weight_${teknologiId}"
+                        class="form-control">
+                </div>
+
+                <div class="form-group">
+                    <label>Berat</label>
+
+                    <input
+                        type="number"
+                        min="1"
+                        max="6"
+                        name="berat_weight_${teknologiId}"
+                        class="form-control">
+                </div>
+
+            </div>
+
+            <div class="form-row">
+
+                <div class="form-group">
+                    <label>Layar</label>
+
+                    <input
+                        type="number"
+                        min="1"
+                        max="6"
+                        name="layar_weight_${teknologiId}"
+                        class="form-control">
+                </div>
+
+                <div class="form-group">
+                    <label>Baterai</label>
+
+                    <input
+                        type="number"
+                        min="1"
+                        max="6"
+                        name="baterai_weight_${teknologiId}"
+                        class="form-control">
+                </div>
+
+            </div>
+
+        </div>
+        `;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+
+        const container =
+            document.getElementById('teknologi-weight-container');
+
+        const checkboxes =
+            document.querySelectorAll('.teknologi-checkbox');
+
+        checkboxes.forEach(cb => {
+
+            cb.addEventListener('change', function() {
+
+                const id = this.value;
+                const nama = this.dataset.nama;
+
+                const existing =
+                    document.getElementById(`weight-${id}`);
+
+                if (this.checked) {
+
+                    if (!existing) {
+                        container.insertAdjacentHTML(
+                            'beforeend',
+                            createBobotForm(id, nama)
+                        );
+                    }
+
+                } else {
+
+                    if (existing) {
+                        existing.remove();
+                    }
+
+                }
+
+            });
+
+        });
+
+    });
 
     // Close modals on overlay click
     document.querySelectorAll('.modal-overlay').forEach(overlay => {

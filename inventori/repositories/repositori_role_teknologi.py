@@ -45,24 +45,26 @@ class RoleTeknologiRepository(
 
     def tambah(self, data):
 
-        query = """
-        SELECT tambah_role_teknologi(
-            %s,
-            %s
-        );
-        """
+            query = """
+            SELECT tambah_role_teknologi(
+                %s,
+                %s
+            );
+            """
 
-        with self.conn.cursor() as cur:
+            with self.conn.cursor() as cur:
 
-            cur.execute(
-                query,
-                (
-                    data.id_role,
-                    data.id_teknologi
+                cur.execute(
+                    query,
+                    (
+                        data.id_role,
+                        data.id_teknologi
+                    )
                 )
-            )
 
-            return cur.fetchone()[0]
+                result = cur.fetchone()
+
+                return result[0]
 
     def hapus(
         self,

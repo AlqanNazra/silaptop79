@@ -1,13 +1,11 @@
 import logging
 
-from interfaces.interface_repositori_proyek import IProyekRepository
+from .interfaces.interface_project_role import IProjectRoleRepository
 
 logger = logging.getLogger(__name__)
 
 
-class ProjectRoleRepository(
-    IProjectRoleRepository
-):
+class ProjectRoleRepository(IProjectRoleRepository):
 
     def __init__(self, conn):
         self.conn = conn
@@ -72,23 +70,16 @@ class ProjectRoleRepository(
             return result
 
     def get_by_role(self, id_role):
-
         query = """
         SELECT *
         FROM get_projectrole_by_role(%s);
         """
-
         with self.conn.cursor() as cur:
-
             cur.execute(query, (id_role,))
-
             columns = [col[0] for col in cur.description]
-
             result = []
-
             for row in cur.fetchall():
                 result.append(dict(zip(columns, row)))
-
             return result
 
     def validate_relation(

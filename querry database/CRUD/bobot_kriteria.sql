@@ -26,6 +26,83 @@ SELECT *
 FROM ambil_kriteria()
 LIMIT 5;
 
+CREATE OR REPLACE FUNCTION tambah_bobot_kriteria(
+
+    p_id_role_teknologi VARCHAR,
+    p_id_kriteria VARCHAR,
+    p_nilai_bobot FLOAT
+
+)
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+AS
+$$
+DECLARE
+
+    v_role_teknologi INTEGER;
+
+    v_kriteria INTEGER;
+
+BEGIN
+
+    SELECT COUNT(*)
+    INTO v_role_teknologi
+    FROM role_teknologi
+    WHERE id_role_teknologi =
+          p_id_role_teknologi;
+
+    IF v_role_teknologi = 0 THEN
+
+        RAISE EXCEPTION
+        'Role teknologi tidak ditemukan';
+
+    END IF;
+
+    SELECT COUNT(*)
+    INTO v_kriteria
+    FROM dss_kriteria
+    WHERE id_kriteria =
+          p_id_kriteria;
+
+    IF v_kriteria = 0 THEN
+
+        RAISE EXCEPTION
+        'Kriteria tidak ditemukan';
+
+    END IF;
+
+    INSERT INTO dss_bobotkriteria(
+
+        id_bobot,
+
+        id_role_teknologi,
+
+        id_kriteria,
+
+        nilai_bobot
+
+    )
+    VALUES(
+
+        f_generate_id(
+            'BBT',
+            'dss_bobotkriteria',
+            'id_bobot'
+        ),
+
+        p_id_role_teknologi,
+
+        p_id_kriteria,
+
+        p_nilai_bobot
+
+    );
+
+    RETURN TRUE;
+
+END;
+$$;
+
 -- Tambah Bobot function
 CREATE OR REPLACE FUNCTION ambil_kriteria()
 RETURNS TABLE (
@@ -286,3 +363,21 @@ $$ LANGUAGE plpgsql;
 
 DROP FUNCTION cari_bobot_kriteria_by_roles
 
+CREATE OR REPLACE FUNCTION update_nilai_swara(
+    f_id_bobot VARCHAR,
+    f_nilai_swara FLOAT
+)
+RETURNS TEXT
+AS
+$$
+BEGIN
+
+    UPDATE dss_bobotkriteria
+    SET nilai_swara = f_nilai_swara
+    WHERE id_bobot = f_id_bobot;
+
+    RETURN 'OK';
+
+END;
+$$
+LANGUAGE plpgsql;

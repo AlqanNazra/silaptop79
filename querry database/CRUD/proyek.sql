@@ -16,9 +16,18 @@ CREATE OR REPLACE FUNCTION tambah_proyek(
     p_mulai_proyek DATE,
     p_akhir_proyek DATE
 )
-RETURNS BOOLEAN AS
+RETURNS VARCHAR
 $$
+DECLARE
+    v_id_proyek VARCHAR;
 BEGIN
+
+    v_id_proyek :=
+        f_generate_id(
+            'PRYK',
+            'inventori_proyek',
+            'id_proyek'
+        );
 
     INSERT INTO inventori_proyek(
         id_proyek,
@@ -30,11 +39,7 @@ BEGIN
         updated_at
     )
     VALUES(
-        f_generate_id(
-            'PRYK',
-            'inventori_proyek',
-            'id_proyek'
-        ),
+        v_id_proyek,
         p_nama_proyek,
         p_user_perusahaan,
         p_mulai_proyek,
@@ -43,10 +48,9 @@ BEGIN
         CURRENT_TIMESTAMP
     );
 
-    RETURN TRUE;
+    RETURN v_id_proyek;
 
 END;
-$$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION update_proyek(
     p_id_proyek VARCHAR,

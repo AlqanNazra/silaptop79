@@ -259,13 +259,41 @@ class ServiceSwara:
             for item in hasil:
 
                 dto = BobotKriteriaDTO(
-                    id_bobot=item["id_bobot"],
-                    nilai_swara=item["nilai_swara"]
+
+                    id_bobot=
+                        item["id_bobot"],
+
+                    nilai_swara=
+                        item["nilai_swara"]
                 )
 
-                self.repoBK.update_nilai_swara(
-                    dto
+                result = (
+                    self.repoBK
+                    .update_nilai_swara(
+                        dto
+                    )
                 )
+
+                print(
+                    "UPDATE SWARA",
+                    item["id_bobot"],
+                    item["nilai_swara"],
+                    result
+                )
+            
+            print("\nUPDATE DATABASE SWARA")
+            print(
+                "ID BOBOT :",
+                item["id_bobot"]
+            )
+            print(
+                "KRITERIA :",
+                item["nama_kriteria"]
+            )
+            print(
+                "SWARA :",
+                item["nilai_swara"]
+            )
 
             return {
                 "status": "success",
@@ -275,11 +303,7 @@ class ServiceSwara:
         except Exception as e:
             return {"status": "error","message": str(e)}
         
-    def proses_role(
-        self,
-        id_role,
-        role_teknologi_list
-    ):
+    def proses_role(self,id_role,role_teknologi_list):
         aggregate_service = (
             AggregationService(
                 self.conn
@@ -299,14 +323,12 @@ class ServiceSwara:
             hasil_teknologi.append(
                 hasil["data"]
             )
-
         hasil_role = (
             aggregate_service
             .aggregate_teknologi_role(
                 hasil_teknologi
             )
         )
-
         return {
             "id_role": id_role,
             "swara_teknologi":hasil_teknologi,

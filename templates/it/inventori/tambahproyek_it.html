@@ -379,11 +379,51 @@
                             <div class="form-row full">
                                 <div class="form-group">
                                     <label>Nama Proyek</label>
-                                    <input type="text" class="form-control" name="nama_proyek"
-                                        placeholder="Contoh: Sistem Informasi Koperasi" required style="font-weight: 600;">
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        name="nama_proyek"
+                                        placeholder="Contoh: Sistem Informasi Koperasi"
+                                        required
+                                        style="font-weight: 600;"
+                                    >
                                 </div>
                             </div>
-                            
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Client Perusahaan</label>
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        name="user_perusahaan"
+                                        placeholder="Contoh: PT ABC Indonesia"
+                                        required
+                                    >
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Tanggal Mulai Proyek</label>
+                                    <input
+                                        type="date"
+                                        class="form-control"
+                                        name="mulai_proyek"
+                                        required
+                                    >
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Tanggal Akhir Proyek</label>
+                                    <input
+                                        type="date"
+                                        class="form-control"
+                                        name="akhir_proyek"
+                                        required
+                                    >
+                                </div>
+                            </div>
                             <div style="margin-top: 32px; margin-bottom: 16px; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px;">
                                 <h4 style="margin: 0; font-size: 15px; font-weight: 800; color: #1e293b; display: flex; align-items: center; gap: 8px;">
                                     <i class="fa-solid fa-users-gear" style="color: #0b57c6;"></i> Kebutuhan Role & Konfigurasi DSS
@@ -410,41 +450,42 @@
                                         </div>
                                     </div>
                                     
-                                    <div class="role-bobot-container">
-                                        <h4><i class="fa-solid fa-sliders"></i> Bobot Kriteria Kebutuhan Laptop (Skala 1 - 5)</h4>
+                                    {% comment %} <div class="role-bobot-container">
+                                        <h4><i class="fa-solid fa-sliders"></i> Bobot Kriteria Kebutuhan Laptop (Skala 1 - 6)</h4>
+                                        <h5><i class="fa-solid fa-sliders"></i> buat urutan kepentingan pada setiap kriteria pada latop</h5>
                                         <div class="form-row">
                                             <div class="form-group">
                                                 <label>Processor (Kapasitas & Benchmark)</label>
-                                                <input type="number" name="processor_weight[]" min="1" max="5" value="3" class="form-control" required>
+                                                <input type="number" name="processor_weight[]" min="1" max="6" value="3" class="form-control" required>
                                             </div>
                                             <div class="form-group">
                                                 <label>RAM (Multitasking)</label>
-                                                <input type="number" name="ram_weight[]" min="1" max="5" value="3" class="form-control" required>
+                                                <input type="number" name="ram_weight[]" min="1" max="6" value="3" class="form-control" required>
                                             </div>
                                         </div>
 
                                         <div class="form-row">
                                             <div class="form-group">
                                                 <label>Storage (Kecepatan & Kapasitas)</label>
-                                                <input type="number" name="storage_weight[]" min="1" max="5" value="3" class="form-control" required>
+                                                <input type="number" name="storage_weight[]" min="1" max="6" value="3" class="form-control" required>
                                             </div>
                                             <div class="form-group">
                                                 <label>Berat (Mobilitas Laptop)</label>
-                                                <input type="number" name="berat_weight[]" min="1" max="5" value="3" class="form-control" required>
+                                                <input type="number" name="berat_weight[]" min="1" max="6" value="3" class="form-control" required>
                                             </div>
                                         </div>
 
                                         <div class="form-row">
                                             <div class="form-group">
                                                 <label>Ukuran Layar (Kenyamanan Visual)</label>
-                                                <input type="number" name="layar_weight[]" min="1" max="5" value="3" class="form-control" required>
+                                                <input type="number" name="layar_weight[]" min="1" max="6" value="3" class="form-control" required>
                                             </div>
                                             <div class="form-group">
                                                 <label>Daya Baterai (Ketahanan Kerja)</label>
-                                                <input type="number" name="baterai_weight[]" min="1" max="5" value="3" class="form-control" required>
+                                                <input type="number" name="baterai_weight[]" min="1" max="6" value="3" class="form-control" required>
                                             </div>
                                         </div>
-                                    </div>
+                                    </div> {% endcomment %}
                                 </div>  
                             </div>
 

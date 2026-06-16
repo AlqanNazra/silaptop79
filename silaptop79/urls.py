@@ -193,4 +193,5 @@ path(
     hapus_teknologi_it_view,
     name='hapus_teknologi_it'
 ),
+
 ]
