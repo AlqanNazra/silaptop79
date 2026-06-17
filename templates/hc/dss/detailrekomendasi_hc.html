@@ -265,7 +265,7 @@
 <body>
 
     <div class="dashboard-wrapper">
-        {% include 'it/components/sidebar.html' with active_page='hasil_rekomendasi' %}
+        {% include 'hc/components/sidebar.html' with active_page='hasil_rekomendasi' %}
 
         <div class="main-content">
             <!-- Flash Messages -->
@@ -288,7 +288,7 @@
                     <h1 class="page-title">Detail Rekomendasi</h1>
                 </div>
                 <div class="nav-buttons">
-                    <a href="{% url 'hasilrekomendasi_it' %}" class="btn-nav btn-grey">Kembali ke Daftar</a>
+                    <a href="{% url 'hasilrekomendasi_hc' %}" class="btn-nav btn-grey">Kembali ke Daftar</a>
                 </div>
             </div>
 
@@ -376,7 +376,7 @@
                 </div>
 
                 <div class="footer-action">
-                    <a href="{% url 'riwayatpeminjamanlaptop_it' %}" style="text-decoration: none; width: 100%;">
+                    <a href="{% url 'riwayatpeminjamanlaptop_hc' %}" style="text-decoration: none; width: 100%;">
                         <button class="btn-history">
                             <i class="fa-solid fa-clock-rotate-left"></i> Lihat Riwayat Peminjaman
                         </button>
