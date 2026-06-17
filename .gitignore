@@ -37,3 +37,7 @@ venv.bak/
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+s e t t i n g . p y  
+# Temporary scratch files
+scratch/
