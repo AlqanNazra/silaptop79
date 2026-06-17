@@ -192,6 +192,13 @@ def pengajuanlaptop_it_view(request):
     status_filter = request.GET.get('status', '')
 
     try:
+        per_page = int(request.GET.get('per_page', 5))
+        if per_page not in [5, 15, 25, 50]:
+            per_page = 5
+    except ValueError:
+        per_page = 5
+
+    try:
         service = PengajuanService()
         semua_pengajuan = service.service_ambil_semua_pengajuan()
 
@@ -251,7 +258,7 @@ def pengajuanlaptop_it_view(request):
             ]
 
         from django.core.paginator import Paginator
-        paginator = Paginator(semua_pengajuan, 5)
+        paginator = Paginator(semua_pengajuan, per_page)
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
 
@@ -267,6 +274,7 @@ def pengajuanlaptop_it_view(request):
             'total_mendesak': total_mendesak,
             'search_query': search_query,
             'status_filter': status_filter,
+            'per_page': per_page,
         }
     except Exception as e:
         context = {
@@ -1243,6 +1251,13 @@ def manajemenlaptop_it_view(request):
     search_query = request.GET.get('q', '')
     status_filter = request.GET.get('status', '')
 
+    try:
+        per_page = int(request.GET.get('per_page', 5))
+        if per_page not in [5, 15, 25, 50]:
+            per_page = 5
+    except ValueError:
+        per_page = 5
+
     from inventori.models import LaptopInventori
     laptops = LaptopInventori.objects.select_related('id_processor', 'id_ram', 'id_storage').all()
 
@@ -1260,7 +1275,7 @@ def manajemenlaptop_it_view(request):
     laptops = laptops.order_by('id_laptop_inventori')
 
     from django.core.paginator import Paginator
-    paginator = Paginator(laptops, 5)
+    paginator = Paginator(laptops, per_page)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
@@ -1269,6 +1284,7 @@ def manajemenlaptop_it_view(request):
         'total': laptops.count(),
         'search_query': search_query,
         'status_filter': status_filter,
+        'per_page': per_page,
     }
     return render(request, 'it/inventori/manajemenlaptop_it.html', context)
 
@@ -1739,14 +1755,66 @@ def tambahspek_it_view(request):
 
     return render(request, 'it/dss/tambahspek_it.html')
 
-def detaillaptop_it_view(request):
-    return render(request, 'it/inventori/detaillaptop_it.html')
+def editdatalaptop_it_view(request, id_laptop):
+    from inventori.models import LaptopInventori, Processor, RAM, Storage
+    from inventori.services.laptop_inventori.update import UpdateLaptopInventoriService
+    from inventori.dto.dto_laptop_inventori import LaptopInventoriDTO
+    from django.contrib import messages
 
-def riwayatpeminjamanlaptop_it_view(request):
-    return render(request, 'it/inventori/riwayatpeminjamanlaptop_it.html')
+    try:
+        laptop = LaptopInventori.objects.get(id_laptop_inventori=id_laptop)
+    except LaptopInventori.DoesNotExist:
+        messages.error(request, 'Laptop tidak ditemukan.')
+        return redirect('manajemen_laptop_it')
 
-def editdatalaptop_it_view(request):
-    return render(request, 'it/inventori/editdatalaptop_it.html')
+    if request.method == 'POST':
+        try:
+            update_service = UpdateLaptopInventoriService()
+            kondisi = request.POST.get('kondisi')
+            status = request.POST.get('status')
+            lokasi = request.POST.get('lokasi')
+
+            if kondisi:
+                update_service.update_kondisi(id_laptop, kondisi)
+            if status:
+                update_service.update_status(id_laptop, status, lokasi)
+
+            # Update spesifikasi
+            id_processor = request.POST.get('id_processor')
+            id_ram = request.POST.get('id_ram')
+            id_storage = request.POST.get('id_storage')
+            
+            if id_processor and id_ram and id_storage:
+                dto = LaptopInventoriDTO(
+                    nama_laptop=laptop.nama_laptop,
+                    model=laptop.model,
+                    os=laptop.os,
+                    kondisi=kondisi or laptop.kondisi,
+                    status=status or laptop.status,
+                    lokasi=lokasi or laptop.lokasi,
+                    id_processor=id_processor,
+                    id_ram=id_ram,
+                    id_storage=id_storage,
+                    id_laptop_inventori=id_laptop
+                )
+                update_service.update_spek(dto)
+
+            messages.success(request, 'Data laptop berhasil diperbarui.')
+            return redirect('detaillaptop_it', id_laptop=id_laptop)
+        except Exception as e:
+            messages.error(request, f'Gagal mengupdate laptop: {str(e)}')
+
+    processors = Processor.objects.all()
+    rams = RAM.objects.all()
+    storages = Storage.objects.all()
+    
+    context = {
+        'laptop': laptop,
+        'processors': processors,
+        'rams': rams,
+        'storages': storages,
+    }
+    return render(request, 'it/inventori/editdatalaptop_it.html', context)
 
 
 
@@ -2226,6 +2294,13 @@ def pengajuanlaptop_talent_view(request):
                 if getattr(p, 'status', '').lower() == status_lower
             ]
 
+        try:
+            per_page = int(request.GET.get('per_page', 5))
+            if per_page not in [5, 15, 25, 50]:
+                per_page = 5
+        except ValueError:
+            per_page = 5
+
         import datetime as dt
         semua_pengajuan.sort(
             key=lambda x: x.tanggal_pengajuan if x.tanggal_pengajuan else dt.date.min,
@@ -2233,7 +2308,7 @@ def pengajuanlaptop_talent_view(request):
         )
 
         from django.core.paginator import Paginator
-        paginator = Paginator(semua_pengajuan, 5)
+        paginator = Paginator(semua_pengajuan, per_page)
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
 
@@ -2242,6 +2317,7 @@ def pengajuanlaptop_talent_view(request):
             'total_pengajuan': len(semua_pengajuan),
             'search_query': search_query,
             'status_filter': status_filter,
+            'per_page': per_page,
         }
 
         return render(
@@ -2289,6 +2365,13 @@ def riwayatpeminjamanlaptop_talent_view(request):
     status_filter = request.GET.get('status', '')
 
     try:
+        per_page = int(request.GET.get('per_page', 5))
+        if per_page not in [5, 15, 25, 50]:
+            per_page = 5
+    except ValueError:
+        per_page = 5
+
+    try:
         user_id = request.user.id_user if hasattr(request.user, 'id_user') else None
         service = PeminjamanService()
         riwayat_list = service.service_ambil_semua_peminjaman()
@@ -2334,7 +2417,7 @@ def riwayatpeminjamanlaptop_talent_view(request):
             ]
 
         from django.core.paginator import Paginator
-        paginator = Paginator(riwayat_list, 5)
+        paginator = Paginator(riwayat_list, per_page)
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
             
@@ -2347,6 +2430,7 @@ def riwayatpeminjamanlaptop_talent_view(request):
             'active_laptop': active_laptop,
             'search_query': search_query,
             'status_filter': status_filter,
+            'per_page': per_page,
         }
     except Exception as e:
         context = {

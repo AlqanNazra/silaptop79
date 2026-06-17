@@ -25,11 +25,20 @@
             min-height: 100vh;
         }
 
+        .sidebar {
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            flex-shrink: 0;
+        }
+
         .main-content {
             flex: 1;
-            margin-left: 260px;
             padding: 40px 50px;
             box-sizing: border-box;
+            max-width: none;
+            margin: 0;
+            min-width: 0;
         }
 
         /* Top Navigation */
@@ -38,6 +47,18 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 30px;
+        }
+
+        .breadcrumb {
+            font-size: 13px;
+            color: #64748b;
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+
+        .breadcrumb span {
+            color: #0b57c6;
+            font-weight: 600;
         }
 
         .page-title {
@@ -209,7 +230,10 @@
 
     <div class="main-content">
         <div class="top-nav">
-            <h1 class="page-title">Edit Data Laptop</h1>
+            <div>
+                <div class="breadcrumb">Data Laptop / <span>Edit Mode</span></div>
+                <h1 class="page-title">Edit Data Laptop</h1>
+            </div>
             <div class="header-actions">
                 <a href="{% url 'inventori:detaillaptop_hc' laptop.id_laptop_inventori %}" class="btn-cancel-text">Batal</a>
                 <button type="submit" form="editForm" class="btn-submit-pill">Simpan Perubahan</button>
@@ -356,5 +380,3 @@
 </body>
 
 </html>
-
-#uibaru

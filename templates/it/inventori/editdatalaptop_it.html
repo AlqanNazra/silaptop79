@@ -25,10 +25,19 @@
             display: flex;
         }
 
+        .sidebar {
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            flex-shrink: 0;
+        }
+
         .main-content {
             flex: 1;
-            margin-left: 260px;
             padding: 30px 50px;
+            max-width: none;
+            margin: 0;
+            min-width: 0;
         }
 
         /* Top Navigation (Header Area) - Identik dengan Riwayat */
@@ -89,7 +98,7 @@
         /* Grid Layout Sesuai Gambar Referensi */
         .edit-grid {
             display: grid;
-            grid-template-columns: 350px 1fr;
+            grid-template-columns: 1fr 320px;
             gap: 24px;
             align-items: start;
         }
@@ -210,41 +219,8 @@
             {% csrf_token %}
             <div class="edit-grid">
 
+                <!-- Left Column (col-left) -->
                 <div class="col-left">
-                    <div class="card">
-                        <div class="card-title" style="color: #005FAA;">
-                            <i class="fa-solid fa-circle-info"></i> Current Status
-                        </div>
-                        <div class="form-group">
-                            <label>Status Availability</label>
-                            <select name="status">
-                                <option value="tersedia" {% if laptop.status == 'tersedia' %}selected{% endif %}>Tersedia
-                                </option>
-                                <option value="dipinjam" {% if laptop.status == 'dipinjam' %}selected{% endif %}>Dipinjam
-                                </option>
-                                <option value="rusak" {% if laptop.status == 'rusak' %}selected{% endif %}>Rusak</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Lokasi</label>
-                            <input type="text" name="lokasi" value="{{ laptop.lokasi }}">
-                        </div>
-                        <div class="form-group">
-                            <label>Device Condition</label>
-                            <select name="kondisi">
-                                <option value="baik" {% if laptop.kondisi == 'baik' %}selected{% endif %}>Baik</option>
-                                <option value="rusak_ringan" {% if laptop.kondisi == 'rusak_ringan' %}selected{% endif %}>
-                                    Rusak Ringan</option>
-                                <option value="rusak_berat" {% if laptop.kondisi == 'rusak_berat' %}selected{% endif %}>
-                                    Rusak Berat</option>
-                            </select>
-                        </div>
-                    </div>
-                    <img src="https://images.unsplash.com/photo-1517336714460-d1b16dd1c06d?q=80&w=1000&auto=format&fit=crop"
-                        class="laptop-preview">
-                </div>
-
-                <div class="col-right">
                     <div class="card border-blue">
                         <div class="card-title">Basic Information</div>
                         <div class="row-group">
@@ -313,6 +289,36 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Right Column (col-right) -->
+                <div class="col-right">
+                    <div class="card">
+                        <div class="card-title" style="color: #005FAA;">
+                            <i class="fa-solid fa-circle-info"></i> Current Status
+                        </div>
+                        <div class="form-group">
+                            <label>Status Availability</label>
+                            <select name="status">
+                                <option value="tersedia" {% if laptop.status == 'tersedia' %}selected{% endif %}>Tersedia</option>
+                                <option value="dipinjam" {% if laptop.status == 'dipinjam' %}selected{% endif %}>Dipinjam</option>
+                                <option value="rusak" {% if laptop.status == 'rusak' %}selected{% endif %}>Rusak</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Lokasi</label>
+                            <input type="text" name="lokasi" value="{{ laptop.lokasi }}">
+                        </div>
+                        <div class="form-group">
+                            <label>Device Condition</label>
+                            <select name="kondisi">
+                                <option value="baik" {% if laptop.kondisi == 'baik' %}selected{% endif %}>Baik</option>
+                                <option value="rusak_ringan" {% if laptop.kondisi == 'rusak_ringan' %}selected{% endif %}>Rusak Ringan</option>
+                                <option value="rusak_berat" {% if laptop.kondisi == 'rusak_berat' %}selected{% endif %}>Rusak Berat</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </form>
     </div>

@@ -53,6 +53,13 @@ def manajemen_laptop_page(request):
     search_query = request.GET.get('q', '')
     status_filter = request.GET.get('status', '')
 
+    try:
+        per_page = int(request.GET.get('per_page', 5))
+        if per_page not in [5, 15, 25, 50]:
+            per_page = 5
+    except ValueError:
+        per_page = 5
+
     laptops = LaptopInventori.objects.select_related('id_processor', 'id_ram', 'id_storage').all()
 
     if search_query:
@@ -69,7 +76,7 @@ def manajemen_laptop_page(request):
     laptops = laptops.order_by('id_laptop_inventori')
 
     from django.core.paginator import Paginator
-    paginator = Paginator(laptops, 5)
+    paginator = Paginator(laptops, per_page)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
@@ -78,6 +85,7 @@ def manajemen_laptop_page(request):
         'total': laptops.count(),
         'search_query': search_query,
         'status_filter': status_filter,
+        'per_page': per_page,
     }
     return render(request, 'hc/inventori/manajemenlaptop_hc.html', context)
 
@@ -90,6 +98,13 @@ def pengajuan_page_view(request):
     """
     search_query = request.GET.get('q', '').strip()
     status_filter = request.GET.get('status', '').strip()
+
+    try:
+        per_page = int(request.GET.get('per_page', 5))
+        if per_page not in [5, 15, 25, 50]:
+            per_page = 5
+    except ValueError:
+        per_page = 5
 
     try:
         service = PengajuanService()
@@ -126,7 +141,7 @@ def pengajuan_page_view(request):
 
         # Pagination
         from django.core.paginator import Paginator
-        paginator = Paginator(filtered_pengajuan, 5)
+        paginator = Paginator(filtered_pengajuan, per_page)
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
 
@@ -138,6 +153,7 @@ def pengajuan_page_view(request):
             'total_ditolak': ditolak,
             'search_query': search_query,
             'status_filter': status_filter,
+            'per_page': per_page,
         }
     except Exception as e:
         messages.error(request, f'Gagal memuat data pengajuan: {str(e)}')

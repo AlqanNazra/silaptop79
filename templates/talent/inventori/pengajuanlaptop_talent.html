@@ -10,7 +10,8 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1.1">
@@ -324,7 +325,8 @@
             <div class="page-top">
                 <div class="page-top-left">
                     <h1>Halaman Formulir Pengajuan Laptop Baru</h1>
-                    <p>Lengkapi formulir di bawah ini untuk memulai proses pengadaan perangkat laptop baru di departemen Anda.</p>
+                    <p>Lengkapi formulir di bawah ini untuk memulai proses pengadaan perangkat laptop baru di departemen
+                        Anda.</p>
                 </div>
                 <a href="{% url 'dashboard_talent' %}" class="btn-back">
                     Kembali ke Dashboard
@@ -339,87 +341,87 @@
                 {% csrf_token %}
                 <div class="form-card">
 
-                <!-- Departemen & Role -->
-                <div class="form-row">
+                    <!-- Departemen & Role -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="departemen">Departemen</label>
+                            <select id="departemen" name="departemen" required>
+                                <option value="" disabled selected>Pilih Departemen</option>
+                                <option value="it">IT</option>
+                                <option value="hr">Human Resources</option>
+                                <option value="finance">Finance</option>
+                                <option value="marketing">Marketing</option>
+                                <option value="ops">Operations</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="role">Role</label>
+                            <select id="role" name="role" required>
+                                <option value="" disabled selected>Pilih Role</option>
+                                <option value="developer">Developer</option>
+                                <option value="designer">Designer</option>
+                                <option value="analyst">Analyst</option>
+                                <option value="manager">Manager</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <hr class="form-divider">
+
+                    <!-- Jenis Pengajuan -->
+                    <div class="form-group" style="margin-bottom: 28px;">
+                        <label>Jenis Pengajuan</label>
+                        <div class="jenis-toggle">
+                            <button type="button" class="jenis-btn" onclick="setJenis(this)">Peminjaman Baru</button>
+                            <button type="button" class="jenis-btn" onclick="setJenis(this)">Penggantian</button>
+                        </div>
+                    </div>
+
+                    <hr class="form-divider">
+
+                    <!-- Spesifikasi -->
+                    <div class="form-group" style="margin-bottom: 28px;">
+                        <label for="spesifikasi">Spesifikasi yang dibutuhkan</label>
+                        <textarea id="spesifikasi" name="spesifikasi"
+                            placeholder="Contoh: RAM 16GB, SSD 512GB, Intel i7 atau MacBook M2..."></textarea>
+                    </div>
+
+                    <!-- Alasan -->
+                    <div class="form-group" style="margin-bottom: 28px;">
+                        <label for="alasan">Alasan Pengajuan</label>
+                        <textarea id="alasan" name="alasan"
+                            placeholder="Jelaskan urgensi atau alasan kebutuhan perangkat..."></textarea>
+                    </div>
+
+                    <hr class="form-divider">
+
+                    <!-- Urgensi -->
                     <div class="form-group">
-                        <label for="departemen">Departemen</label>
-                        <select id="departemen" name="departemen" required>
-                            <option value="" disabled selected>Pilih Departemen</option>
-                            <option value="it">IT</option>
-                            <option value="hr">Human Resources</option>
-                            <option value="finance">Finance</option>
-                            <option value="marketing">Marketing</option>
-                            <option value="ops">Operations</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="role">Role</label>
-                        <select id="role" name="role" required>
-                            <option value="" disabled selected>Pilih Role</option>
-                            <option value="developer">Developer</option>
-                            <option value="designer">Designer</option>
-                            <option value="analyst">Analyst</option>
-                            <option value="manager">Manager</option>
-                        </select>
-                    </div>
-                </div>
-
-                <hr class="form-divider">
-
-                <!-- Jenis Pengajuan -->
-                <div class="form-group" style="margin-bottom: 28px;">
-                    <label>Jenis Pengajuan</label>
-                    <div class="jenis-toggle">
-                        <button class="jenis-btn active" onclick="setJenis(this)">Peminjaman Baru</button>
-                        <button class="jenis-btn" onclick="setJenis(this)">Penggantian</button>
-                    </div>
-                </div>
-
-                <hr class="form-divider">
-
-                <!-- Spesifikasi -->
-                <div class="form-group" style="margin-bottom: 28px;">
-                    <label for="spesifikasi">Spesifikasi yang dibutuhkan</label>
-                    <textarea id="spesifikasi" name="spesifikasi"
-                        placeholder="Contoh: RAM 16GB, SSD 512GB, Intel i7 atau MacBook M2..."></textarea>
-                </div>
-
-                <!-- Alasan -->
-                <div class="form-group" style="margin-bottom: 28px;">
-                    <label for="alasan">Alasan Pengajuan</label>
-                    <textarea id="alasan" name="alasan"
-                        placeholder="Jelaskan urgensi atau alasan kebutuhan perangkat..."></textarea>
-                </div>
-
-                <hr class="form-divider">
-
-                <!-- Urgensi -->
-                <div class="form-group">
-                    <label>Urgensi</label>
-                    <div class="urgensi-group">
-                        <div class="urgensi-card active" onclick="setUrgensi(this, false)">
-                            <div class="urgensi-title">Standar</div>
-                            <div class="urgensi-sub">7 Hari Kerja</div>
-                        </div>
-                        <div class="urgensi-card" onclick="setUrgensi(this, false)">
-                            <div class="urgensi-title">Tinggi</div>
-                            <div class="urgensi-sub">48 Jam</div>
-                        </div>
-                        <div class="urgensi-card" onclick="setUrgensi(this, true)">
-                            <div class="urgensi-title">Kritis</div>
-                            <div class="urgensi-sub">Segera</div>
+                        <label>Urgensi</label>
+                        <div class="urgensi-group">
+                            <div class="urgensi-card active" onclick="setUrgensi(this, false)">
+                                <div class="urgensi-title">Standar</div>
+                                <div class="urgensi-sub">7 Hari Kerja</div>
+                            </div>
+                            <div class="urgensi-card" onclick="setUrgensi(this, false)">
+                                <div class="urgensi-title">Tinggi</div>
+                                <div class="urgensi-sub">48 Jam</div>
+                            </div>
+                            <div class="urgensi-card" onclick="setUrgensi(this, true)">
+                                <div class="urgensi-title">Kritis</div>
+                                <div class="urgensi-sub">Segera</div>
+                            </div>
                         </div>
                     </div>
-                </div>
 
 
-                <!-- Actions -->
-                <div class="form-actions">
-                    <a href="{% url 'dashboard_talent' %}" class="btn-cancel">Batal</a>
-                    <button class="btn-submit" type="submit">Kirim Pengajuan</button>
-                </div>
+                    <!-- Actions -->
+                    <div class="form-actions">
+                        <a href="{% url 'dashboard_talent' %}" class="btn-cancel">Batal</a>
+                        <button class="btn-submit" type="submit">Kirim Pengajuan</button>
+                    </div>
 
-            </div><!-- End Form Card -->
+                </div><!-- End Form Card -->
             </form>
 
         </div><!-- End Main Content -->

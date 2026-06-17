@@ -25,11 +25,20 @@
             min-height: 100vh;
         }
 
+        .sidebar {
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            flex-shrink: 0;
+        }
+
         .main-content {
             flex: 1;
-            margin-left: 260px;
             padding: 40px 50px;
             box-sizing: border-box;
+            max-width: none;
+            margin: 0;
+            min-width: 0;
         }
 
         /* Top Nav */
@@ -78,7 +87,7 @@
         /* Grid Layout */
         .content-grid {
             display: grid;
-            grid-template-columns: 1fr 320px;
+            grid-template-columns: 1.5fr 1fr;
             gap: 30px;
             align-items: start;
         }
@@ -467,5 +476,3 @@
 </body>
 
 </html>
-
-#uibaru

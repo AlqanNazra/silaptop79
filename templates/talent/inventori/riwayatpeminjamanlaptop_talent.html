@@ -576,8 +576,15 @@
                 <div class="pagination-row" style="display: flex; justify-content: space-between; align-items: center; padding: 20px 32px; border-top: 1px solid #F1F5F9;">
                     <span class="pagination-text">Menampilkan {{ riwayat_list.start_index }} - {{ riwayat_list.end_index }} dari {{ total_peminjaman }} riwayat</span>
                     <div class="pagination-buttons" style="display: flex; gap: 6px; align-items: center;">
+                        <select onchange="window.location.href = '?page=1&per_page=' + this.value + '{% if search_query %}&q={{ search_query|escapejs }}{% endif %}{% if status_filter %}&status={{ status_filter|escapejs }}{% endif %}';" style="padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; color: #334155; background-color: #ffffff; cursor: pointer; margin-right: 6px;">
+                            <option value="5" {% if per_page == 5 %}selected{% endif %}>5</option>
+                            <option value="15" {% if per_page == 15 %}selected{% endif %}>15</option>
+                            <option value="25" {% if per_page == 25 %}selected{% endif %}>25</option>
+                            <option value="50" {% if per_page == 50 %}selected{% endif %}>50</option>
+                        </select>
+
                         {% if riwayat_list.has_previous %}
-                            <a href="?page={{ riwayat_list.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" class="btn-pagination" style="text-decoration: none; display: flex; align-items: center; justify-content: center;">
+                            <a href="?page={{ riwayat_list.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if per_page %}&per_page={{ per_page }}{% endif %}" class="btn-pagination" style="text-decoration: none; display: flex; align-items: center; justify-content: center;">
                                 <i class="fa-solid fa-chevron-left"></i>
                             </a>
                         {% endif %}
@@ -586,12 +593,12 @@
                             {% if riwayat_list.number == num %}
                                 <span class="btn-pagination active" style="display: flex; align-items: center; justify-content: center;">{{ num }}</span>
                             {% elif num > riwayat_list.number|add:'-3' and num < riwayat_list.number|add:'3' %}
-                                <a href="?page={{ num }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" class="btn-pagination" style="text-decoration: none; display: flex; align-items: center; justify-content: center;">{{ num }}</a>
+                                <a href="?page={{ num }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if per_page %}&per_page={{ per_page }}{% endif %}" class="btn-pagination" style="text-decoration: none; display: flex; align-items: center; justify-content: center;">{{ num }}</a>
                             {% endif %}
                         {% endfor %}
 
                         {% if riwayat_list.has_next %}
-                            <a href="?page={{ riwayat_list.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" class="btn-pagination" style="text-decoration: none; display: flex; align-items: center; justify-content: center;">
+                            <a href="?page={{ riwayat_list.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if per_page %}&per_page={{ per_page }}{% endif %}" class="btn-pagination" style="text-decoration: none; display: flex; align-items: center; justify-content: center;">
                                 <i class="fa-solid fa-chevron-right"></i>
                             </a>
                         {% endif %}

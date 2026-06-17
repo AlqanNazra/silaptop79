@@ -24,15 +24,20 @@
         }
 
         .sidebar {
+            position: sticky;
+            top: 0;
+            height: 100vh;
             flex-shrink: 0;
             box-shadow: 2px 0 10px rgba(0,0,0,0.03);
         }
 
         .main-content {
             flex: 1;
-            margin-left: 260px;
             padding: 40px 60px;
             box-sizing: border-box;
+            max-width: none;
+            margin: 0;
+            min-width: 0;
         }
 
         /* ============================
