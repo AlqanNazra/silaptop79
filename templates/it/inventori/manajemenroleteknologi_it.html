@@ -715,7 +715,7 @@
                                     </div>
                                 </td>
                                 <td>
-                                    {% for rel in role.roleteknologi_set.all %}
+                                    {% for rel in role.teknologi_role.all %}
                                     <span class="tech-pill">{{ rel.teknologi.nama_teknologi }}</span>
                                     {% empty %}
                                     <span style="color: #94a3b8; font-style: italic; font-size: 13px;">Belum ada teknologi</span>

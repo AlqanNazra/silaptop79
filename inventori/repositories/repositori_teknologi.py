@@ -1,7 +1,5 @@
 import logging
-
-from interfaces.interface_teknologi import ITeknologiRepository
-
+from inventori.repositories.interfaces.interface_teknologi import ITeknologiRepository
 logger = logging.getLogger(__name__)
 
 
@@ -14,22 +12,20 @@ class TeknologiRepository(ITeknologiRepository):
     # TAMBAH
     # ====================================
     def tambah_teknologi(self, data):
-
-        query = """
-        SELECT tambah_teknologi(%s);
-        """
-
+        query = """SELECT tambah_teknologi(%s,%s);"""
         with self.conn.cursor() as cur:
-
-            cur.execute(query, (
-                data.nama_teknologi,
-            ))
-
-            logger.info(
-                f"Berhasil tambah teknologi {data.nama_teknologi}"
+            cur.execute(
+                query,
+                (
+                    data.nama_teknologi,
+                    data.kategori
+                )
             )
-
-            return True
+            result = cur.fetchone()
+            logger.info(f"Berhasil tambah teknologi {data.nama_teknologi}")
+            if result:
+                return result[0]
+            return False
 
     # ====================================
     # UPDATE
@@ -57,20 +53,13 @@ class TeknologiRepository(ITeknologiRepository):
     # HAPUS
     # ====================================
     def hapus_teknologi(self, id_teknologi):
-
-        query = """
-        SELECT hapus_teknologi(%s);
-        """
-
+        query = """ SELECT hapus_teknologi(%s); """
         with self.conn.cursor() as cur:
-
-            cur.execute(query, (id_teknologi,))
-
-            logger.info(
-                f"Berhasil hapus teknologi {id_teknologi}"
-            )
-
-            return True
+            cur.execute(query,(id_teknologi,))
+            result = cur.fetchone()
+            if result:
+                return result[0]
+            return False
 
     # ====================================
     # GET ALL
@@ -123,4 +112,36 @@ class TeknologiRepository(ITeknologiRepository):
                 "minimal_ram": row[0],
                 "minimal_core": row[1],
                 "gpu_required": row[2]
+            }
+
+    def get_teknologi_by_id(
+        self,
+        id_teknologi
+    ):
+
+        query = """
+        SELECT
+            id_teknologi,
+            nama_teknologi,
+            kategori
+        FROM inventori_teknologi
+        WHERE id_teknologi = %s
+        """
+
+        with self.conn.cursor() as cur:
+
+            cur.execute(
+                query,
+                (id_teknologi,)
+            )
+
+            row = cur.fetchone()
+
+            if not row:
+                return None
+
+            return {
+                "id_teknologi": row[0],
+                "nama_teknologi": row[1],
+                "kategori": row[2]
             }

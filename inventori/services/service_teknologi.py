@@ -2,9 +2,9 @@ import logging
 
 from django.db import transaction
 
-from apps.teknologi.validations.teknologi_validation import (
-    TeknologiValidation
-)
+# from apps.teknologi.validations.teknologi_validation import (
+#     TeknologiValidation
+# )
 
 logger = logging.getLogger(__name__)
 
@@ -24,9 +24,9 @@ class TeknologiService:
     # ====================================
     def tambah(self, data):
 
-        TeknologiValidation.validate_nama_teknologi(
-            data.nama_teknologi
-        )
+        # TeknologiValidation.validate_nama_teknologi(
+        #     data.nama_teknologi
+        # )
 
         try:
 
@@ -87,30 +87,16 @@ class TeknologiService:
     # ====================================
     # HAPUS
     # ====================================
-    def hapus(self, id_teknologi):
-
+    def hapus_teknologi(self, id_teknologi):
         try:
-
             with transaction.atomic():
-
-                self.teknologi_repo.hapus_teknologi(
-                    id_teknologi
-                )
-
+                result = (self.teknologi_repo.hapus_teknologi(id_teknologi))
                 self.conn.commit()
-
-                return {
-                    "success": True,
-                    "message": "Berhasil hapus teknologi"
-                }
-
+                return {"success": result,"message": "Berhasil hapus teknologi"}
         except Exception as e:
-
             self.conn.rollback()
-
             logger.error(str(e))
-
-            raise e
+            raise Exception(str(e))
 
     # ====================================
     # GET COMPATIBILITY

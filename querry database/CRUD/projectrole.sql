@@ -13,8 +13,7 @@ ADD COLUMN persentase_role FLOAT DEFAULT 1;
 
 CREATE OR REPLACE FUNCTION tambah_project_role(
     p_id_proyek VARCHAR,
-    p_id_role VARCHAR,
-    p_persentase_role FLOAT
+    p_id_role VARCHAR
 )
 RETURNS BOOLEAN AS
 $$
@@ -66,7 +65,7 @@ BEGIN
         ),
         p_id_proyek,
         p_id_role,
-        p_persentase_role
+        1
     );
 
     RETURN TRUE;
@@ -177,7 +176,7 @@ BEGIN
 
     SELECT COUNT(*)
     INTO v_role
-    FROM role
+    FROM inventori_role
     WHERE id_role = p_id_role;
 
     IF v_role = 0 THEN

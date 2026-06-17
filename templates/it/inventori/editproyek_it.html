@@ -305,94 +305,125 @@
             <form action="{% url 'editproyek_it' proyek.id_proyek %}" method="POST">
                 {% csrf_token %}
                 <div class="row-container">
-                    <!-- Left: Fields -->
                     <div class="section-card">
                         <div class="section-header">
                             <div class="section-icon">
                                 <i class="fa-solid fa-pen-to-square"></i>
                             </div>
-                            <h3 class="section-title">Detail Proyek</h3>
+                            <h3 class="section-title">
+                                Detail Proyek
+                            </h3>
                         </div>
                         <div class="section-body">
                             <div class="form-row full">
                                 <div class="form-group">
                                     <label>Nama Proyek</label>
-                                    <input type="text" class="form-control" name="nama_proyek"
-                                        value="{{ proyek.nama_proyek }}" placeholder="Contoh: Sistem Informasi Koperasi"
-                                        required>
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        name="nama_proyek"
+                                        value="{{ proyek.nama_proyek }}"
+                                        required
+                                    >
                                 </div>
                             </div>
-
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Client / Perusahaan</label>
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        name="user_perusahaan"
+                                        value="{{ proyek.user_perusahaan }}"
+                                        required
+                                    >
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Mulai Proyek</label>
+                                    <input
+                                        type="date"
+                                        class="form-control"
+                                        name="mulai_proyek"
+                                        value="{{ proyek.mulai_proyek|date:'Y-m-d' }}"
+                                        required
+                                    >
+                                </div>
+                                <div class="form-group">
+                                    <label>Akhir Proyek</label>
+                                    <input
+                                        type="date"
+                                        class="form-control"
+                                        name="akhir_proyek"
+                                        value="{{ proyek.akhir_proyek|date:'Y-m-d' }}"
+                                        required
+                                    >
+                                </div>
+                            </div>
+                            <hr style="margin:30px 0;">
+                            <h4
+                                style="
+                                    margin-bottom:15px;
+                                    color:#1e293b;
+                                    font-size:14px;
+                                    font-weight:700;
+                                "
+                            >
+                                Role Yang Digunakan
+                            </h4>
                             <div
-                                style="margin-top: 28px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
-                                <h4 style="margin: 0; font-size: 14px; font-weight: 700; color: #1e293b;">Role &
-                                    Teknologi Proyek</h4>
-                            </div>
-
-                            <div id="roles-container">
-                                {% for role in proyek.roles.all %}
-                                <div class="role-group-box">
-                                    {% if not forloop.first %}
-                                    <button type="button" class="btn-remove-role" title="Hapus Role"
-                                        onclick="this.parentElement.remove()">
-                                        <i class="fa-solid fa-trash-can"></i>
-                                    </button>
-                                    {% endif %}
-                                    <div class="form-row">
-                                        <div class="form-group">
-                                            <label>Nama Role</label>
-                                            <input type="text" class="form-control" name="role_names[]"
-                                                value="{{ role.nama_role }}" placeholder="Contoh: Backend Developer"
-                                                required style="background-color: white;">
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Teknologi (pisahkan dengan koma)</label>
-                                            <input type="text" class="form-control" name="role_techs[]"
-                                                value="{% for tech in role.teknologi.all %}{{ tech.nama_teknologi }}{% if not forloop.last %}, {% endif %}{% endfor %}"
-                                                placeholder="Contoh: Python, Django, PostgreSQL" required
-                                                style="background-color: white;">
-                                        </div>
-                                    </div>
-                                </div>
+                                style="
+                                    display:flex;
+                                    flex-wrap:wrap;
+                                    gap:10px;
+                                "
+                            >
+                                {% for role in role_list %}
+                                <span
+                                    class="role-badge"
+                                    title="Persentase {{ role.persentase_role }}"
+                                >
+                                    {{ role.nama_role }}
+                                </span>
                                 {% empty %}
-                                <!-- If no roles exist, show one empty card -->
-                                <div class="role-group-box">
-                                    <div class="form-row">
-                                        <div class="form-group">
-                                            <label>Nama Role</label>
-                                            <input type="text" class="form-control" name="role_names[]"
-                                                placeholder="Contoh: Backend Developer" required
-                                                style="background-color: white;">
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Teknologi (pisahkan dengan koma)</label>
-                                            <input type="text" class="form-control" name="role_techs[]"
-                                                placeholder="Contoh: Python, Django, PostgreSQL" required
-                                                style="background-color: white;">
-                                        </div>
-                                    </div>
-                                </div>
+                                <span
+                                    style="
+                                        color:#94a3b8;
+                                        font-style:italic;
+                                    "
+                                >
+                                    Tidak ada role pada proyek ini.
+                                </span>
                                 {% endfor %}
                             </div>
-
-                            <button type="button" id="btn-add-role" class="btn-add-role-dash">
-                                <i class="fa-solid fa-plus"></i> Tambah Role Lainnya
-                            </button>
                         </div>
                     </div>
-
-                    <!-- Right: Control Box -->
                     <div class="control-card">
-                        <h4 class="control-title">Edit Proyek</h4>
-                        <p class="control-text">Pastikan semua perubahan data proyek sudah sesuai sebelum menyimpan.</p>
-                        <button type="submit" class="btn-submit">
-                            <i class="fa-solid fa-floppy-disk"></i> Simpan Perubahan
+                        <h4 class="control-title">
+                            Edit Proyek
+                        </h4>
+                        <p class="control-text">
+                            Pastikan data proyek sudah sesuai sebelum menyimpan perubahan.
+                        </p>
+                        <button
+                            type="submit"
+                            class="btn-submit"
+                        >
+                            <i class="fa-solid fa-floppy-disk"></i>
+                            Simpan Perubahan
                         </button>
-                        <a href="{% url 'manajemen_proyek_it' %}" class="btn-cancel">
-                            <i class="fa-solid fa-xmark"></i> Batal
+                        <a
+                            href="{% url 'manajemen_proyek_it' %}"
+                            class="btn-cancel"
+                        >
+                            <i class="fa-solid fa-xmark"></i>
+                            Batal
                         </a>
                     </div>
+
                 </div>
+
             </form>
 
         </div>

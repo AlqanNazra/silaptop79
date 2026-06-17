@@ -53,25 +53,32 @@ CREATE OR REPLACE FUNCTION hapus_teknologi(
 RETURNS BOOLEAN AS
 $$
 DECLARE
-    v_kriteria INTEGER;
+    v_role INTEGER;
 BEGIN
 
     SELECT COUNT(*)
-    INTO v_kriteria
-    FROM kriteria
+    INTO v_role
+    FROM role_teknologi
     WHERE id_teknologi = p_id_teknologi;
 
-    IF v_kriteria > 0 THEN
-        RAISE EXCEPTION 'Teknologi masih digunakan pada kriteria';
+    IF v_role > 0 THEN
+        RAISE EXCEPTION
+        'Teknologi masih digunakan pada role';
     END IF;
 
-    DELETE FROM teknologi
+    DELETE FROM inventori_teknologi
     WHERE id_teknologi = p_id_teknologi;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION
+        'Teknologi tidak ditemukan';
+    END IF;
 
     RETURN TRUE;
 
 END;
-$$ LANGUAGE plpgsql;
+$$
+LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION update_teknologi(
     p_id_teknologi VARCHAR,

@@ -13,7 +13,7 @@ class ProjectRoleRepository(IProjectRoleRepository):
     def tambah(self, data):
 
         query = """
-        SELECT tambah_projectrole(%s,%s);
+        SELECT tambah_project_role(%s,%s);
         """
 
         with self.conn.cursor() as cur:

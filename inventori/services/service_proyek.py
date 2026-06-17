@@ -42,6 +42,10 @@ class ProyekService:
         try:
             with transaction.atomic():
                 id_proyek = (self.proyek_repo.tambah(data))
+                
+                print("ID DARI REPO =", id_proyek)
+                print("TYPE =", type(id_proyek))
+                
                 self.conn.commit()
                 return {
                     "success": True,
@@ -51,29 +55,22 @@ class ProyekService:
             self.conn.rollback()
             raise Exception(str(e))
     def update_proyek(self, data):
-
         try:
-
             with transaction.atomic():
-
                 is_exist = self.proyek_repo.validate(
                     data.id_proyek
                 )
-
                 if not is_exist:
                     raise Exception(
                         "Proyek tidak ditemukan"
                     )
-
                 self.proyek_repo.update(data)
-
                 # trigger DSS recalculation
-                self.calculate_project_requirement(
-                    data.id_proyek
-                )
-
+                if hasattr(self, "calculate_project_requirement"):
+                    self.calculate_project_requirement(
+                        data.id_proyek
+                    )
                 self.conn.commit()
-
                 return {
                     "success": True,
                     "message": "Berhasil update proyek"
@@ -85,27 +82,17 @@ class ProyekService:
 
             raise Exception(str(e))
 
-    def hapus_proyek(self, id_proyek):
-
+    def hapus_proyek(self,id_proyek):
         try:
-
             with transaction.atomic():
-
-                self.proyek_repo.hapus(
-                    id_proyek
-                )
-
+                result = (self.proyek_repo.hapus(id_proyek))
                 self.conn.commit()
-
-                return {
-                    "success": True,
-                    "message": "Berhasil hapus proyek"
-                }
+                logger.info(f"Berhasil hapus proyek "f"{id_proyek}")
+                return {"success": result}
 
         except Exception as e:
-
             self.conn.rollback()
-
+            logger.error(str(e))
             raise Exception(str(e))
 
     def getBobot(self, id_proyek):

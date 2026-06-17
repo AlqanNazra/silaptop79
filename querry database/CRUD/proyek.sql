@@ -17,7 +17,7 @@ CREATE OR REPLACE FUNCTION tambah_proyek(
     p_akhir_proyek DATE
 )
 RETURNS VARCHAR
-$$
+AS $$ 
 DECLARE
     v_id_proyek VARCHAR;
 BEGIN
@@ -51,11 +51,14 @@ BEGIN
     RETURN v_id_proyek;
 
 END;
+$$ LANGUAGE plpgsql;
 
+DROP FUNCTION update_proyek
+	
 CREATE OR REPLACE FUNCTION update_proyek(
     p_id_proyek VARCHAR,
     p_nama_proyek VARCHAR,
-    p_client_perusahaan VARCHAR,
+    p_user_perusahaan VARCHAR,
     p_mulai_proyek DATE,
     p_akhir_proyek DATE
 )
@@ -63,49 +66,58 @@ RETURNS BOOLEAN AS
 $$
 BEGIN
 
-    UPDATE proyek
+    UPDATE inventori_proyek
     SET
         nama_proyek = p_nama_proyek,
-        client_perusahaan = p_client_perusahaan,
+        user_perusahaan = p_user_perusahaan,
         mulai_proyek = p_mulai_proyek,
-        akhir_proyek = p_akhir_proyek
+        akhir_proyek = p_akhir_proyek,
+        updated_at = CURRENT_TIMESTAMP
     WHERE id_proyek = p_id_proyek;
 
     IF NOT FOUND THEN
-        RAISE EXCEPTION 'Proyek tidak ditemukan';
+        RAISE EXCEPTION
+        'Proyek tidak ditemukan';
     END IF;
 
     RETURN TRUE;
 
 END;
-$$ LANGUAGE plpgsql;
+$$
+LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION hapus_proyek(
     p_id_proyek VARCHAR
 )
-RETURNS BOOLEAN AS
+RETURNS BOOLEAN
+AS
 $$
 DECLARE
-    v_relasi INTEGER;
+    v_exist INTEGER;
 BEGIN
 
     SELECT COUNT(*)
-    INTO v_relasi
-    FROM projectrole
+    INTO v_exist
+    FROM inventori_proyek
     WHERE id_proyek = p_id_proyek;
 
-    IF v_relasi > 0 THEN
-        RAISE EXCEPTION 'Proyek masih digunakan pada projectrole';
+    IF v_exist = 0 THEN
+        RAISE EXCEPTION
+        'Proyek tidak ditemukan';
     END IF;
 
-    DELETE FROM proyek
+    DELETE FROM inventori_project_role
+    WHERE id_proyek = p_id_proyek;
+
+    DELETE FROM inventori_proyek
     WHERE id_proyek = p_id_proyek;
 
     RETURN TRUE;
 
 END;
-$$ LANGUAGE plpgsql;
+$$
+LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION get_proyek(
     p_id VARCHAR
@@ -151,18 +163,19 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION validate_proyek(
     p_id VARCHAR
 )
-RETURNS BOOLEAN AS $$
+RETURNS BOOLEAN AS
+$$
 DECLARE
     total INT;
 BEGIN
     SELECT COUNT(*)
     INTO total
-    FROM proyek
+    FROM inventori_proyek
     WHERE id_proyek = p_id;
-
     RETURN total > 0;
 END;
-$$ LANGUAGE plpgsql;
+$$
+LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION get_detail_proyek(

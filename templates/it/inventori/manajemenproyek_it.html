@@ -484,21 +484,29 @@
                             </td>
                             <td style="padding-top: 16px; padding-bottom: 16px;">
                                 <div style="display: flex; flex-direction: column; gap: 14px;">
-                                    {% for role in proyek.roles.all %}
+                                    {% for pr in proyek.roles.all %}
                                     <div style="display: flex; align-items: flex-start; gap: 16px; font-size: 13px;">
                                         <div style="min-width: 160px; flex-shrink: 0; padding-top: 2px;">
-                                            <span class="role-badge">{{ role.nama_role }}</span>
+                                            <span class="role-badge">
+                                                {{ pr.role.nama_role }}
+                                            </span>
                                         </div>
                                         <div style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center;">
-                                            {% for tech in role.teknologi.all %}
-                                            <span class="tech-pill">{{ tech.nama_teknologi }}</span>
+                                            {% for rt in pr.role.teknologi_role.all %}
+                                                <span class="tech-pill">
+                                                    {{ rt.teknologi.nama_teknologi }}
+                                                </span>
                                             {% empty %}
-                                            <span style="color: #94a3b8; font-style: italic;">Tidak ada teknologi</span>
+                                                <span style="color:#94a3b8;font-style:italic;">
+                                                    Tidak ada teknologi
+                                                </span>
                                             {% endfor %}
                                         </div>
                                     </div>
                                     {% empty %}
-                                    <span style="color: #94a3b8; font-style: italic;">Tidak ada data role</span>
+                                        <span style="color:#94a3b8;font-style:italic;">
+                                            Tidak ada data role
+                                        </span>
                                     {% endfor %}
                                 </div>
                             </td>

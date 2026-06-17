@@ -188,7 +188,8 @@ class RoleTeknologi(models.Model):
     role = models.ForeignKey(
         Role,
         db_column="id_role",
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name="teknologi_role"
     )
 
     teknologi = models.ForeignKey(
@@ -241,7 +242,8 @@ class ProjectRole(models.Model):
     proyek = models.ForeignKey(
         Proyek,
         db_column="id_proyek",
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name="roles"
     )
 
     role = models.ForeignKey(

@@ -25,7 +25,15 @@ class ProyekRepository(IProyekRepository):
                     data.akhir_proyek
                 )
             )
-            return cur.fetchone()[0]
+            result = cur.fetchone()
+
+            print("FETCHONE =", result)
+
+            if result:
+                print("RESULT[0] =", result[0])
+                print("TYPE =", type(result[0]))
+
+            return result[0]
 
     # ===================================
     # UPDATE
@@ -59,9 +67,17 @@ class ProyekRepository(IProyekRepository):
 
         with self.conn.cursor() as cur:
 
-            cur.execute(query, (id_proyek,))
+            cur.execute(
+                query,
+                (id_proyek,)
+            )
 
-            return True
+            result = cur.fetchone()
+
+            if result:
+                return result[0]
+
+            return False
 
     # ===================================
     # GET BOBOT
@@ -88,22 +104,17 @@ class ProyekRepository(IProyekRepository):
     # VALIDATE
     # ===================================
     def validate(self, id_proyek):
-
         query = """
         SELECT validate_proyek(%s);
         """
-
         with self.conn.cursor() as cur:
-
-            cur.execute(query, (id_proyek,))
-
+            cur.execute(query,(id_proyek,))
             result = cur.fetchone()
             if result:
                 if isinstance(result, dict):
                     return list(result.values())[0]
-                else:
-                    return result[0]
-            return None
+                return result[0]
+            return False
 
     # ===================================
     # GET ROLES
@@ -176,3 +187,90 @@ class ProyekRepository(IProyekRepository):
                 "total_teknologi": row[1],
                 "rata_bobot": row[2]
             }
+
+    def ambil_by_id(self,id_proyek):
+        query = """
+        SELECT
+            id_proyek,
+            nama_proyek
+        FROM inventori_proyek
+        WHERE id_proyek = %s
+        """
+        with self.conn.cursor() as cur:
+            cur.execute(query,(id_proyek,))
+            row = cur.fetchone()
+            if not row:
+                return None
+            return {
+                "id_proyek": row[0],
+                "nama_proyek": row[1]
+            }
+    def ambil_by_id_full_proyek(self,id_proyek):
+        query = """
+        SELECT
+            p.id_proyek,
+            p.nama_proyek,
+            p.user_perusahaan,
+            p.mulai_proyek,
+            p.akhir_proyek
+        FROM inventori_proyek p
+        WHERE p.id_proyek = %s
+        """
+        with self.conn.cursor() as cur:
+            cur.execute(query,(id_proyek,))
+            row = cur.fetchone()
+            if not row:
+                return None
+            proyek = {
+                "id_proyek": row[0],
+                "nama_proyek": row[1],
+                "user_perusahaan": row[2],
+                "mulai_proyek": row[3],
+                "akhir_proyek": row[4],
+                "roles": []
+            }
+            cur.execute("""
+                SELECT
+                    pr.id_project_role,
+                    r.id_role,
+                    r.nama_role,
+                    pr.persentase_role
+                FROM inventori_project_role pr
+                JOIN inventori_role r
+                    ON r.id_role = pr.id_role
+                WHERE pr.id_proyek = %s
+                ORDER BY r.nama_role
+            """, (id_proyek,))
+            for role_row in cur.fetchall():
+                proyek["roles"].append({
+                    "id_role": role_row[1],
+                    "nama_role": role_row[2],
+                    "persentase_role": role_row[3]
+                })
+            return proyek
+        
+    def ambil_role_proyek(self,id_proyek):
+        query = """
+        SELECT
+            pr.id_project_role,
+            r.id_role,
+            r.nama_role,
+            pr.persentase_role
+        FROM inventori_project_role pr
+        INNER JOIN inventori_role r
+            ON r.id_role = pr.id_role
+        WHERE pr.id_proyek = %s
+        ORDER BY r.nama_role;
+        """
+        with self.conn.cursor() as cur:
+            cur.execute(query,(id_proyek,))
+            rows = cur.fetchall()
+            hasil = []
+            for row in rows:
+                hasil.append({
+                    "id_project_role": row[0],
+                    "id_role": row[1],
+                    "nama_role": row[2],
+                    "persentase_role": row[3]
+                })
+            return hasil

@@ -19,11 +19,14 @@ from dss.services.service_swara import ServiceSwara
 from inventori.dto.dto_projectrole import ProjectRoleDTO
 from inventori.dto.dto_proyek import ProyekDTO
 from inventori.dto.dto_role_teknologi import RoleTeknologiDTO
+from inventori.dto.dto_teknologi import TeknologiDTO
 from inventori.repositories.repositori_laptop_inventori import LaptopInventoriRepository
 from inventori.repositories.repositori_projectrole import ProjectRoleRepository
 from inventori.repositories.repositori_proyek import ProyekRepository
+from inventori.repositories.repositori_teknologi import TeknologiRepository
 from inventori.services.service_projectrole import ProjectRoleService
 from inventori.services.service_proyek import ProyekService
+from inventori.services.service_teknologi import TeknologiService
 from .db import get_connection
 
 # ==========================================
@@ -2595,7 +2598,7 @@ def manajemenproyek_it_view(request):
 
     search_query = request.GET.get('q', '')
     proyek_list = Proyek.objects.prefetch_related(
-        'projectrole_set__role__roleteknologi_set__teknologi'
+        'roles__role__teknologi_role__teknologi'
     )
 
     if search_query:
@@ -2622,42 +2625,29 @@ def tambahproyek_it_view(request):
     projectrole_repo = ProjectRoleRepository(conn)
     service_proyek = ProyekService(proyek_repo,conn)
     service_projectrole = ProjectRoleService(projectrole_repo,conn)
-
     if request.method == "POST":
         print(request.POST)
         try:
             proyek_data = ProyekDTO(
-                nama_proyek=request.POST.get(
-                    "nama_proyek"
-                ),
-                user_perusahaan=request.POST.get(
-                    "user_perusahaan"
-                ),
-                mulai_proyek=request.POST.get(
-                    "mulai_proyek"
-                ),
-                akhir_proyek=request.POST.get(
-                    "akhir_proyek"
-                )
+                nama_proyek=request.POST.get("nama_proyek"),
+                user_perusahaan=request.POST.get("user_perusahaan"),
+                mulai_proyek=request.POST.get("mulai_proyek"),
+                akhir_proyek=request.POST.get("akhir_proyek")
             )
-
-            role_ids = request.POST.getlist(
-                "role_ids[]"
-            )
-
+            role_ids = request.POST.getlist("role_ids[]")
             with transaction.atomic():
-
-                result = (
-                    service_proyek
-                    .tambah_proyek(
-                        proyek_data
-                    )
-                )
-
-                id_proyek = (
-                    result["id_proyek"]
-                )
-
+                result = (service_proyek.tambah_proyek(proyek_data))
+                
+                print("HASIL SERVICE:")
+                print(result)
+                print("TYPE RESULT:")
+                print(type(result))
+                print("ID PROYEK:")
+                print(result["id_proyek"])
+                print("TYPE ID:")
+                print(type(result["id_proyek"]))
+                
+                id_proyek = (result["id_proyek"])
                 for role_id in role_ids:
 
                     (
@@ -2669,62 +2659,30 @@ def tambahproyek_it_view(request):
                             )
                         )
                     )
-
-                messages.success(
-                    request,
-                    "Proyek berhasil ditambahkan"
-                )
-
-                return redirect(
-                    "manajemen_proyek_it"
-                )
+                messages.success(request,"Proyek berhasil ditambahkan")
+                return redirect("manajemen_proyek_it")
 
         except Exception as e:
-
             traceback.print_exc()
+            print("ERROR:",str(e))
+            messages.error(request,str(e))
 
-            print(
-                "ERROR:",
-                str(e)
-            )
-
-            messages.error(
-                request,
-                str(e)
-            )
-
-    role_list = (
-        Role.objects
+    role_list = (Role.objects
         .all()
-        .order_by(
-            "nama_role"
-        )
+        .order_by("nama_role")
     )
-
     role_data = []
-
     for role in role_list:
-
         teknologi = []
-
         rels = (
             RoleTeknologi.objects
-            .select_related(
-                "teknologi"
-            )
-            .filter(
-                role=role
-            )
+            .select_related("teknologi")
+            .filter(role=role)
         )
-
         for rel in rels:
-
             teknologi.append({
-                "id":
-                rel.teknologi.id_teknologi,
-
-                "nama":
-                rel.teknologi.nama_teknologi
+                "id":rel.teknologi.id_teknologi,
+                "nama":rel.teknologi.nama_teknologi
             })
 
         role_data.append({
@@ -2732,72 +2690,75 @@ def tambahproyek_it_view(request):
             "nama": role.nama_role,
             "teknologi": teknologi
         })
-
     context = {"role_list": role_list,"role_data_json": role_data}
-
-    return render(
-        request,
-        "it/inventori/tambahproyek_it.html",
-        context
-    )
+    return render(request,"it/inventori/tambahproyek_it.html",context)
                 
-def editproyek_it_view(request, id_proyek):
+def editproyek_it_view(request,id_proyek):
+    conn = get_connection()
+    proyek_repo = ProyekRepository(conn)
+    service_proyek = ProyekService(proyek_repo,conn)
 
-    try:
-        proyek = Proyek.objects.get(id_proyek=id_proyek)
-    except Proyek.DoesNotExist:
-        messages.error(request, 'Proyek tidak ditemukan.')
-        return redirect('manajemen_proyek_it')
+    # try:
+    #     proyek = (proyek_repo.ambil_by_id_full_proyek(id_proyek))
+    #     if not proyek:
+    #         messages.error(request,"Proyek tidak ditemukan.")
+    #         return redirect("manajemen_proyek_it")
 
-    if request.method == 'POST':
+    # except Exception as e:
+    #     messages.error(request,str(e))
+    #     return redirect("manajemen_proyek_it")
+
+    if request.method == "POST":
         try:
-            proyek.nama_proyek = request.POST.get('nama_proyek')
-            proyek.save()
-
-            # Delete old roles and their technologies
-            proyek.role_teknologi.all().delete()
-
-            # Re-create roles and technologies
-            role_names = request.POST.getlist('role_names[]')
-            role_techs = request.POST.getlist('role_techs[]')
-
-            for name, tech_str in zip(role_names, role_techs):
-                if name.strip():
-                    role_obj = ProjectRole.objects.create(
-                        id_role=str(uuid.uuid4())[:8],
-                        proyek=proyek,
-                        nama_role=name.strip()
-                    )
-                    techs = [t.strip() for t in tech_str.split(',') if t.strip()]
-                    for t in techs:
-                        TeknologiRole.objects.create(
-                            id_teknologi=str(uuid.uuid4())[:8],
-                            role_proyek=role_obj,
-                            nama_teknologi=t
-                        )
-
-            messages.success(request, f'Proyek "{proyek.nama_proyek}" berhasil diperbarui!')
-            return redirect('manajemen_proyek_it')
+            proyek_data = ProyekDTO(id_proyek=id_proyek,
+                nama_proyek=request.POST.get("nama_proyek"),
+                user_perusahaan=request.POST.get("user_perusahaan"),
+                mulai_proyek=request.POST.get("mulai_proyek"),
+                akhir_proyek=request.POST.get("akhir_proyek")
+            )
+            (
+                service_proyek.update_proyek(proyek_data)
+            )
+            messages.success(request,f'Proyek "{proyek_data.nama_proyek}" berhasil diperbarui!')
+            return redirect("manajemen_proyek_it")
         except Exception as e:
-            messages.error(request, f'Gagal memperbarui proyek: {str(e)}')
+            traceback.print_exc()
+            messages.error(request,str(e))
+            
+    proyek = (proyek_repo.ambil_by_id_full_proyek(id_proyek))
+    role_list = (proyek_repo.ambil_role_proyek(id_proyek))
+    context = {
+        "proyek": proyek,"role_list": role_list
+        }
+    return render(request,"it/inventori/editproyek_it.html",context)
 
-    return render(request, 'it/inventori/editproyek_it.html', {'proyek': proyek})
+def hapusproyek_it_view(
+    request,
+    id_proyek
+):
 
-def hapusproyek_it_view(request, id_proyek):
-    from inventori.models import Proyek
-
-    if request.method == 'POST':
+    conn = get_connection()
+    proyek_repo = (ProyekRepository(conn))
+    service_proyek = (ProyekService(proyek_repo,conn))
+    if request.method == "POST":
         try:
-            proyek = Proyek.objects.get(id_proyek=id_proyek)
-            nama = proyek.nama_proyek
-            proyek.delete()
-            messages.success(request, f'Proyek "{nama}" berhasil dihapus!')
-        except Proyek.DoesNotExist:
-            messages.error(request, 'Proyek tidak ditemukan.')
-        except Exception as e:
-            messages.error(request, f'Gagal menghapus proyek: {str(e)}')
+            proyek = (proyek_repo.ambil_by_id(id_proyek))
+            if not proyek:
+                messages.error(request,"Proyek tidak ditemukan.")
+                return redirect("manajemen_proyek_it" )
+            nama_proyek = (proyek["nama_proyek"])
+            (
+                service_proyek
+                .hapus_proyek(
+                    id_proyek
+                )
+            )
+            messages.success(request,f'Proyek "{nama_proyek}" berhasil dihapus!')
 
-    return redirect('manajemen_proyek_it')
+        except Exception as e:
+            traceback.print_exc()
+            messages.error(request,str(e))
+    return redirect("manajemen_proyek_it")
 
 def tambah_komponen_it_view(request):
     from inventori.models import Processor, RAM, Storage
@@ -2853,24 +2814,20 @@ def manajemen_role_teknologi_it_view(request):
     search_role = request.GET.get('q_role', '')
     search_tech = request.GET.get('q_tech', '')
 
-    role_list = Role.objects.prefetch_related('roleteknologi_set__teknologi').order_by('nama_role')
-    teknologi_list = Teknologi.objects.order_by('nama_teknologi')
-
+    role_list = (Role.objects.prefetch_related('teknologi_role__teknologi').order_by('nama_role'))
+    teknologi_list = (Teknologi.objects.order_by('nama_teknologi'))
     if search_role:
         role_list = role_list.filter(Q(nama_role__icontains=search_role))
+
     if search_tech:
         teknologi_list = teknologi_list.filter(Q(nama_teknologi__icontains=search_tech) | Q(kategori__icontains=search_tech))
-
     paginator_role = Paginator(role_list, 5)
     page_role = request.GET.get('page_role')
     role_obj = paginator_role.get_page(page_role)
-
     paginator_tech = Paginator(teknologi_list, 5)
     page_tech = request.GET.get('page_tech')
     tech_obj = paginator_tech.get_page(page_tech)
-
     active_tab = request.GET.get('tab', 'role')
-
     context = {
         "role_list": role_obj,
         "tech_page": tech_obj,
@@ -2879,39 +2836,23 @@ def manajemen_role_teknologi_it_view(request):
         "search_tech": search_tech,
         "active_tab": active_tab,
     }
-    return render(
-        request,
-        "it/inventori/manajemenroleteknologi_it.html",
-        context
-    )
+    return render(request,"it/inventori/manajemenroleteknologi_it.html",context)
 def tambah_teknologi_it_view(request):
+    conn = get_connection()
+    repo = TeknologiRepository(conn)
+    service = TeknologiService(repo,conn)
     if request.method == "POST":
         try:
-            Teknologi.objects.create(
-                id_teknologi=str(uuid.uuid4())[:8],
-                nama_teknologi=request.POST.get(
-                    "nama_teknologi"
-                ),
-                kategori=request.POST.get(
-                    "kategori"
-                )
+            data = TeknologiDTO(
+                nama_teknologi=request.POST.get("nama_teknologi"),
+                kategori=request.POST.get("kategori")
             )
-
-            messages.success(
-                request,
-                "Teknologi berhasil ditambahkan."
-            )
-
+            service.tambah(data)
+            messages.success(request,"Teknologi berhasil ditambahkan.")
         except Exception as e:
-
-            messages.error(
-                request,
-                str(e)
-            )
-
-    return redirect(
-        "manajemenroleteknologi_it"
-    )
+            traceback.print_exc()
+            messages.error(request,str(e))
+    return redirect("manajemenroleteknologi_it")
 
 def tambah_role_it_view(request):
     from django.shortcuts import redirect
@@ -3310,7 +3251,6 @@ def tambah_role_it_view(request):
         "manajemenroleteknologi_it"
     )
     
-    
 def hapus_role_it_view(request,id_role):
     conn = get_connection()
     role_repo = (RoleRepository(conn))
@@ -3338,34 +3278,17 @@ def hapus_role_it_view(request,id_role):
         "manajemenroleteknologi_it"
     )
     
-def hapus_teknologi_it_view(
-    request,
-    id_teknologi
-):
-
+def hapus_teknologi_it_view(request,id_teknologi):
+    conn = get_connection()
+    repo = TeknologiRepository(conn)
+    service = TeknologiService(repo,conn)
     try:
-
-        teknologi = Teknologi.objects.get(
-            id_teknologi=id_teknologi
-        )
-
-        teknologi.delete()
-
-        messages.success(
-            request,
-            "Teknologi berhasil dihapus."
-        )
-
+        service.hapus_teknologi(id_teknologi)
+        messages.success(request,"Teknologi berhasil dihapus.")
     except Exception as e:
-
-        messages.error(
-            request,
-            str(e)
-        )
-
-    return redirect(
-        "manajemenroleteknologi_it"
-    )
+        traceback.print_exc()
+        messages.error(request,str(e))
+    return redirect("manajemenroleteknologi_it")
 
 def edit_role_it_view(request, id_role):
 
@@ -3659,8 +3582,6 @@ def edit_role_it_view(request, id_role):
         return redirect(
             "manajemenroleteknologi_it"
         )
-
-
     
 def edit_teknologi_it_view(
     request,
