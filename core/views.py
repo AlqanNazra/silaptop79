@@ -2874,6 +2874,11 @@ def tambah_role_it_view(request):
             print("\nPOST DATA:")
             print(dict(request.POST))
 
+            nama_role = request.POST.get("nama_role", "").strip()
+            if Role.objects.filter(nama_role__iexact=nama_role).exists():
+                messages.error(request, f"Role dengan nama '{nama_role}' sudah ada.")
+                return redirect("manajemenroleteknologi_it")
+
             # ==========================
             # CREATE ROLE
             # ==========================
@@ -3441,9 +3446,11 @@ def edit_role_it_view(request, id_role):
                 # UPDATE ROLE
                 # ==========================
 
-                role.nama_role = request.POST.get(
-                    "nama_role"
-                )
+                nama_role = request.POST.get("nama_role", "").strip()
+                if Role.objects.filter(nama_role__iexact=nama_role).exclude(id_role=role.id_role).exists():
+                    raise Exception(f"Role dengan nama '{nama_role}' sudah ada.")
+
+                role.nama_role = nama_role
 
                 role.min_ram = int(
                     request.POST.get(

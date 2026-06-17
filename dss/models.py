@@ -29,6 +29,7 @@ class BobotKriteria(models.Model):
     )
 
     nilai_bobot = models.FloatField()
+    nilai_swara = models.FloatField(null=True, blank=True)
 
 class DSSProses(models.Model):
     id_dss = models.CharField(primary_key=True, max_length=100)

@@ -1,36 +1,34 @@
 import os
+import django
 import sys
+sys.path.append(os.getcwd())
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "silaptop79.settings")
+django.setup()
 
-# Add project root to python path
-project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-if project_root not in sys.path:
-    sys.path.append(project_root)
+from django.db import connection
 
-# Import get_connection
-from silaptop79.db import get_connection
+drop_statements = [
+    "DROP FUNCTION IF EXISTS tambah_bobot_kriteria(uuid, uuid, double precision) CASCADE;",
+    "DROP FUNCTION IF EXISTS update_nilai_swara(uuid, double precision) CASCADE;",
+    "DROP FUNCTION IF EXISTS get_bobot_role_teknologi(uuid) CASCADE;",
+    "DROP FUNCTION IF EXISTS validasi_total_bobot_project(uuid) CASCADE;",
+    # Also drop any other conflicting versions of tambah_bobot_kriteria
+    "DROP FUNCTION IF EXISTS tambah_bobot_kriteria(character varying, character varying, double precision) CASCADE;"
+]
 
-def apply_sql():
-    sql_file_path = os.path.join(project_root, 'querry database', 'CRUD', 'laptop_invetori.sql')
-    print(f"Reading SQL file: {sql_file_path}")
-    
-    with open(sql_file_path, 'r') as f:
-        sql_content = f.read()
+with open("querry database/fungsi_preprosesSwara.sql", "r") as f:
+    sql_script = f.read()
 
-    # Split script by CREATE OR REPLACE FUNCTION block roughly, or execute all
-    # Since there are multiple commands, we should separate them or execute them as blocks
-    # psycopg2 allows executing multiple commands in one execute() call if they are valid SQL
-    conn = get_connection()
+with connection.cursor() as cursor:
+    for stmt in drop_statements:
+        try:
+            cursor.execute(stmt)
+            print(f"Executed: {stmt}")
+        except Exception as e:
+            print(f"Failed to execute '{stmt}': {str(e)}")
+            
     try:
-        cur = conn.cursor()
-        print("Executing SQL content...")
-        cur.execute(sql_content)
-        conn.commit()
-        print("SQL functions applied successfully!")
+        cursor.execute(sql_script)
+        print("Successfully applied new functions from fungsi_preprosesSwara.sql!")
     except Exception as e:
-        print(f"Error executing SQL: {e}")
-        conn.rollback()
-    finally:
-        conn.close()
-
-if __name__ == '__main__':
-    apply_sql()
+        print("Error applying sql script:", str(e))

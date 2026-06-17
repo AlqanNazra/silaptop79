@@ -72,8 +72,15 @@ class RoleRepository(IRoleRepository):
         with self.conn.cursor() as cur:
             cur.execute(
                 """
+                DELETE FROM inventori_project_role
+                WHERE id_role = %s
+                """,
+                (id_role,)
+            )
+            cur.execute(
+                """
                 DELETE FROM dss_bobotkriteria
-                WHERE id_role_teknologi IN (
+                WHERE role IN (
                     SELECT
                         id_role_teknologi
                     FROM role_teknologi

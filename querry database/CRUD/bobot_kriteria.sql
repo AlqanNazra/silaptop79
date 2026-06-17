@@ -335,28 +335,25 @@ RETURN QUERY
 
 SELECT
     b.id_bobot,
-    b.id_kriteria,
+    b.kriteria_id AS id_kriteria,
     k.nama_kriteria,
     k.tipe_kriteria,
-
     r.id_role,
     r.nama_role,
-
     b.nilai_bobot
 
 FROM dss_bobotkriteria b
 
 JOIN dss_kriteria k
-    ON k.id_kriteria = b.id_kriteria
+    ON k.id_kriteria = b.kriteria_id
 
 JOIN role_teknologi rt
-    ON rt.id_role_teknologi = b.id_role_teknologi
+    ON rt.id_role_teknologi = b.role
 
 JOIN inventori_role r
     ON r.id_role = rt.id_role
 
-WHERE r.id_role = ANY(f_roles)
-AND b.is_active = TRUE;
+WHERE r.nama_role = ANY(f_roles);
 
 END;
 $$ LANGUAGE plpgsql;

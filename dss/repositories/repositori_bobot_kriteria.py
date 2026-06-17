@@ -181,15 +181,14 @@ class BobotKriteriaRepository(IBobotKriteriaRepositoryImpl):
         query = """
             SELECT
                 bk.id_bobot,
-                bk.id_kriteria,
+                bk.kriteria_id AS id_kriteria,
                 k.nama_kriteria,
                 bk.nilai_bobot,
                 bk.nilai_swara
             FROM dss_bobotkriteria bk
             JOIN dss_kriteria k
-                ON k.id_kriteria = bk.id_kriteria
-            WHERE bk.id_role_teknologi = %s
-            AND bk.is_active = TRUE
+                ON k.id_kriteria = bk.kriteria_id
+            WHERE bk.role = %s
             ORDER BY bk.nilai_bobot DESC
         """
 
@@ -214,15 +213,11 @@ class BobotKriteriaRepository(IBobotKriteriaRepositoryImpl):
 
         WHERE
 
-            id_role_teknologi = %s
+            role = %s
 
             AND
 
-            id_kriteria = %s
-
-            AND
-
-            is_active = TRUE
+            kriteria_id = %s
         """
 
         with self.conn.cursor() as cur:
