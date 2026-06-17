@@ -23,13 +23,19 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-68e461gv0a9s&i4vs1fd%^z_xy^hu**#6m%u)cqmtf1h^*(5nl'
 
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*', 'testserver', 'localhost', '127.0.0.1']
 
+# Authentication Settings
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/login-redirect/'
+LOGOUT_REDIRECT_URL = '/login/'
+AUTHENTICATION_BACKENDS = [
+    'core.auth_backend.InventoriAuthBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
 
-# Application definition
 
 INSTALLED_APPS = [
     'django.contrib.admin',

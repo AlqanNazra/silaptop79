@@ -2,7 +2,7 @@
 -- 9. RAM
 -- =============================================
 CREATE TABLE ram (
-    id_ram SERIAL PRIMARY KEY,
+    id_ram VARCHAR(50) PRIMARY KEY,
     kapasitas_gb INTEGER CHECK (kapasitas_gb > 0),
     tipe VARCHAR(50),
     keterangan TEXT
@@ -15,8 +15,8 @@ CREATE OR REPLACE FUNCTION tambah_ram(
 )
 RETURNS TEXT AS $$
 BEGIN
-    INSERT INTO inventori_ram (kapasitas_gb, tipe, keterangan)
-    VALUES (f_kapasitas, f_tipe, f_keterangan);
+    INSERT INTO inventori_ram (id_ram,kapasitas_gb, tipe, keterangan)
+    VALUES (f_generate_id('RAM','inventori_ram','id_ram'),f_kapasitas, f_tipe, f_keterangan);
 
     RETURN 'RAM berhasil ditambahkan!';
 END;
@@ -24,7 +24,7 @@ $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION ambil_ram()
 RETURNS TABLE (
-    id_ram BIGINT,
+    id_ram VARCHAR,
     kapasitas_gb INT,
     tipe VARCHAR,
     keterangan TEXT

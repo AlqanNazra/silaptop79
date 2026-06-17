@@ -1,0 +1,715 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manajemen Pengguna - SiLaptop79</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1.1">
+
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: 'Inter', sans-serif; background: #F8FAFC; display: flex; min-height: 100vh; }
+        .dashboard-wrapper { display: flex; width: 100%; }
+        .sidebar { flex-shrink: 0; box-shadow: 2px 0 10px rgba(0,0,0,0.03); }
+
+        .main-dashboard-content {
+            flex: 1;
+            margin-left: 260px;
+            padding: 40px 48px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ── PAGE HEADER ── */
+        .page-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 32px;
+        }
+        .page-title { font-size: 26px; font-weight: 800; color: #0F172A; margin: 0 0 4px 0; letter-spacing: -0.4px; }
+        .page-sub   { font-size: 14px; color: #64748B; margin: 0; }
+
+        .btn-add {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 12px 22px;
+            background: #005FAA;
+            color: #fff; border: none; border-radius: 10px;
+            font-size: 14px; font-weight: 600; font-family: 'Inter', sans-serif;
+            cursor: pointer; text-decoration: none;
+            box-shadow: 0 4px 12px rgba(0, 95, 170, 0.3);
+            transition: all .2s;
+            white-space: nowrap;
+        }
+        .btn-add:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(0, 95, 170, 0.4); }
+
+        /* ── STATS ROW ── */
+        .stats-row { display: flex; gap: 16px; margin-bottom: 24px; }
+        .stat-mini {
+            flex: 1; background: #fff; border: 1px solid #E2E8F0;
+            border-radius: 14px; padding: 20px 24px;
+            display: flex; align-items: center; gap: 16px;
+            box-shadow: 0 2px 4px rgba(0,0,0,.02);
+        }
+        .stat-mini-icon {
+            width: 44px; height: 44px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .stat-mini-icon.blue   { background: #DBEAFE; color: #2563EB; }
+        .stat-mini-icon.purple { background: #EDE9FE; color: #7C3AED; }
+        .stat-mini-icon.green  { background: #DCFCE7; color: #16A34A; }
+        .stat-mini-icon.yellow { background: #FEF3C7; color: #D97706; }
+        .stat-mini-label { font-size: 12px; color: #64748B; font-weight: 500; margin: 0 0 4px; }
+        .stat-mini-value { font-size: 22px; font-weight: 800; color: #0F172A; margin: 0; }
+
+        /* ── FLASH MESSAGES ── */
+        .flash-wrap { margin-bottom: 16px; }
+        .flash { padding: 13px 18px; border-radius: 10px; font-size: 14px; font-weight: 500; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; animation: fadeIn .3s ease; }
+        .flash-success { background:#DCFCE7; color:#15803D; border:1px solid #BBF7D0; }
+        .flash-error   { background:#FEE2E2; color:#DC2626; border:1px solid #FECACA; }
+        @keyframes fadeIn { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
+
+        /* ── TOP ACTIONS ── */
+        .top-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; gap: 16px; }
+        .search-box { flex: 1; max-width: 420px; position: relative; }
+        .search-box input {
+            width: 100%; padding: 11px 16px 11px 40px;
+            border: 1.5px solid #E2E8F0; border-radius: 10px;
+            font-size: 14px; font-family: 'Inter', sans-serif;
+            color: #0F172A; background: #fff; outline: none;
+            transition: all .2s;
+        }
+        .search-box input:focus { border-color: #005FAA; box-shadow: 0 0 0 3px rgba(0, 95, 170, 0.1); }
+        .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94A3B8; pointer-events: none; }
+
+        .filter-select {
+            padding: 11px 36px 11px 14px;
+            border: 1.5px solid #E2E8F0; border-radius: 10px;
+            font-size: 14px; font-family: 'Inter', sans-serif;
+            color: #475569; background: #fff; outline: none;
+            cursor: pointer; appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat; background-position: right 10px center;
+            transition: all .2s;
+        }
+        .filter-select:focus { border-color: #005FAA; }
+
+        /* ── TABLE CARD ── */
+        .table-card {
+            background: #fff; border-radius: 16px;
+            border: 1px solid #E2E8F0;
+            box-shadow: 0 4px 20px rgba(0,0,0,.02);
+            overflow: hidden;
+        }
+        table { width: 100%; border-collapse: collapse; }
+        th {
+            text-align: left; padding: 18px 20px;
+            font-size: 11px; font-weight: 700; color: #94A3B8;
+            text-transform: uppercase; letter-spacing: .8px;
+            border-bottom: 1px solid #F1F5F9;
+        }
+        td {
+            padding: 14px 20px; border-bottom: 1px solid #F1F5F9;
+            vertical-align: middle; font-size: 14px; color: #475569;
+        }
+        tbody tr { transition: background .15s; }
+        tbody tr:hover { background: #F8FAFC; }
+        tbody tr:last-child td { border-bottom: none; }
+
+        /* User cell */
+        .user-cell { display: flex; align-items: center; gap: 14px; }
+        .user-avatar-sm {
+            width: 38px; height: 38px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px; font-weight: 700; color: #fff; flex-shrink: 0;
+        }
+        .avatar-hc     { background: linear-gradient(135deg, #7C3AED, #A78BFA); }
+        .avatar-it     { background: linear-gradient(135deg, #F59E0B, #FBBF24); }
+        .avatar-talent { background: linear-gradient(135deg, #059669, #34D399); }
+        .avatar-other  { background: linear-gradient(135deg, #64748B, #94A3B8); }
+        .user-name-main { font-weight: 700; color: #0F172A; font-size: 14px; }
+        .user-id-sub    { font-size: 12px; color: #94A3B8; font-family: monospace; }
+
+        /* Role badge */
+        .role-badge {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 4px 12px; border-radius: 999px;
+            font-size: 12px; font-weight: 700;
+        }
+        .role-hc     { background: #EDE9FE; color: #6D28D9; }
+        .role-it     { background: #FEF3C7; color: #D97706; }
+        .role-talent { background: #DCFCE7; color: #15803D; }
+        .role-other  { background: #F1F5F9; color: #475569; }
+
+        /* Email cell */
+        .email-text { font-size: 13px; color: #64748B; }
+        .email-empty { font-size: 13px; color: #CBD5E1; font-style: italic; }
+
+        /* Action buttons */
+        .action-btns { display: flex; gap: 8px; }
+        .btn-edit, .btn-hapus {
+            padding: 6px 14px; border-radius: 7px;
+            font-size: 12px; font-weight: 600; font-family: 'Inter', sans-serif;
+            cursor: pointer; border: none; display: inline-flex; align-items: center; gap: 5px;
+            transition: all .2s;
+        }
+        .btn-edit  { background: #F1F5F9; color: #475569; }
+        .btn-edit:hover  { background: #E2E8F0; color: #0F172A; }
+        .btn-hapus { background: #FEF2F2; color: #DC2626; }
+        .btn-hapus:hover { background: #FEE2E2; }
+
+        /* Pagination */
+        .pagination-container {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 18px 20px; border-top: 1px solid #F1F5F9;
+        }
+        .pagination-text { font-size: 13px; color: #64748B; font-weight: 500; }
+        .pagination-controls { display: flex; align-items: center; gap: 6px; }
+        .page-btn {
+            width: 30px; height: 30px; display: flex; align-items: center;
+            justify-content: center; border-radius: 8px; border: 1px solid #E2E8F0;
+            background: #fff; font-size: 13px; font-weight: 600; color: #475569;
+            cursor: pointer; transition: all .15s;
+        }
+        .page-btn:hover  { background: #F1F5F9; }
+        .page-btn.active { background: #005FAA; color: #fff; border-color: #005FAA; }
+        .page-btn.disabled {
+            background: #F8FAFC !important;
+            color: #CBD5E1 !important;
+            border-color: #E2E8F0 !important;
+            cursor: not-allowed;
+        }
+        .page-btn.nav-btn {
+            background: #F1F5F9;
+            color: #475569;
+            border-color: #E2E8F0;
+        }
+        .page-btn.nav-btn:hover {
+            background: #E2E8F0;
+            color: #0F172A;
+        }
+
+        /* Empty state */
+        .empty-state { text-align: center; padding: 60px 24px; }
+        .empty-icon { width: 56px; height: 56px; background: #F1F5F9; border-radius: 16px; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; color: #94A3B8; }
+        .empty-title { font-size: 16px; font-weight: 700; color: #0F172A; margin: 0 0 6px; }
+        .empty-sub   { font-size: 14px; color: #64748B; margin: 0; }
+
+        /* ── MODAL EDIT ── */
+        .modal-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(15,23,42,.45); backdrop-filter: blur(4px);
+            z-index: 1000; align-items: center; justify-content: center;
+        }
+        .modal-overlay.active { display: flex; animation: fadeIn .2s ease; }
+        .modal {
+            background: #fff; border-radius: 20px; width: 520px; max-width: 95vw;
+            max-height: 90vh; overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(15,23,42,.3);
+            animation: slideUp .25s ease;
+        }
+        @keyframes slideUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+        .modal-header {
+            padding: 24px 28px 16px; border-bottom: 1px solid #F1F5F9;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .modal-title { font-size: 17px; font-weight: 700; color: #0F172A; margin: 0; }
+        .modal-close {
+            width: 32px; height: 32px; border-radius: 8px; border: none;
+            background: #F1F5F9; color: #64748B; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all .2s;
+        }
+        .modal-close:hover { background: #E2E8F0; color: #0F172A; }
+        .modal-body { padding: 24px 28px; }
+        .modal-footer {
+            padding: 16px 28px 24px; border-top: 1px solid #F1F5F9;
+            display: flex; gap: 10px; justify-content: flex-end;
+        }
+
+        /* Modal form fields */
+        .form-group { margin-bottom: 18px; }
+        .form-group:last-child { margin-bottom: 0; }
+        .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        label { display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 7px; }
+        .req { color: #EF4444; margin-left: 2px; }
+        .field-wrap { position: relative; }
+        .field-icon {
+            position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+            color: #94A3B8; pointer-events: none;
+        }
+        .modal-input, .modal-select {
+            width: 100%; padding: 10px 14px 10px 38px;
+            border: 1.5px solid #E2E8F0; border-radius: 9px;
+            font-size: 14px; font-family: 'Inter', sans-serif;
+            color: #0F172A; background: #FAFAFA; outline: none;
+            transition: all .2s; box-sizing: border-box; appearance: none;
+        }
+        .modal-input:focus, .modal-select:focus {
+            border-color: #005FAA; background: #fff;
+            box-shadow: 0 0 0 3px rgba(0, 95, 170, 0.1);
+        }
+        .modal-input:read-only { background: #F1F5F9; color: #64748B; cursor: not-allowed; }
+        .field-hint { margin-top: 5px; font-size: 12px; color: #94A3B8; }
+
+        .btn-save {
+            padding: 10px 24px; background: #005FAA;
+            color: #fff; border: none; border-radius: 9px;
+            font-size: 14px; font-weight: 600; font-family: 'Inter', sans-serif;
+            cursor: pointer; transition: all .2s;
+        }
+        .btn-save:hover { transform: translateY(-1.5px); }
+        .btn-cancel {
+            padding: 10px 20px; background: #F1F5F9; color: #475569;
+            border: none; border-radius: 9px;
+            font-size: 14px; font-weight: 600; font-family: 'Inter', sans-serif;
+            cursor: pointer; transition: all .2s;
+        }
+        .btn-cancel:hover { transform: translateY(-1.5px); background: #E2E8F0; color: #0F172A; }
+
+        /* ── MODAL HAPUS ── */
+        .modal-hapus { width: 420px; }
+        .hapus-icon {
+            width: 56px; height: 56px; background: #FEF2F2; border-radius: 16px;
+            margin: 0 auto 16px; display: flex; align-items: center; justify-content: center;
+            color: #DC2626;
+        }
+        .hapus-title { font-size: 18px; font-weight: 700; color: #0F172A; text-align: center; margin: 0 0 8px; }
+        .hapus-desc  { font-size: 14px; color: #64748B; text-align: center; margin: 0; line-height: 1.6; }
+        .btn-hapus-confirm {
+            flex: 1; padding: 11px; background: #DC2626; color: #fff; border: none;
+            border-radius: 9px; font-size: 14px; font-weight: 600; font-family: 'Inter', sans-serif;
+            cursor: pointer; transition: all .2s;
+        }
+        .btn-hapus-confirm:hover { background: #B91C1C; }
+    </style>
+</head>
+
+<body>
+<div class="dashboard-wrapper">
+    {% include 'hc/components/sidebar.html' with active_page='manajemen_user' %}
+
+    <div class="main-dashboard-content">
+
+        <!-- Flash Messages -->
+        {% if messages %}
+        <div class="flash-wrap">
+            {% for message in messages %}
+            <div class="flash {% if message.tags == 'success' %}flash-success{% elif message.tags == 'error' %}flash-error{% endif %}">
+                {% if message.tags == 'success' %}
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                {% else %}
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                {% endif %}
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Page Header -->
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Manajemen Pengguna</h1>
+                <p class="page-sub">Kelola seluruh akun pengguna sistem SiLaptop79.</p>
+            </div>
+            <a href="{% url 'tambahuser_hc' %}" class="btn-add">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Tambah Pengguna
+            </a>
+        </div>
+
+        <!-- Stats Row -->
+        <div class="stats-row">
+            <div class="stat-mini">
+                <div class="stat-mini-icon blue">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                </div>
+                <div>
+                    <p class="stat-mini-label">Total Pengguna</p>
+                    <p class="stat-mini-value">{{ total_user }}</p>
+                </div>
+            </div>
+            <div class="stat-mini">
+                <div class="stat-mini-icon purple">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                </div>
+                <div>
+                    <p class="stat-mini-label">Human Capital</p>
+                    <p class="stat-mini-value">{{ total_hc }}</p>
+                </div>
+            </div>
+            <div class="stat-mini">
+                <div class="stat-mini-icon yellow">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                </div>
+                <div>
+                    <p class="stat-mini-label">IT Infrastructure</p>
+                    <p class="stat-mini-value">{{ total_it }}</p>
+                </div>
+            </div>
+            <div class="stat-mini">
+                <div class="stat-mini-icon green">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+                </div>
+                <div>
+                    <p class="stat-mini-label">Talent</p>
+                    <p class="stat-mini-value">{{ total_talent }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Actions -->
+        <div class="top-actions">
+            <div class="search-box">
+                <span class="search-icon">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                </span>
+                <input type="text" id="searchInput" placeholder="Cari nama atau ID pengguna..." oninput="filterTable()">
+            </div>
+            <select class="filter-select" id="roleFilter" onchange="filterTable()">
+                <option value="">Semua Role</option>
+                <option value="HC">Human Capital</option>
+                <option value="IT">IT Infrastructure</option>
+                <option value="Talent">Talent</option>
+            </select>
+        </div>
+
+        <!-- Table Card -->
+        <div class="table-card">
+            <table id="userTable">
+                <thead>
+                    <tr>
+                        <th style="width:48px">NO</th>
+                        <th>PENGGUNA</th>
+                        <th>ROLE</th>
+                        <th>EMAIL</th>
+                        <th style="width:140px">AKSI</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in list_user %}
+                    <tr data-name="{{ user.nama|lower }}" data-id="{{ user.id_user|lower }}" data-role="{{ user.role }}">
+                        <td style="font-weight:600; color:#64748B;">{{ forloop.counter|stringformat:"02d" }}</td>
+                        <td>
+                            <div class="user-cell">
+                                <div class="user-avatar-sm {% if user.role == 'HC' %}avatar-hc{% elif user.role == 'IT' %}avatar-it{% elif user.role == 'Talent' %}avatar-talent{% else %}avatar-other{% endif %}">
+                                    {{ user.nama|slice:":1"|upper }}
+                                </div>
+                                <div>
+                                    <div class="user-name-main">{{ user.nama }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="role-badge {% if user.role == 'HC' %}role-hc{% elif user.role == 'IT' %}role-it{% elif user.role == 'Talent' %}role-talent{% else %}role-other{% endif %}">
+                                {% if user.role == 'HC' %}Human Capital
+                                {% elif user.role == 'IT' %}IT Infrastructure
+                                {% elif user.role == 'Talent' %}Talent
+                                {% else %}{{ user.role }}{% endif %}
+                            </span>
+                        </td>
+                        <td>
+                            {% if user.email %}
+                            <span class="email-text">{{ user.email }}</span>
+                            {% else %}
+                            <span class="email-empty">Tidak ada email</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="action-btns">
+                                <button class="btn-edit"
+                                    onclick="bukaModalEdit('{{ user.id_user }}','{{ user.nama }}','{{ user.email|default:"" }}','{{ user.role }}')">
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                    Edit
+                                </button>
+                                <button class="btn-hapus"
+                                    onclick="bukaModalHapus('{{ user.id_user }}','{{ user.nama }}')">
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                                    Hapus
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5">
+                            <div class="empty-state">
+                                <div class="empty-icon">
+                                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                                </div>
+                                <p class="empty-title">Belum Ada Pengguna</p>
+                                <p class="empty-sub">Klik "Tambah Pengguna" untuk mendaftarkan akun baru.</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <div class="pagination-container">
+                <span class="pagination-text">Menampilkan <span id="showCount">0</span> dari {{ total_user }} pengguna</span>
+                <div class="pagination-controls" id="paginationControls">
+                    <!-- Dynamic Pagination -->
+                </div>
+            </div>
+        </div>
+
+    </div><!-- /main -->
+</div><!-- /wrapper -->
+
+<!-- ══════════════════════════════════════
+     MODAL EDIT
+══════════════════════════════════════ -->
+<div class="modal-overlay" id="modalEdit">
+    <div class="modal">
+        <div class="modal-header">
+            <h2 class="modal-title">Edit Pengguna</h2>
+            <button class="modal-close" onclick="tutupModal('modalEdit')">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <form method="POST" action="{% url 'edit_user_hc' %}">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="edit">
+            <div class="modal-body">
+                <div class="form-row-2">
+                    <div class="form-group">
+                        <label for="edit_id_user">ID Pengguna</label>
+                        <div class="field-wrap">
+                            <span class="field-icon">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                            </span>
+                            <input type="text" id="edit_id_user" name="id_user" class="modal-input" readonly>
+                        </div>
+                        <p class="field-hint">ID tidak dapat diubah.</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_role">Role <span class="req">*</span></label>
+                        <div class="field-wrap">
+                            <span class="field-icon">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                            </span>
+                            <select id="edit_role" name="role" class="modal-select">
+                                <option value="HC">Human Capital (HC)</option>
+                                <option value="IT">IT Infrastructure</option>
+                                <option value="Talent">Talent</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="edit_nama">Nama Lengkap <span class="req">*</span></label>
+                    <div class="field-wrap">
+                        <span class="field-icon">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        </span>
+                        <input type="text" id="edit_nama" name="nama" class="modal-input" placeholder="Nama lengkap" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="edit_email">Email <span style="font-size:11px;color:#94A3B8;font-weight:400;">(opsional)</span></label>
+                    <div class="field-wrap">
+                        <span class="field-icon">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                        </span>
+                        <input type="email" id="edit_email" name="email" class="modal-input" placeholder="email@perusahaan.com">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="edit_password">Password Baru <span style="font-size:11px;color:#94A3B8;font-weight:400;">(kosongkan jika tidak diubah)</span></label>
+                    <div class="field-wrap">
+                        <span class="field-icon">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        </span>
+                        <input type="password" id="edit_password" name="password" class="modal-input" placeholder="Isi untuk mengganti password" minlength="8">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel" onclick="tutupModal('modalEdit')">Batal</button>
+                <button type="submit" class="btn-save">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px;vertical-align:middle"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                    Simpan Perubahan
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     MODAL HAPUS
+══════════════════════════════════════ -->
+<div class="modal-overlay" id="modalHapus">
+    <div class="modal modal-hapus">
+        <div class="modal-body" style="padding:32px 28px 8px;">
+            <div class="hapus-icon">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+            </div>
+            <p class="hapus-title">Hapus Pengguna?</p>
+            <p class="hapus-desc">Anda akan menghapus akun <strong id="hapusNama"></strong>. Tindakan ini tidak dapat dibatalkan.</p>
+        </div>
+        <form method="POST" action="{% url 'hapus_user_hc' %}">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="hapus">
+            <input type="hidden" id="hapus_id_user" name="id_user" value="">
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel" style="flex:1" onclick="tutupModal('modalHapus')">Batal</button>
+                <button type="submit" class="btn-hapus-confirm">Ya, Hapus</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // ── Modal helpers ──
+    function bukaModalEdit(id, nama, email, role) {
+        document.getElementById('edit_id_user').value = id;
+        document.getElementById('edit_nama').value    = nama;
+        document.getElementById('edit_email').value   = email;
+        document.getElementById('edit_role').value    = role;
+        document.getElementById('edit_password').value = '';
+        document.getElementById('modalEdit').classList.add('active');
+    }
+    function bukaModalHapus(id, nama) {
+        document.getElementById('hapus_id_user').value = id;
+        document.getElementById('hapusNama').textContent = nama;
+        document.getElementById('modalHapus').classList.add('active');
+    }
+    function tutupModal(id) {
+        document.getElementById(id).classList.remove('active');
+    }
+    // Close on overlay click
+    document.querySelectorAll('.modal-overlay').forEach(el => {
+        el.addEventListener('click', e => { if (e.target === el) el.classList.remove('active'); });
+    });
+
+    // ── Filter / Search with Pagination ──
+    let currentPage = 1;
+    const pageSize = 10;
+    let filteredRows = [];
+
+    function filterTable() {
+        const q    = document.getElementById('searchInput').value.toLowerCase();
+        const role = document.getElementById('roleFilter').value;
+        const rows = document.querySelectorAll('#userTable tbody tr[data-name]');
+        
+        filteredRows = [];
+        rows.forEach(row => {
+            const matchName = row.dataset.name.includes(q) || row.dataset.id.includes(q);
+            const matchRole = !role || row.dataset.role === role;
+            const show = matchName && matchRole;
+            if (show) {
+                filteredRows.push(row);
+            } else {
+                row.style.display = 'none';
+            }
+        });
+        
+        currentPage = 1;
+        renderPaginatedTable();
+    }
+
+    function renderPaginatedTable() {
+        const totalRows = filteredRows.length;
+        const totalPages = Math.ceil(totalRows / pageSize) || 1;
+        
+        if (currentPage > totalPages) {
+            currentPage = totalPages;
+        }
+        if (currentPage < 1) {
+            currentPage = 1;
+        }
+
+        // Sembunyikan semua baris
+        const rows = document.querySelectorAll('#userTable tbody tr[data-name]');
+        rows.forEach(row => row.style.display = 'none');
+
+        // Tampilkan baris pada halaman aktif
+        const startIndex = (currentPage - 1) * pageSize;
+        const endIndex = Math.min(startIndex + pageSize, totalRows);
+
+        for (let i = startIndex; i < endIndex; i++) {
+            filteredRows[i].style.display = '';
+        }
+
+        // Update teks jumlah data
+        const showCountEl = document.getElementById('showCount');
+        if (showCountEl) {
+            if (totalRows === 0) {
+                showCountEl.textContent = '0';
+            } else {
+                showCountEl.textContent = `${startIndex + 1}-${endIndex} dari ${totalRows}`;
+            }
+        }
+
+        renderControls(totalPages);
+    }
+
+    function renderControls(totalPages) {
+        const container = document.getElementById('paginationControls');
+        if (!container) return;
+        container.innerHTML = '';
+
+        // Tombol Sebelumnya (<)
+        const prevBtn = document.createElement('button');
+        prevBtn.textContent = '<';
+        if (currentPage === 1) {
+            prevBtn.className = 'page-btn disabled';
+            prevBtn.disabled = true;
+        } else {
+            prevBtn.className = 'page-btn nav-btn';
+            prevBtn.onclick = () => {
+                currentPage--;
+                renderPaginatedTable();
+            };
+        }
+        container.appendChild(prevBtn);
+
+        // Angka Halaman
+        for (let i = 1; i <= totalPages; i++) {
+            const pageBtn = document.createElement('button');
+            pageBtn.textContent = i;
+            if (i === currentPage) {
+                pageBtn.className = 'page-btn active';
+            } else {
+                pageBtn.className = 'page-btn';
+                pageBtn.onclick = () => {
+                    currentPage = i;
+                    renderPaginatedTable();
+                };
+            }
+            container.appendChild(pageBtn);
+        }
+
+        // Tombol Selanjutnya (>)
+        const nextBtn = document.createElement('button');
+        nextBtn.textContent = '>';
+        if (currentPage === totalPages) {
+            nextBtn.className = 'page-btn disabled';
+            nextBtn.disabled = true;
+        } else {
+            nextBtn.className = 'page-btn nav-btn';
+            nextBtn.onclick = () => {
+                currentPage++;
+                renderPaginatedTable();
+            };
+        }
+        container.appendChild(nextBtn);
+    }
+
+    // Inisialisasi awal
+    window.addEventListener('DOMContentLoaded', () => {
+        filterTable();
+    });
+</script>
+</body>
+</html>

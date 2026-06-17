@@ -1,10 +1,10 @@
 import psycopg2
 from psycopg2.extras import RealDictCursor
-from dto.dto_dss_proses import DssProsesDTO
-from interface.interface_dss_proses import IDssProssesRepository 
+from .dto.dto_dss_proses import DssProsesDTO
+from .interface.interface_dss_proses import IDssProssesRepositoryImpl 
 
 
-class KriteriaRepository(IDssProssesRepository):
+class DssprossesRepository(IDssProssesRepositoryImpl):
 
     def __init__(self, conn):
         self.conn = conn
@@ -13,22 +13,40 @@ class KriteriaRepository(IDssProssesRepository):
     # CREATE
     # =========================
     def tambah_dss_proses(self, data: DssProsesDTO):
+
         query = """
-        SELECT tambah_kriteria(%s, %s, %s, %s, %s);
+        SELECT tambah_dss_proses(%s, %s, %s, %s);
         """
 
         with self.conn.cursor() as cur:
-            cur.execute(query, (
-                data.id_user,
-                data.id_bobot,
-                data.role_dss,
-                data.jenis_dss,
-                data.create_at
-            ))
+
+            cur.execute(
+                query,
+                (
+                    data.id_user,
+                    data.id_bobot,
+                    data.role_dss,
+                    data.jenis_dss
+                )
+            )
+
+            hasil = cur.fetchone()
+
+            print("\n=== DEBUG HASIL DSS ===")
+            print(hasil)
+            print(type(hasil))
+
             self.conn.commit()
 
-            return "Berhasil tambah kriteria"
-        
+            # Cursor biasa
+            if isinstance(hasil, tuple):
+                return hasil[0]
+
+            # RealDictCursor
+            if isinstance(hasil, dict):
+                return next(iter(hasil.values()))
+
+            return hasil   
     # =========================
     # Ambil Semua
     # =========================

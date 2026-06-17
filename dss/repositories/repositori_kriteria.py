@@ -1,10 +1,10 @@
 import psycopg2
 from psycopg2.extras import RealDictCursor
-from dto.dto_kriteria import KriteriaDTO
-from interface.interface_kriteria import IKriteriaRepository
+from .dto.dto_kriteria import KriteriaDTO
+from .interface.interface_kriteria import IKriteriaRepositoryImpl
 
 
-class KriteriaRepository(IKriteriaRepository):
+class KriteriaRepository(IKriteriaRepositoryImpl):
 
     def __init__(self, conn):
         self.conn = conn
@@ -13,18 +13,26 @@ class KriteriaRepository(IKriteriaRepository):
     # CREATE
     # =========================
     def tambah_kriteria(self, data: KriteriaDTO):
-        query = """
-        SELECT tambah_kriteria(%s, %s);
-        """
+        print("➡️ QUERY TAMBAH KRITERIA DTO")
+
+        query = "SELECT tambah_kriteria(%s, %s, %s,%s);"
 
         with self.conn.cursor() as cur:
             cur.execute(query, (
                 data.nama_kriteria,
-                data.tipe_kriteria
+                data.tipe_kriteria,
+                data.golongan_kriteria
             ))
-            self.conn.commit()
 
-            return "Berhasil tambah kriteria"
+            result = cur.fetchone()
+            print("RESULT KRITERIA:", result)
+
+            if result:
+                if isinstance(result, dict):
+                    return list(result.values())[0]
+                else:
+                    return result[0]
+            return None
 
     # =========================
     # READ
@@ -55,4 +63,18 @@ class KriteriaRepository(IKriteriaRepository):
             result = cur.fetchone()
             self.conn.commit()
 
-            return result[0] if result else None
+            if result:
+                if isinstance(result, dict):
+                    return list(result.values())[0]
+                else:
+                    return result[0]
+            return None
+        
+    def ambil_semua_role(self):
+        query = "SELECT role FROM dss_bobotkriteria;"
+
+        with self.conn.cursor() as cur:
+            cur.execute(query)
+            rows = cur.fetchall()
+
+            return [row[0] for row in rows]

@@ -1,0 +1,391 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detail Rekomendasi - SiLaptop79</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        /* Reset agar menu tidak ada bullet points */
+        ul,
+        li {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        body {
+            background-color: #f8fafc;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+        }
+
+        /* Pembungkus utama agar sidebar dan konten bersandingan dengan benar */
+        .dashboard-wrapper {
+            display: flex;
+            width: 100%;
+        }
+
+        .main-content {
+            flex: 1;
+            margin-left: 260px;
+            /* Lebar sidebar */
+            padding: 30px 50px;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        /* Top Nav Header Area */
+        .top-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .breadcrumb {
+            font-size: 13px;
+            color: #64748b;
+            margin-bottom: 4px;
+        }
+
+        .breadcrumb span {
+            color: #0b57c6;
+            font-weight: 600;
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 800;
+            color: #1e293b;
+            margin: 0;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-nav {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.2s;
+        }
+
+        .btn-grey {
+            background: #e2e8f0;
+            color: #475569;
+        }
+
+        /* Grid Layout Sesuai Gambar */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 30px;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid #f1f5f9;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+            position: relative;
+        }
+
+        /* Status Badge */
+        .status-badge {
+            position: absolute;
+            top: 25px;
+            left: 25px;
+            background: #dcfce7;
+            color: #16a34a;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .laptop-display {
+            text-align: center;
+        }
+
+        .laptop-img {
+            width: 80%;
+            margin: 20px 0;
+            border-radius: 12px;
+        }
+
+        .laptop-info h2 {
+            font-size: 24px;
+            font-weight: 800;
+            color: #1e293b;
+            margin: 0 0 5px 0;
+        }
+
+        .laptop-info p {
+            color: #94a3b8;
+            font-weight: 500;
+            margin: 0;
+        }
+
+        /* Admin Info */
+        .admin-title {
+            font-size: 18px;
+            font-weight: 800;
+            color: #1e293b;
+            margin-bottom: 20px;
+        }
+
+        .admin-item {
+            margin-bottom: 24px;
+        }
+
+        .admin-item label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #64748b;
+            margin-bottom: 8px;
+        }
+
+        .asset-id {
+            background: #eff6ff;
+            color: #2563eb;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-weight: 700;
+            display: inline-block;
+        }
+
+        /* Specs Section */
+        .specs-card {
+            grid-column: span 2;
+            margin-top: 10px;
+        }
+
+        .specs-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 18px;
+            font-weight: 800;
+            color: #1e293b;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #0b57c6;
+            width: fit-content;
+        }
+
+        .specs-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+
+        .spec-item label {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .spec-item span {
+            font-size: 14px;
+            font-weight: 700;
+            color: #334155;
+        }
+
+        /* Footer Action */
+        .footer-action {
+            grid-column: span 2;
+            margin-top: 10px;
+        }
+
+        .btn-history {
+            width: 100%;
+            padding: 14px;
+            background: #e2e8f0;
+            color: #1e293b;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .asset-status{
+            display:inline-block;
+            padding:6px 12px;
+            border-radius:8px;
+            font-size:12px;
+            font-weight:700;
+            text-transform:uppercase;
+            background:#dcfce7;
+            color:#16a34a;
+        }
+        .status-tersedia{
+            background:#dcfce7;
+            color:#16a34a;
+        }
+
+        .status-dipinjam{
+            background:#dbeafe;
+            color:#2563eb;
+        }
+
+        .status-rusak{
+            background:#fee2e2;
+            color:#dc2626;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="dashboard-wrapper">
+        {% include 'it/components/sidebar.html' with active_page='hasil_rekomendasi' %}
+
+        <div class="main-content">
+            <!-- Flash Messages -->
+            {% if messages %}
+            <div style="margin-bottom:20px;">
+                {% for message in messages %}
+                <div style="padding:12px 20px; border-radius:8px; margin-bottom:8px; font-size:14px; font-weight:500;
+                    {% if message.tags == 'success' %}background:#dcfce7; color:#15803d; border:1px solid #bbf7d0;
+                    {% elif message.tags == 'error' %}background:#fee2e2; color:#dc2626; border:1px solid #fecaca;
+                    {% else %}background:#dbeafe; color:#2563eb; border:1px solid #bfdbfe;{% endif %}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="top-nav">
+                <div>
+                    <div class="breadcrumb">Data Laptop / <span>{{ laptop.nama }}</span></div>
+                    <h1 class="page-title">Detail Rekomendasi</h1>
+                </div>
+                <div class="nav-buttons">
+                    <a href="{% url 'hasilrekomendasi_it' %}" class="btn-nav btn-grey">Kembali ke Daftar</a>
+                </div>
+            </div>
+
+            <div class="content-grid">
+                <div class="card laptop-display">
+                    <div class="status-badge">
+                        <i class="fa-solid fa-circle" style="font-size: 8px;"></i> TERSEDIA
+                    </div>
+                    <img src="https://images.unsplash.com/photo-1517336714460-d1b16dd1c06d?q=80&w=1000&auto=format&fit=crop"
+                        class="laptop-img" alt="Laptop">
+                    <div class="laptop-info">
+                        <h2>{{ detail.nama_laptop }}</h2>
+                        <p>{{ detail.model }}</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="admin-title">Asset Administration</div>
+                        <div class="admin-item">
+                            <label>Asset ID</label>
+                            <div class="asset-id">
+                                {{ detail.id_laptop_inventori }}
+                            </div>
+                        </div>
+                        <div class="admin-item">
+                            <label>Storage Location</label>
+                            <div>
+                                <i class="fa-solid fa-location-dot"></i>
+                                {{ detail.lokasi }}
+                            </div>
+                        </div>
+                        <div class="admin-item">
+                            <label>Status Laptop</label>
+                            <span class="asset-status {% if detail.status == 'tersedia' %} status-tersedia
+                            {% elif detail.status == 'dipinjam' %} status-dipinjam {% else %} status-rusak{% endif %}">
+                            {{ detail.status|upper }}
+                            </span>
+                        </div>
+                </div>
+
+                <div class="card specs-card">
+                    <div class="specs-header">
+                        <i class="fa-solid fa-microchip"></i> Spesifikasi Laptop
+                    </div>
+                        <div class="specs-grid">
+                            <div class="spec-item">
+                                <label>Manufacturer</label>
+                                <span>{{ detail.manufacturer }}</span>
+                            </div>
+                            <div class="spec-item">
+                                <label>Processor</label>
+                                <span>
+                                    {{ detail.manufacturer }}
+                                    {{ detail.processor_model }}
+                                </span>
+                            </div>
+                            <div class="spec-item">
+                                <label>Cores</label>
+                                <span>{{ detail.cores }}</span>
+                            </div>
+                            <div class="spec-item">
+                                <label>Threads</label>
+                                <span>{{ detail.threads }}</span>
+                            </div>
+                            <div class="spec-item">
+                                <label>Benchmark Score</label>
+                                <span>{{ detail.benchmark_score }}</span>
+                            </div>
+                            <div class="spec-item">
+                                <label>RAM</label>
+                                <span>
+                                    {{ detail.ram }} GB
+                                    ({{ detail.ram_tipe }})
+                                </span>
+                            </div>
+                            <div class="spec-item">
+                                <label>Storage</label>
+                                <span>
+                                    {{ detail.storage }} GB
+                                    ({{ detail.storage_tipe }})
+                                </span>
+                            </div>
+
+                        </div>
+                </div>
+
+                <div class="footer-action">
+                    <a href="{% url 'riwayatpeminjamanlaptop_it' %}" style="text-decoration: none; width: 100%;">
+                        <button class="btn-history">
+                            <i class="fa-solid fa-clock-rotate-left"></i> Lihat Riwayat Peminjaman
+                        </button>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

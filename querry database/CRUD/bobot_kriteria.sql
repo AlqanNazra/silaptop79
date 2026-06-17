@@ -1,56 +1,280 @@
 -- =============================================
 -- 3. BOBOT KRITERIA (SWARA)
 -- =============================================
+DROP TABLE IF EXISTS dss_bobotkriteria CASCADE;
+
 CREATE TABLE dss_bobotkriteria (
     id_bobot VARCHAR(100) PRIMARY KEY,
-    id_kriteria VARCHAR(100),
-    role VARCHAR(100),
+    id_role_teknologi VARCHAR(30) NOT NULL,
+    id_kriteria VARCHAR(100) NOT NULL,
     nilai_bobot FLOAT CHECK (nilai_bobot >= 0),
-    FOREIGN KEY (id_kriteria) REFERENCES kriteria(id_kriteria)
+    nilai_swara FLOAT CHECK (nilai_swara >= 0),
+    versi INTEGER DEFAULT 1,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_role_teknologi)
+       REFERENCES role_teknologi(id_role_teknologi),
+    FOREIGN KEY (id_kriteria)
+        REFERENCES dss_kriteria(id_kriteria),
+    UNIQUE(id_kriteria, id_role_teknologi)
 );
+ALTER TABLE dss_bobotkriteria
+ADD CONSTRAINT unique_kriteria_roletek
+UNIQUE (id_kriteria, id_role_teknologi);
+
+SELECT *
+FROM ambil_kriteria()
+LIMIT 5;
+
+CREATE OR REPLACE FUNCTION tambah_bobot_kriteria(
+
+    p_id_role_teknologi VARCHAR,
+    p_id_kriteria VARCHAR,
+    p_nilai_bobot FLOAT
+
+)
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+AS
+$$
+DECLARE
+
+    v_role_teknologi INTEGER;
+
+    v_kriteria INTEGER;
+
+BEGIN
+
+    SELECT COUNT(*)
+    INTO v_role_teknologi
+    FROM role_teknologi
+    WHERE id_role_teknologi =
+          p_id_role_teknologi;
+
+    IF v_role_teknologi = 0 THEN
+
+        RAISE EXCEPTION
+        'Role teknologi tidak ditemukan';
+
+    END IF;
+
+    SELECT COUNT(*)
+    INTO v_kriteria
+    FROM dss_kriteria
+    WHERE id_kriteria =
+          p_id_kriteria;
+
+    IF v_kriteria = 0 THEN
+
+        RAISE EXCEPTION
+        'Kriteria tidak ditemukan';
+
+    END IF;
+
+    INSERT INTO dss_bobotkriteria(
+
+        id_bobot,
+
+        id_role_teknologi,
+
+        id_kriteria,
+
+        nilai_bobot
+
+    )
+    VALUES(
+
+        f_generate_id(
+            'BBT',
+            'dss_bobotkriteria',
+            'id_bobot'
+        ),
+
+        p_id_role_teknologi,
+
+        p_id_kriteria,
+
+        p_nilai_bobot
+
+    );
+
+    RETURN TRUE;
+
+END;
+$$;
 
 -- Tambah Bobot function
+CREATE OR REPLACE FUNCTION ambil_kriteria()
+RETURNS TABLE (
+    id_kriteria VARCHAR,
+    nama_kriteria VARCHAR,
+    tipe_kriteria VARCHAR,
+    golongan_kriteria VARCHAR,
+    id_role_teknologi VARCHAR,
+    nilai_bobot FLOAT,
+    nilai_swara FLOAT
+)
+AS $$
+BEGIN
 
-CREATE OR REPLACE FUNCTION tambah_bobot_kriteria(f_id_kriteria VARCHAR(100), f_role VARCHAR(100), f_nilai_bobot FLOAT)
-RETURNS VOID AS $$
-BEGIN 
-    INSERT INTO dss_bobotkriteria(id_bobot,id_kriteria, role, nilai_bobot)
-    VALUES (f_generate_id('bobot','dss_bobotkriteria','id_bobot'), f_id_kriteria, f_role, f_nilai_bobot);
+RETURN QUERY
+
+SELECT
+    k.id_kriteria,
+    k.nama_kriteria,
+    k.tipe_kriteria,
+    k.golongan_kriteria,
+
+    bk.id_role_teknologi,
+
+    bk.nilai_bobot,
+    bk.nilai_swara
+
+FROM dss_kriteria k
+
+LEFT JOIN dss_bobotkriteria bk
+    ON k.id_kriteria = bk.id_kriteria;
+
 END;
 $$ LANGUAGE plpgsql;
 
--- cari bobot kriteria
+DROP FUNCTION ambil_kriteria()
 
-CREATE OR REPLACE FUNCTION cari_bobot_kriteria(f_id_bobot VARCHAR(100))
-RETURNS TABLE (id_bobot VARCHAR,id_kriteria VARCHAR, role VARCHAR, nilai_bobot FLOAT) AS $$
-BEGIN 
-    RETURN  QUERY
-    SELECT b.id_bobot,b.kriteria_id, b.role, b.nilai_bobot
-    FROM dss_bobotkriteria b
-    WHERE b.id_bobot = f_id_bobot;
+CREATE OR REPLACE FUNCTION cari_bobot_role_teknologi(
+    p_id_role VARCHAR
+)
+RETURNS TABLE (
+    nama_teknologi VARCHAR,
+    nama_kriteria VARCHAR,
+    nilai_bobot FLOAT
+)
+AS
+$$
+BEGIN
+
+RETURN QUERY
+
+SELECT
+    t.nama_teknologi,
+    k.nama_kriteria,
+    b.nilai_bobot
+
+FROM dss_bobotkriteria b
+
+JOIN role_teknologi rt
+    ON rt.id_role_teknologi = b.id_role_teknologi
+
+JOIN inventori_teknologi t
+    ON t.id_teknologi = rt.id_teknologi
+
+JOIN dss_kriteria k
+    ON k.id_kriteria = b.id_kriteria
+
+WHERE rt.id_role = p_id_role
+AND b.is_active = TRUE;
+
 END;
 $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION ambil_semua_data_detail_bobot()
-RETURNS TABLE (id_bobot VARCHAR,id_kriteria VARCHAR, role VARCHAR, nilai_bobot FLOAT) AS $$
+RETURNS TABLE (
+    id_bobot VARCHAR,
+    id_kriteria VARCHAR,
+    id_role_teknologi VARCHAR,
+    nilai_bobot FLOAT
+)
+AS
+$$
 BEGIN
-    RETURN  QUERY
-    SELECT b.id_bobot,b.kriteria_id, b.role, b.nilai_bobot
-    FROM dss_bobotkriteria b;
+
+RETURN QUERY
+
+SELECT
+    b.id_bobot,
+    b.id_kriteria,
+    b.id_role_teknologi,
+    b.nilai_bobot
+FROM dss_bobotkriteria b;
+
 END;
 $$ LANGUAGE plpgsql;
+
+DROP FUNCTION ambil_semua_data_detail_bobot()
+
+CREATE OR REPLACE FUNCTION ambil_bobot_by_kriteria(
+    p_id_bobot VARCHAR,
+    p_id_kriteria VARCHAR
+)
+RETURNS TABLE(
+    nama_kriteria VARCHAR,
+    tipe_kriteria VARCHAR,
+    nilai_bobot FLOAT,
+    id_role_teknologi VARCHAR
+)
+AS
+$$
+BEGIN
+
+RETURN QUERY
+
+SELECT
+    k.nama_kriteria,
+    k.tipe_kriteria,
+    bk.nilai_bobot,
+    bk.id_role_teknologi
+
+FROM dss_bobotkriteria bk
+
+LEFT JOIN dss_kriteria k
+    ON bk.id_kriteria = k.id_kriteria
+
+WHERE bk.id_bobot = p_id_bobot
+AND bk.id_kriteria = p_id_kriteria;
+
+END;
+$$ LANGUAGE plpgsql;
+
+DROP FUNCTION ambil_bobot_by_kriteria
 
 -- update bobot kriteria
 
-CREATE OR REPLACE FUNCTION update_bobot_kriteria(f_id_bobot VARCHAR(100), f_nilai_bobot float)
+CREATE OR REPLACE FUNCTION update_nilai_swara_per_kriteria(
+    f_id_kriteria VARCHAR,
+    f_id_role_teknologi VARCHAR,
+    f_nilai_swara FLOAT
+)
+RETURNS TEXT AS
+$$
+BEGIN
+
+UPDATE dss_bobotkriteria
+SET nilai_swara = f_nilai_swara
+WHERE id_kriteria = f_id_kriteria
+AND id_role_teknologi = f_id_role_teknologi;
+
+RETURN 'OK';
+
+END;
+$$ LANGUAGE plpgsql;
+
+DROP FUNCTION update_nilai_swara_per_kriteria
+
+CREATE OR REPLACE FUNCTION update_nilai_swara_per_kriteria(
+    f_id_kriteria VARCHAR,
+    f_role VARCHAR,
+    f_nilai_swara FLOAT
+)
 RETURNS TEXT AS $$
 BEGIN
     UPDATE dss_bobotkriteria 
-    SET nilai_bobot = f_nilai_bobot 
-    WHERE id_bobot = f_id_bobot;
-    RETURN 'Bobot berhasil diupdate!';
+    SET nilai_swara = f_nilai_swara 
+    WHERE id_kriteria = f_id_kriteria
+      AND role = f_role;
+
+    RETURN 'OK';
 END;
 $$ LANGUAGE plpgsql;
+
 
 -- DELETE bobot kriteria
 
@@ -90,3 +314,67 @@ BEGIN
 
 END;
 $$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION cari_bobot_kriteria_by_roles(
+    f_roles VARCHAR[]
+)
+RETURNS TABLE(
+    id_bobot VARCHAR,
+    id_kriteria VARCHAR,
+    nama_kriteria VARCHAR,
+    tipe_kriteria VARCHAR,
+    id_role VARCHAR,
+    nama_role VARCHAR,
+    nilai_bobot FLOAT
+)
+AS
+$$
+BEGIN
+
+RETURN QUERY
+
+SELECT
+    b.id_bobot,
+    b.kriteria_id AS id_kriteria,
+    k.nama_kriteria,
+    k.tipe_kriteria,
+    r.id_role,
+    r.nama_role,
+    b.nilai_bobot
+
+FROM dss_bobotkriteria b
+
+JOIN dss_kriteria k
+    ON k.id_kriteria = b.kriteria_id
+
+JOIN role_teknologi rt
+    ON rt.id_role_teknologi = b.role
+
+JOIN inventori_role r
+    ON r.id_role = rt.id_role
+
+WHERE r.nama_role = ANY(f_roles);
+
+END;
+$$ LANGUAGE plpgsql;
+
+DROP FUNCTION cari_bobot_kriteria_by_roles
+
+CREATE OR REPLACE FUNCTION update_nilai_swara(
+    f_id_bobot VARCHAR,
+    f_nilai_swara FLOAT
+)
+RETURNS TEXT
+AS
+$$
+BEGIN
+
+    UPDATE dss_bobotkriteria
+    SET nilai_swara = f_nilai_swara
+    WHERE id_bobot = f_id_bobot;
+
+    RETURN 'OK';
+
+END;
+$$
+LANGUAGE plpgsql;

@@ -33,7 +33,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION ambil_processor()
+CREATE OR REPLACE FUNCTION ambil_laptop_alternatif()
 RETURNS TABLE (
     id_alternatif_laptop VARCHAR,
     f_model_alternatif TEXT,
@@ -47,7 +47,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION ambil_processor_by_id(f_id VARCHAR)
+CREATE OR REPLACE FUNCTION ambil_alternatif_by_id(f_id VARCHAR)
 RETURNS TABLE (
     id_alternatif_laptop VARCHAR,
     f_model_alternatif TEXT,
@@ -65,7 +65,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION update_processor(
+CREATE OR REPLACE FUNCTION update_laptop_alternatif(
     f_id VARCHAR,
     f_model_alternatif TEXT,
     f_brand_alternatif TEXT,
@@ -78,14 +78,14 @@ BEGIN
         id_alternatif_laptop = f_nama_processor,
         model_alternatif = f_manufacturer,
         brand_alternatif = f_model,
-        id_dss = f_cores
+        id_dss = f_id_dss
     WHERE id_alternatif_laptop = f_id;
 
     RETURN 'Processor berhasil diupdate!';
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION hapus_processor(f_id INT)
+CREATE OR REPLACE FUNCTION hapus_laptop_alternatif(f_id INT)
 RETURNS TEXT AS $$
 BEGIN
     DELETE FROM dss_laptopalternatif

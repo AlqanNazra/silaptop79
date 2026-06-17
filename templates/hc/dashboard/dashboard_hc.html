@@ -1,0 +1,594 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - SiLaptop79</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1.1">
+
+    <style>
+        /* Base and Layout Styles */
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .dashboard-wrapper {
+            display: flex;
+            width: 100%;
+        }
+
+        .sidebar {
+            flex-shrink: 0;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.03);
+        }
+
+        .main-dashboard-content {
+            flex: 1;
+            margin-left: 260px;
+            /* Offset fixed sidebar */
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Top Header Area */
+        .page-header {
+            padding: 32px 40px 24px 40px;
+            background-color: #FFFFFF;
+            border-bottom: 1px solid #E2E8F0;
+        }
+
+        .page-header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 700;
+            color: #0F172A;
+        }
+
+        .page-header p {
+            margin: 8px 0 0 0;
+            font-size: 14px;
+            color: #64748B;
+        }
+
+        /* Content Padding Wrapper */
+        .content-padding {
+            padding: 32px 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+        }
+
+        /* Hero Card */
+        .hero-card {
+            background-color: #0F172A;
+            /* Slate 900 */
+            border-radius: 20px;
+            padding: 48px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #FFFFFF;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 15px -3px rgba(15, 23, 42, 0.1);
+        }
+
+        .hero-text {
+            max-width: 60%;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-text h2 {
+            margin: 0;
+            font-size: 36px;
+            font-weight: 800;
+            line-height: 1.2;
+            letter-spacing: -0.5px;
+        }
+
+        .hero-text h2 .highlight {
+            color: #3B82F6;
+            /* Blue 500 */
+        }
+
+        .hero-text p {
+            margin: 20px 0 32px 0;
+            font-size: 15px;
+            color: #94A3B8;
+            /* Slate 400 */
+            line-height: 1.6;
+        }
+
+        .btn-hero {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background-color: #0284C7;
+            color: #FFFFFF;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .btn-hero:hover {
+            background-color: #0369A1;
+        }
+
+        /* Hero Graphic (Simple CSS Art) */
+        .hero-graphic {
+            position: relative;
+            z-index: 1;
+            width: 180px;
+            height: 200px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .laptop-icon {
+            color: #0EA5E9;
+            margin-bottom: 24px;
+        }
+
+        .system-status {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: #475569;
+            text-transform: uppercase;
+        }
+
+        .system-status span {
+            color: #10B981;
+        }
+
+        /* Stats Row */
+        .stats-container {
+            display: flex;
+            gap: 24px;
+        }
+
+        .stat-card {
+            background-color: #FFFFFF;
+            border-radius: 16px;
+            padding: 32px;
+            border: 1px solid #E2E8F0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card.small {
+            flex: 1;
+        }
+
+        .stat-card.large {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        /* Stat Card Small */
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 24px;
+        }
+
+        .icon-circle {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background-color: #F1F5F9;
+            color: #0F172A;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .trend-badge {
+            font-size: 12px;
+            font-weight: 700;
+            color: #16A34A;
+        }
+
+        .stat-title {
+            font-size: 11px;
+            font-weight: 700;
+            color: #94A3B8;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin: 0 0 8px 0;
+        }
+
+        .stat-value {
+            font-size: 36px;
+            font-weight: 800;
+            color: #0F172A;
+            margin: 0;
+        }
+
+        /* Stat Card Large */
+        .rec-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #0284C7;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+
+        .rec-title {
+            font-size: 28px;
+            font-weight: 800;
+            color: #0F172A;
+            margin: 0 0 16px 0;
+            letter-spacing: -0.5px;
+        }
+
+        .rec-badges {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .score-badge {
+            background-color: #DCFCE7;
+            color: #166534;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .rec-note {
+            font-size: 13px;
+            color: #64748B;
+        }
+
+        .detail-link {
+            font-size: 13px;
+            font-weight: 600;
+            color: #0284C7;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .detail-link:hover {
+            text-decoration: underline;
+        }
+
+        .bg-icon {
+            position: absolute;
+            right: 32px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #F1F5F9;
+        }
+
+        /* Activity Section */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 20px;
+        }
+
+        .section-title h3 {
+            margin: 0 0 8px 0;
+            font-size: 20px;
+            font-weight: 700;
+            color: #0F172A;
+        }
+
+        .section-title p {
+            margin: 0;
+            font-size: 14px;
+            color: #64748B;
+        }
+
+        .btn-export-light {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background-color: #FFFFFF;
+            border: 1px solid #E2E8F0;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #0F172A;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-export-light:hover {
+            border-color: #CBD5E1;
+        }
+
+        /* Table */
+        .activity-table {
+            background-color: #FFFFFF;
+            border-radius: 16px;
+            border: 1px solid #E2E8F0;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .activity-table th {
+            text-align: left;
+            padding: 20px 32px;
+            font-size: 10px;
+            font-weight: 700;
+            color: #94A3B8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px solid #E2E8F0;
+        }
+
+        .activity-table td {
+            padding: 20px 32px;
+            font-size: 14px;
+            color: #0F172A;
+            border-bottom: 1px solid #F1F5F9;
+            vertical-align: middle;
+        }
+
+        .activity-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .product-cell {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-weight: 600;
+        }
+
+        .product-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background-color: #F1F5F9;
+            color: #64748B;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .date-text {
+            color: #64748B;
+            font-size: 13px;
+        }
+
+        .score-text {
+            font-weight: 700;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="dashboard-wrapper">
+        <!-- Load Sidebar with Dashboard Active -->
+        {% include 'hc/components/sidebar.html' with active_page='dashboard' %}
+
+        <!-- Main Dashboard Content -->
+        <div class="main-dashboard-content">
+
+            <!-- Flash Messages -->
+            {% if messages %}
+            <div style="margin-bottom:20px; padding: 0 40px;">
+                {% for message in messages %}
+                <div style="padding:12px 20px; border-radius:8px; margin-bottom:8px; font-size:14px; font-weight:500;
+                    {% if message.tags == 'success' %}background:#dcfce7; color:#15803d; border:1px solid #bbf7d0;
+                    {% elif message.tags == 'error' %}background:#fee2e2; color:#dc2626; border:1px solid #fecaca;
+                    {% else %}background:#dbeafe; color:#2563eb; border:1px solid #bfdbfe;{% endif %}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Header -->
+            <div class="page-header">
+                <h1>Selamat Datang 👋</h1>
+                <p>Pantau hasil perhitungan laptop terbaik hari ini.</p>
+            </div>
+
+            <!-- Content Area -->
+            <div class="content-padding">
+
+                <!-- Hero Section -->
+                <div class="hero-card">
+                    <div class="hero-text">
+                        <h2>Temukan Laptop Ideal <br>Secara <span class="highlight">Presisi.</span></h2>
+                        <p>Gunakan teknologi SAW (Simple Additive Weighting) untuk memproses ribuan data kriteria
+                            menjadi keputusan yang akurat dan objektif.</p>
+                        <a href="#" class="btn-hero">
+                            Mulai Rekomendasi
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                                <polyline points="12 5 19 12 12 19"></polyline>
+                            </svg>
+                        </a>
+                    </div>
+                    <div class="hero-graphic">
+                        <svg class="laptop-icon" width="64" height="64" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="4" width="18" height="12" rx="2" ry="2"></rect>
+                            <line x1="2" y1="20" x2="22" y2="20"></line>
+                            <circle cx="12" cy="16" r="1" fill="currentColor"></circle>
+                        </svg>
+                        <div class="system-status">
+                            SYSTEM STATUS <span>READY</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats Section -->
+                <div class="stats-container">
+
+                    <!-- Total Laptop Card -->
+                    <div class="stat-card small">
+                        <div class="stat-header">
+                            <div class="icon-circle">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+                                    <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
+                                    <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
+                                </svg>
+                            </div>
+                            <span class="trend-badge">+1% Bulan Ini</span>
+                        </div>
+                        <p class="stat-title">Total Data Laptop</p>
+                        <h3 class="stat-value">{{ total_laptop }}</h3>
+                    </div>
+
+                    <!-- Total Pengajuan Card -->
+                    <div class="stat-card small">
+                        <div class="stat-header">
+                            <div class="icon-circle">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                                    <polyline points="10 9 9 9 8 9"></polyline>
+                                </svg>
+                            </div>
+                            <span class="trend-badge" style="color:#0284C7;">{{ pengajuan_pending }} Pending</span>
+                        </div>
+                        <p class="stat-title">Total Pengajuan</p>
+                        <h3 class="stat-value">{{ total_pengajuan }}</h3>
+                    </div>
+
+                    <!-- Top Recommendation Card -->
+                    <div class="stat-card large">
+                        <div class="rec-header">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                                <polygon
+                                    points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
+                                </polygon>
+                            </svg>
+                            Rekomendasi Terakhir Tertinggi
+                        </div>
+                        <h3 class="rec-title">MacBook Air M2 (2023)</h3>
+                        <div class="rec-badges">
+                            <span class="score-badge">Skor SAW: 0.985</span>
+                            <span class="rec-note">Berdasarkan 7 Kriteria Utama</span>
+                        </div>
+                        <a href="#" class="detail-link">
+                            Lihat Detail Analisis
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                <polyline points="15 3 21 3 21 9"></polyline>
+                                <line x1="10" y1="14" x2="21" y2="3"></line>
+                            </svg>
+                        </a>
+
+                        <!-- Background decoration icon -->
+                        <svg class="bg-icon" width="120" height="120" viewBox="0 0 24 24" fill="currentColor"
+                            stroke="none">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" opacity="0.5"></path>
+                            <path d="M9 12l2 2 4-4" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" fill="none"></path>
+                        </svg>
+                    </div>
+
+                </div>
+                <!-- Activity Table Section -->
+                <div class="activity-section">
+                    <div class="section-header">
+                        <div class="section-title">
+                            <h3>Riwayat Laptop yang Dipinjam</h3>
+                            <p>Log riwayat laptop yang sedang dan telah dipinjam oleh Talent.</p>
+                        </div>
+                    </div>
+
+                    <table class="activity-table">
+                        <thead>
+                            <tr>
+                                <th>PRODUK LAPTOP</th>
+                                <th>PENGGUNA (TALENT)</th>
+                                <th>TANGGAL PINJAM</th>
+                                <th>STATUS</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for pinjam in riwayat_pinjam %}
+                            <tr>
+                                <td>
+                                    <div class="product-cell">
+                                        <div class="product-icon">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                stroke-linejoin="round">
+                                                <rect x="3" y="4" width="18" height="12" rx="2" ry="2"></rect>
+                                                <line x1="2" y1="20" x2="22" y2="20"></line>
+                                            </svg>
+                                        </div>
+                                        {{ pinjam.nama_laptop }}
+                                    </div>
+                                </td>
+                                <td><span style="font-weight: 500; color: #334155;">{{ pinjam.nama_user }}</span></td>
+                                <td><span class="date-text">{{ pinjam.tanggal_pinjam }}</span></td>
+                                <td>
+                                    <span style="text-transform: capitalize; font-weight: 600; font-size: 13px; color: {% if pinjam.status == 'selesai' %}#16a34a{% else %}#2563eb{% endif %};">
+                                        {{ pinjam.status }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" style="text-align: center; padding: 40px; color: #94A3B8;">Belum ada riwayat peminjaman laptop.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>iv>
+
+            </div> <!-- End Content Padding -->
+
+        </div> <!-- End Main Content -->
+    </div> <!-- End Wrapper -->
+
+</body>
+
+</html>

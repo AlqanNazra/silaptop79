@@ -1,0 +1,495 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detail Laptop - SiLaptop79</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        ul,
+        li {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        body {
+            background-color: #f8fafc;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .main-content {
+            flex: 1;
+            margin-left: 260px;
+            padding: 40px 50px;
+            box-sizing: border-box;
+        }
+
+        /* Top Nav */
+        .top-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .breadcrumb {
+            font-size: 13px;
+            color: #64748b;
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+
+        .breadcrumb span {
+            color: #0b57c6;
+            font-weight: 600;
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 800;
+            color: #0f172a;
+            margin: 0;
+            letter-spacing: -0.5px;
+        }
+
+        .btn-back-pill {
+            background-color: #e8edf9;
+            color: #0b57c6;
+            padding: 10px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 13px;
+            transition: background 0.2s;
+        }
+
+        .btn-back-pill:hover {
+            background-color: #d1dffb;
+        }
+
+        /* Grid Layout */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 30px;
+            align-items: start;
+        }
+
+        /* Card Styling */
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            border: 1px solid #f1f5f9;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+            box-sizing: border-box;
+        }
+
+        /* Laptop Display Card */
+        .laptop-display-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 280px;
+        }
+
+        .laptop-display-card svg {
+            margin-bottom: 16px;
+        }
+
+        .laptop-caption {
+            font-size: 13px;
+            font-style: italic;
+            color: #94a3b8;
+            font-weight: 500;
+        }
+
+        /* Admin Card */
+        .admin-card {
+            border-left: 4px solid #0b57c6;
+            height: 280px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .admin-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-top: 0;
+            margin-bottom: 16px;
+        }
+
+        .admin-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .admin-row:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .admin-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: #475569;
+        }
+
+        .admin-value {
+            font-size: 13px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .asset-id-pill {
+            background-color: #eff6ff;
+            color: #0b57c6;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 12px;
+        }
+
+        /* Specs Section */
+        .specs-heading {
+            font-size: 18px;
+            font-weight: 800;
+            color: #1e293b;
+            margin: 32px 0 20px 0;
+        }
+
+        .specs-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            margin-bottom: 30px;
+        }
+
+        .spec-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.01);
+        }
+
+        .spec-icon-box {
+            width: 36px;
+            height: 36px;
+            background-color: #f1f5f9;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #475569;
+            font-size: 16px;
+        }
+
+        .spec-label {
+            font-size: 10px;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin: 0;
+        }
+
+        .spec-value {
+            font-size: 14px;
+            font-weight: 800;
+            color: #1e293b;
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        .spec-subtext {
+            font-size: 11px;
+            color: #94a3b8;
+            margin: 0;
+            margin-top: -4px;
+        }
+
+        /* Action Buttons */
+        .bottom-actions {
+            display: flex;
+            gap: 24px;
+            margin-top: 30px;
+        }
+
+        .btn-blue-action {
+            flex: 1;
+            background-color: #0b57c6;
+            color: white;
+            padding: 14px 24px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 4px 12px rgba(11, 87, 198, 0.15);
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .btn-blue-action:hover {
+            background-color: #09459e;
+        }
+
+        .btn-grey-action {
+            flex: 1;
+            background-color: #e2e8f0;
+            color: #0b57c6;
+            padding: 14px 24px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .btn-grey-action:hover {
+            background-color: #cbd5e1;
+        }
+    </style>
+</head>
+
+<body>
+
+    {% include 'hc/components/sidebar.html' with active_page='manajemen_laptop' %}
+
+    <div class="main-content">
+
+        <!-- Alert Popup Modal -->
+        {% if messages %}
+        <div class="modal-overlay" id="alertModal" style="display: flex; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center;">
+            <div class="modal-box" style="background: white; border-radius: 16px; padding: 32px; max-width: 400px; width: 90%; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.15);">
+                {% for message in messages %}
+                    {% if message.tags == 'success' %}
+                    <div class="modal-icon" style="width: 56px; height: 56px; border-radius: 50%; background: #dcfce7; color: #15803d; display: flex; align-items: center; justify-content: center; font-size: 24px; margin: 0 auto 16px;">
+                        <i class="fa-solid fa-circle-check"></i>
+                    </div>
+                    <div class="modal-title" style="font-size: 18px; font-weight: 700; color: #1e293b; margin-bottom: 8px;">Berhasil!</div>
+                    <div class="modal-text" style="font-size: 14px; color: #64748b; line-height: 1.5; margin-bottom: 24px;">{{ message }}</div>
+                    {% else %}
+                    <div class="modal-icon" style="width: 56px; height: 56px; border-radius: 50%; background: #fee2e2; color: #dc2626; display: flex; align-items: center; justify-content: center; font-size: 24px; margin: 0 auto 16px;">
+                        <i class="fa-solid fa-circle-xmark"></i>
+                    </div>
+                    <div class="modal-title" style="font-size: 18px; font-weight: 700; color: #1e293b; margin-bottom: 8px;">Gagal!</div>
+                    <div class="modal-text" style="font-size: 14px; color: #64748b; line-height: 1.5; margin-bottom: 24px;">{{ message }}</div>
+                    {% endif %}
+                {% endfor %}
+                <div class="modal-actions" style="display: flex; justify-content: center;">
+                    <button type="button" class="modal-btn" style="padding: 10px 32px; border: none; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; background: #0b57c6; color: white; box-shadow: 0 4px 12px rgba(11, 87, 198, 0.2);" onclick="hideAlertModal()">Tutup</button>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="breadcrumb">Data Laptop / <span>{{ laptop.nama_laptop }}</span></div>
+
+        <div class="top-nav">
+            <h1 class="page-title">Detail Laptop</h1>
+            <a href="{% url 'inventori:manajemen_laptop' %}" class="btn-back-pill">Kembali ke Daftar</a>
+        </div>
+
+        <div class="content-grid">
+
+            <!-- Laptop Graphic Card -->
+            <div class="card laptop-display-card">
+                <svg width="240" height="136" viewBox="0 0 240 136" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Laptop Screen Frame -->
+                    <rect x="30" y="10" width="180" height="110" rx="6" fill="#1e293b" />
+                    <!-- Inner Screen -->
+                    <rect x="35" y="15" width="170" height="100" rx="3" fill="#bfdbfe" />
+                    <!-- Base -->
+                    <path d="M10 120H230V124C230 127 226 129 220 129H20C14 129 10 127 10 124V120Z" fill="#0f172a" />
+                    <!-- Keyboard Area / Indent -->
+                    <rect x="25" y="121" width="190" height="2" rx="1" fill="#475569" />
+                    <!-- Screen Gloss/Reflect -->
+                    <path d="M35 15L120 115H100L35 35V15Z" fill="white" opacity="0.12" />
+                </svg>
+                <div class="laptop-caption">{{ laptop.nama_laptop }}</div>
+            </div>
+
+            <!-- Asset Administration Card -->
+            <div class="card admin-card">
+                <div class="admin-title">Asset Administration</div>
+                <div class="admin-rows-wrapper"
+                    style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
+                    <div class="admin-row">
+                        <span class="admin-label">ID Aset</span>
+                        <span class="asset-id-pill">{{ laptop.no_inventori }}</span>
+                    </div>
+                    <div class="admin-row">
+                        <span class="admin-label">Lokasi</span>
+                        <span class="admin-value" style="display: flex; align-items: center; gap: 6px;">
+                            <i class="fa-solid fa-location-dot" style="color: #0b57c6;"></i> {{ laptop.lokasi }}
+                        </span>
+                    </div>
+                    <div class="admin-row">
+                        <span class="admin-label">Operating System</span>
+                        <span class="admin-value">{{ laptop.os|default:"-" }}</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <h2 class="specs-heading">Spesifikasi Laptop</h2>
+
+        <!-- Specifications 6 Cards Grid -->
+        <div class="specs-grid">
+
+            <!-- Card 1: Processor -->
+            <div class="spec-card">
+                <div class="spec-icon-box">
+                    <i class="fa-solid fa-microchip"></i>
+                </div>
+                <p class="spec-label">Processor</p>
+                <h3 class="spec-value">{{ laptop.id_processor.nama_processor|default:"-" }}</h3>
+                <span class="spec-subtext">{{ laptop.id_processor.manufacturer|default:"" }} {{
+                    laptop.id_processor.model|default:"" }}</span>
+            </div>
+
+            <!-- Card 2: Memory RAM -->
+            <div class="spec-card">
+                <div class="spec-icon-box">
+                    <i class="fa-solid fa-memory"></i>
+                </div>
+                <p class="spec-label">Memory RAM</p>
+                <h3 class="spec-value">{{ laptop.id_ram.kapasitas_gb|default:"0" }} GB {{ laptop.id_ram.tipe|default:""
+                    }}</h3>
+            </div>
+
+            <!-- Card 3: Storage -->
+            <div class="spec-card">
+                <div class="spec-icon-box">
+                    <i class="fa-solid fa-database"></i>
+                </div>
+                <p class="spec-label">Storage</p>
+                <h3 class="spec-value">{{ laptop.id_storage.kapasitas_gb|default:"0" }} GB {{
+                    laptop.id_storage.tipe|default:"" }}</h3>
+            </div>
+
+            <!-- Card 4: Condition -->
+            <div class="spec-card">
+                <div class="spec-icon-box">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                </div>
+                <p class="spec-label">Kondisi Device</p>
+                <h3 class="spec-value">{{ laptop.kondisi|title }}</h3>
+            </div>
+
+            <!-- Card 5: Screen Size -->
+            <div class="spec-card">
+                <div class="spec-icon-box">
+                    <i class="fa-solid fa-desktop"></i>
+                </div>
+                <p class="spec-label">Layar</p>
+                <h3 class="spec-value">{{ laptop.ukuran_layar|default:"-" }} inch</h3>
+            </div>
+
+            <!-- Card 6: Availability Status -->
+            <div class="spec-card">
+                <div class="spec-icon-box">
+                    <i class="fa-solid fa-circle-check"></i>
+                </div>
+                <p class="spec-label">Status Aset</p>
+                <h3 class="spec-value">{{ laptop.status|upper }}</h3>
+            </div>
+
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="bottom-actions" style="display: flex; gap: 15px; align-items: center; width: 100%;">
+            <a href="{% url 'inventori:editdatalaptop_hc' laptop.id_laptop_inventori %}" class="btn-blue-action"
+                style="flex: 1;">
+                <i class="fa-solid fa-pen"></i> Edit Data
+            </a>
+            <a href="{% url 'inventori:riwayatpeminjamanlaptop_hc' %}" class="btn-grey-action" style="flex: 1;">
+                <i class="fa-solid fa-clock-rotate-left"></i> Riwayat Peminjaman
+            </a>
+            <button type="button" class="btn-grey-action" style="color: #dc2626; flex: 1;" onclick="showDeleteModal()">
+                <i class="fa-solid fa-trash"></i> Hapus Aset
+            </button>
+        </div>
+
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal-overlay" id="deleteModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center;">
+        <div class="modal-box" style="background: white; border-radius: 16px; padding: 32px; max-width: 420px; width: 90%; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.15);">
+            <div class="modal-icon" style="width: 56px; height: 56px; border-radius: 50%; background: #fee2e2; color: #dc2626; display: flex; align-items: center; justify-content: center; font-size: 24px; margin: 0 auto 16px;">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div class="modal-title" style="font-size: 18px; font-weight: 700; color: #1e293b; margin-bottom: 8px;">Hapus Aset Laptop?</div>
+            <div class="modal-text" style="font-size: 14px; color: #64748b; line-height: 1.5; margin-bottom: 24px;">Apakah Anda yakin ingin menghapus laptop <strong>"{{ laptop.nama_laptop }}"</strong> dari sistem inventori? Tindakan ini tidak dapat dibatalkan.</div>
+            <div class="modal-actions" style="display: flex; gap: 12px; justify-content: center;">
+                <button type="button" class="modal-btn" style="padding: 10px 24px; border: none; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; background: #f1f5f9; color: #475569;" onclick="hideDeleteModal()">Batal</button>
+                <form action="{% url 'inventori:detaillaptop_hc' laptop.id_laptop_inventori %}" method="POST" style="margin: 0;">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="hapus">
+                    <button type="submit" class="modal-btn" style="padding: 10px 24px; border: none; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; background: #dc2626; color: white;">Ya, Hapus</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showDeleteModal() {
+            document.getElementById('deleteModal').style.display = 'flex';
+        }
+
+        function hideDeleteModal() {
+            document.getElementById('deleteModal').style.display = 'none';
+        }
+
+        // Close modal on overlay click
+        document.getElementById('deleteModal').addEventListener('click', function(e) {
+            if (e.target === this) hideDeleteModal();
+        });
+
+        function hideAlertModal() {
+            const alertModal = document.getElementById('alertModal');
+            if (alertModal) alertModal.style.display = 'none';
+        }
+
+        const alertModal = document.getElementById('alertModal');
+        if (alertModal) {
+            alertModal.addEventListener('click', function(e) {
+                if (e.target === this) hideAlertModal();
+            });
+        }
+    </script>
+</body>
+
+</html>
+
+#uibaru

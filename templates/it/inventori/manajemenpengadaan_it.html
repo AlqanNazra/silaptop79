@@ -1,0 +1,553 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manajemen Pengadaan - SiLaptop79</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1.1">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            min-height: 100vh;
+            background-color: #f8fafc;
+        }
+
+        .dashboard-wrapper {
+            display: flex;
+            width: 100%;
+        }
+
+        .main-dashboard-content {
+            flex: 1;
+            margin-left: 260px;
+            padding: 40px 60px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 800;
+            color: #1e293b;
+            margin-top: 0;
+            margin-bottom: 28px;
+            letter-spacing: -0.5px;
+        }
+
+        /* Stat Cards */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 28px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px 24px;
+            border: 1px solid #f1f5f9;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .stat-card-left {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.7px;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 800;
+            color: #1e293b;
+            line-height: 1;
+        }
+
+        .stat-value.green {
+            color: #16a34a;
+        }
+
+        .stat-value.blue {
+            color: #2563eb;
+        }
+
+        .stat-value.red {
+            color: #dc2626;
+        }
+
+        .stat-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .stat-icon.gray-icon {
+            background: #f1f5f9;
+            color: #64748b;
+        }
+
+        .stat-icon.green-icon {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .stat-icon.blue-icon {
+            background: #dbeafe;
+            color: #2563eb;
+        }
+
+        .stat-icon.red-icon {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        /* Top Actions (Search & Add Button) */
+        .top-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 24px;
+        }
+
+        .search-box {
+            flex: 1;
+            max-width: 600px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 20px;
+            background-color: #d1d5db;
+            font-size: 14px;
+            color: #374151;
+            outline: none;
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+            transition: all 0.2s;
+            box-sizing: border-box;
+        }
+
+        .search-box input::placeholder {
+            color: #6b7280;
+            font-weight: 500;
+        }
+
+        .search-box input:focus {
+            background-color: #cbd5e1;
+            box-shadow: 0 0 0 3px rgba(11, 87, 198, 0.1);
+        }
+
+        .btn-primary {
+            background-color: #0b57c6;
+            color: white;
+            padding: 14px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(11, 87, 198, 0.2);
+            transition: background 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        .btn-primary:hover {
+            background-color: #09459e;
+        }
+
+        /* Table Wrapper */
+        .table-card {
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+            overflow: hidden;
+            border: 1px solid #f1f5f9;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 20px 24px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        td {
+            padding: 16px 24px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+            font-size: 14px;
+            color: #475569;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        tbody tr {
+            transition: background 0.2s;
+        }
+
+        tbody tr:hover {
+            background-color: #f8fafc;
+        }
+
+        .col-no {
+            width: 60px;
+            font-weight: 500;
+            color: #64748b;
+        }
+
+        .laptop-cell {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .laptop-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            background-color: #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #94a3b8;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .laptop-text {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .laptop-name {
+            font-weight: 700;
+            color: #1e293b;
+            font-size: 14px;
+        }
+
+        .laptop-brand {
+            font-size: 12px;
+            color: #94a3b8;
+            font-weight: 500;
+        }
+
+        .col-supplier {
+            font-size: 14px;
+            color: #475569;
+            font-weight: 600;
+        }
+
+        .col-cost {
+            font-size: 14px;
+            color: #1e293b;
+            font-weight: 700;
+        }
+
+        /* Status Pills */
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .status-pill .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+
+        .status-approved {
+            background-color: #dcfce7;
+            color: #16a34a;
+        }
+
+        .status-approved .dot {
+            background-color: #16a34a;
+        }
+
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .status-pending .dot {
+            background-color: #856404;
+        }
+
+        .status-rejected {
+            background-color: #fee2e2;
+            color: #dc2626;
+        }
+
+        .status-rejected .dot {
+            background-color: #dc2626;
+        }
+
+        /* Detail Button */
+        .btn-detail {
+            display: inline-block;
+            padding: 7px 18px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #334155;
+            background: white;
+            text-decoration: none;
+            transition: all 0.15s;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .btn-detail:hover {
+            background-color: #f1f5f9;
+            border-color: #cbd5e1;
+            color: #0f172a;
+        }
+
+        /* Pagination */
+        .pagination-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px 24px;
+            border-top: 1px solid #f1f5f9;
+        }
+
+        .pagination-text {
+            font-size: 13px;
+            color: #475569;
+            font-weight: 500;
+        }
+
+        .pagination-controls {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .page-btn {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+            background: white;
+            font-size: 13px;
+            font-weight: 600;
+            color: #475569;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.15s;
+        }
+
+        .page-btn:hover {
+            background-color: #f1f5f9;
+        }
+
+        .page-btn.active {
+            background-color: #0b57c6;
+            color: white;
+            border-color: #0b57c6;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="dashboard-wrapper">
+        <!-- Load Sidebar -->
+        {% include 'it/components/sidebar.html' with active_page='kelola_pengadaan' %}
+
+        <!-- Main Dashboard Content -->
+        <div class="main-dashboard-content">
+            <div style="width: 100%;">
+
+                <h1 class="page-title">Kelola Data Pengadaan</h1>
+
+                {% include 'components/messages_popup.html' %}
+
+                <!-- Stat Cards -->
+                <div class="stats-row" style="grid-template-columns: 1fr 1fr;">
+                    <div class="stat-card">
+                        <div class="stat-card-left">
+                            <span class="stat-label">Total Laptop</span>
+                            <span class="stat-value">{{ total }}</span>
+                        </div>
+                        <div class="stat-icon gray-icon">
+                            <i class="fa-solid fa-laptop"></i>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-left">
+                            <span class="stat-label">Sumber</span>
+                            <span class="stat-value"
+                                style="font-size: 26px; font-weight: 800; color: #0b57c6;">Agres.id</span>
+                        </div>
+                        <div class="stat-icon blue-icon">
+                            <i class="fa-solid fa-shop"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Top Actions -->
+                <form id="filter-form" method="GET" action="" class="top-actions" style="margin-bottom: 24px; display: flex; gap: 16px; align-items: center; justify-content: space-between; width: 100%;">
+                    <div class="search-box" style="flex: 1; max-width: 500px; display: flex; gap: 8px;">
+                        <input type="text" id="search-input" name="q" placeholder="Cari Item..." value="{{ search_query }}" style="width: 100%; padding: 12px 16px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: 'Inter', sans-serif; background: #ffffff;">
+                    </div>
+                    
+                    <div style="display: flex; gap: 12px; align-items: center;">
+                        <a href="?" class="btn-secondary" style="padding: 12px 20px; border-radius: 8px; text-decoration: none; background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; font-size: 14px; font-weight: 600; font-family: 'Inter', sans-serif;">Reset</a>
+                    </div>
+                    <a href="#" class="btn-primary" style="background-color: #0b57c6; color: white; padding: 12px 20px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
+                        <i class="fa-solid fa-plus"></i> Tambah Pengadaan
+                    </a>
+                </form>
+
+                <!-- Table Card -->
+                <div class="table-card">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th class="col-no">NO</th>
+                                <th>ITEM</th>
+                                <th style="width: 120px; text-align: right;">AKSI</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in pengadaan_list %}
+                            <tr>
+                                <td class="col-no">{{ forloop.counter0|add:pengadaan_list.start_index }}</td>
+                                <td>
+                                    <div class="laptop-cell">
+                                        <div class="laptop-icon"><i class="fa-solid fa-laptop"></i></div>
+                                        <div class="laptop-text">
+                                            <span class="laptop-name">{{ item.name }}</span>
+                                            <span class="laptop-brand">{{ item.brand }}</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td style="text-align: right;"><a href="{% url 'detailpengadaan_it' %}"
+                                        class="btn-detail">Detail</a></td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="3" style="text-align: center; padding: 40px; color: #64748b;">Belum ada data pengadaan.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+
+                    <div class="pagination-container" style="display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-top: 1px solid #f1f5f9;">
+                        <span class="pagination-text">Menampilkan {{ pengadaan_list.start_index }} - {{ pengadaan_list.end_index }} dari {{ total }} pengadaan</span>
+                        <div class="pagination-controls" style="display: flex; gap: 6px; align-items: center;">
+                            {% if pengadaan_list.has_previous %}
+                                <a href="?page={{ pengadaan_list.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">
+                                    <i class="fa-solid fa-chevron-left"></i>
+                                </a>
+                            {% endif %}
+                            
+                            {% for num in pengadaan_list.paginator.page_range %}
+                                {% if pengadaan_list.number == num %}
+                                    <span class="page-btn active" style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; background: #0b57c6; color: white; font-weight: bold; font-size: 12px;">{{ num }}</span>
+                                {% elif num > pengadaan_list.number|add:'-3' and num < pengadaan_list.number|add:'3' %}
+                                    <a href="?page={{ num }}{% if search_query %}&q={{ search_query }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">{{ num }}</a>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if pengadaan_list.has_next %}
+                                <a href="?page={{ pengadaan_list.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">
+                                    <i class="fa-solid fa-chevron-right"></i>
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                </div> <!-- End Table Card -->
+
+            </div> <!-- End max-width wrapper -->
+        </div> <!-- End Main Content -->
+    </div> <!-- End Wrapper -->
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const filterForm = document.getElementById("filter-form");
+            const searchInput = document.getElementById("search-input");
+            let debounceTimer;
+
+            if (searchInput) {
+                searchInput.addEventListener("input", function() {
+                    clearTimeout(debounceTimer);
+                    debounceTimer = setTimeout(function() {
+                        filterForm.submit();
+                    }, 500);
+                });
+
+                // Focus kursor di akhir
+                if (searchInput.value.length > 0) {
+                    const val = searchInput.value;
+                    searchInput.value = '';
+                    searchInput.focus();
+                    searchInput.value = val;
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>

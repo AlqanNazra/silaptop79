@@ -1,17 +1,15 @@
 import psycopg2
 from psycopg2.extras import RealDictCursor
-from dto.dto_peminjaman import PeminjamanDTO
-from interfaces.interface_peminjaman import IPeminjamanRepository
+from inventori.dto.dto_peminjaman import PeminjamanDTO
+from .dto.dto_peminjaman import PeminjamanDTO
+from .interfaces.interface_peminjaman import IPeminjamanRepository
 
 
-class PeminjamanRepository(IPeminjamanRepository):
+class PeminjamanRepository:
 
     def __init__(self, conn):
         self.conn = conn
 
-    # =========================
-    # CREATE
-    # =========================
     def tambah_peminjaman(self, data: PeminjamanDTO):
         query = """
         SELECT tambah_peminjaman(%s,%s,%s,%s,%s,%s);
@@ -30,9 +28,6 @@ class PeminjamanRepository(IPeminjamanRepository):
 
             return "Berhasil tambah peminjaman"
 
-    # =========================
-    # READ ALL
-    # =========================
     def ambil_semua_peminjaman(self):
         query = "SELECT * FROM ambil_semua_peminjaman();"
 
@@ -42,9 +37,6 @@ class PeminjamanRepository(IPeminjamanRepository):
 
             return [self._map_to_dto(row) for row in rows]
 
-    # =========================
-    # READ BY ID
-    # =========================
     def cari_peminjaman(self, id_peminjaman):
         query = "SELECT * FROM cari_peminjaman(%s);"
 
@@ -54,9 +46,6 @@ class PeminjamanRepository(IPeminjamanRepository):
 
             return self._map_to_dto(row) if row else None
 
-    # =========================
-    # UPDATE
-    # =========================
     def update_peminjaman(self, data: PeminjamanDTO):
         query = """
         SELECT update_peminjaman(%s,%s,%s,%s,%s);
@@ -72,12 +61,14 @@ class PeminjamanRepository(IPeminjamanRepository):
             ))
             result = cur.fetchone()
             self.conn.commit()
+            # Use safe dict/tuple retrieval to avoid KeyError/IndexError
+            if result:
+                if isinstance(result, dict):
+                    return list(result.values())[0]
+                else:
+                    return result[0]
+            return None
 
-            return result[0] if result else None
-
-    # =========================
-    # DELETE
-    # =========================
     def hapus_peminjaman(self, id_peminjaman):
         query = "SELECT hapus_peminjaman(%s);"
 
@@ -85,12 +76,14 @@ class PeminjamanRepository(IPeminjamanRepository):
             cur.execute(query, (id_peminjaman,))
             result = cur.fetchone()
             self.conn.commit()
+            # Use safe dict/tuple retrieval to avoid KeyError/IndexError
+            if result:
+                if isinstance(result, dict):
+                    return list(result.values())[0]
+                else:
+                    return result[0]
+            return None
 
-            return result[0] if result else None
-
-    # =========================
-    # PINJAM LAPTOP (BUSINESS LOGIC)
-    # =========================
     def pinjam_laptop(self, data: PeminjamanDTO):
         query = """
         SELECT pinjam_laptop(%s,%s,%s,%s,%s,%s);
@@ -107,12 +100,14 @@ class PeminjamanRepository(IPeminjamanRepository):
             ))
             result = cur.fetchone()
             self.conn.commit()
+            # Use safe dict/tuple retrieval to avoid KeyError/IndexError
+            if result:
+                if isinstance(result, dict):
+                    return list(result.values())[0]
+                else:
+                    return result[0]
+            return None
 
-            return result[0] if result else None
-
-    # =========================
-    # PENGEMBALIAN
-    # =========================
     def pengembalian_laptop(self, data: PeminjamanDTO):
         query = """
         SELECT pengembalian_laptop(%s,%s,%s);
@@ -126,12 +121,16 @@ class PeminjamanRepository(IPeminjamanRepository):
             ))
             result = cur.fetchone()
             self.conn.commit()
+            print(f"DEBUG pengembalian_laptop: result={result}, type={type(result)}")
+            
+            # Use safe dict/tuple retrieval to avoid KeyError/IndexError
+            if result:
+                if isinstance(result, dict):
+                    return list(result.values())[0]
+                else:
+                    return result[0]
+            return None
 
-            return result[0] if result else None
-
-    # =========================
-    # SYNC STATUS
-    # =========================
     def sync_status_laptop(self):
         query = "SELECT sync_status_laptop();"
 
@@ -141,9 +140,6 @@ class PeminjamanRepository(IPeminjamanRepository):
 
             return "Status berhasil disinkronkan"
 
-    # =========================
-    # LAPTOP BY LOKASI
-    # =========================
     def ambil_laptop_by_lokasi(self, data=None):
         query = "SELECT * FROM ambil_laptop_by_lokasi();"
 
@@ -153,9 +149,6 @@ class PeminjamanRepository(IPeminjamanRepository):
 
             return rows
 
-    # =========================
-    # MAPPING DTO
-    # =========================
     def _map_to_dto(self, row):
         return PeminjamanDTO(
             id_peminjaman=row.get("id_peminjaman"),

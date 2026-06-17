@@ -8,7 +8,7 @@ from inventori.models import (
 
 from dss.models import (
     Kriteria, BobotKriteria,
-    DSSProses, AlternatifDSS,
+    DSSProses, NilaiAlternatif,
     HasilSAW, DetailHasilSAW,
     LaptopPengadaan
 )
@@ -205,7 +205,7 @@ class Command(BaseCommand):
         # =============================
         # 11. ALTERNATIF DSS
         # =============================
-        alternatif, _ = AlternatifDSS.objects.get_or_create(
+        alternatif, _ = NilaiAlternatif.objects.get_or_create(
             id_alternatif="ALT-001",
             defaults={
                 "dss": dss,

@@ -2,7 +2,7 @@
 -- 10. STORAGE
 -- =============================================
 CREATE TABLE storage (
-    id_storage SERIAL PRIMARY KEY,
+    id_storage  VARCHAR(50),
     kapasitas_gb INTEGER CHECK (kapasitas_gb > 0),
     tipe VARCHAR(100)
 );
@@ -13,8 +13,8 @@ CREATE OR REPLACE FUNCTION tambah_storage(
 )
 RETURNS TEXT AS $$
 BEGIN
-    INSERT INTO inventori_storage (kapasitas_gb, tipe)
-    VALUES (f_kapasitas, f_tipe);
+    INSERT INTO inventori_storage (id_storage, kapasitas_gb, tipe)
+    VALUES (f_generate_id('STORE','inventori_storage','id_storage'),f_kapasitas, f_tipe);
 
     RETURN 'Storage berhasil ditambahkan!';
 END;
@@ -22,7 +22,7 @@ $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION ambil_storage()
 RETURNS TABLE (
-    id_storage BIGINT,
+    id_storage VARCHAR,
     kapasitas_gb INT,
     tipe VARCHAR
 )

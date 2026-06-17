@@ -1,17 +1,16 @@
+from tkinter import END
+
 import psycopg2
 from psycopg2.extras import RealDictCursor
-from dto.dto_laptop_pengadaan import LaptopPengadaanDTO
-from interface.interface_laptop_pengadaan import ILaptopPengadaanRepository
+from .dto.dto_laptop_pengadaan import LaptopPengadaanDTO
+from .interface.interface_laptop_pengadaan import ILaptopPengadaanRepositoryImpl
 
 
-class LaptopPengadaanRepository(ILaptopPengadaanRepository):
+class LaptopPengadaanRepository(ILaptopPengadaanRepositoryImpl):
 
     def __init__(self, conn):
         self.conn = conn
 
-    # =========================
-    # CREATE
-    # =========================
     def tambah_laptop_pengadaan(self, data: LaptopPengadaanDTO):
         query = """
         SELECT tambah_laptop_pengadaan(%s,%s,%s,%s,%s,%s,%s,%s,%s);
@@ -33,9 +32,6 @@ class LaptopPengadaanRepository(ILaptopPengadaanRepository):
 
             return "Berhasil tambah laptop pengadaan"
 
-    # =========================
-    # READ
-    # =========================
     def ambil_laptop_pengadaan(self):
         query = "SELECT * FROM ambil_laptop_pengadaan();"
 
@@ -44,10 +40,7 @@ class LaptopPengadaanRepository(ILaptopPengadaanRepository):
             rows = cur.fetchall()
 
             return rows  
-
-    # =========================
-    # UPDATE DATA UTAMA
-    # =========================
+        
     def update_laptop_pengadaan(self, data: LaptopPengadaanDTO):
         query = """
         SELECT update_laptop_pengadaan(%s,%s,%s,%s,%s,%s);
@@ -65,11 +58,13 @@ class LaptopPengadaanRepository(ILaptopPengadaanRepository):
             result = cur.fetchone()
             self.conn.commit()
 
-            return result[0] if result else None
-
-    # =========================
-    # UPDATE SPEK
-    # =========================
+            if result:
+                if isinstance(result, dict):
+                    return list(result.values())[0]
+                else:
+                    return result[0]
+            return None
+        
     def update_spek_pengadaan(self, data: LaptopPengadaanDTO):
         query = """
         SELECT update_spek_pengadaan(%s,%s,%s,%s);
@@ -85,11 +80,13 @@ class LaptopPengadaanRepository(ILaptopPengadaanRepository):
             result = cur.fetchone()
             self.conn.commit()
 
-            return result[0] if result else None
-
-    # =========================
-    # DELETE
-    # =========================
+            if result:
+                if isinstance(result, dict):
+                    return list(result.values())[0]
+                else:
+                    return result[0]
+            return None
+        
     def hapus_laptop_pengadaan(self, id_laptop_pengadaan):
         query = "SELECT hapus_laptop_pengadaan(%s);"
 
@@ -98,11 +95,13 @@ class LaptopPengadaanRepository(ILaptopPengadaanRepository):
             result = cur.fetchone()
             self.conn.commit()
 
-            return result[0] if result else None
-
-    # =========================
-    # DSS SAW
-    # =========================
+            if result:
+                if isinstance(result, dict):
+                    return list(result.values())[0]
+                else:
+                    return result[0]
+            return None
+        
     def ambil_hasil_saw_pengadaan(self, id_hasil):
         query = "SELECT * FROM ambil_hasil_saw_pengadaan(%s);"
 
@@ -111,3 +110,59 @@ class LaptopPengadaanRepository(ILaptopPengadaanRepository):
             rows = cur.fetchall()
 
             return rows
+        
+    def filter_pengadaan(self, filter_dto):
+        query = """
+            SELECT * FROM GetFilteredLaptopPengadaan(
+                %s,
+                %s, %s, %s,
+                %s,
+                %s, %s, %s,
+                %s, %s, %s,
+                %s, %s, %s,
+                %s, %s, %s,
+                %s, %s, %s, %s,
+                %s, %s, %s, %s
+            );
+        """
+
+        params = filter_dto.get_params()
+
+        with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
+            cur.execute(query, params)
+            return cur.fetchall()
+
+    def ambil_laptop_pengadaan_by_id(self, id_laptop_pengadaan):
+        # Menggunakan triple quotes untuk multiline string
+        query = """
+        SELECT 
+            lp.id_laptop_pengadaan,
+            lp.nama_laptop,
+            lp.harga,
+            lp.gpu,
+            lp.ukuran_layar,
+            lp.baterai,
+            lp.berat,
+            pro.nama_processor,
+            pro.manufacturer,
+            pro.model AS processor_model,
+            pro.cores,
+            pro.threads,
+            pro.benchmark_score,
+            r.kapasitas_gb AS ram_kapasitas,
+            r.tipe AS ram_tipe,
+            s.kapasitas_gb AS storage_kapasitas,
+            s.tipe AS storage_tipe
+        FROM dss_laptoppengadaan lp
+        LEFT JOIN inventori_processor pro ON lp.id_processor = pro.id_processor
+        LEFT JOIN inventori_ram r ON lp.id_ram = r.id_ram
+        LEFT JOIN inventori_storage s ON lp.id_storage = s.id_storage
+        WHERE lp.id_laptop_pengadaan = %s;  -- <--- PENTING: Tambahkan ini untuk memfilter berdasarkan ID
+        """
+        
+        params = (id_laptop_pengadaan,)
+
+        with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
+            cur.execute(query, params)
+            row = cur.fetchone()  # Menggunakan fetchone() karena hasilnya pasti cuma 1 data (atau None)
+            return row

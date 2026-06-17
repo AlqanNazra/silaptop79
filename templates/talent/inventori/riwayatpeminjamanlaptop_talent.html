@@ -1,0 +1,606 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Riwayat Peminjaman - SiLaptop79 Talent</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1.1">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: #F8FAFC;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .dashboard-wrapper {
+            display: flex;
+            width: 100%;
+        }
+
+        .sidebar {
+            flex-shrink: 0;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.03);
+        }
+
+        .main-content {
+            flex: 1;
+            margin-left: 260px;
+            padding: 40px 48px;
+            box-sizing: border-box;
+        }
+
+        /* ============================
+           PAGE HEADER
+           ============================ */
+        .page-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+
+        .page-top h1 {
+            font-size: 26px;
+            font-weight: 800;
+            color: #0F172A;
+            margin: 0;
+            letter-spacing: -0.5px;
+        }
+
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background-color: #E2E8F0;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #334155;
+            text-decoration: none;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-back:hover {
+            background-color: #CBD5E1;
+            transform: translateY(-1px);
+        }
+
+        /* ============================
+           ACTIVE LAPTOP CARD
+           ============================ */
+        .active-laptop-card {
+            background-color: #FFFFFF;
+            border: 2px solid #0066CC;
+            border-radius: 16px;
+            padding: 32px 40px;
+            margin-bottom: 32px;
+            box-shadow: 0 10px 25px -5px rgba(0, 102, 204, 0.05);
+            position: relative;
+        }
+
+        .badge-active-device {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background-color: #FEE2E2;
+            color: #991B1B;
+            border: 1px solid #FCA5A5;
+            padding: 5px 12px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.2px;
+            text-transform: capitalize;
+        }
+
+        .badge-active-device svg {
+            color: #991B1B;
+        }
+
+        .active-device-title {
+            font-size: 26px;
+            font-weight: 800;
+            color: #0F172A;
+            margin: 18px 0 12px 0;
+            letter-spacing: -0.5px;
+        }
+
+        .active-device-desc {
+            font-size: 14px;
+            color: #475569;
+            line-height: 1.6;
+            margin-bottom: 24px;
+            max-width: 850px;
+        }
+
+        .active-card-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-return {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background-color: #0066CC;
+            color: #FFFFFF;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(0, 102, 204, 0.25);
+        }
+
+        .btn-return:hover {
+            background-color: #0056B3;
+            transform: translateY(-1px);
+        }
+
+        .btn-detail-device {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background-color: #E2E8F0;
+            color: #334155;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-detail-device:hover {
+            background-color: #CBD5E1;
+        }
+
+        /* ============================
+           HISTORY CARD / LOG SECTION
+           ============================ */
+        .history-card {
+            background-color: #FFFFFF;
+            border-radius: 16px;
+            border: 1px solid #E2E8F0;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+            margin-bottom: 24px;
+        }
+
+        .log-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 28px 32px 20px 32px;
+        }
+
+        .log-title h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #0F172A;
+            margin: 0 0 4px 0;
+        }
+
+        .log-title p {
+            font-size: 13px;
+            color: #64748B;
+            margin: 0;
+        }
+
+        .log-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-action-outline {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background-color: #FFFFFF;
+            border: 1px solid #E2E8F0;
+            color: #475569;
+            padding: 8px 16px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .btn-action-outline:hover {
+            background-color: #F8FAFC;
+            border-color: #CBD5E1;
+        }
+
+        /* Table */
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .log-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        .log-table th {
+            padding: 16px 32px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #94A3B8;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            border-bottom: 1px solid #F1F5F9;
+            background-color: #FAFAFA;
+        }
+
+        .log-table td {
+            padding: 20px 32px;
+            font-size: 14px;
+            color: #334155;
+            border-bottom: 1px solid #F1F5F9;
+            vertical-align: middle;
+        }
+
+        .log-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .log-table tbody tr:hover td {
+            background-color: #FAFBFF;
+        }
+
+        /* Device spec cell */
+        .laptop-cell {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .laptop-icon-sm {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            background-color: #EFF6FF;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #3B82F6;
+            flex-shrink: 0;
+        }
+
+        .laptop-name-text {
+            font-weight: 700;
+            color: #0F172A;
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .laptop-id-text {
+            font-size: 12px;
+            color: #94A3B8;
+            font-weight: 500;
+        }
+
+        /* Periode cell */
+        .periode-main-text {
+            font-weight: 500;
+            color: #0F172A;
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .periode-sub-text {
+            font-size: 12px;
+            color: #94A3B8;
+            font-weight: 500;
+        }
+
+        /* Durasi cell */
+        .durasi-text {
+            font-weight: 500;
+            color: #0F172A;
+        }
+
+        /* Status Badge */
+        .badge-returned {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background-color: #DCFCE7;
+            color: #15803D;
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-returned .dot {
+            width: 6px;
+            height: 6px;
+            background-color: #22C55E;
+            border-radius: 50%;
+        }
+
+        /* Aksi Detail Button */
+        .btn-table-action {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #F1F5F9;
+            color: #334155;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .btn-table-action:hover {
+            background-color: #E2E8F0;
+        }
+
+        /* Pagination & Footer Row */
+        .pagination-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 32px;
+            background-color: #FFFFFF;
+            border-top: 1px solid #F1F5F9;
+        }
+
+        .pagination-text {
+            font-size: 13px;
+            color: #64748B;
+            font-weight: 500;
+        }
+
+        .pagination-buttons {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-pagination {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            border: 1.5px solid #E2E8F0;
+            background-color: #FFFFFF;
+            color: #64748B;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-pagination:hover {
+            background-color: #F8FAFC;
+            border-color: #CBD5E1;
+        }
+
+        .btn-pagination.active {
+            background-color: #0066CC;
+            color: #FFFFFF;
+            border-color: #0066CC;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-wrapper">
+        {% include 'talent/components/sidebar.html' with active_page='history_pengajuan' %}
+
+        <div class="main-content">
+
+            <!-- Page Header -->
+            <div class="page-top">
+                <h1>Riwayat Pengajuan Peminjaman Laptop</h1>
+                <a href="{% url 'dashboard_talent' %}" class="btn-back">
+                    Kembali ke Dashboard
+                </a>
+            </div>
+
+            <!-- Flash Messages -->
+            {% include 'components/messages_popup.html' %}
+
+            <!-- Active Device Card -->
+            {% if active_peminjaman and active_laptop %}
+            <div class="active-laptop-card">
+                <div class="badge-active-device">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                    Perangkat Aktif
+                </div>
+                <h2 class="active-device-title">{{ active_laptop.nama_laptop }} ({{ active_laptop.model }})</h2>
+                <p class="active-device-desc">
+                    Anda telah meminjam perangkat ini sejak {{ active_peminjaman.tanggal_pinjam|date:"d M Y" }}. Jika Anda telah menyelesaikan sprint saat ini, harap mulai proses pengembalian agar tersedia bagi orang lain.
+                </p>
+                <div class="active-card-actions">
+                    <a href="{% url 'pengembalianlaptop_talent' %}" style="text-decoration:none;">
+                        <button class="btn-return">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                                <polyline points="16 17 21 12 16 7"></polyline>
+                                <line x1="21" y1="12" x2="9" y2="12"></line>
+                            </svg>
+                            Proses Pengembalian
+                        </button>
+                    </a>
+                    <a href="{% url 'detaillaptop_talent' %}" style="text-decoration:none;">
+                        <button class="btn-detail-device">
+                            Detail Perangkat
+                        </button>
+                    </a>
+                </div>
+            </div>
+            {% else %}
+            <div class="active-laptop-card" style="border-color: #E2E8F0; box-shadow: none;">
+                <div class="badge-active-device" style="background-color: #F1F5F9; color: #475569; border-color: #CBD5E1;">
+                    Tidak Ada Perangkat Aktif
+                </div>
+                <h2 class="active-device-title" style="color: #64748B;">Tidak ada perangkat aktif</h2>
+                <p class="active-device-desc">
+                    Anda saat ini tidak memiliki perangkat laptop yang sedang dipinjam secara aktif. Silakan ajukan peminjaman jika Anda memerlukan perangkat baru.
+                </p>
+                <div class="active-card-actions">
+                    <a href="{% url 'pengajuanlaptop_talent' %}" style="text-decoration:none;">
+                        <button class="btn-return" style="background-color: #0284C7; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);">
+                            Ajukan Laptop Baru
+                        </button>
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Search and Filter Form -->
+            <div style="margin-bottom: 24px;">
+                <form method="GET" action="" style="display: flex; gap: 12px; width: 100%;">
+                    <input type="text" name="q" placeholder="Cari nama laptop, no seri, atau ID..." value="{{ search_query }}" style="flex: 1; padding: 12px 16px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px;">
+                    <select name="status" style="padding: 12px 16px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background: white;">
+                        <option value="">Semua Status</option>
+                        <option value="dipinjam" {% if status_filter == 'dipinjam' %}selected{% endif %}>Dipinjam</option>
+                        <option value="selesai" {% if status_filter == 'selesai' %}selected{% endif %}>Selesai</option>
+                        <option value="dikembalikan" {% if status_filter == 'dikembalikan' %}selected{% endif %}>Dikembalikan</option>
+                    </select>
+                    <button type="submit" style="background-color: #0b57c6; color: white; padding: 12px 24px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">Cari</button>
+                </form>
+            </div>
+
+            <!-- History Log Perangkat Card -->
+            <div class="history-card">
+                <div class="log-header">
+                    <div class="log-title">
+                        <h3>Riwayat Log Perangkat</h3>
+                        <p>Catatan lengkap penugasan aset Anda sebelumnya</p>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table class="log-table">
+                        <thead>
+                            <tr>
+                                <th>Detail Perangkat</th>
+                                <th>Periode Peminjaman</th>
+                                <th>Durasi</th>
+                                <th>Status Akhir</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for p in riwayat_list %}
+                            <tr>
+                                <td>
+                                    <div class="laptop-cell">
+                                        <div class="laptop-icon-sm">
+                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                                                <line x1="8" y1="21" x2="16" y2="21"></line>
+                                                <line x1="12" y1="17" x2="12" y2="21"></line>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <span class="laptop-name-text">{{ p.nama_laptop }}</span>
+                                            <span class="laptop-id-text">No Seri: {{ p.no_inventori }}</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="periode-main-text">{{ p.tanggal_pinjam|date:"d M Y" }} - {% if p.tanggal_kembali %}{{ p.tanggal_kembali|date:"d M Y" }}{% else %}Sekarang{% endif %}</span>
+                                    <span class="periode-sub-text">Ket: {{ p.keterangan|default:"-" }}</span>
+                                </td>
+                                <td>
+                                    <span class="durasi-text">-</span>
+                                </td>
+                                <td>
+                                    {% if p.status == 'selesai' or p.status == 'dikembalikan' %}
+                                    <span class="badge-returned">
+                                        <span class="dot"></span>
+                                        DIKEMBALIKAN
+                                    </span>
+                                    {% elif p.status == 'dipinjam' or p.status == 'aktif' %}
+                                    <span class="badge-returned" style="background-color: #DBEAFE; color: #1E40AF;">
+                                        <span class="dot" style="background-color: #2563EB;"></span>
+                                        DIPINJAM
+                                    </span>
+                                    {% else %}
+                                    <span class="badge-returned" style="background-color: #FEE2E2; color: #991B1B;">
+                                        <span class="dot" style="background-color: #EF4444;"></span>
+                                        {{ p.status|upper }}
+                                    </span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{% url 'detaillaptop_talent' %}" style="text-decoration:none;">
+                                        <button class="btn-table-action">Detail</button>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" style="text-align: center; padding: 40px; color: #94A3B8;">Belum ada riwayat peminjaman laptop.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="pagination-row" style="display: flex; justify-content: space-between; align-items: center; padding: 20px 32px; border-top: 1px solid #F1F5F9;">
+                    <span class="pagination-text">Menampilkan {{ riwayat_list.start_index }} - {{ riwayat_list.end_index }} dari {{ total_peminjaman }} riwayat</span>
+                    <div class="pagination-buttons" style="display: flex; gap: 6px; align-items: center;">
+                        {% if riwayat_list.has_previous %}
+                            <a href="?page={{ riwayat_list.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" class="btn-pagination" style="text-decoration: none; display: flex; align-items: center; justify-content: center;">
+                                <i class="fa-solid fa-chevron-left"></i>
+                            </a>
+                        {% endif %}
+                        
+                        {% for num in riwayat_list.paginator.page_range %}
+                            {% if riwayat_list.number == num %}
+                                <span class="btn-pagination active" style="display: flex; align-items: center; justify-content: center;">{{ num }}</span>
+                            {% elif num > riwayat_list.number|add:'-3' and num < riwayat_list.number|add:'3' %}
+                                <a href="?page={{ num }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" class="btn-pagination" style="text-decoration: none; display: flex; align-items: center; justify-content: center;">{{ num }}</a>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if riwayat_list.has_next %}
+                            <a href="?page={{ riwayat_list.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" class="btn-pagination" style="text-decoration: none; display: flex; align-items: center; justify-content: center;">
+                                <i class="fa-solid fa-chevron-right"></i>
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- End Main Content -->
+    </div><!-- End Wrapper -->
+</body>
+
+</html>

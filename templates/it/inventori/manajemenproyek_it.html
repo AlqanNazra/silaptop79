@@ -1,0 +1,626 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manajemen Proyek - SiLaptop79</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1.1">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            min-height: 100vh;
+            background-color: #f8fafc;
+        }
+
+        .dashboard-wrapper {
+            display: flex;
+            width: 100%;
+        }
+
+        .main-dashboard-content {
+            flex: 1;
+            margin-left: 260px;
+            padding: 40px 60px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 800;
+            color: #1e293b;
+            margin-top: 0;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .page-subtitle {
+            font-size: 14px;
+            color: #64748b;
+            margin-bottom: 32px;
+            max-width: 620px;
+            line-height: 1.6;
+        }
+
+        /* Stats Row */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: #ffffff;
+            border-radius: 16px;
+            border: 1px solid #f1f5f9;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+            padding: 24px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
+        }
+
+        .stat-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 12px;
+            background-color: rgba(11, 87, 198, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #0b57c6;
+            font-size: 24px;
+        }
+
+        .stat-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #64748b;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 800;
+            color: #1e293b;
+            margin: 4px 0 0 0;
+        }
+
+        /* Top Actions */
+        .top-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .search-wrapper {
+            flex: 1;
+            max-width: 500px;
+            position: relative;
+            min-width: 260px;
+        }
+
+        .search-wrapper i {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        .search-wrapper input {
+            width: 100%;
+            padding: 12px 16px 12px 40px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            background: #ffffff;
+            font-size: 14px;
+            color: #334155;
+            box-sizing: border-box;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .search-wrapper input:focus {
+            border-color: #0b57c6;
+            box-shadow: 0 0 0 3px rgba(11, 87, 198, 0.1);
+        }
+
+        .action-buttons-group {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-secondary-custom {
+            padding: 12px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            background: #f1f5f9;
+            color: #475569;
+            border: 1px solid #cbd5e1;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary-custom:hover {
+            background: #e2e8f0;
+            color: #1e293b;
+        }
+
+        .btn-primary-custom {
+            background-color: #0b57c6;
+            color: white;
+            padding: 12px 20px;
+            border: 1px solid #0b57c6;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(11, 87, 198, 0.15);
+            transition: all 0.2s;
+        }
+
+        .btn-primary-custom:hover {
+            background-color: #09459e;
+            border-color: #09459e;
+        }
+
+        /* Table Card */
+        .table-card {
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+            overflow: hidden;
+            border: 1px solid #f1f5f9;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 20px 24px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        td {
+            padding: 16px 24px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+            font-size: 14px;
+            color: #475569;
+        }
+
+        tbody tr {
+            transition: background 0.2s;
+        }
+
+        tbody tr:hover {
+            background-color: #f8fafc;
+        }
+
+        .role-badge {
+            background-color: rgba(11, 87, 198, 0.06);
+            color: #0b57c6;
+            font-weight: 700;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            display: inline-block;
+            border: 1px solid rgba(11, 87, 198, 0.1);
+        }
+
+        .tech-pill {
+            display: inline-block;
+            background-color: #f1f5f9;
+            color: #475569;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            border: 1px solid #e2e8f0;
+        }
+
+        /* Action Buttons */
+        .action-btns {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .btn-action {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 8px 14px;
+            border: 1px solid transparent;
+            border-radius: 6px;
+            font-family: 'Inter', sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .btn-edit {
+            background-color: #eff6ff;
+            color: #1d4ed8;
+            border-color: #dbeafe;
+        }
+
+        .btn-edit:hover {
+            background-color: #dbeafe;
+        }
+
+        .btn-delete {
+            background-color: #fef2f2;
+            color: #b91c1c;
+            border-color: #fee2e2;
+        }
+
+        .btn-delete:hover {
+            background-color: #fee2e2;
+        }
+
+        /* Modal Overlay */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-box {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 420px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            animation: modalIn 0.2s ease-out;
+        }
+
+        @keyframes modalIn {
+            from { transform: scale(0.95); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: #fee2e2;
+            color: #dc2626;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin: 0 auto 16px;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+
+        .modal-text {
+            font-size: 14px;
+            color: #64748b;
+            line-height: 1.5;
+            margin-bottom: 24px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .modal-btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .modal-btn-cancel {
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        .modal-btn-cancel:hover {
+            background: #e2e8f0;
+        }
+
+        .modal-btn-delete {
+            background: #dc2626;
+            color: white;
+        }
+
+        .modal-btn-delete:hover {
+            background: #b91c1c;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="dashboard-wrapper">
+        <!-- Load Sidebar with active status -->
+        {% include 'it/components/sidebar.html' with active_page='manajemen_proyek' %}
+
+        <!-- Main Dashboard Content -->
+        <div class="main-dashboard-content">
+            <h1 class="page-title">Manajemen Data Proyek</h1>
+            <p class="page-subtitle">Kelola daftar proyek, konfigurasi role kebutuhan, serta alokasi bobot kriteria DSS untuk inventori laptop.</p>
+
+            {% include 'components/messages_popup.html' %}
+
+            <!-- Statistics Cards -->
+            <div class="stats-container">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fa-solid fa-briefcase"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-label">Total Proyek</span>
+                        <span class="stat-value">{{ proyek_list.paginator.count }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Actions -->
+            <div class="top-actions">
+                <form id="filter-form" method="GET" action="" class="search-wrapper">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="search-input" name="q" placeholder="Cari proyek berdasarkan nama..." value="{{ search_query }}">
+                </form>
+
+                <div class="action-buttons-group">
+                    <a href="?" class="btn-secondary-custom">
+                        <i class="fa-solid fa-rotate-left"></i> Reset
+                    </a>
+                    <a href="{% url 'manajemenroleteknologi_it' %}" class="btn-secondary-custom">
+                        <i class="fa-solid fa-layer-group"></i> Kelola Role & Teknologi
+                    </a>
+                    <a href="{% url 'tambahproyek_it' %}" class="btn-primary-custom">
+                        <i class="fa-solid fa-plus"></i> Tambah Proyek
+                    </a>
+                </div>
+            </div>
+
+            <!-- Table Card -->
+            <div class="table-card">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 60px; text-align: center;">NO</th>
+                            <th>PROYEK</th>
+                            <th>DETAIL ROLE & TEKNOLOGI</th>
+                            <th style="width: 160px; text-align: center;">AKSI</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for proyek in proyek_list %}
+                        <tr>
+                            <td style="font-weight: 600; color: #64748b; text-align: center; vertical-align: top; padding-top: 20px;">
+                                {{ forloop.counter0|add:proyek_list.start_index }}
+                            </td>
+                            <td style="font-weight: 700; color: #1e293b; vertical-align: top; padding-top: 20px; font-size: 15px; width: 30%;">
+                                {{ proyek.nama_proyek }}
+                            </td>
+                            <td style="padding-top: 16px; padding-bottom: 16px;">
+                                <div style="display: flex; flex-direction: column; gap: 14px;">
+                                    {% for pr in proyek.roles.all %}
+                                    <div style="display: flex; align-items: flex-start; gap: 16px; font-size: 13px;">
+                                        <div style="min-width: 160px; flex-shrink: 0; padding-top: 2px;">
+                                            <span class="role-badge">
+                                                {{ pr.role.nama_role }}
+                                            </span>
+                                        </div>
+                                        <div style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center;">
+                                            {% for rt in pr.role.teknologi_role.all %}
+                                                <span class="tech-pill">
+                                                    {{ rt.teknologi.nama_teknologi }}
+                                                </span>
+                                            {% empty %}
+                                                <span style="color:#94a3b8;font-style:italic;">
+                                                    Tidak ada teknologi
+                                                </span>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    {% empty %}
+                                        <span style="color:#94a3b8;font-style:italic;">
+                                            Tidak ada data role
+                                        </span>
+                                    {% endfor %}
+                                </div>
+                            </td>
+                            <td style="vertical-align: top; padding-top: 20px; text-align: center;">
+                                <div class="action-btns" style="justify-content: center;">
+                                    <a href="{% url 'editproyek_it' proyek.id_proyek %}" class="btn-action btn-edit" title="Edit">
+                                        <i class="fa-solid fa-pen-to-square"></i> Edit
+                                    </a>
+                                    <button type="button" class="btn-action btn-delete" title="Hapus" onclick="showDeleteModal('{{ proyek.id_proyek }}', '{{ proyek.nama_proyek }}')">
+                                        <i class="fa-solid fa-trash-can"></i> Hapus
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" style="text-align: center; padding: 40px; color: #94a3b8; font-weight: 500;">
+                                Belum ada data proyek. Silakan tambahkan proyek baru.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <!-- Pagination -->
+                {% if proyek_list.paginator.count > 0 %}
+                <div class="pagination-container" style="display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-top: 1px solid #f1f5f9;">
+                    <span class="pagination-text" style="font-size: 14px; color: #64748b;">Menampilkan {{ proyek_list.start_index }} - {{ proyek_list.end_index }} dari {{ proyek_list.paginator.count }} proyek</span>
+                    <div class="pagination-controls" style="display: flex; gap: 6px; align-items: center;">
+                        {% if proyek_list.has_previous %}
+                            <a href="?page={{ proyek_list.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px; transition: all 0.2s;">
+                                <i class="fa-solid fa-chevron-left"></i>
+                            </a>
+                        {% endif %}
+                        
+                        {% for num in proyek_list.paginator.page_range %}
+                            {% if proyek_list.number == num %}
+                                <span class="page-btn active" style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; background: #0b57c6; color: white; font-weight: bold; font-size: 12px;">{{ num }}</span>
+                            {% elif num > proyek_list.number|add:'-3' and num < proyek_list.number|add:'3' %}
+                                <a href="?page={{ num }}{% if search_query %}&q={{ search_query }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">{{ num }}</a>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if proyek_list.has_next %}
+                            <a href="?page={{ proyek_list.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px; transition: all 0.2s;">
+                                <i class="fa-solid fa-chevron-right"></i>
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            </div> <!-- End Table Card -->
+
+        </div> <!-- End Main Content -->
+    </div> <!-- End Wrapper -->
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal-overlay" id="deleteModal">
+        <div class="modal-box">
+            <div class="modal-icon">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div class="modal-title">Hapus Proyek?</div>
+            <div class="modal-text">Apakah Anda yakin ingin menghapus proyek <strong id="deleteProyekName"></strong>? Semua data role dan teknologi terkait juga akan dihapus.</div>
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-cancel" onclick="hideDeleteModal()">Batal</button>
+                <form id="deleteForm" method="POST" style="margin: 0;">
+                    {% csrf_token %}
+                    <button type="submit" class="modal-btn modal-btn-delete">Ya, Hapus</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showDeleteModal(idProyek, namaProyek) {
+            document.getElementById('deleteProyekName').textContent = '"' + namaProyek + '"';
+            document.getElementById('deleteForm').action = '/it/hapus-proyek/' + idProyek + '/';
+            document.getElementById('deleteModal').classList.add('active');
+        }
+
+        function hideDeleteModal() {
+            document.getElementById('deleteModal').classList.remove('active');
+        }
+
+        // Close modal on overlay click
+        document.getElementById('deleteModal').addEventListener('click', function(e) {
+            if (e.target === this) hideDeleteModal();
+        });
+
+        // Search Auto Filtering with Debounce
+        document.addEventListener("DOMContentLoaded", function() {
+            const filterForm = document.getElementById("filter-form");
+            const searchInput = document.getElementById("search-input");
+            let debounceTimer;
+
+            if (searchInput) {
+                searchInput.addEventListener("input", function() {
+                    clearTimeout(debounceTimer);
+                    debounceTimer = setTimeout(function() {
+                        filterForm.submit();
+                    }, 500);
+                });
+
+                // Focus cursor at the end
+                if (searchInput.value.length > 0) {
+                    const val = searchInput.value;
+                    searchInput.value = '';
+                    searchInput.focus();
+                    searchInput.value = val;
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>
