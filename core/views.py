@@ -9,6 +9,7 @@ from django.http import HttpResponse, JsonResponse
 from django.db import connection, transaction
 
 from dss.models import BobotKriteria
+from dss.repositories.dto.dto_bobot_kriteria import BobotKriteriaDTO
 from dss.repositories.dto.dto_laptop_pengadaan import FilterPengadaanDTO
 from dss.repositories.repositori_bobot_kriteria import BobotKriteriaRepository
 from dss.repositories.repositori_bobot_kriteria import BobotKriteriaRepository
@@ -2872,7 +2873,8 @@ def manajemen_role_teknologi_it_view(request):
 
     context = {
         "role_list": role_obj,
-        "teknologi_list": tech_obj,
+        "tech_page": tech_obj,
+        "teknologi_list": teknologi_list,
         "search_role": search_role,
         "search_tech": search_tech,
         "active_tab": active_tab,
@@ -2883,11 +2885,8 @@ def manajemen_role_teknologi_it_view(request):
         context
     )
 def tambah_teknologi_it_view(request):
-
     if request.method == "POST":
-
         try:
-
             Teknologi.objects.create(
                 id_teknologi=str(uuid.uuid4())[:8],
                 nama_teknologi=request.POST.get(
@@ -3312,18 +3311,16 @@ def tambah_role_it_view(request):
     )
     
     
-def hapus_role_it_view(
-    request,
-    id_role
-):
-
+def hapus_role_it_view(request,id_role):
+    conn = get_connection()
+    role_repo = (RoleRepository(conn))
+    repo_bobot = (BobotKriteriaRepository(conn))
+    role_service = (RoleService(role_repo,conn,repo_bobot))
     try:
 
-        role = Role.objects.get(
-            id_role=id_role
+        role_service.hapus_role(
+            id_role
         )
-
-        role.delete()
 
         messages.success(
             request,
@@ -3405,59 +3402,124 @@ def edit_role_it_view(request, id_role):
                     rt.id_role_teknologi
                 )
             )
-
+            print("ROLE TEK:",rt.id_role_teknologi)
+            print("BOBOT:",bobot_list)
             data_teknologi.append({
-
                 "id_role_teknologi":
                     rt.id_role_teknologi,
-
                 "id_teknologi":
                     rt.teknologi.id_teknologi,
-
                 "nama_teknologi":
                     rt.teknologi.nama_teknologi,
-
                 "bobot":
                     bobot_list
-
             })
+            print(data_teknologi)
+        # ==========================
+        # UPDATE BOBOT KRITERIA
+        # ==========================
 
-        return JsonResponse({
+        repo_bobot = BobotKriteriaRepository(
+            connection
+        )
 
-            "id_role":
-                role.id_role,
+        KRITERIA_MAPPING = {
 
-            "nama_role":
-                role.nama_role,
+            "processor": "KRIT_0001",
+            "ram": "KRIT_0002",
+            "storage": "KRIT_0003",
+            "berat": "KRIT_0004",
+            "layar": "KRIT_0005",
+            "baterai": "KRIT_0006"
 
-            "min_ram":
-                role.min_ram,
+        }
 
-            "min_storage":
-                role.min_storage,
+        role_teknologi_list = (
 
-            "min_processor_score":
-                role.min_processor_score,
+            RoleTeknologi.objects
 
-            "teknologi":
-                data_teknologi
+            .filter(
+                role=role
+            )
 
-        })
+        )
 
-    # ====================================
-    # UPDATE ROLE
-    # ====================================
+        for role_teknologi in role_teknologi_list:
 
+            for nama_kriteria, id_kriteria in (
+
+                KRITERIA_MAPPING.items()
+
+            ):
+
+                field_name = (
+
+                    f"{nama_kriteria}_weight_"
+                    f"{role_teknologi.teknologi.id_teknologi}"
+
+                )
+
+                nilai_bobot = request.POST.get(
+                    field_name
+                )
+
+                print(
+                    field_name,
+                    "=",
+                    nilai_bobot
+                )
+
+                if nilai_bobot:
+
+                    dto = BobotKriteriaDTO(
+
+                        id_role_teknologi=
+                            role_teknologi
+                            .id_role_teknologi,
+
+                        id_kriteria=
+                            id_kriteria,
+
+                        nilai_bobot=
+                            float(nilai_bobot)
+
+                    )
+
+                    repo_bobot.update_bobot_role_teknologi(
+                        dto
+                    )
+
+                return JsonResponse({
+
+                    "id_role":
+                        role.id_role,
+
+                    "nama_role":
+                        role.nama_role,
+
+                    "min_ram":
+                        role.min_ram,
+
+                    "min_storage":
+                        role.min_storage,
+
+                    "min_processor_score":
+                        role.min_processor_score,
+                    "teknologi":
+                        data_teknologi
+                })
     if request.method == "POST":
 
         try:
 
             with transaction.atomic():
 
-                role.nama_role = (
-                    request.POST.get(
-                        "nama_role"
-                    )
+                # ==========================
+                # UPDATE ROLE
+                # ==========================
+
+                role.nama_role = request.POST.get(
+                    "nama_role"
                 )
 
                 role.min_ram = int(
@@ -3484,168 +3546,103 @@ def edit_role_it_view(request, id_role):
                 role.save()
 
                 # ==========================
-                # HAPUS ROLE TEKNOLOGI LAMA
+                # UPDATE BOBOT
                 # ==========================
 
-                RoleTeknologi.objects.filter(
-                    role=role
-                ).delete()
-
-                # ==========================
-                # SIMPAN TEKNOLOGI BARU
-                # ==========================
-
-                teknologi_ids = (
-                    request.POST.getlist(
-                        "teknologi"
+                repo_bobot = (
+                    BobotKriteriaRepository(
+                        connection
                     )
                 )
 
                 KRITERIA_MAPPING = {
 
                     "processor":
-                        "KR001",
+                        "KRIT_0001",
 
                     "ram":
-                        "KR002",
+                        "KRIT_0002",
 
                     "storage":
-                        "KR003",
+                        "KRIT_0003",
 
                     "berat":
-                        "KR004",
+                        "KRIT_0004",
 
                     "layar":
-                        "KR005",
+                        "KRIT_0005",
 
                     "baterai":
-                        "KR006"
+                        "KRIT_0006"
+
                 }
 
-                service_bobot = (
-                    ServiceBobotKriteria(
-                        connection
+                role_teknologi_list = (
+
+                    RoleTeknologi.objects
+
+                    .filter(
+                        role=role
                     )
+
                 )
 
-                for teknologi_id in teknologi_ids:
+                for role_teknologi in (
 
-                    role_teknologi = (
-                        RoleTeknologi.objects.create(
+                    role_teknologi_list
 
-                            id_role_teknologi=
-                                str(
-                                    uuid.uuid4()
-                                )[:12],
+                ):
 
-                            role=role,
-
-                            teknologi_id=
-                                teknologi_id
-                        )
-                    )
-
-                    list_bobot = [
-
-                        {
-                            "id_kriteria":
-                                KRITERIA_MAPPING[
-                                    "processor"
-                                ],
-
-                            "nilai_bobot":
-                                request.POST.get(
-                                    f"processor_weight_{teknologi_id}",
-                                    3
-                                )
-                        },
-
-                        {
-                            "id_kriteria":
-                                KRITERIA_MAPPING[
-                                    "ram"
-                                ],
-
-                            "nilai_bobot":
-                                request.POST.get(
-                                    f"ram_weight_{teknologi_id}",
-                                    3
-                                )
-                        },
-
-                        {
-                            "id_kriteria":
-                                KRITERIA_MAPPING[
-                                    "storage"
-                                ],
-
-                            "nilai_bobot":
-                                request.POST.get(
-                                    f"storage_weight_{teknologi_id}",
-                                    3
-                                )
-                        },
-
-                        {
-                            "id_kriteria":
-                                KRITERIA_MAPPING[
-                                    "berat"
-                                ],
-
-                            "nilai_bobot":
-                                request.POST.get(
-                                    f"berat_weight_{teknologi_id}",
-                                    3
-                                )
-                        },
-
-                        {
-                            "id_kriteria":
-                                KRITERIA_MAPPING[
-                                    "layar"
-                                ],
-
-                            "nilai_bobot":
-                                request.POST.get(
-                                    f"layar_weight_{teknologi_id}",
-                                    3
-                                )
-                        },
-
-                        {
-                            "id_kriteria":
-                                KRITERIA_MAPPING[
-                                    "baterai"
-                                ],
-
-                            "nilai_bobot":
-                                request.POST.get(
-                                    f"baterai_weight_{teknologi_id}",
-                                    3
-                                )
-                        }
-
-                    ]
-
-                    result = (
-                        service_bobot
-                        .input_bobot_role_teknologi(
-                            role_teknologi
-                            .id_role_teknologi,
-
-                            list_bobot
-                        )
-                    )
-
-                    if (
-                        result["status"]
-                        !=
-                        "success"
+                    for (
+                        nama_kriteria,
+                        id_kriteria
+                    ) in (
+                        KRITERIA_MAPPING.items()
                     ):
 
-                        raise Exception(
-                            result["message"]
+                        field_name = (
+
+                            f"{nama_kriteria}_weight_"
+                            f"{role_teknologi.teknologi.id_teknologi}"
+
                         )
+
+                        nilai_bobot = (
+                            request.POST.get(
+                                field_name
+                            )
+                        )
+
+                        print(
+                            field_name,
+                            "=",
+                            nilai_bobot
+                        )
+
+                        if nilai_bobot:
+
+                            dto = (
+                                BobotKriteriaDTO(
+
+                                    id_role_teknologi=
+
+                                    role_teknologi
+                                    .id_role_teknologi,
+
+                                    id_kriteria=
+                                    id_kriteria,
+
+                                    nilai_bobot=
+                                    float(
+                                        nilai_bobot
+                                    )
+
+                                )
+                            )
+
+                            repo_bobot.update_bobot_role_teknologi(
+                                dto
+                            )
 
             messages.success(
                 request,
@@ -3662,6 +3659,8 @@ def edit_role_it_view(request, id_role):
         return redirect(
             "manajemenroleteknologi_it"
         )
+
+
     
 def edit_teknologi_it_view(
     request,
@@ -3690,7 +3689,7 @@ def edit_teknologi_it_view(
             )
 
             teknologi.save()
-
+            messages.success
             messages.success(
                 request,
                 "Teknologi berhasil diperbarui."

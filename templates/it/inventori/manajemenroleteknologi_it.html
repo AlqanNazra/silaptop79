@@ -516,6 +516,37 @@
         .modal-btn-save:hover {
             background-color: #09459e;
         }
+        #editRoleModal .modal-actions{
+            position: sticky;
+            bottom: 0;
+            background: white;
+            padding-top: 12px;
+            border-top: 1px solid #e5e7eb;
+        }
+        #edit_swara_container{
+            max-height: 250px;
+            overflow-y: auto;
+        }
+        #edit_bobot_container{
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        #editRoleModal .modal-box{
+            max-width: 1000px;
+            width: 95%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        #edit_bobot_container{
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        #edit_swara_container{
+            max-height: 250px;
+            overflow-y: auto;
+        }
     </style>
 </head>
 <body>
@@ -549,7 +580,7 @@
                 </div>
                 <div class="stat-info">
                     <span class="stat-label">Total Teknologi</span>
-                    <span class="stat-value">{{ teknologi_list.paginator.count }}</span>
+                    <span class="stat-value">{{ tech_page.paginator.count }}</span>
                 </div>
             </div>
         </div>
@@ -693,7 +724,7 @@
                                 <td align="center">
                                     <div class="action-btns">
                                         <button class="btn-action btn-edit" type="button"
-                                            onclick="openEditRole(
+                                            onclick="openEditRoleModal(
                                                 '{{ role.id_role }}',
                                                 '{{ role.nama_role }}',
                                                 '{{ role.min_ram }}',
@@ -876,7 +907,7 @@
 
 <!-- Modal: Edit Role -->
 <div class="modal-overlay" id="editRoleModal">
-    <div class="modal-box" style="max-width:1000px; width:95%;">
+    <div class="modal-box" style=" max-width: width:95 max-height:90vh; overflow-y:auto;">
 
         <h3 class="modal-title">
             <i class="fa-solid fa-user-gear"></i>
@@ -1080,126 +1111,210 @@
         }
     }
 
-    function openEditRoleModal(
-        roleId
-    ){
 
-        fetch(
-            `/role/${roleId}/detail/`
-        )
+function openEditRoleModal(roleId){
 
-        .then(
-            response => response.json()
-        )
+    fetch(`/it/edit-role/${roleId}/`)
 
-        .then(
-            data => {
+    .then(response => response.json())
 
-                document
-                .getElementById(
-                    'edit_nama_role'
-                )
-                .value =
-                data.nama_role;
-                const teknologiContainer =
-                document.getElementById('edit_teknologi_container');
-                teknologiContainer.innerHTML = '';
-                data.teknologi.forEach(t => {
-                    teknologiContainer.innerHTML += `
-                        <label
-                            class="tech-checkbox-item">
-                            <input
-                                type="checkbox"
-                                checked
-                                name="teknologi"
-                                value="${t.id_teknologi}">
-                            ${t.nama_teknologi}
-                        </label>
-                    `;
-                });
-                const bobotContainer =
-                document.getElementById(
-                    'edit_bobot_container'
-                );
-                bobotContainer.innerHTML = '';
-                data.teknologi.forEach(t => {
-                    bobotContainer.innerHTML +=
-                    createEditBobotForm(
-                        t.id_teknologi,
-                        t.nama_teknologi
-                    );
-                });
-                data.teknologi.forEach(t => {
-                    t.bobot.forEach(b => {
-                        const nama =
-                        b.nama_kriteria.toLowerCase();
-                        const input =
-                        document.querySelector(
-                            `[name="${nama}_weight_${t.id_teknologi}"]`
-                        );
-                        if(input){
-                            input.value =
-                                b.nilai_bobot;
-                        }
-                    });
-                });
-                const swaraContainer =
-                document.getElementById(
-                    'edit_swara_container'
-                );
-                swaraContainer.innerHTML = '';
-                data.teknologi.forEach(t => {
+    .then(data => {
 
-                let html = `
+        console.log(data);
 
-                    <div
-                        class="swara-card"
-                        style="
-                            margin-bottom:15px;
-                            padding:15px;
-                            background:#f8fafc;
-                            border-radius:10px;
-                        ">
+        // =====================
+        // DATA ROLE
+        // =====================
 
-                        <h5>
-                            ${t.nama_teknologi}
-                        </h5>
+        document.getElementById(
+            'edit_nama_role'
+        ).value = data.nama_role;
 
-                        <table
-                            style="
-                                width:100%;
-                                margin-top:10px;
-                            ">
-                `;
+        document.getElementById(
+            'edit_min_ram'
+        ).value = data.min_ram;
 
-                t.bobot.forEach(b => {
+        document.getElementById(
+            'edit_min_storage'
+        ).value = data.min_storage;
 
-                    html += `
-                        <tr>
-                            <td>
-                                ${b.nama_kriteria}
-                            </td>
+        document.getElementById(
+            'edit_min_processor_score'
+        ).value = data.min_processor_score;
 
-                            <td>
-                                ${b.nilai_swara ?? '-'}
-                            </td>
-                        </tr>
-                    `;
-                });
+        // =====================
+        // FORM ACTION
+        // =====================
 
-                html += `
-                        </table>
-                    </div>
-                `;
+        document.getElementById(
+            "editRoleForm"
+        ).action =
+        `/it/edit-role/${roleId}/`;
 
-                swaraContainer.innerHTML += html;
+        // =====================
+        // TEKNOLOGI
+        // =====================
 
-            });
-            }
+        const teknologiContainer =
+        document.getElementById(
+            'edit_teknologi_container'
         );
 
-    }
+        teknologiContainer.innerHTML = '';
 
+        data.teknologi.forEach(t => {
+
+            teknologiContainer.innerHTML += `
+                <label class="tech-checkbox-item">
+
+                    <input
+                        type="checkbox"
+                        checked
+                        name="teknologi"
+                        value="${t.id_teknologi}">
+
+                    ${t.nama_teknologi}
+
+                </label>
+            `;
+        });
+
+        // =====================
+        // BOBOT
+        // =====================
+
+        const bobotContainer =
+        document.getElementById(
+            'edit_bobot_container'
+        );
+
+        bobotContainer.innerHTML = '';
+
+        data.teknologi.forEach(t => {
+
+            bobotContainer.innerHTML +=
+            createEditBobotForm(
+                t.id_teknologi,
+                t.nama_teknologi
+            );
+
+        });
+
+        data.teknologi.forEach(t => {
+
+            t.bobot.forEach(b => {
+
+                const nama =
+                String(
+                    b[2]
+                ).toLowerCase();
+
+                const input =
+                document.querySelector(
+                    `[name="${nama}_weight_${t.id_teknologi}"]`
+                );
+
+                if(input){
+
+                    input.value = b[3];
+
+                }
+
+            });
+
+        });
+
+        // =====================
+        // SWARA
+        // =====================
+
+        const swaraContainer =
+        document.getElementById(
+            'edit_swara_container'
+        );
+
+        swaraContainer.innerHTML = '';
+
+        data.teknologi.forEach(t => {
+
+            let html = `
+                <div
+                    class="swara-card"
+                    style="
+                        margin-bottom:15px;
+                        padding:15px;
+                        background:#f8fafc;
+                        border-radius:10px;
+                    ">
+
+                    <h5>
+                        ${t.nama_teknologi}
+                    </h5>
+
+                    <table
+                        style="
+                            width:100%;
+                            margin-top:10px;
+                        ">
+                        <thead>
+                            <tr>
+                                <th>Kriteria</th>
+                                <th>Bobot SWARA</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            t.bobot.forEach(b => {
+
+                html += `
+                    <tr>
+
+                        <td>
+                            ${b[2]}
+                        </td>
+
+                        <td>
+                            ${b[4]}
+                        </td>
+
+                    </tr>
+                `;
+
+            });
+
+            html += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+
+            swaraContainer.innerHTML += html;
+
+        });
+
+        // =====================
+        // TAMPILKAN MODAL
+        // =====================
+
+        document.getElementById(
+            "editRoleModal"
+        ).classList.add(
+            "active"
+        );
+
+    })
+
+    .catch(error => {
+
+        console.error(
+            "Gagal load role:",
+            error
+        );
+
+    });
+
+}
 
     function createBobotForm(teknologiId, teknologiNama) {
 

@@ -60,12 +60,42 @@ class RoleRepository(IRoleRepository):
 
         return result
 
-    def hapus(self, id_role: str) -> bool:
-        query = "SELECT hapus_role(%s);"
+    # def hapus(self, id_role: str) -> bool:
+    #     query = "SELECT hapus_role(%s);"
+    #     with self.conn.cursor() as cur:
+    #         cur.execute(query, (id_role,))
+    #         result = cur.fetchone()[0]
+    #     return result
+
+    def hapus(self,id_role):
         with self.conn.cursor() as cur:
-            cur.execute(query, (id_role,))
-            result = cur.fetchone()[0]
-        return result
+            cur.execute(
+                """
+                DELETE FROM dss_bobotkriteria
+                WHERE id_role_teknologi IN (
+                    SELECT
+                        id_role_teknologi
+                    FROM role_teknologi
+                    WHERE id_role = %s
+                )
+                """,
+                (id_role,)
+            )
+            cur.execute(
+                """
+                DELETE FROM role_teknologi
+                WHERE id_role = %s
+                """,
+                (id_role,)
+            )
+            cur.execute(
+                """
+                DELETE FROM inventori_role
+                WHERE id_role = %s
+                """,
+                (id_role,)
+            )
+        return True
 
     def get_kriteria(self, id_role: str) -> List[Dict]:
         query = "SELECT * FROM get_kriteria_role(%s);"

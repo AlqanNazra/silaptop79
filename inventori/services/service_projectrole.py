@@ -41,6 +41,11 @@ class ProjectRoleService:
         try:
 
             with transaction.atomic():
+                print(type(data.id_proyek))
+                print(data.id_proyek)
+
+                print(type(data.id_role))
+                print(data.id_role)
 
                 is_valid = (
                     self.projectrole_repo
