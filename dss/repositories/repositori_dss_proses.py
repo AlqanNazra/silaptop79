@@ -32,9 +32,9 @@ class DssprossesRepository(IDssProssesRepositoryImpl):
 
             hasil = cur.fetchone()
 
-            print("\n=== DEBUG HASIL DSS ===")
-            print(hasil)
-            print(type(hasil))
+            # print("\n=== DEBUG HASIL DSS ===")
+            # print(hasil)
+            # print(type(hasil))
 
             self.conn.commit()
 

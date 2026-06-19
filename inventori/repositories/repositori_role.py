@@ -29,7 +29,6 @@ class RoleRepository(IRoleRepository):
                 )
             )
             result = cur.fetchone()[0]
-
         return result
 
     def update(self, data: RoleDTO) -> bool:
