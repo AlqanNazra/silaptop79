@@ -50,28 +50,19 @@ class TeknologiService:
     # UPDATE
     # ====================================
     def update(self, data):
-
         try:
-
             with transaction.atomic():
-
                 result = self.teknologi_repo.update_teknologi(
                     data
                 )
-
                 self.conn.commit()
-
                 return {
                     "success": True,
                     "message": "Berhasil update teknologi"
                 }
-
         except Exception as e:
-
             self.conn.rollback()
-
             logger.error(str(e))
-
             raise e
 
     # ====================================
@@ -102,7 +93,7 @@ class TeknologiService:
     # ====================================
     def validateVersion(self, version):
 
-        TeknologiValidation.validate_version(version)
+        # TeknologiValidation.validate_version(version)
 
         return {
             "success": True,
@@ -143,3 +134,5 @@ class TeknologiService:
                 }
             ]
         }
+    def ambil_semua(self):
+        return (self.teknologi_repo.get_all_teknologi())

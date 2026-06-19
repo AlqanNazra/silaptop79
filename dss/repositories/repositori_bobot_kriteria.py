@@ -242,3 +242,17 @@ class BobotKriteriaRepository(IBobotKriteriaRepositoryImpl):
             # print("ROW UPDATED:",cur.rowcount)
 
         return True
+    def hapus_by_role_teknologi(self,id_role_teknologi):
+        query = """
+        DELETE
+        FROM dss_bobotkriteria
+        WHERE id_role_teknologi = %s
+        """
+        with self.conn.cursor() as cur:
+            cur.execute(
+                query,
+                (
+                    id_role_teknologi,
+                )
+            )
+            return True

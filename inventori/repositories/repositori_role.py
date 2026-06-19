@@ -144,4 +144,13 @@ class RoleRepository(IRoleRepository):
         with self.conn.cursor() as cur:
             cur.execute(query)
             rows = cur.fetchall()
-            return rows
+            hasil = []
+            for row in rows:
+                hasil.append({
+                    "id_role": row[0],
+                    "nama_role": row[1],
+                    "min_ram": row[2],
+                    "min_storage": row[3],
+                    "min_processor_score": row[4]
+                })
+            return hasil
