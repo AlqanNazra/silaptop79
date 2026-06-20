@@ -6,6 +6,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Input Kriteria DSS - SiLaptop79</title>
+    {% comment %} {% if warning_dss %}
+    <div class="alert alert-warning">
+        <strong>
+            Peringatan DSS
+        </strong>
+        <br>
+        {{ warning_dss }}
+        <br><br>
+        Sistem menampilkan alternatif
+        laptop terbaik dari seluruh data
+        yang tersedia.
+    </div>
+    {% endif %} {% endcomment %}
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -357,31 +370,18 @@
 </head>
 
 <body>
-
     <div class="dashboard-wrapper">
         <!-- Load Sidebar -> highlight "Input Kriteria" -->
-        {% include 'hc/components/sidebar.html' with active_page='input_kriteria' %}
-
-<body>
-
-<div class="dashboard-wrapper">
-
-    {% include 'hc/components/sidebar.html' with active_page='input_kriteria' %}
-
+        {% include 'it/components/sidebar.html' with active_page='input_kriteria' %}
     <div class="main-dashboard-content">
-
         <h1 class="page-title">Konfigurasi Parameter SAW</h1>
-
         <p class="page-subtitle">
             Pilih Project dan Role Teknologi untuk memuat konfigurasi DSS.
             Nilai kriteria dan bobot dapat disesuaikan untuk simulasi rekomendasi
             tanpa mengubah data master sistem.
         </p>
-
         <form method="POST" id="mainForm">
-
             {% csrf_token %}
-
             <input
                 type="hidden"
                 name="jenis_rekomendasi"
@@ -469,32 +469,12 @@
 
                         <label>Role</label>
 
-                        <select
-                            class="form-control"
-                            name="id_role_teknologi"
-                            id="roleTeknologiSelect">
-
-                            <option value="">
-                                Pilih Role
-                            </option>
-
-                            {% for item in role_teknologi %}
-                            <option
-                                value="{{ item.id_role_teknologi }}"
-                                {% if selected_role_teknologi == item.id_role_teknologi %}
-                                selected
-                                {% endif %}
-                            >
-                                {{ item.role.nama_role }}
-                                -
-                                {{ item.teknologi.nama_teknologi }}
-                            </option>
-                            {% endfor %}
-
-                        </select>
-
+                            <select class="form-control" name="id_role" id="roleSelect">
+                                <option value="">
+                                    Pilih Role
+                                </option>
+                            </select>
                     </div>
-
                 </div>
 
                 <div class="info-alert">
@@ -578,81 +558,26 @@
                 </div>
 
             </div>
-                        <!-- ================================= -->
+            <!-- ================================= -->
             <!-- SECTION C -->
             <!-- ================================= -->
-            <div class="card">
+            {% comment %} <div class="card">
                 <div class="section-header">
                     <div class="icon-box">
                         <i class="fa-solid fa-scale-balanced"></i>
                     </div>
-                    <h3>Section C: Bobot Kriteria</h3>
-                </div>
-                <div class="grid-2-cols">
-                    <div class="form-group">
-                        <label>Processor</label>
-                        <input
-                            id="bobotProcessor"
-                            type="number"
-                            step="0.01"
-                            name="bobot_processor"
-                            value="{% if bobot_role %}{{ bobot_role.processor|default:'0' }}{% endif %}"
-                            class="form-control">
-                    </div>
-                    <div class="form-group">
-                        <label>RAM</label>
-                        <input
-                            id="bobotRam"
-                            type="number"
-                            step="0.01"
-                            name="bobot_ram"
-                            value="{% if bobot_role %}{{ bobot_role.ram|default:'0' }}{% endif %}"
-                            class="form-control">
-                    </div>
-                    <div class="form-group">
-                        <label>Storage</label>
-                        <input
-                            id="bobotStorage"
-                            type="number"
-                            step="0.01"
-                            name="bobot_storage"
-                            value="{% if bobot_role %}{{ bobot_role.storage|default:'0' }}{% endif %}"
-                            class="form-control">
-                    </div>
-                    <div class="form-group">
-                        <label>Berat</label>
-                        <input
-                            id="bobotBerat"
-                            type="number"
-                            step="0.01"
-                            name="bobot_berat"
-                            value="{% if bobot_role %}{{ bobot_role.berat|default:'0' }}{% endif %}"
-                            class="form-control">
-                    </div>
-                    <div class="form-group">
-                        <label>Layar</label>
-                        <input
-                            id="bobotLayar"
-                            type="number"
-                            step="0.01"
-                            name="bobot_layar"
-                            value="{% if bobot_role %}{{ bobot_role.layar|default:'0' }}{% endif %}"
-                            class="form-control">
-                    </div>
-                    <div class="form-group">
-                        <label>Baterai</label>
-                        <input
-                            id="bobotBaterai"
-                            type="number"
-                            step="0.01"
-                            name="bobot_baterai"
-                            value="{% if bobot_role %}{{ bobot_role.baterai|default:'0' }}{% endif %}"
-                            class="form-control">
-                    </div>
+                    <h3>Section C: Bobot Kriteria Teknologi</h3>
                 </div>
 
-            </div>
+                <div id="bobotTeknologiContainer">
 
+                    <div class="empty-state">
+                        <i class="fa-solid fa-circle-info"></i>
+                        Pilih proyek dan role terlebih dahulu
+                    </div>
+
+                </div>
+            </div> {% endcomment %}
 
             <!-- ================================= -->
             <!-- SUMMARY -->
@@ -718,6 +643,7 @@
             </div>
 
         </form>
+        {{ role_teknologi_data|json_script:"roleTeknologiData" }}
 
     </div>
 
@@ -727,11 +653,6 @@
 
 <script>
 
-const roleSelect =
-    document.getElementById("roleTeknologiSelect");
-
-const projectSelect =
-    document.getElementById("projectSelect");
 
 const projectRoleData =
     JSON.parse(
@@ -739,11 +660,146 @@ const projectRoleData =
             "project-role-data"
         ).textContent
     );
+console.log(projectRoleData);
 
 console.log(
     "PROJECT ROLE DATA",
     projectRoleData
 );
+
+const container =
+    document.getElementById(
+        "bobotTeknologiContainer"
+    );
+
+{% comment %} roleSelect.addEventListener(
+    "change",
+    renderBobotTeknologi
+); {% endcomment %}
+console.log(
+    "ROLE VALUE =",
+    roleSelect.value
+);
+
+function renderBobotTeknologi() {
+        if (!container) {
+        return;
+    }
+
+
+    const roleId =
+        roleSelect.value;
+
+    const teknologiList =
+        roleTeknologiData.filter(
+            item =>
+                item.id_role  == roleId
+        );
+
+    if (
+        teknologiList.length === 0
+    ) {
+
+        container.innerHTML = `
+            <div class="empty-state">
+                Tidak ada teknologi
+            </div>
+        `;
+
+        return;
+    }
+
+    let html = "";
+
+    teknologiList.forEach(
+        (item,index) => {
+
+            html += `
+            <div class="technology-card">
+
+                <h4>
+                    Teknologi ${index+1}
+                    :
+                    ${item.teknologi}
+                </h4>
+
+                <input
+                    type="hidden"
+                    name="id_role_teknologi[]"
+                    value="${item.id_role}"
+                >
+
+                <div class="grid-2-cols">
+
+                    <div class="form-group">
+                        <label>Processor</label>
+                        <input
+                            type="number"
+                            step="0.01"
+                            name="processor_${item.id_role}"
+                            value="${item.bobot.processor || 0}"
+                            class="form-control">
+                    </div>
+
+                    <div class="form-group">
+                        <label>RAM</label>
+                        <input
+                            type="number"
+                            step="0.01"
+                            name="ram_${item.id_role}"
+                            value="${item.bobot.ram || 0}"
+                            class="form-control">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Storage</label>
+                        <input
+                            type="number"
+                            step="0.01"
+                            name="storage_${item.id_role}"
+                            value="${item.bobot.storage || 0}"
+                            class="form-control">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Berat</label>
+                        <input
+                            type="number"
+                            step="0.01"
+                            name="berat_${item.id_role}"
+                            value="${item.bobot.berat || 0}"
+                            class="form-control">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Layar</label>
+                        <input
+                            type="number"
+                            step="0.01"
+                            name="layar_${item.id_role}"
+                            value="${item.bobot.layar || 0}"
+                            class="form-control">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Baterai</label>
+                        <input
+                            type="number"
+                            step="0.01"
+                            name="baterai_${item.id_role}"
+                            value="${item.bobot.baterai || 0}"
+                            class="form-control">
+                    </div>
+
+                </div>
+
+            </div>
+            `;
+        }
+    );
+
+    container.innerHTML = html;
+}
 
 function filterRoleByProject() {
 
@@ -751,7 +807,7 @@ function filterRoleByProject() {
         projectSelect.value;
 
     const currentSelectedRole =
-        "{{ selected_role_teknologi|default:'' }}";
+        "{{ selected_role|default:'' }}";
 
     roleSelect.innerHTML =
         '<option value="">Pilih Role</option>';
@@ -761,16 +817,10 @@ function filterRoleByProject() {
             item =>
                 item.id_proyek === projectId
         );
-
-    console.log(
-        "PROJECT:",
-        projectId
-    );
-
-    console.log(
-        "ROLES:",
-        roles
-    );
+    
+    console.log("PROJECT =", projectId);
+    console.log("ROLES FILTER =", roles);
+    console.log("ROLE SELECT =", roleSelect);
 
     roles.forEach(role => {
 
@@ -780,14 +830,14 @@ function filterRoleByProject() {
             );
 
         option.value =
-            role.id_role_teknologi;
+            role.id_role;
 
         option.textContent =
             role.nama;
 
-        if(
-            role.id_role_teknologi ===
-            currentSelectedRole
+        if (
+            role.id_role ===
+            "{{ selected_role_teknologi|default:'' }}"
         ){
             option.selected = true;
         }
@@ -814,7 +864,7 @@ function loadRoleData() {
     if(projectId && roleId){
 
         const url =
-            `${window.location.pathname}?id_proyek=${projectId}&id_role_teknologi=${roleId}&jenis=${jenis}`;
+            `${window.location.pathname}?id_proyek=${projectId}&id_role=${roleId}&jenis=${jenis}`;
 
         window.location.href =
             url;
@@ -862,110 +912,112 @@ document.addEventListener(
             : "",
 
         bobotProcessor:
-            document.getElementById(
-                "bobotProcessor"
-            ).value,
+            document.getElementById("bobotProcessor")?.value || "",
 
         bobotRam:
-            document.getElementById(
-                "bobotRam"
-            ).value,
+            document.getElementById("bobotRam")?.value || "",
 
         bobotStorage:
-            document.getElementById(
-                "bobotStorage"
-            ).value,
+            document.getElementById("bobotStorage")?.value || "",
 
         bobotBerat:
-            document.getElementById(
-                "bobotBerat"
-            ).value,
+            document.getElementById("bobotBerat")?.value || "",
 
         bobotLayar:
-            document.getElementById(
-                "bobotLayar"
-            ).value,
+            document.getElementById("bobotLayar")?.value || "",
 
         bobotBaterai:
-            document.getElementById(
-                "bobotBaterai"
-            ).value
+            document.getElementById("bobotBaterai")?.value || "",        
     };
+    const roleTeknologiData =JSON.parse(document.getElementById("roleTeknologiData").textContent);
+    const roleSelect = document.getElementById("roleSelect");
+    const projectSelect = document.getElementById("projectSelect");
+    
+    filterRoleByProject();
+
+    if (
+    document.getElementById(
+        "bobotTeknologiContainer"
+        )
+    ){
+        renderBobotTeknologi();
+    }
 
     const btnDefaultRole =
     document.getElementById(
         "btnDefaultRole"
     );
+if(btnDefaultRole){
+    btnDefaultRole.addEventListener(
+        "click",
+        function(){
 
-btnDefaultRole.addEventListener(
-    "click",
-    function(){
-
-        document.getElementById(
-            "minProcessor"
-        ).value =
-            defaultRoleData.minProcessor;
-
-        document.getElementById(
-            "minRam"
-        ).value =
-            defaultRoleData.minRam;
-
-        document.getElementById(
-            "minStorage"
-        ).value =
-            defaultRoleData.minStorage;
-
-        if(
             document.getElementById(
-                "minHarga"
-            )
-        ){
-            document.getElementById(
-                "minHarga"
+                "minProcessor"
             ).value =
-                defaultRoleData.minHarga;
+                defaultRoleData.minProcessor;
+
+            document.getElementById(
+                "minRam"
+            ).value =
+                defaultRoleData.minRam;
+
+            document.getElementById(
+                "minStorage"
+            ).value =
+                defaultRoleData.minStorage;
+
+            if(
+                document.getElementById(
+                    "minHarga"
+                )
+            ){
+                document.getElementById(
+                    "minHarga"
+                ).value =
+                    defaultRoleData.minHarga;
+            }
+
+            document.getElementById(
+                "bobotProcessor"
+            ).value =
+                defaultRoleData.bobotProcessor;
+
+            document.getElementById(
+                "bobotRam"
+            ).value =
+                defaultRoleData.bobotRam;
+
+            document.getElementById(
+                "bobotStorage"
+            ).value =
+                defaultRoleData.bobotStorage;
+
+            document.getElementById(
+                "bobotBerat"
+            ).value =
+                defaultRoleData.bobotBerat;
+
+            document.getElementById(
+                "bobotLayar"
+            ).value =
+                defaultRoleData.bobotLayar;
+
+            document.getElementById(
+                "bobotBaterai"
+            ).value =
+                defaultRoleData.bobotBaterai;
+
+            Swal.fire({
+                icon: "success",
+                title: "Berhasil",
+                text:
+                    "Konfigurasi dikembalikan ke default role"
+            });
+
         }
-
-        document.getElementById(
-            "bobotProcessor"
-        ).value =
-            defaultRoleData.bobotProcessor;
-
-        document.getElementById(
-            "bobotRam"
-        ).value =
-            defaultRoleData.bobotRam;
-
-        document.getElementById(
-            "bobotStorage"
-        ).value =
-            defaultRoleData.bobotStorage;
-
-        document.getElementById(
-            "bobotBerat"
-        ).value =
-            defaultRoleData.bobotBerat;
-
-        document.getElementById(
-            "bobotLayar"
-        ).value =
-            defaultRoleData.bobotLayar;
-
-        document.getElementById(
-            "bobotBaterai"
-        ).value =
-            defaultRoleData.bobotBaterai;
-
-        Swal.fire({
-            icon: "success",
-            title: "Berhasil",
-            text:
-                "Konfigurasi dikembalikan ke default role"
-        });
-
-    }
-);
+    );
+}
 
         const btnInventori =
             document.getElementById(
@@ -993,63 +1045,41 @@ btnDefaultRole.addEventListener(
             );
 
         function setInventori() {
-
-            jenisInput.value =
-                "inventori";
-
-            hargaContainer.style.display =
-                "none";
-
-            minHarga.disabled =
-                true;
-
-            minHarga.value =
-                "";
-
-            btnInventori.classList.remove(
-                "btn-secondary"
-            );
-
-            btnInventori.classList.add(
-                "btn-primary"
-            );
-
-            btnPengadaan.classList.remove(
-                "btn-primary"
-            );
-
-            btnPengadaan.classList.add(
-                "btn-secondary"
-            );
+        console.log("MODE INVENTORI");
+        jenisInput.value = "inventori";
+        if (hargaContainer) {
+            hargaContainer.style.display = "none";
         }
-
-        function setPengadaan() {
-
-            jenisInput.value =
-                "pengadaan";
-
-            hargaContainer.style.display =
-                "block";
-
-            minHarga.disabled =
-                false;
-
-            btnPengadaan.classList.remove(
-                "btn-secondary"
-            );
-
-            btnPengadaan.classList.add(
-                "btn-primary"
-            );
-
-            btnInventori.classList.remove(
-                "btn-primary"
-            );
-
-            btnInventori.classList.add(
-                "btn-secondary"
-            );
+        if (minHarga) {
+            minHarga.disabled = true;
+            minHarga.value = "";
         }
+        btnInventori.classList.remove("btn-secondary");
+        btnInventori.classList.add("btn-primary");
+        btnPengadaan.classList.remove("btn-primary");
+        btnPengadaan.classList.add("btn-secondary");
+    }
+
+
+    function setPengadaan() {
+        console.log("MODE PENGADAAN");
+        jenisInput.value = "pengadaan";
+        if (hargaContainer) {
+            hargaContainer.style.display = "block";
+        }
+        if (minHarga) {
+            minHarga.disabled = false;
+        }
+        btnPengadaan.classList.remove("btn-secondary");
+        btnPengadaan.classList.add("btn-primary");
+        btnInventori.classList.remove("btn-primary");
+        btnInventori.classList.add("btn-secondary");
+    }
+    console.log("btnInventori =", btnInventori);
+    console.log("btnPengadaan =", btnPengadaan);
+    console.log("jenisInput =", jenisInput);
+    console.log("hargaContainer =", hargaContainer);
+    console.log("minHarga =", minHarga);
 
         btnInventori.addEventListener(
             "click",

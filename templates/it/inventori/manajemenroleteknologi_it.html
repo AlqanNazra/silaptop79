@@ -547,6 +547,80 @@
             max-height: 250px;
             overflow-y: auto;
         }
+
+        .teknologi-modal-box{
+            width:700px;
+            max-width:95%;
+            background:#fff;
+            border-radius:16px;
+            overflow:hidden;
+            box-shadow:0 20px 60px rgba(0,0,0,.15);
+        }
+
+        .teknologi-modal-header{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            padding:20px;
+            border-bottom:1px solid #e5e7eb;
+        }
+
+        .btn-close-modal{
+            border:none;
+            background:none;
+            cursor:pointer;
+            font-size:20px;
+        }
+
+        .teknologi-list{
+            max-height:450px;
+            overflow-y:auto;
+            padding:20px;
+            display:grid;
+            grid-template-columns:
+                repeat(
+                    auto-fill,
+                    minmax(180px,1fr)
+                );
+            gap:12px;
+        }
+
+        .teknologi-option{
+            padding:14px;
+            border:1px solid #e2e8f0;
+            border-radius:12px;
+            cursor:pointer;
+            font-weight:600;
+            background:#f8fafc;
+            transition:.2s;
+        }
+
+        .teknologi-option:hover{
+            background:#2563eb;
+            color:white;
+            transform:translateY(-2px);
+        }
+
+        .tech-item{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            padding:12px 16px;
+            border:1px solid #e2e8f0;
+            border-radius:10px;
+            margin-bottom:10px;
+            background:#f8fafc;
+        }
+
+        .btn-remove-tech{
+            border:none;
+            background:#ef4444;
+            color:white;
+            width:32px;
+            height:32px;
+            border-radius:50%;
+            cursor:pointer;
+        }
     </style>
 </head>
 <body>
@@ -973,13 +1047,29 @@
                 <i class="fa-solid fa-microchip"></i>
                 Teknologi Pendukung
             </h4>
-
-            <div
-                class="tech-checkboxes"
-                id="edit_teknologi_container">
-
+            <div id="edit_teknologi_container"></div>
+            <div style="margin-top:15px;">
+                <button type="button" id="btnTambahTeknologi" class="modal-btn modal-btn-save">
+                    <i class="fa-solid fa-plus"></i>
+                    Tambah Teknologi
+                </button>
             </div>
-
+            <div id="teknologiModal" class="modal-overlay">
+                <div class="teknologi-modal-box">
+                    <div class="teknologi-modal-header">
+                            <h3>
+                                <i class="fa-solid fa-microchip"></i>
+                                Pilih Teknologi
+                            </h3>
+                            <button type="button" id="closeTeknologiModal" class="btn-close-modal">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+                        <input type="text" id="searchTeknologi" class="form-control" placeholder="Cari teknologi...">
+                        <div id="teknologiList" class="teknologi-list">   
+                    </div>
+                </div>
+            </div>
             <!-- Bobot -->
             <hr style="margin:20px 0;">
 
@@ -1011,6 +1101,17 @@
                     Belum ada hasil SWARA
                 </div>
             </div>
+            <div id="roleValidationError"
+                style="
+                    display:none;
+                    margin-top:10px;
+                    padding:12px;
+                    border-radius:8px;
+                    background:#fef2f2;
+                    color:#dc2626;
+                    border:1px solid #fecaca;
+                "
+            ></div>
             <div class="modal-actions">
                 <button
                     type="button"
@@ -1027,6 +1128,14 @@
         </form>
     </div>
 </div>
+
+{% comment %} <div id="edit_teknologi_container"> </div>
+<div style=" margin-top:15px;">
+    <button type="button" id="btnTambahTeknologi" class="modal-btn modal-btn-save">
+        <i class="fa-solid fa-plus"></i>
+        Tambah Teknologi
+    </button>
+</div> {% endcomment %}
 
 <!-- Modal: Edit Teknologi -->
 <div class="modal-overlay" id="editTeknologiModal">
@@ -1053,6 +1162,39 @@
 </div>
 
 <script>
+    document.getElementById("editRoleForm").addEventListener(
+            "submit",
+            function(e){
+
+                const teknologiList =
+                    document.querySelectorAll(
+                        '#edit_teknologi_container input[name="teknologi_ids[]"]'
+                    );
+
+                const errorBox =
+                    document.getElementById(
+                        "roleValidationError"
+                    );
+
+                if(
+                    teknologiList.length === 0
+                ){
+
+                    e.preventDefault();
+
+                    errorBox.style.display =
+                        "block";
+
+                    errorBox.innerHTML =
+                        '<i class="fa-solid fa-circle-exclamation"></i> Role harus memiliki minimal 1 teknologi.';
+
+                    return false;
+                }
+
+                errorBox.style.display =
+                    "none";
+            }
+        );
     // Tab switching logic
     function switchTab(tabName) {
         document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -1115,16 +1257,21 @@
 function openEditRoleModal(roleId){
 
     fetch(`/it/edit-role/${roleId}/`)
-
     .then(response => response.json())
-
     .then(data => {
 
         console.log(data);
+        window.allTeknologi =
+            data.all_teknologi || [];
+
+        console.log(
+            "ALL TEKNOLOGI",
+            window.allTeknologi
+        );
 
         // =====================
         // DATA ROLE
-        // =====================
+        // =====================     
 
         document.getElementById(
             'edit_nama_role'
@@ -1160,7 +1307,7 @@ function openEditRoleModal(roleId){
             'edit_teknologi_container'
         );
 
-        teknologiContainer.innerHTML = '';
+        {% comment %} teknologiContainer.innerHTML = '';
 
         data.teknologi.forEach(t => {
 
@@ -1177,7 +1324,188 @@ function openEditRoleModal(roleId){
 
                 </label>
             `;
-        });
+        }); {% endcomment %}
+
+        let html = '';
+
+        data.teknologi.forEach(
+            function(tech){
+
+                html += `
+                    <div
+                        class="tech-item"
+                        data-id="${tech.id_teknologi}"
+                    >
+
+                        <span>
+                            ${tech.nama_teknologi}
+                        </span>
+
+                        <button
+                            type="button"
+                            class="btn-remove-tech"
+                        >
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+
+                        <input
+                            type="hidden"
+                            name="teknologi_ids[]"
+                            value="${tech.id_teknologi}"
+                        >
+
+                    </div>
+                `;
+            }
+        );
+
+        document.getElementById(
+            "edit_teknologi_container"
+        ).innerHTML = html;
+        document
+        .getElementById("btnTambahTeknologi")
+        .addEventListener(
+            "click",
+            function(){
+                let html = '';
+
+                allTeknologi.forEach(function(t){
+                    html += `
+                        <div
+                            class="teknologi-option"
+                            data-id="${t.id_teknologi}"
+                            data-nama="${t.nama_teknologi}"
+                        >
+                            ${t.nama_teknologi}
+                        </div>
+                    `;
+                });
+                console.log(window.allTeknologi);
+                document.getElementById(
+                    "teknologiList"
+                ).innerHTML = html;
+                document
+                .querySelectorAll(".teknologi-option")
+                .forEach(function(item){
+
+                    item.addEventListener(
+                        "click",
+                        function(){
+
+                            const id =
+                                this.dataset.id;
+
+                            const nama =
+                                this.dataset.nama;
+
+                            // cek duplikat
+                            if(
+                                document.querySelector(
+                                    `.tech-item[data-id="${id}"]`
+                                )
+                            ){
+                                alert(
+                                    "Teknologi sudah ditambahkan"
+                                );
+                                return;
+                            }
+
+                            document
+                            .getElementById(
+                                "edit_teknologi_container"
+                            )
+                            .insertAdjacentHTML(
+                                "beforeend",
+                                `
+                                <div
+                                    class="tech-item"
+                                    data-id="${id}"
+                                >
+
+                                    <span>
+                                        ${nama}
+                                    </span>
+
+                                    <button
+                                        type="button"
+                                        class="btn-remove-tech"
+                                    >
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+
+                                    <input
+                                        type="hidden"
+                                        name="teknologi_ids[]"
+                                        value="${id}"
+                                    >
+
+                                </div>
+                                `
+                            );
+
+                            document.getElementById(
+                                "teknologiModal"
+                            ).style.display = "none";
+
+                        }
+                    );
+
+                });
+
+                document.getElementById(
+                    "teknologiModal"
+                ).style.display = "flex";
+
+            }
+        );
+
+        document.addEventListener(
+            "click",
+            function(e){
+
+                const btn =
+                    e.target.closest(
+                        ".btn-remove-tech"
+                    );
+
+                if(btn){
+
+                    btn.closest(
+                        ".tech-item"
+                    ).remove();
+
+                }
+
+            }
+        );
+        document
+        .getElementById(
+            "searchTeknologi"
+        )
+        .addEventListener(
+            "keyup",
+            function(){
+
+                const keyword =
+                    this.value.toLowerCase();
+
+                document
+                .querySelectorAll(
+                    ".teknologi-option"
+                )
+                .forEach(function(item){
+
+                    item.style.display =
+                        item.textContent
+                            .toLowerCase()
+                            .includes(keyword)
+                        ? "block"
+                        : "none";
+
+                });
+
+            }
+        );
 
         // =====================
         // BOBOT
@@ -1549,6 +1877,7 @@ function openEditRoleModal(roleId){
         });
 
     });
+
 
     // Close modals on overlay click
     document.querySelectorAll('.modal-overlay').forEach(overlay => {
