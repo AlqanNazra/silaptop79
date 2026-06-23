@@ -229,44 +229,46 @@ def pengajuanlaptop_it_view(request):
             p_loans = peminjaman_map.get(p.id_pengajuan, [])
             is_approved = p.status and p.status.lower() in ['disetujui', 'approved']
             
-            # Map status_it for frontend representation
+            # Jika ditolak, langsung hilang (tidak dimasukkan ke list manapun)
+            if p.status and p.status.lower() in ['ditolak', 'rejected']:
+                continue
+
+            # Calculate if urgent (due date <= 7 days)
             if p.status and p.status.lower() in ['menunggu', 'pending']:
-                p.status_it = 'configuring' # Configuring / Menunggu Antrean
-                total_siap_proses += 1
-                total_dikonfigurasi += 1
-                # Calculate if urgent (due date <= 7 days)
                 if p.bulan:
                     diff_days = (p.bulan - today).days
                     if diff_days <= 7:
                         total_mendesak += 1
-            elif is_approved:
-                if p_loans:
-                    latest_loan = sorted(p_loans, key=lambda l: l.tanggal_pinjam if l.tanggal_pinjam else "", reverse=True)[0]
-                    if latest_loan.status.lower() == 'selesai':
-                        p.status_it = 'selesai'
-                    elif latest_loan.status.lower() == 'dikembalikan':
-                        p.status_it = 'dikembalikan'
-                    else:
-                        p.status_it = 'dipinjam'
-                else:
-                    p.status_it = 'ready' # Siap Diambil
-                total_selesai += 1
-            else:
-                p.status_it = 'ditolak'
-                
+
             if not is_approved:
                 belum_disetujui_list.append(p)
+                p.status_it = 'configuring'
+                total_dikonfigurasi += 1
             else:
-                has_completed = any(l.status.lower() == 'selesai' for l in p_loans)
-                if has_completed:
-                    riwayat_selesai_list.append(p)
+                has_ready = (not p_loans) or any(l.status.lower() == 'ready' for l in p_loans)
+                if has_ready:
+                    # Jika belum diambil oleh talent, hold dulu di belum_disetujui_list dengan status 'ready'
+                    belum_disetujui_list.append(p)
+                    p.status_it = 'ready'
+                    total_siap_proses += 1
                 else:
-                    sedang_berlangsung_list.append(p)
+                    has_completed = any(l.status.lower() == 'selesai' for l in p_loans)
+                    if has_completed:
+                        riwayat_selesai_list.append(p)
+                        p.status_it = 'selesai'
+                        total_selesai += 1
+                    else:
+                        sedang_berlangsung_list.append(p)
+                        has_returned = any(l.status.lower() == 'dikembalikan' for l in p_loans)
+                        if has_returned:
+                            p.status_it = 'dikembalikan'
+                        else:
+                            p.status_it = 'dipinjam'
         
-        total_pengajuan = len(semua_pengajuan)
         total_belum_disetujui = len(belum_disetujui_list)
         total_sedang_berlangsung = len(sedang_berlangsung_list)
         total_riwayat_selesai = len(riwayat_selesai_list)
+        total_pengajuan = total_belum_disetujui + total_sedang_berlangsung + total_riwayat_selesai
 
         # Select target list based on active tab
         if active_tab == 'sedang_berlangsung':
@@ -357,6 +359,10 @@ def detailpengajuan_it_view(request):
 
         user_obj = User.objects.filter(id_user=pengajuan.id_user).first()
         pengajuan.user_nama = user_obj.nama if user_obj else pengajuan.id_user
+
+        from inventori.models import Proyek
+        proyek_obj = Proyek.objects.filter(id_proyek=pengajuan.id_proyek).first()
+        pengajuan.proyek_nama = proyek_obj.nama_proyek if proyek_obj else "-"
 
         if request.method == 'POST':
             action = request.POST.get('action')
@@ -786,11 +792,8 @@ def inputkriteria_hc_view(request):
             # print("\n=== HASIL SERVICE ===")
             # print(hasil)
             if hasil.get("status") != "success":
-                messages.error(
-                    request,
-                    hasil.get("message","Gagal menjalankan DSS")
-                )
-                return redirect("inputkriteria_it")
+                messages.error(request, hasil.get("message","Gagal menjalankan DSS"))
+                return redirect("inputkriteria_hc")
             request.session["ranking_sesuai"] = (
                 hasil["data"]
                 ["rekomendasi_sesuai_role"]
@@ -2038,35 +2041,175 @@ def notifikasi_it_view(request):
 def manajemenpengadaan_it_view(request):
     search_query = request.GET.get('q', '')
     
-    mock_pengadaan = [
-        {"id": 1, "name": "MacBook Pro M3 Max 14-inch", "brand": "Apple Inc."},
-        {"id": 2, "name": "ThinkPad X1 Carbon Gen 10", "brand": "Lenovo"},
-        {"id": 3, "name": "ASUS ROG Zephyrus G14", "brand": "ASUS"},
-    ]
-    
-    if search_query:
-        mock_pengadaan = [
-            item for item in mock_pengadaan
-            if search_query.lower() in item["name"].lower() or search_query.lower() in item["brand"].lower()
-        ]
+    conn = get_connection()
+    try:
+        repo = LaptopPengadaanRepository(conn)
+        raw_list = repo.ambil_laptop_pengadaan()
         
-    from django.core.paginator import Paginator
-    paginator = Paginator(mock_pengadaan, 5)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    
-    context = {
-        'pengadaan_list': page_obj,
-        'search_query': search_query,
-        'total': len(mock_pengadaan),
-    }
-    return render(request, 'it/inventori/manajemenpengadaan_it.html', context)
+        if search_query:
+            raw_list = [
+                item for item in raw_list
+                if (search_query.lower() in item.get("nama_laptop", "").lower() or 
+                    search_query.lower() in item.get("manufacturer", "").lower() or
+                    search_query.lower() in item.get("nama_processor", "").lower())
+            ]
+        
+        from django.core.paginator import Paginator
+        paginator = Paginator(raw_list, 5)
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+        
+        context = {
+            'pengadaan_list': page_obj,
+            'search_query': search_query,
+            'total': len(raw_list),
+        }
+        return render(request, 'it/inventori/manajemenpengadaan_it.html', context)
+    finally:
+        conn.close()
 
 def detailpengadaan_it_view(request):
-    return render(request, 'it/inventori/detailpengadaan_it.html')
+    laptop_id = request.GET.get('id')
+    if not laptop_id:
+        messages.error(request, 'ID laptop tidak ditemukan.')
+        return redirect('manajemen_pengadaan_it')
+        
+    conn = get_connection()
+    try:
+        repo = LaptopPengadaanRepository(conn)
+        
+        # Handle delete action
+        if request.method == 'POST' and request.POST.get('action') == 'hapus':
+            try:
+                repo.hapus_laptop_pengadaan(laptop_id)
+                messages.success(request, 'Data laptop pengadaan berhasil dihapus!')
+                return redirect('manajemen_pengadaan_it')
+            except Exception as e:
+                messages.error(request, f'Gagal menghapus laptop pengadaan: {str(e)}')
+                return redirect('manajemen_pengadaan_it')
+
+        laptop = repo.ambil_laptop_pengadaan_by_id(laptop_id)
+        if not laptop:
+            messages.error(request, 'Laptop pengadaan tidak ditemukan.')
+            return redirect('manajemen_pengadaan_it')
+            
+        laptop['harga_format'] = f"Rp. {laptop.get('harga', 0):,.0f}".replace(",", ".")
+        
+        context = {
+            'laptop': laptop
+        }
+        return render(request, 'it/inventori/detailpengadaan_it.html', context)
+    finally:
+        conn.close()
 
 def editpengadaan_it_view(request):
-    return render(request, 'it/inventori/editpengadaan_it.html')
+    laptop_id = request.GET.get('id')
+    if not laptop_id:
+        messages.error(request, 'ID laptop tidak ditemukan.')
+        return redirect('manajemen_pengadaan_it')
+        
+    conn = get_connection()
+    try:
+        repo = LaptopPengadaanRepository(conn)
+        laptop = repo.ambil_laptop_pengadaan_by_id(laptop_id)
+        if not laptop:
+            messages.error(request, 'Laptop pengadaan tidak ditemukan.')
+            return redirect('manajemen_pengadaan_it')
+            
+        if request.method == 'POST':
+            try:
+                nama_laptop = request.POST.get('nama_laptop')
+                harga = int(request.POST.get('harga', 0))
+                gpu = request.POST.get('gpu')
+                ukuran_layar = float(request.POST.get('ukuran_layar') or 0.0)
+                baterai = float(request.POST.get('baterai') or 0.0)
+                berat = float(request.POST.get('berat') or 0.0)
+                
+                id_processor = request.POST.get('id_processor') or None
+                id_ram = request.POST.get('id_ram') or None
+                id_storage = request.POST.get('id_storage') or None
+                
+                from dss.repositories.dto.dto_laptop_pengadaan import LaptopPengadaanDTO
+                dto = LaptopPengadaanDTO(
+                    id_laptop_pengadaan=laptop_id,
+                    nama_laptop=nama_laptop,
+                    harga=harga,
+                    gpu=gpu,
+                    ukuran_layar=ukuran_layar,
+                    baterai=baterai,
+                    berat=berat,
+                    id_processor=id_processor,
+                    id_ram=id_ram,
+                    id_storage=id_storage
+                )
+                repo.update_laptop_pengadaan(dto)
+                repo.update_spek_pengadaan(dto)
+                
+                messages.success(request, 'Data laptop pengadaan berhasil diperbarui!')
+                return redirect(f"/it/detail-pengadaan/?id={laptop_id}")
+            except Exception as e:
+                messages.error(request, f'Gagal memperbarui data: {str(e)}')
+                
+        processors = Processor.objects.all()
+        rams = RAM.objects.all()
+        storages = Storage.objects.all()
+        
+        context = {
+            'laptop': laptop,
+            'processors': processors,
+            'rams': rams,
+            'storages': storages,
+        }
+        return render(request, 'it/inventori/editpengadaan_it.html', context)
+    finally:
+        conn.close()
+
+def tambahpengadaan_it_view(request):
+    if request.method == 'POST':
+        conn = get_connection()
+        try:
+            repo = LaptopPengadaanRepository(conn)
+            nama_laptop = request.POST.get('nama_laptop')
+            harga = int(request.POST.get('harga', 0))
+            gpu = request.POST.get('gpu')
+            ukuran_layar = float(request.POST.get('ukuran_layar') or 0.0)
+            baterai = float(request.POST.get('baterai') or 0.0)
+            berat = float(request.POST.get('berat') or 0.0)
+            
+            id_processor = request.POST.get('id_processor') or None
+            id_ram = request.POST.get('id_ram') or None
+            id_storage = request.POST.get('id_storage') or None
+            
+            from dss.repositories.dto.dto_laptop_pengadaan import LaptopPengadaanDTO
+            dto = LaptopPengadaanDTO(
+                nama_laptop=nama_laptop,
+                harga=harga,
+                gpu=gpu,
+                ukuran_layar=ukuran_layar,
+                baterai=baterai,
+                berat=berat,
+                id_processor=id_processor,
+                id_ram=id_ram,
+                id_storage=id_storage
+            )
+            repo.tambah_laptop_pengadaan(dto)
+            messages.success(request, 'Laptop pengadaan berhasil ditambahkan!')
+            return redirect('manajemen_pengadaan_it')
+        except Exception as e:
+            messages.error(request, f'Gagal menambahkan laptop pengadaan: {str(e)}')
+        finally:
+            conn.close()
+            
+    processors = Processor.objects.all()
+    rams = RAM.objects.all()
+    storages = Storage.objects.all()
+    
+    context = {
+        'processors': processors,
+        'rams': rams,
+        'storages': storages,
+    }
+    return render(request, 'it/inventori/tambahpengadaan_it.html', context)
 
 # ==========================================
 # 3. TALENT VIEWS
@@ -2144,13 +2287,27 @@ def pengajuanlaptop_talent_view(request):
                 if hasattr(request.user, 'id_user')
                 else None
             )
-        if request.method == 'POST':
 
+        from inventori.models import User, Proyek, ProjectRole, Role
+        user_obj = None
+        if user_id:
+            try:
+                user_obj = User.objects.get(id_user=user_id)
+            except User.DoesNotExist:
+                pass
+        
+        user_departemen = user_obj.departemen if user_obj else 'Non IT'
+
+        if request.method == 'POST':
             from datetime import datetime
 
-            departemen = request.POST.get('departemen') or 'Internal'
-            role = request.POST.get('role') or 'Unknown'
-            spesifikasi = request.POST.get('spesifikasi') or '-'
+            departemen = user_departemen
+            if user_departemen == 'IT':
+                role = request.POST.get('role') or 'Unknown'
+                spesifikasi = request.POST.get('spesifikasi') or '-'
+            else:
+                role = 'Non-IT'
+                spesifikasi = '-'
             alasan = request.POST.get('alasan') or '-'
 
             # Validate double booking (maksimal 1 laptop aktif dipinjam)
@@ -2165,6 +2322,7 @@ def pengajuanlaptop_talent_view(request):
                 messages.error(request, 'Gagal mengajukan: Anda masih meminjam laptop aktif.')
                 return redirect('pengajuanlaptop_talent')
 
+            proyek_id = request.POST.get('proyek') or None
             dto = PengajuanDTO(
                 id_user=user_id,
                 kebutuhan_role=role,
@@ -2172,7 +2330,8 @@ def pengajuanlaptop_talent_view(request):
                 bulan=datetime.now().date(),
                 keterangan=alasan,
                 perusahaan=departemen,
-                status='menunggu'
+                status='menunggu',
+                id_proyek=proyek_id
             )
 
             service.service_tambah_pengajuan(dto)
@@ -2216,11 +2375,29 @@ def pengajuanlaptop_talent_view(request):
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
 
+        projects = Proyek.objects.all()
+        project_roles_map = {}
+        for pr in ProjectRole.objects.select_related('proyek', 'role'):
+            proj_id = pr.proyek.id_proyek
+            if proj_id not in project_roles_map:
+                project_roles_map[proj_id] = []
+            project_roles_map[proj_id].append({
+                'id_role': pr.role.id_role,
+                'nama_role': pr.role.nama_role,
+            })
+
+        from datetime import datetime
+        today_str = datetime.now().strftime('%Y-%m-%d')
+
         context = {
             'list_pengajuan': page_obj,
             'total_pengajuan': len(semua_pengajuan),
             'search_query': search_query,
             'status_filter': status_filter,
+            'user_departemen': user_departemen,
+            'projects': projects,
+            'project_roles_map': project_roles_map,
+            'today_str': today_str,
         }
 
         return render(
@@ -2480,50 +2657,18 @@ def login_redirect_view(request):
         return redirect('login')
     role = getattr(request.user, 'role', '').upper()
     if role == 'HC':
-        return redirect('dashboardhc')
+        return redirect('dashboard_hc')
     elif role == 'IT':
         return redirect('dashboard_it')
     elif role in ('TALENT', 'EMPLOYEE'):
         return redirect('dashboard_talent')
-    return redirect('dashboardhc')
+    return redirect('dashboard_hc')
 
 def home_view(request):
     return login_redirect_view(request)
 
 
-# Procurement management views for IT (Added to fix NoReverseMatch)
-def manajemenpengadaan_it_view(request):
-    search_query = request.GET.get('q', '')
-    
-    mock_pengadaan = [
-        {"id": 1, "name": "MacBook Pro M3 Max 14-inch", "brand": "Apple Inc."},
-        {"id": 2, "name": "ThinkPad X1 Carbon Gen 10", "brand": "Lenovo"},
-        {"id": 3, "name": "ASUS ROG Zephyrus G14", "brand": "ASUS"},
-    ]
-    
-    if search_query:
-        mock_pengadaan = [
-            item for item in mock_pengadaan
-            if search_query.lower() in item["name"].lower() or search_query.lower() in item["brand"].lower()
-        ]
-        
-    from django.core.paginator import Paginator
-    paginator = Paginator(mock_pengadaan, 5)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    
-    context = {
-        'pengadaan_list': page_obj,
-        'search_query': search_query,
-        'total': len(mock_pengadaan),
-    }
-    return render(request, 'it/inventori/manajemenpengadaan_it.html', context)
 
-def detailpengadaan_it_view(request):
-    return render(request, 'it/inventori/detailpengadaan_it.html')
-
-def editpengadaan_it_view(request):
-    return render(request, 'it/inventori/editpengadaan_it.html')
 
 def setujui_pengajuan_it_view(request):
     from inventori.models import LaptopInventori
@@ -3302,10 +3447,11 @@ def tambahuser_hc_view(request):
         nama                = request.POST.get('nama', '').strip()
         email               = request.POST.get('email', '').strip() or None
         role                = request.POST.get('role', '').strip()
+        departemen          = request.POST.get('departemen', 'Non IT').strip()
         password            = request.POST.get('password', '')
         konfirmasi_password = request.POST.get('konfirmasi_password', '')
 
-        form_data = {'nama': nama, 'email': email, 'role': role}
+        form_data = {'nama': nama, 'email': email, 'role': role, 'departemen': departemen}
 
         if not nama or not role or not password:
             messages.error(request, 'Nama, role, dan password wajib diisi.')
@@ -3330,6 +3476,7 @@ def tambahuser_hc_view(request):
                 nama=nama,
                 email=email,
                 role=role,
+                departemen=departemen,
                 password=password,
             )
             messages.success(request, f'Pengguna "{nama}" ({role}) berhasil ditambahkan dengan ID {new_id}.')
@@ -3342,15 +3489,16 @@ def tambahuser_hc_view(request):
 
 
 def edit_user_hc_view(request):
-    """Edit data pengguna (nama, email, role, password)."""
+    """Edit data pengguna (nama, email, role, departemen, password)."""
     from inventori.models import User
 
     if request.method == 'POST':
-        id_user  = request.POST.get('id_user', '').strip()
-        nama     = request.POST.get('nama', '').strip()
-        email    = request.POST.get('email', '').strip() or None
-        role     = request.POST.get('role', '').strip()
-        password = request.POST.get('password', '')
+        id_user    = request.POST.get('id_user', '').strip()
+        nama       = request.POST.get('nama', '').strip()
+        email      = request.POST.get('email', '').strip() or None
+        role       = request.POST.get('role', '').strip()
+        departemen = request.POST.get('departemen', 'Non IT').strip()
+        password   = request.POST.get('password', '')
 
         if not id_user or not nama or not role:
             messages.error(request, 'Data tidak lengkap.')
@@ -3361,6 +3509,7 @@ def edit_user_hc_view(request):
             user.nama = nama
             user.email = email
             user.role = role
+            user.departemen = departemen
             if password:
                 if len(password) < 8:
                     messages.error(request, 'Password baru minimal 8 karakter.')

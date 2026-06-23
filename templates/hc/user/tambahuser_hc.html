@@ -461,7 +461,7 @@
             <div class="page-header-row">
                 <div>
                     <div class="breadcrumb">
-                        <a href="{% url 'dashboardhc' %}">Dashboard</a>
+                        <a href="{% url 'dashboard_hc' %}">Dashboard</a>
                         <span style="color:#CBD5E1">›</span>
                         <a href="{% url 'manajemenuser_hc' %}">Manajemen User</a>
                         <span style="color:#CBD5E1">›</span>
@@ -557,7 +557,7 @@
                                         <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                                     </svg>
                                 </span>
-                                <select id="role" name="role" required>
+                                <select id="role" name="role" required onchange="toggleDeptField()">
                                     <option value="" disabled {% if not form_data.role %}selected{% endif %}>
                                         -- Pilih Role --
                                     </option>
@@ -570,6 +570,28 @@
                                     <option value="Talent" {% if form_data.role == 'Talent' %}selected{% endif %}>
                                         Talent
                                     </option>
+                                </select>
+                                <span class="select-arrow">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="6 9 12 15 18 9" />
+                                    </svg>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="form-group" id="deptGroup" style="display: none;">
+                            <label for="departemen">Departemen <span class="req">*</span></label>
+                            <div class="field-wrap">
+                                <span class="field-icon">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                                    </svg>
+                                </span>
+                                <select id="departemen" name="departemen">
+                                    <option value="IT" {% if form_data.departemen == 'IT' %}selected{% endif %}>IT</option>
+                                    <option value="Non IT" {% if form_data.departemen == 'Non IT' or not form_data.departemen %}selected{% endif %}>Non IT</option>
                                 </select>
                                 <span class="select-arrow">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -659,6 +681,17 @@
     </div><!-- /wrapper -->
 
     <script>
+        function toggleDeptField() {
+            const roleSelect = document.getElementById('role');
+            const deptGroup = document.getElementById('deptGroup');
+            if (roleSelect.value === 'Talent') {
+                deptGroup.style.display = 'block';
+            } else {
+                deptGroup.style.display = 'none';
+            }
+        }
+        window.addEventListener('DOMContentLoaded', toggleDeptField);
+
         function togglePw(id, btn) {
             const inp = document.getElementById(id);
             const show = inp.type === 'password';

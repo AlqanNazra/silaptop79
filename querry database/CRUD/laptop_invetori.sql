@@ -27,9 +27,9 @@ BEGIN
         kondisi,
         status,
         lokasi,
-        processor_id, 
-        ram_id,
-        storage_id,
+        id_processor, 
+        id_ram,
+        id_storage,
         ukuran_layar,
         baterai -- Tambahkan kolom target
     )
@@ -116,7 +116,7 @@ RETURNS TABLE (
 )
 AS $$
 BEGIN
-RETURN QUERY
+Return QUERY
 SELECT
     li.id_laptop_inventori,
     li.no_inventori,
@@ -128,7 +128,7 @@ SELECT
     li.lokasi,
 
     li.ukuran_layar,
-    li.baterai,
+    NULL::FLOAT AS baterai,
 
     pro.nama_processor,
     pro.manufacturer,
@@ -226,20 +226,20 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION update_kondisi_inventori (f_id_laptop_inventori VARCHAR(100), f_kondisi VARCHAR(100))
-RETURNs TEXT AS $$
+RETURNS TEXT AS $$
 BEGIN
     UPDATE inventori_laptopinventori
-    set kondisi = f_kondisi
+    SET kondisi = f_kondisi
     WHERE id_laptop_inventori = f_id_laptop_inventori;
     RETURN 'Kondisi berhasil diupdate!';
 END;
 $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION update_status_inventori (f_id_laptop_inventori VARCHAR(100), f_status VARCHAR(100), f_lokasi VARCHAR(100) DEFAULT NULL)
-RETURNs TEXT AS $$
+RETURNS TEXT AS $$
 BEGIN
     UPDATE inventori_laptopinventori
-    set status = f_status, lokasi = f_lokasi
+    SET status = f_status, lokasi = f_lokasi
     WHERE id_laptop_inventori = f_id_laptop_inventori;
     RETURN 'status berhasil diupdate!';
 END;
@@ -259,9 +259,9 @@ RETURNS TEXT AS $$
 BEGIN
     UPDATE inventori_laptopinventori
     SET 
-        processor_id = f_id_processor,
-        ram_id = f_id_ram,
-        storage_id = f_id_storage
+        id_processor = f_id_processor,
+        id_ram = f_id_ram,
+        id_storage = f_id_storage
     WHERE id_laptop_inventori = f_id_laptop_inventori;
 
     RETURN 'Spesifikasi berhasil diupdate!';

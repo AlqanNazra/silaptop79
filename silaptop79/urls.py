@@ -41,6 +41,7 @@ from core.views import (
     manajemenpengadaan_it_view,
     detailpengadaan_it_view,
     editpengadaan_it_view,
+    tambahpengadaan_it_view,
     setujui_pengajuan_it_view,
     tambah_komponen_it_view,
     manajemenproyek_it_view,
@@ -95,8 +96,8 @@ urlpatterns = [
     # ==========================================
     # HUMAN CAPITAL (HC) ROUTES
     # ==========================================
-    path('hc/', dashboard_hc_view, name='dashboardhc'),
-    path('hc/manajemen-laptop/', manajemenlaptop_hc_view, name='manajemen_laptop'),
+    path('hc/', dashboard_hc_view, name='dashboard_hc'),
+    path('hc/manajemen-laptop/', manajemenlaptop_hc_view, name='manajemen_laptop_hc'),
     path('hc/pengajuan-laptop/', pengajuanlaptop_hc_view, name='pengajuanlaptop_hc'),
     path('hc/detail-pengajuan/', detailpengajuan_hc_view, name='detailpengajuan_hc'),
     path('hc/setujui-pengajuan/', setujui_pengajuan_hc_view, name='setujui_pengajuan_hc'),
@@ -138,6 +139,7 @@ urlpatterns = [
     path('it/manajemen-pengadaan/', manajemenpengadaan_it_view, name='manajemen_pengadaan_it'),
     path('it/detail-pengadaan/', detailpengadaan_it_view, name='detailpengadaan_it'),
     path('it/edit-pengadaan/', editpengadaan_it_view, name='editpengadaan_it'),
+    path('it/tambah-pengadaan/', tambahpengadaan_it_view, name='tambah_pengadaan_it'),
     path('it/setujui-pengajuan/', setujui_pengajuan_it_view, name='setujui_pengajuan_it'),
     path('it/manajemen-proyek/', manajemenproyek_it_view, name='manajemen_proyek_it'),
     path('it/tambah-proyek/', tambahproyek_it_view, name='tambahproyek_it'),
@@ -159,12 +161,6 @@ urlpatterns = [
     path('talent/detail-rekomendasi/', detailrekomendasi_talent_view, name='detailrekomendasi_talent'),
     path('talent/detail-scrapping/', detailrekomendasiscrapping_talent_view, name='detailrekomendasiscrapping_talent'),
     path('', home_view, name='home'),
-    path('dashboardhc/', dashboard_hc_view, name='dashboardhc'), # Ini Dashboard baru
-    path('pengajuanlaptop_hc/', pengajuanlaptop_hc_view, name='pengajuanlaptop_hc'),
-    path('tambahlaptop_hc/', tambahlaptop_hc_view, name='tambahlaptop_hc'),
-    path('inputkriteria_hc/', inputkriteria_hc_view, name='inputkriteria_hc'),
-    path('hasilrekomendasi_hc/', hasilrekomendasi_hc_view, name='hasilrekomendasi_hc'),
-    path("laptop/", laptop_dashboard, name="laptop_dashboard"),
     path(
     'it/manajemen-role-teknologi/',
     manajemen_role_teknologi_it_view,

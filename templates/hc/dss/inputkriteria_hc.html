@@ -372,7 +372,7 @@
 <body>
     <div class="dashboard-wrapper">
         <!-- Load Sidebar -> highlight "Input Kriteria" -->
-        {% include 'it/components/sidebar.html' with active_page='input_kriteria' %}
+        {% include 'hc/components/sidebar.html' with active_page='input_kriteria' %}
     <div class="main-dashboard-content">
         <h1 class="page-title">Konfigurasi Parameter SAW</h1>
         <p class="page-subtitle">
@@ -652,34 +652,21 @@
 {{ project_role_mapping|json_script:"project-role-data" }}
 
 <script>
-
-
 const projectRoleData =
     JSON.parse(
         document.getElementById(
             "project-role-data"
         ).textContent
     );
-console.log(projectRoleData);
-
-console.log(
-    "PROJECT ROLE DATA",
-    projectRoleData
-);
-
-const container =
-    document.getElementById(
-        "bobotTeknologiContainer"
+const roleTeknologiData =
+    JSON.parse(
+        document.getElementById(
+            "roleTeknologiData"
+        ).textContent || "[]"
     );
-
-{% comment %} roleSelect.addEventListener(
-    "change",
-    renderBobotTeknologi
-); {% endcomment %}
-console.log(
-    "ROLE VALUE =",
-    roleSelect.value
-);
+const projectSelect = document.getElementById("projectSelect");
+const roleSelect = document.getElementById("roleSelect");
+const container = document.getElementById("bobotTeknologiContainer");
 
 function renderBobotTeknologi() {
         if (!container) {
@@ -929,10 +916,6 @@ document.addEventListener(
         bobotBaterai:
             document.getElementById("bobotBaterai")?.value || "",        
     };
-    const roleTeknologiData =JSON.parse(document.getElementById("roleTeknologiData").textContent);
-    const roleSelect = document.getElementById("roleSelect");
-    const projectSelect = document.getElementById("projectSelect");
-    
     filterRoleByProject();
 
     if (

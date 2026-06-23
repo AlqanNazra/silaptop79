@@ -20,12 +20,13 @@ class BobotKriteria(models.Model):
     id_bobot = models.CharField(primary_key=True, max_length=100)
     id_kriteria = models.ForeignKey(
         Kriteria,
-        db_column="kriteria_id",
+        db_column="id_kriteria",
         on_delete=models.CASCADE
     )
 
     role = models.CharField(
-        max_length=100
+        max_length=100,
+        db_column='id_role_teknologi'
     )
 
     nilai_bobot = models.FloatField()
@@ -34,8 +35,8 @@ class BobotKriteria(models.Model):
 class DSSProses(models.Model):
     id_dss = models.CharField(primary_key=True, max_length=100)
 
-    id_user = models.ForeignKey(User, on_delete=models.CASCADE, db_column='user_id')
-    id_bobot = models.ForeignKey(BobotKriteria, on_delete=models.CASCADE, db_column='bobot_id')
+    id_user = models.ForeignKey(User, on_delete=models.CASCADE, db_column='id_user')
+    id_bobot = models.ForeignKey(BobotKriteria, on_delete=models.CASCADE, db_column='id_bobot')
 
     role_dss = models.CharField(max_length=100)
     jenis_dss = models.CharField(max_length=100)
@@ -101,7 +102,7 @@ class LaptopPengadaan(models.Model):
 
     id_processor = models.ForeignKey(
         'inventori.Processor',
-        db_column='processor_id',
+        db_column='id_processor',
         on_delete=models.SET_NULL,
         null=True,
         blank=True
@@ -109,7 +110,7 @@ class LaptopPengadaan(models.Model):
 
     id_ram = models.ForeignKey(
         'inventori.RAM',
-        db_column='ram_id',
+        db_column='id_ram',
         on_delete=models.SET_NULL,
         null=True,
         blank=True
@@ -117,7 +118,7 @@ class LaptopPengadaan(models.Model):
 
     id_storage = models.ForeignKey(
         'inventori.Storage',
-        db_column='storage_id',
+        db_column='id_storage',
         on_delete=models.SET_NULL,
         null=True,
         blank=True

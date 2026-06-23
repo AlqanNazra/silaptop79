@@ -105,6 +105,15 @@ class Servicesaw:
                 f"Role {id_role} tidak ditemukan"
             )
 
+        if isinstance(role, dict):
+            return {
+                "id_role": role.get("id_role"),
+                "nama_role": role.get("nama_role"),
+                "min_ram": role.get("min_ram"),
+                "min_storage": role.get("min_storage"),
+                "min_processor_score": role.get("min_processor_score")
+            }
+
         return {
             "id_role": role[0],
             "nama_role": role[1],

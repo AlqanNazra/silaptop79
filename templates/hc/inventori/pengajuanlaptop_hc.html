@@ -635,8 +635,8 @@
                                     <span class="status-badge menunggu" style="background-color: #FEF3C7; color: #B45309; border: 1px solid #FDE68A;">Dikembalikan</span>
                                     {% elif pengajuan.status_display == 'selesai' %}
                                     <span class="status-badge disetujui" style="background-color: #D1FAE5; color: #065F46; border: 1px solid #A7F3D0;">Selesai</span>
-                                    {% elif pengajuan.status_display == 'ready' %}
-                                    <span class="status-badge menunggu" style="background-color: #FFF7ED; color: #C2410C; border: 1px solid #FDBA74;">Siap Diambil</span>
+                                    {% elif pengajuan.status_display == 'ready' or pengajuan.status_display == 'belum diambil' %}
+                                    <span class="status-badge menunggu" style="background-color: #FFF7ED; color: #C2410C; border: 1px solid #FDBA74;">Belum Diambil</span>
                                     {% elif pengajuan.status_display == 'ditolak' or pengajuan.status|lower == 'ditolak' or pengajuan.status|lower == 'rejected' %}
                                     <span class="status-badge ditolak">Ditolak</span>
                                     {% else %}

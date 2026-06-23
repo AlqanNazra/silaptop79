@@ -211,7 +211,7 @@
         <div class="top-nav">
             <h1 class="page-title">Edit Data Laptop</h1>
             <div class="header-actions">
-                <a href="{% url 'inventori:detaillaptop_hc' laptop.id_laptop_inventori %}" class="btn-cancel-text">Batal</a>
+                <a href="{% url 'detaillaptop_hc' laptop.id_laptop_inventori %}" class="btn-cancel-text">Batal</a>
                 <button type="submit" form="editForm" class="btn-submit-pill">Simpan Perubahan</button>
             </div>
         </div>
@@ -230,7 +230,7 @@
         </div>
         {% endif %}
 
-        <form id="editForm" method="POST" action="{% url 'inventori:editdatalaptop_hc' laptop.id_laptop_inventori %}">
+        <form id="editForm" method="POST" action="{% url 'editdatalaptop_hc' laptop.id_laptop_inventori %}">
             {% csrf_token %}
             <div class="edit-grid">
 

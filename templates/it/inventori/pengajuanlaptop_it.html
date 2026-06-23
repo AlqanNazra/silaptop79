@@ -10,6 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
     <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1.1">
 
@@ -285,6 +286,24 @@
             background-color: #EA580C;
         }
 
+        .status-badge.ditolak {
+            background-color: #FEF2F2;
+            color: #B91C1C;
+        }
+
+        .status-badge.ditolak::before {
+            background-color: #EF4444;
+        }
+
+        /* Date column */
+        .date-col {
+            display: flex;
+            flex-direction: column;
+            color: #475569;
+            font-size: 13px;
+            gap: 4px;
+        }
+
         .btn-detail {
             display: inline-block;
             padding: 7px 18px;
@@ -378,24 +397,6 @@
                 </div>
             </div>
 
-            <!-- Search and Filter Form -->
-            <div style="margin-bottom: 24px;">
-                <form method="GET" action="" style="display: flex; gap: 12px; width: 100%;">
-                    <input type="hidden" name="tab" value="{{ active_tab }}">
-                    <input type="text" name="q" placeholder="Cari pemohon atau spesifikasi..." value="{{ search_query }}" style="flex: 1; padding: 12px 16px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px;">
-                    <select name="status" style="padding: 12px 16px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background: white;">
-                        <option value="">Semua Status IT</option>
-                        <option value="menunggu" {% if status_filter == 'menunggu' %}selected{% endif %}>Menunggu</option>
-                        <option value="disetujui" {% if status_filter == 'disetujui' %}selected{% endif %}>Disetujui</option>
-                        <option value="ditolak" {% if status_filter == 'ditolak' %}selected{% endif %}>Ditolak</option>
-                    </select>
-                    <button type="submit" style="background-color: #0b57c6; color: white; padding: 12px 24px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">Cari</button>
-                    <a href="?tab={{ active_tab }}" style="padding: 12px 24px; background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; border-radius: 8px; text-decoration: none; font-size: 14px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 6px; font-family: 'Inter', sans-serif;">
-                        <i class="fa-solid fa-rotate-left"></i> Reset
-                    </a>
-                </form>
-            </div>
-
             <div class="table-card">
                 <!-- Sub-tab Headers -->
                 <div class="tabs-container" style="display: flex; gap: 8px; border-bottom: 1px solid #e2e8f0; padding: 12px 24px 0; background: #f8fafc; border-top-left-radius: 12px; border-top-right-radius: 12px;">
@@ -416,8 +417,26 @@
                     </a>
                 </div>
 
-                <div class="table-header">
-                    <h2>Daftar Unit Perlu Disiapkan</h2>
+                <div class="table-header" style="display:flex; flex-direction:column; gap:16px; align-items:stretch; padding: 24px 24px 16px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <h2 style="margin:0;">Daftar Unit Perlu Disiapkan</h2>
+                    </div>
+                    <form id="filter-form" method="GET" action="" style="display:flex; gap:12px; align-items:center; flex-wrap:wrap; width:100%;">
+                        <input type="hidden" name="tab" value="{{ active_tab }}">
+                        <div style="position: relative; flex: 1; min-width: 260px;">
+                            <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 14px;"></i>
+                            <input type="text" id="search-input" name="q" value="{{ search_query|default:'' }}" placeholder="Cari pemohon atau spesifikasi..." style="width: 100%; padding: 10px 16px 10px 40px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: 'Inter', sans-serif; box-sizing: border-box;">
+                        </div>
+                        <select name="status" id="status-select" style="padding: 10px 16px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: 'Inter', sans-serif; background: white; color: #475569; font-weight: 500; cursor: pointer;">
+                            <option value="">Semua Status IT</option>
+                            <option value="menunggu" {% if status_filter == 'menunggu' %}selected{% endif %}>Menunggu</option>
+                            <option value="disetujui" {% if status_filter == 'disetujui' %}selected{% endif %}>Disetujui</option>
+                            <option value="ditolak" {% if status_filter == 'ditolak' %}selected{% endif %}>Ditolak</option>
+                        </select>
+                        <a href="?tab={{ active_tab }}" style="padding:10px 20px; background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; border-radius:8px; text-decoration:none; font-size:14px; font-weight:600; font-family:'Inter',sans-serif; display: flex; align-items: center; gap: 6px;">
+                            <i class="fa-solid fa-rotate-left"></i> Reset
+                        </a>
+                    </form>
                 </div>
 
                 <div class="table-responsive" style="width: 100%; overflow-x: auto;">
@@ -427,6 +446,7 @@
                                 <th style="width: 50px; text-align: center;">NO</th>
                                 <th>NAMA PEMOHON</th>
                                 <th>DEPARTEMEN</th>
+                                <th>TANGGAL</th>
                                 <th>STATUS IT</th>
                                 <th style="text-align: center;">AKSI IT</th>
                             </tr>
@@ -447,20 +467,30 @@
                                 </td>
                                 <td style="color: #475569;">{{ pengajuan.kebutuhan_role|default:"-" }}</td>
                                 <td>
+                                    <div class="date-col">
+                                        {% if pengajuan.tanggal_pengajuan %}
+                                        <span>{{ pengajuan.tanggal_pengajuan|date:"d M" }}</span>
+                                        <span>{{ pengajuan.tanggal_pengajuan|date:"Y" }}</span>
+                                        {% else %}
+                                        <span>-</span>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td>
                                     {% if pengajuan.status_it == 'ready' %}
-                                    <span class="status-badge ready">Siap Diambil</span>
+                                    <span class="status-badge menunggu" style="background-color: #FFF7ED; color: #C2410C; border: 1px solid #FDBA74;">Siap Diambil</span>
                                     {% elif pengajuan.status_it == 'configuring' %}
-                                    <span class="status-badge menunggu">Konfigurasi</span>
+                                    <span class="status-badge menunggu" style="background-color: #EFF6FF; color: #1D4ED8; border: 1px solid #BFDBFE;">Konfigurasi</span>
                                     {% elif pengajuan.status_it == 'dipinjam' %}
-                                    <span class="status-badge ready" style="background-color: #DBEAFE; color: #1E40AF; border-color: #BFDBFE;">Dipinjam</span>
+                                    <span class="status-badge disetujui" style="background-color: #DBEAFE; color: #1E40AF; border: 1px solid #BFDBFE;">Dipinjam</span>
                                     {% elif pengajuan.status_it == 'dikembalikan' %}
-                                    <span class="status-badge menunggu" style="background-color: #FEF3C7; color: #B45309; border-color: #FDE68A;">Dikembalikan</span>
+                                    <span class="status-badge menunggu" style="background-color: #FEF3C7; color: #B45309; border: 1px solid #FDE68A;">Dikembalikan</span>
                                     {% elif pengajuan.status_it == 'selesai' %}
-                                    <span class="status-badge ready" style="background-color: #D1FAE5; color: #065F46; border-color: #A7F3D0;">Selesai</span>
+                                    <span class="status-badge disetujui" style="background-color: #D1FAE5; color: #065F46; border: 1px solid #A7F3D0;">Selesai</span>
                                     {% elif pengajuan.status_it == 'ditolak' %}
-                                    <span class="status-badge ditolak">Ditolak</span>
+                                    <span class="status-badge ditolak" style="background-color: #FEF2F2; color: #B91C1C; border: 1px solid #FCA5A5;">Ditolak</span>
                                     {% else %}
-                                    <span class="status-badge disetujui">Menunggu Antrean</span>
+                                    <span class="status-badge menunggu" style="background-color: #F1F5F9; color: #475569; border: 1px solid #CBD5E1;">Menunggu Antrean</span>
                                     {% endif %}
                                 </td>
                                 <td align="center">
@@ -471,7 +501,7 @@
                             {% endfor %}
                             {% else %}
                             <tr>
-                                <td colspan="5" style="text-align: center; padding: 32px; color: #64748B;">
+                                <td colspan="6" style="text-align: center; padding: 32px; color: #64748B;">
                                     Belum ada antrean pengerjaan laptop untuk IT.
                                 </td>
                             </tr>
@@ -510,6 +540,37 @@
             </div>
         </div>
     </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const filterForm = document.getElementById("filter-form");
+            const searchInput = document.getElementById("search-input");
+            const statusSelect = document.getElementById("status-select");
+            let debounceTimer;
+
+            if (statusSelect) {
+                statusSelect.addEventListener("change", function() {
+                    filterForm.submit();
+                });
+            }
+
+            if (searchInput) {
+                searchInput.addEventListener("input", function() {
+                    clearTimeout(debounceTimer);
+                    debounceTimer = setTimeout(function() {
+                        filterForm.submit();
+                    }, 500);
+                });
+
+                // Maintain focus and cursor position at the end of input after reload
+                if (searchInput.value.length > 0) {
+                    const val = searchInput.value;
+                    searchInput.value = '';
+                    searchInput.focus();
+                    searchInput.value = val;
+                }
+            }
+        });
+    </script>
 </body>
 
 </html>

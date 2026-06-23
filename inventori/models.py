@@ -7,6 +7,7 @@ class User(models.Model):
     email = models.EmailField(unique=True, null=True, blank=True)
     password = models.CharField(max_length=255)
     role = models.CharField(max_length=50)
+    departemen = models.CharField(max_length=100, default='Non IT')
 
     def __str__(self):
         return self.nama
@@ -105,6 +106,13 @@ class Pengajuan(models.Model):
     status = models.CharField(max_length=20, default='menunggu')
     tanggal_pengajuan = models.DateTimeField(auto_now_add=True)
     tanggal_approval = models.DateTimeField(null=True, blank=True)
+    id_proyek = models.ForeignKey(
+        'Proyek',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        db_column='id_proyek'
+    )
 
     approved_by = models.ForeignKey(
         User,

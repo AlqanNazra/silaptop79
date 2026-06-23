@@ -128,30 +128,37 @@ def pengajuan_page_view(request):
             p_loans = peminjaman_map.get(p.id_pengajuan, [])
             is_approved = p.status and p.status.lower() in ['disetujui', 'approved']
             
+            # Jika ditolak, langsung hilang (tidak dimasukkan ke list manapun)
+            if p.status and p.status.lower() in ['ditolak', 'rejected']:
+                continue
+
             if not is_approved:
                 belum_disetujui_list.append(p)
-                p.status_display = 'menunggu' if p.status.lower() in ['menunggu', 'pending'] else 'ditolak'
+                p.status_display = 'menunggu'
             else:
-                has_completed = any(l.status.lower() == 'selesai' for l in p_loans)
-                if has_completed:
-                    riwayat_selesai_list.append(p)
-                    p.status_display = 'selesai'
+                has_ready = any(l.status.lower() == 'ready' for l in p_loans)
+                if has_ready:
+                    # Jika belum diambil oleh talent, hold dulu di belum_disetujui_list dengan status 'belum diambil'
+                    belum_disetujui_list.append(p)
+                    p.status_display = 'belum diambil'
                 else:
-                    sedang_berlangsung_list.append(p)
-                    has_returned = any(l.status.lower() == 'dikembalikan' for l in p_loans)
-                    has_ready = any(l.status.lower() == 'ready' for l in p_loans)
-                    if has_returned:
-                        p.status_display = 'dikembalikan'
-                    elif has_ready:
-                        p.status_display = 'ready'
+                    has_completed = any(l.status.lower() == 'selesai' for l in p_loans)
+                    if has_completed:
+                        riwayat_selesai_list.append(p)
+                        p.status_display = 'selesai'
                     else:
-                        p.status_display = 'dipinjam'
+                        sedang_berlangsung_list.append(p)
+                        has_returned = any(l.status.lower() == 'dikembalikan' for l in p_loans)
+                        if has_returned:
+                            p.status_display = 'dikembalikan'
+                        else:
+                            p.status_display = 'dipinjam'
 
         # Count statistics for each tab/category
-        total = len(semua_pengajuan)
         total_belum_disetujui = len(belum_disetujui_list)
         total_sedang_berlangsung = len(sedang_berlangsung_list)
         total_riwayat_selesai = len(riwayat_selesai_list)
+        total = total_belum_disetujui + total_sedang_berlangsung + total_riwayat_selesai
 
         # Select target list based on active tab
         if active_tab == 'sedang_berlangsung':
@@ -256,7 +263,7 @@ def tambah_laptop_page(request):
             service = CreateLaptopInventoriService()
             service.execute(dto)
             messages.success(request, 'Laptop berhasil ditambahkan ke inventori!')
-            return redirect('inventori:manajemen_laptop')
+            return redirect('manajemen_laptop_hc')
         except Exception as e:
             messages.error(request, f'Gagal menambahkan laptop: {str(e)}')
 
@@ -298,7 +305,7 @@ def detail_laptop_page(request, id_laptop):
                 service = DeleteLaptopInventoriService()
                 service.execute(id_laptop)
                 messages.success(request, f'Laptop {laptop.nama_laptop} berhasil dihapus.')
-                return redirect('inventori:manajemen_laptop')
+                return redirect('manajemen_laptop_hc')
             except Exception as e:
                 messages.error(request, f'Gagal menghapus: {str(e)}')
 
@@ -315,7 +322,7 @@ def detail_laptop_page(request, id_laptop):
                     update_service.update_status(id_laptop, status, lokasi)
 
                 messages.success(request, 'Data laptop berhasil diperbarui.')
-                return redirect('inventori:detaillaptop_hc', id_laptop=id_laptop)
+                return redirect('detaillaptop_hc', id_laptop=id_laptop)
             except Exception as e:
                 messages.error(request, f'Gagal update: {str(e)}')
 
@@ -332,7 +339,7 @@ def detailpengajuan_hc_view(request):
     id_pengajuan = request.GET.get('id')
     if not id_pengajuan:
         messages.error(request, 'ID Pengajuan tidak diberikan.')
-        return redirect('inventori:pengajuanlaptop_hc')
+        return redirect('pengajuanlaptop_hc')
 
     try:
         service = PengajuanService()
@@ -340,11 +347,14 @@ def detailpengajuan_hc_view(request):
         
         if not pengajuan:
             messages.error(request, 'Data pengajuan tidak ditemukan.')
-            return redirect('inventori:pengajuanlaptop_hc')
+            return redirect('pengajuanlaptop_hc')
 
-        from inventori.models import User
+        from inventori.models import User, Proyek
         user_obj = User.objects.filter(id_user=pengajuan.id_user).first()
         pengajuan.user_nama = user_obj.nama if user_obj else pengajuan.id_user
+
+        proyek_obj = Proyek.objects.filter(id_proyek=pengajuan.id_proyek).first()
+        pengajuan.proyek_nama = proyek_obj.nama_proyek if proyek_obj else "-"
 
         if request.method == 'POST':
             action = request.POST.get('action')
@@ -363,7 +373,7 @@ def detailpengajuan_hc_view(request):
                 )
                 service.service_approve_pengajuan(dto)
                 messages.success(request, f'Pengajuan berhasil di-{action}.')
-                return redirect('inventori:pengajuanlaptop_hc')
+                return redirect('pengajuanlaptop_hc')
 
         context = {
             'pengajuan': pengajuan
@@ -372,7 +382,7 @@ def detailpengajuan_hc_view(request):
         
     except Exception as e:
         messages.error(request, f'Terjadi kesalahan: {str(e)}')
-        return redirect('inventori:pengajuanlaptop_hc')
+        return redirect('pengajuanlaptop_hc')
 
 
 # @login_required
@@ -386,7 +396,7 @@ def setujui_pengajuan_hc_view(request):
     pengajuan_id = request.GET.get('id')
     if not pengajuan_id:
         messages.error(request, 'ID Pengajuan tidak diberikan.')
-        return redirect('inventori:pengajuanlaptop_hc')
+        return redirect('pengajuanlaptop_hc')
 
     if request.method == 'POST':
         laptop_id = request.POST.get('laptop_id')
@@ -399,7 +409,7 @@ def setujui_pengajuan_hc_view(request):
             pengajuan = service.service_cari_pengajuan_by_id(pengajuan_id)
             if not pengajuan:
                 messages.error(request, 'Pengajuan tidak ditemukan.')
-                return redirect('inventori:pengajuanlaptop_hc')
+                return redirect('pengajuanlaptop_hc')
 
             # Buat DTO Pengajuan
             user_id = request.user.id_user if (hasattr(request.user, 'id_user') and request.user.id_user) else 'USR-001'
@@ -444,7 +454,7 @@ def setujui_pengajuan_hc_view(request):
                 peminjaman.save()
 
             messages.success(request, 'Pengajuan berhasil disetujui dan laptop siap diambil oleh Talent.')
-            return redirect('inventori:pengajuanlaptop_hc')
+            return redirect('pengajuanlaptop_hc')
         except Exception as e:
             messages.error(request, f'Gagal menyetujui pengajuan: {str(e)}')
             return redirect(f"{request.path}?id={pengajuan_id}")
@@ -590,7 +600,7 @@ def riwayatpeminjamanlaptop_hc_view(request):
     except Exception as e:
         import traceback; traceback.print_exc()
         messages.error(request, f'Gagal memuat riwayat: {str(e)}')
-        return redirect('inventori:manajemen_laptop')
+        return redirect('manajemen_laptop_hc')
 
 # @login_required
 def editdatalaptop_hc_view(request, id_laptop):
@@ -598,7 +608,7 @@ def editdatalaptop_hc_view(request, id_laptop):
         laptop = LaptopInventori.objects.get(id_laptop_inventori=id_laptop)
     except LaptopInventori.DoesNotExist:
         messages.error(request, 'Laptop tidak ditemukan.')
-        return redirect('inventori:manajemen_laptop')
+        return redirect('manajemen_laptop_hc')
 
     if request.method == 'POST':
         try:
@@ -636,7 +646,7 @@ def editdatalaptop_hc_view(request, id_laptop):
                 update_service.update_spek(dto)
 
             messages.success(request, 'Data laptop berhasil diperbarui.')
-            return redirect('inventori:detaillaptop_hc', id_laptop=id_laptop)
+            return redirect('detaillaptop_hc', id_laptop=id_laptop)
         except Exception as e:
             messages.error(request, f'Gagal mengupdate laptop: {str(e)}')
 
@@ -802,10 +812,11 @@ def tambah_pengajuan_view(request):
                 kebutuhan_requirement=body.get("kebutuhan_requirement"),
                 bulan=body.get("bulan"),
                 keterangan=body.get("keterangan"),
-                perusahaan=body.get("perusahaan")
+                perusahaan=body.get("perusahaan"),
+                id_proyek=body.get("id_proyek")
             )
             service = PengajuanService()
-            result = service.tambah_pengajuan(dto)
+            result = service.service_tambah_pengajuan(dto)
             return JsonResponse({"message": result})
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)
@@ -816,7 +827,7 @@ def list_pengajuan_view(request):
     if request.method == "GET":
         try:
             service = PengajuanService()
-            data = service.ambil_semua()
+            data = service.service_ambil_semua_pengajuan()
             return JsonResponse({"data": [d.__dict__ for d in data]})
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)
@@ -988,7 +999,7 @@ def laptop_dashboard(request):
         row["model"] = row.get("model") or "-"
         row["no_inventori"] = row.get("no_inventori") or "-"
 
-    return render(request, "dashboard/laptop_dashboard.html", {
+    return render(request, "hc/dashboard/laptop_dashboard.html", {
         "laptops": data_list
     })
 

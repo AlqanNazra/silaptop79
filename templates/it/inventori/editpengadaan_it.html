@@ -208,11 +208,14 @@
     {% include 'it/components/sidebar.html' with active_page='kelola_pengadaan' %}
 
     <div class="main-content">
+        <!-- Flash Messages -->
+        {% include 'components/messages_popup.html' %}
+
         <div class="top-nav">
             <h1 class="page-title">Edit Data Pengadaan</h1>
             <div class="header-actions">
-                <a href="{% url 'detailpengadaan_it' %}" class="btn-cancel-text">Batal</a>
-                <a href="{% url 'detailpengadaan_it' %}" class="btn-submit-pill">Simpan Perubahan</a>
+                <a href="{% url 'detailpengadaan_it' %}?id={{ laptop.id_laptop_pengadaan }}" class="btn-cancel-text">Batal</a>
+                <button type="submit" form="editForm" class="btn-submit-pill" style="border: none;">Simpan Perubahan</button>
             </div>
         </div>
 
@@ -228,16 +231,22 @@
                     <div class="row-group-2">
                         <div class="form-group">
                             <label>Laptop Name</label>
-                            <input type="text" name="nama_laptop" value="MacBook Pro M3 Max 14-inch">
+                            <input type="text" name="nama_laptop" value="{{ laptop.nama_laptop }}" required>
                         </div>
                         <div class="form-group">
-                            <label>Brand</label>
-                            <input type="text" name="brand" value="Apple Inc.">
+                            <label>GPU (Graphics Card)</label>
+                            <input type="text" name="gpu" value="{{ laptop.gpu|default:"" }}">
                         </div>
                     </div>
-                    <div class="form-group" style="width: calc(50% - 12px);">
-                        <label>Serial Number</label>
-                        <input type="text" name="serial_number" value="FVFG61KCQ6L2">
+                    <div class="row-group-2">
+                        <div class="form-group">
+                            <label>ID Pengadaan (Tidak Dapat Diubah)</label>
+                            <input type="text" value="{{ laptop.id_laptop_pengadaan }}" disabled style="background-color: #e2e8f0; color: #64748b;">
+                        </div>
+                        <div class="form-group">
+                            <label>Supplier / Brand</label>
+                            <input type="text" value="{{ laptop.manufacturer|default:"-" }}" disabled style="background-color: #e2e8f0; color: #64748b;">
+                        </div>
                     </div>
                 </div>
 
@@ -249,34 +258,45 @@
                     <div class="row-group-2">
                         <div class="form-group">
                             <label>Processor</label>
-                            <select name="processor">
-                                <option selected>Apple M3 Max (14-core CPU)</option>
-                                <option>Intel Core i7-13700H</option>
-                                <option>AMD Ryzen 7 7840HS</option>
+                            <select name="id_processor" required>
+                                <option value="" disabled>Pilih Processor</option>
+                                {% for proc in processors %}
+                                <option value="{{ proc.id_processor }}" {% if laptop.nama_processor == proc.nama_processor %}selected{% endif %}>{{ proc.nama_processor }} ({{ proc.manufacturer }})</option>
+                                {% endfor %}
                             </select>
                         </div>
                         <div class="form-group">
-                            <label>RAM (GB)</label>
-                            <input type="text" name="ram" value="32">
+                            <label>RAM</label>
+                            <select name="id_ram" required>
+                                <option value="" disabled>Pilih RAM</option>
+                                {% for ram in rams %}
+                                <option value="{{ ram.id_ram }}" {% if laptop.ram_kapasitas == ram.kapasitas_gb %}selected{% endif %}>{{ ram.kapasitas_gb }} GB {{ ram.tipe }}</option>
+                                {% endfor %}
+                            </select>
                         </div>
                     </div>
                     <div class="row-group-3">
                         <div class="form-group">
                             <label>Storage</label>
-                            <input type="text" name="storage" value="1TB SSD">
+                            <select name="id_storage" required>
+                                <option value="" disabled>Pilih Storage</option>
+                                {% for st in storages %}
+                                <option value="{{ st.id_storage }}" {% if laptop.storage_kapasitas == st.kapasitas_gb %}selected{% endif %}>{{ st.kapasitas_gb }} GB {{ st.tipe }}</option>
+                                {% endfor %}
+                            </select>
                         </div>
                         <div class="form-group">
                             <label>Battery (MAH)</label>
-                            <input type="text" name="battery" value="7200">
+                            <input type="number" name="baterai" value="{{ laptop.baterai|floatformat:"0" }}" step="any" required>
                         </div>
                         <div class="form-group">
                             <label>Weight (KG)</label>
-                            <input type="text" name="weight" value="1.6">
+                            <input type="number" name="berat" value="{{ laptop.berat }}" step="any" required>
                         </div>
                     </div>
                     <div class="form-group" style="width: calc(33.33% - 16px);">
-                        <label>Screen Size</label>
-                        <input type="text" name="screen_size" value="14.2-inch Liquid Retina">
+                        <label>Screen Size (Inch)</label>
+                        <input type="number" name="ukuran_layar" value="{{ laptop.ukuran_layar }}" step="any" required>
                     </div>
                 </div>
 
@@ -286,8 +306,8 @@
                         <span class="title-accent-red"></span>Harga
                     </div>
                     <div class="form-group">
-                        <label>Harga</label>
-                        <input type="text" name="harga" value="Rp. 15.000.000">
+                        <label>Harga (Rupiah)</label>
+                        <input type="number" name="harga" value="{{ laptop.harga }}" required>
                     </div>
                 </div>
 

@@ -339,30 +339,39 @@
                 {% csrf_token %}
                 <div class="form-card">
 
-                <!-- Departemen & Role -->
+                <!-- Departemen & Proyek & Role -->
                 <div class="form-row">
                     <div class="form-group">
                         <label for="departemen">Departemen</label>
-                        <select id="departemen" name="departemen" required>
-                            <option value="" disabled selected>Pilih Departemen</option>
-                            <option value="it">IT</option>
-                            <option value="hr">Human Resources</option>
-                            <option value="finance">Finance</option>
-                            <option value="marketing">Marketing</option>
-                            <option value="ops">Operations</option>
+                        <select id="departemen" name="departemen" disabled style="background-color: #f1f5f9; color: #64748b; cursor: not-allowed;">
+                            <option value="IT" {% if user_departemen == 'IT' %}selected{% endif %}>IT</option>
+                            <option value="Non IT" {% if user_departemen == 'Non IT' %}selected{% endif %}>Non IT</option>
                         </select>
                     </div>
+
+                    {% if user_departemen == 'IT' %}
+                    <div class="form-group">
+                        <label for="proyek">Proyek</label>
+                        <select id="proyek" name="proyek" required onchange="updateRoles()">
+                            <option value="" disabled selected>Pilih Proyek</option>
+                            {% for p in projects %}
+                            <option value="{{ p.id_proyek }}">{{ p.nama_proyek }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% endif %}
+                </div>
+
+                {% if user_departemen == 'IT' %}
+                <div class="form-row">
                     <div class="form-group">
                         <label for="role">Role</label>
                         <select id="role" name="role" required>
-                            <option value="" disabled selected>Pilih Role</option>
-                            <option value="developer">Developer</option>
-                            <option value="designer">Designer</option>
-                            <option value="analyst">Analyst</option>
-                            <option value="manager">Manager</option>
+                            <option value="" disabled selected>Pilih Role (Pilih Proyek terlebih dahulu)</option>
                         </select>
                     </div>
                 </div>
+                {% endif %}
 
                 <hr class="form-divider">
 
@@ -377,39 +386,20 @@
 
                 <hr class="form-divider">
 
+                {% if user_departemen == 'IT' %}
                 <!-- Spesifikasi -->
                 <div class="form-group" style="margin-bottom: 28px;">
                     <label for="spesifikasi">Spesifikasi yang dibutuhkan</label>
                     <textarea id="spesifikasi" name="spesifikasi"
-                        placeholder="Contoh: RAM 16GB, SSD 512GB, Intel i7 atau MacBook M2..."></textarea>
+                        placeholder="Contoh: RAM 16GB, SSD 512GB, Intel i7 atau MacBook M2..." required></textarea>
                 </div>
+                {% endif %}
 
                 <!-- Alasan -->
                 <div class="form-group" style="margin-bottom: 28px;">
                     <label for="alasan">Alasan Pengajuan</label>
                     <textarea id="alasan" name="alasan"
-                        placeholder="Jelaskan urgensi atau alasan kebutuhan perangkat..."></textarea>
-                </div>
-
-                <hr class="form-divider">
-
-                <!-- Urgensi -->
-                <div class="form-group">
-                    <label>Urgensi</label>
-                    <div class="urgensi-group">
-                        <div class="urgensi-card active" onclick="setUrgensi(this, false)">
-                            <div class="urgensi-title">Standar</div>
-                            <div class="urgensi-sub">7 Hari Kerja</div>
-                        </div>
-                        <div class="urgensi-card" onclick="setUrgensi(this, false)">
-                            <div class="urgensi-title">Tinggi</div>
-                            <div class="urgensi-sub">48 Jam</div>
-                        </div>
-                        <div class="urgensi-card" onclick="setUrgensi(this, true)">
-                            <div class="urgensi-title">Kritis</div>
-                            <div class="urgensi-sub">Segera</div>
-                        </div>
-                    </div>
+                        placeholder="Jelaskan urgensi atau alasan kebutuhan perangkat..." required></textarea>
                 </div>
 
 
@@ -425,21 +415,33 @@
         </div><!-- End Main Content -->
     </div><!-- End Wrapper -->
 
+    {{ project_roles_map|json_script:"project-roles-data" }}
+
     <script>
+        function updateRoles() {
+            const projSelect = document.getElementById('proyek');
+            const roleSelect = document.getElementById('role');
+            if (!projSelect || !roleSelect) return;
+            
+            const selectedProj = projSelect.value;
+            const projectRolesMap = JSON.parse(document.getElementById('project-roles-data').textContent);
+            
+            // Clear current options
+            roleSelect.innerHTML = '<option value="" disabled selected>Pilih Role</option>';
+            
+            if (selectedProj && projectRolesMap[selectedProj]) {
+                projectRolesMap[selectedProj].forEach(item => {
+                    const opt = document.createElement('option');
+                    opt.value = item.nama_role;
+                    opt.textContent = item.nama_role;
+                    roleSelect.appendChild(opt);
+                });
+            }
+        }
+
         function setJenis(el) {
             document.querySelectorAll('.jenis-btn').forEach(b => b.classList.remove('active'));
             el.classList.add('active');
-        }
-
-        function setUrgensi(el, isKritis) {
-            document.querySelectorAll('.urgensi-card').forEach(c => {
-                c.classList.remove('active', 'active-red');
-            });
-            if (isKritis) {
-                el.classList.add('active-red');
-            } else {
-                el.classList.add('active');
-            }
         }
     </script>
 </body>

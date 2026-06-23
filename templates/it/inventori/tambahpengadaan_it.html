@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tambah Laptop Baru - SiLaptop79</title>
+    <title>Tambah Laptop Pengadaan Baru - SiLaptop79</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -128,6 +128,10 @@
             grid-template-columns: 1fr;
         }
 
+        .form-row.three {
+            grid-template-columns: 1fr 1fr 1fr;
+        }
+
         .form-row:last-child {
             margin-bottom: 0;
         }
@@ -235,7 +239,7 @@
 <body>
 
     <div class="dashboard-wrapper">
-        {% include 'hc/components/sidebar.html' with active_page='manajemen_laptop' %}
+        {% include 'it/components/sidebar.html' with active_page='kelola_pengadaan' %}
 
         <div class="main-dashboard-content">
 
@@ -253,11 +257,10 @@
             </div>
             {% endif %}
 
-            <h1 class="page-title">Tambah Laptop Baru</h1>
-            <p class="page-subtitle">Silakan lengkapi formulir di bawah ini untuk menambahkan aset perangkat keras baru
-                ke dalam sistem inventaris digital Prism Logic.</p>
+            <h1 class="page-title">Tambah Laptop Pengadaan Baru</h1>
+            <p class="page-subtitle">Silakan lengkapi formulir di bawah ini untuk menambahkan katalog laptop baru (untuk data pengadaan/DSS).</p>
 
-            <form action="{% url 'tambahlaptop_hc' %}" method="POST" enctype="multipart/form-data">
+            <form action="{% url 'tambah_pengadaan_it' %}" method="POST">
                 {% csrf_token %}
 
                 <!-- General Information -->
@@ -269,29 +272,16 @@
                         <h3 class="section-title">General Information</h3>
                     </div>
                     <div class="section-body">
-                        <div class="form-row full">
+                        <div class="form-row">
                             <div class="form-group">
                                 <label>Laptop Name</label>
                                 <input type="text" class="form-control" name="nama_laptop" required
                                     placeholder="Contoh: MacBook Pro 14 M3 Max">
                             </div>
-                        </div>
-                        <div class="form-row">
                             <div class="form-group">
-                                <label>Brand/Model</label>
-                                <select class="form-control" name="model" required>
-                                    <option value="" disabled selected>Pilih Brand/Model</option>
-                                    <option value="Apple">Apple</option>
-                                    <option value="Lenovo">Lenovo</option>
-                                    <option value="Dell">Dell</option>
-                                    <option value="HP">HP</option>
-                                    <option value="Asus">Asus</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>Operating System (OS)</label>
-                                <input type="text" class="form-control" name="os" required
-                                    placeholder="Contoh: macOS Sequoia / Windows 11">
+                                <label>GPU (Graphics Card)</label>
+                                <input type="text" class="form-control" name="gpu" required
+                                    placeholder="Contoh: Apple M3 Max GPU / NVIDIA RTX 4060">
                             </div>
                         </div>
                     </div>
@@ -330,7 +320,7 @@
                             <div class="form-group">
                                 <label>Storage</label>
                                 <select class="form-control" name="id_storage" required>
-                                    <option value="" disabled selected>Pilih Kapasitas</option>
+                                    <option value="" disabled selected>Pilih Storage</option>
                                     {% for storage in storages %}
                                     <option value="{{ storage.id_storage }}">{{ storage.kapasitas_gb }} GB {{ storage.tipe }}</option>
                                     {% endfor %}
@@ -338,46 +328,38 @@
                             </div>
                             <div class="form-group">
                                 <label>Screen Size (Inch)</label>
-                                <input type="text" class="form-control" name="ukuran_layar"
+                                <input type="number" step="any" class="form-control" name="ukuran_layar" required
                                     placeholder="Misal: 14">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Battery Capacity (mAh)</label>
+                                <input type="number" step="any" class="form-control" name="baterai" required
+                                    placeholder="Misal: 7200">
+                            </div>
+                            <div class="form-group">
+                                <label>Weight (Kg)</label>
+                                <input type="number" step="any" class="form-control" name="berat" required
+                                    placeholder="Misal: 1.6">
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Administrative -->
+                <!-- Price -->
                 <div class="section-card red">
                     <div class="section-header">
                         <div class="section-icon icon-red">
-                            <i class="fa-solid fa-shield-halved"></i>
+                            <i class="fa-solid fa-tags"></i>
                         </div>
-                        <h3 class="section-title">Administrative</h3>
+                        <h3 class="section-title">Harga</h3>
                     </div>
                     <div class="section-body">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Lokasi</label>
-                                <input type="text" class="form-control" name="lokasi" required
-                                    placeholder="Contoh: Kantor Pusat Lt. 3 / Remote">
-                            </div>
-                            <div class="form-group">
-                                <label>Kondisi</label>
-                                <select class="form-control" name="kondisi" required>
-                                    <option value="baik" selected>Baik</option>
-                                    <option value="rusak_ringan">Rusak Ringan</option>
-                                    <option value="rusak_berat">Rusak Berat</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Initial Status</label>
-                                <select class="form-control" name="status" required>
-                                    <option value="tersedia" selected>Tersedia (Available)</option>
-                                    <option value="dipinjam">Dipinjam</option>
-                                    <option value="rusak">Rusak</option>
-                                </select>
-                            </div>
+                        <div class="form-group">
+                            <label>Harga (Rupiah)</label>
+                            <input type="number" class="form-control" name="harga" required
+                                placeholder="Misal: 15000000">
                         </div>
                     </div>
                 </div>
@@ -385,9 +367,9 @@
                 <!-- Action Buttons -->
                 <div class="form-actions">
                     <button type="submit" class="btn-submit">
-                        <i class="fa-solid fa-lock"></i> Simpan Data
+                        <i class="fa-solid fa-save"></i> Simpan Data Pengadaan
                     </button>
-                    <a href="{% url 'manajemen_laptop_hc' %}" class="btn-cancel">
+                    <a href="{% url 'manajemen_pengadaan_it' %}" class="btn-cancel">
                         <i class="fa-solid fa-xmark"></i> Batal
                     </a>
                 </div>
@@ -400,5 +382,3 @@
 </body>
 
 </html>
-
-#uibaru

@@ -27,7 +27,6 @@ CREATE OR REPLACE FUNCTION tambah_pengajuan (
     f_bulan DATE,
     f_keterangan TEXT,
     f_perusahaan TEXT,
-    f_tanggal_deadline TIMESTAMP,
     f_id_proyek VARCHAR
 )
 RETURNS VOID AS $$
@@ -36,13 +35,13 @@ BEGIN
         id_pengajuan,id_user,
         kebutuhan_role,kebutuhan_requirement,bulan,
         keterangan,perusahaan,status,
-        tanggal_pengajuan,tanggal_deadline,id_proyek
+        tanggal_pengajuan,id_proyek
     )
     VALUES (
         f_generate_id('PNJ','inventori_pengajuan','id_pengajuan'),
         f_id_user,f_kebutuhan_role,f_kebutuhan_requirement,
         f_bulan,f_keterangan,f_perusahaan,
-        'pending',CURRENT_TIMESTAMP,f_tanggal_deadline,f_id_proyek
+        'pending',CURRENT_TIMESTAMP,f_id_proyek
     );
 END;
 $$ LANGUAGE plpgsql;
@@ -51,8 +50,8 @@ CREATE OR REPLACE FUNCTION ambil_semua_pengajuan()
 RETURNS TABLE (
     id_pengajuan VARCHAR,id_user VARCHAR,kebutuhan_role VARCHAR,
     kebutuhan_requirement TEXT,bulan DATE,keterangan TEXT,
-    perusahaan TEXT,status VARCHAR,tanggal_pengajuan TIMESTAMP,
-    tanggal_deadline TIMESTAMP,tanggal_approval TIMESTAMP,approved_by VARCHAR,
+    perusahaan TEXT,status VARCHAR,tanggal_pengajuan TIMESTAMPTZ,
+    tanggal_approval TIMESTAMPTZ,approved_by VARCHAR,
     id_proyek VARCHAR
 )
 AS $$
@@ -68,9 +67,8 @@ BEGIN
         p.perusahaan,
         p.status,
         p.tanggal_pengajuan,
-        p.tanggal_deadline,
         p.tanggal_approval,
-        p.approved_by,
+        p.id_approved_by,
         p.id_proyek
     FROM inventori_pengajuan p
     ORDER BY p.tanggal_pengajuan DESC;
@@ -89,9 +87,8 @@ RETURNS TABLE (
     keterangan TEXT,
     perusahaan TEXT,
     status VARCHAR,
-    tanggal_pengajuan TIMESTAMP,
-    tanggal_deadline TIMESTAMP,
-    tanggal_approval TIMESTAMP,
+    tanggal_pengajuan TIMESTAMPTZ,
+    tanggal_approval TIMESTAMPTZ,
     approved_by VARCHAR,
     id_proyek VARCHAR
 )
@@ -108,9 +105,8 @@ BEGIN
         p.perusahaan,
         p.status,
         p.tanggal_pengajuan,
-        p.tanggal_deadline,
         p.tanggal_approval,
-        p.approved_by,
+        p.id_approved_by,
         p.id_proyek
     FROM inventori_pengajuan p
     WHERE p.id_pengajuan = f_id_pengajuan;
@@ -140,7 +136,7 @@ BEGIN
     SET
         status = f_status,
         tanggal_approval = CURRENT_TIMESTAMP,
-        approved_by = f_approved_by
+        id_approved_by = f_approved_by
     WHERE id_pengajuan = f_id_pengajuan;
     IF NOT FOUND THEN
         RAISE EXCEPTION
