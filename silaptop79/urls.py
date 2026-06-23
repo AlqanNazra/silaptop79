@@ -65,6 +65,7 @@ from core.views import (
     # Home View
     home_view,
     login_redirect_view,
+    logout_view,
     profile_view,
 )
 from inventori.views import (
@@ -87,7 +88,7 @@ urlpatterns = [
     
     # Authentication (login sementara dinonaktifkan)
     path('login/', auth_views.LoginView.as_view(template_name='auth/login.html'), name='login'),
-    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+    path('logout/', logout_view, name='logout'),
     path('login-redirect/', login_redirect_view, name='login_redirect'),
 
     # Landing Page (Directly to HC Dashboard as requested)

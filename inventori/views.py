@@ -77,7 +77,7 @@ def manajemen_laptop_page(request):
     laptops = laptops.order_by('id_laptop_inventori')
 
     from django.core.paginator import Paginator
-    paginator = Paginator(laptops, 5)
+    paginator = Paginator(laptops, 999999)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
@@ -194,7 +194,7 @@ def pengajuan_page_view(request):
 
         # Pagination
         from django.core.paginator import Paginator
-        paginator = Paginator(filtered_pengajuan, 5)
+        paginator = Paginator(filtered_pengajuan, 999999)
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
 
@@ -584,7 +584,7 @@ def riwayatpeminjamanlaptop_hc_view(request):
 
         # Pagination
         from django.core.paginator import Paginator
-        paginator = Paginator(filtered_p, 5)
+        paginator = Paginator(filtered_p, 999999)
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
 

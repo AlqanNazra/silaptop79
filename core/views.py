@@ -306,7 +306,7 @@ def pengajuanlaptop_it_view(request):
             ]
 
         from django.core.paginator import Paginator
-        paginator = Paginator(filtered_pengajuan, 5)
+        paginator = Paginator(filtered_pengajuan, 999999)
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
 
@@ -561,7 +561,7 @@ def riwayatpeminjamanlaptop_it_view(request):
             ]
 
         from django.core.paginator import Paginator
-        paginator = Paginator(filtered_p, 5)
+        paginator = Paginator(filtered_p, 999999)
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
             
@@ -994,10 +994,10 @@ def hasilrekomendasi_hc_view(request):
         elif sort_by == "harga_asc" and jenis_rekomendasi == "pengadaan":
             ranking_sesuai.sort(key=lambda x: x["detail"].get("harga", 0))
         
-        paginator = Paginator(ranking_sesuai, 10)  # Tampilkan 10 item per halaman
+        paginator = Paginator(ranking_sesuai, 999999)  # Tampilkan 10 item per halaman
         page_number = request.GET.get('page')
         rangking_page = paginator.get_page(page_number)
-        alternatif_paginator = Paginator(ranking_alternatif, 10)
+        alternatif_paginator = Paginator(ranking_alternatif, 999999)
         alternatif_page_number = request.GET.get('alternatif_page')
         ranking_alternatif = alternatif_paginator.get_page(alternatif_page_number)
 
@@ -1274,7 +1274,7 @@ def manajemenlaptop_it_view(request):
     laptops = laptops.order_by('id_laptop_inventori')
 
     from django.core.paginator import Paginator
-    paginator = Paginator(laptops, 5)
+    paginator = Paginator(laptops, 999999)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
@@ -1845,10 +1845,10 @@ def hasilrekomendasi_it_view(request):
         elif sort_by == "harga_asc" and jenis_rekomendasi == "pengadaan":
             ranking_sesuai.sort(key=lambda x: x["detail"].get("harga", 0))
         
-        paginator = Paginator(ranking_sesuai, 10)  # Tampilkan 10 item per halaman
+        paginator = Paginator(ranking_sesuai, 999999)  # Tampilkan 10 item per halaman
         page_number = request.GET.get('page')
         rangking_page = paginator.get_page(page_number)
-        alternatif_paginator = Paginator(ranking_alternatif, 10)
+        alternatif_paginator = Paginator(ranking_alternatif, 999999)
         alternatif_page_number = request.GET.get('alternatif_page')
         ranking_alternatif = alternatif_paginator.get_page(alternatif_page_number)
 
@@ -2055,7 +2055,7 @@ def manajemenpengadaan_it_view(request):
             ]
         
         from django.core.paginator import Paginator
-        paginator = Paginator(raw_list, 5)
+        paginator = Paginator(raw_list, 999999)
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
         
@@ -2371,7 +2371,7 @@ def pengajuanlaptop_talent_view(request):
         )
 
         from django.core.paginator import Paginator
-        paginator = Paginator(semua_pengajuan, 5)
+        paginator = Paginator(semua_pengajuan, 999999)
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
 
@@ -2511,7 +2511,7 @@ def riwayatpeminjamanlaptop_talent_view(request):
             ]
 
         from django.core.paginator import Paginator
-        paginator = Paginator(riwayat_list, 5)
+        paginator = Paginator(riwayat_list, 999999)
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
             
@@ -2667,6 +2667,11 @@ def login_redirect_view(request):
 def home_view(request):
     return login_redirect_view(request)
 
+def logout_view(request):
+    from django.contrib.auth import logout
+    logout(request)
+    return redirect('login')
+
 
 
 
@@ -2788,7 +2793,7 @@ def manajemenproyek_it_view(request):
 
     proyek_list = proyek_list.order_by('id_proyek')
 
-    paginator = Paginator(proyek_list, 5)
+    paginator = Paginator(proyek_list, 999999)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
@@ -3034,10 +3039,10 @@ def manajemen_role_teknologi_it_view(request):
 
     if search_tech:
         teknologi_list = teknologi_list.filter(Q(nama_teknologi__icontains=search_tech) | Q(kategori__icontains=search_tech))
-    paginator_role = Paginator(role_list, 5)
+    paginator_role = Paginator(role_list, 999999)
     page_role = request.GET.get('page_role')
     role_obj = paginator_role.get_page(page_role)
-    paginator_tech = Paginator(teknologi_list, 5)
+    paginator_tech = Paginator(teknologi_list, 999999)
     page_tech = request.GET.get('page_tech')
     tech_obj = paginator_tech.get_page(page_tech)
     active_tab = request.GET.get('tab', 'role')

@@ -14,6 +14,7 @@
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1.1">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
     <style>
         body {
@@ -310,6 +311,35 @@
             background-color: #0369A1;
             transform: translateY(-1px);
         }
+
+        .btn-stopwatch {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            background-color: #FFFFFF;
+            border: 1px solid #E2E8F0;
+            color: #475569;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            text-decoration: none;
+            box-sizing: border-box;
+        }
+
+        .btn-stopwatch:hover {
+            background-color: #F8FAFC;
+            border-color: #0b57c6;
+            color: #0b57c6;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px rgba(11, 87, 198, 0.1);
+        }
+
+        .btn-stopwatch i {
+            font-size: 20px;
+        }
     </style>
 </head>
 
@@ -320,15 +350,19 @@
 
         <div class="main-content">
 
-            <!-- Page Top Header -->
             <div class="page-top">
                 <div class="page-top-left">
                     <h1>Halaman Formulir Pengajuan Laptop Baru</h1>
                     <p>Lengkapi formulir di bawah ini untuk memulai proses pengadaan perangkat laptop baru di departemen Anda.</p>
                 </div>
-                <a href="{% url 'dashboard_talent' %}" class="btn-back">
-                    Kembali ke Dashboard
-                </a>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <a href="{% url 'riwayatpeminjamanlaptop_talent' %}" class="btn-stopwatch" title="Lihat Riwayat Peminjaman">
+                        <i class="fa-solid fa-stopwatch"></i>
+                    </a>
+                    <a href="{% url 'dashboard_talent' %}" class="btn-back">
+                        Kembali ke Dashboard
+                    </a>
+                </div>
             </div>
 
             <!-- Flash Messages -->
