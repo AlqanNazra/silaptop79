@@ -143,18 +143,18 @@ def run_tests():
             id_user=it_user,
             kebutuhan_role="Software Engineer",
             kebutuhan_requirement="Core i7, 16GB RAM",
-            status="pending",
+            status="menunggu",
             keterangan="Urgent request for test"
         )
     print(f"Testing Detail Pengajuan ID: {pengajuan.id_pengajuan}...")
     response = client.get(f"{reverse('detailpengajuan_it')}?id={pengajuan.id_pengajuan}")
     assert response.status_code == 200, f"Detail Pengajuan GET failed: {response.status_code}"
     
-    response = client.post(f"{reverse('detailpengajuan_it')}?id={pengajuan.id_pengajuan}", {'action': 'approved'})
+    response = client.post(f"{reverse('detailpengajuan_it')}?id={pengajuan.id_pengajuan}", {'action': 'disetujui'})
     assert response.status_code == 302, f"Detail Pengajuan POST approve failed: {response.status_code}"
     
     pengajuan.refresh_from_db()
-    assert pengajuan.status == 'approved', f"Pengajuan status not approved: {pengajuan.status}"
+    assert pengajuan.status == 'disetujui', f"Pengajuan status not disetujui: {pengajuan.status}"
     print("Detail Pengajuan OK.")
 
     # 9. DSS Input Kriteria IT

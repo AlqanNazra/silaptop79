@@ -348,6 +348,7 @@
                     <h2 style="margin:0;">Daftar Peminjam</h2>
                 </div>
                 <form method="GET" action="" style="display:flex; gap:12px; align-items:center; flex-wrap:wrap; width:100%;">
+                    <input type="hidden" name="laptop_id" value="{{ laptop_id|default:'' }}">
                     <input type="text" name="q" value="{{ search_query|default:'' }}" placeholder="Cari peminjam, laptop, atau status..." style="flex:1; min-width:260px; padding:10px 16px; border:1px solid #cbd5e1; border-radius:8px; font-family:'Inter',sans-serif;">
                     <select name="status" style="padding:10px 16px; border:1px solid #cbd5e1; border-radius:8px; font-family:'Inter',sans-serif; background:white; color:#475569; font-weight:500;">
                         <option value="">Semua Status</option>
@@ -356,59 +357,97 @@
                         <option value="rusak" {% if status_filter == 'rusak' %}selected{% endif %}>Rusak</option>
                     </select>
                     <button type="submit" style="padding:10px 20px; background:#0b57c6; color:white; border:none; border-radius:8px; font-weight:600; cursor:pointer; font-family:'Inter',sans-serif;">Filter</button>
-                    <a href="?" style="padding:10px 20px; background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; border-radius:8px; text-decoration:none; font-size:14px; font-weight:600; font-family:'Inter',sans-serif;">Reset</a>
+                    <a href="?{% if laptop_id %}laptop_id={{ laptop_id }}{% endif %}" style="padding:10px 20px; background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; border-radius:8px; text-decoration:none; font-size:14px; font-weight:600; font-family:'Inter',sans-serif;">Reset</a>
                 </form>
             </div>
 
             <table>
-                <thead>
-                    <tr>
-                        <th>User Name</th>
-                        <th>Device Laptop</th>
-                        <th>Borrow Date</th>
-                        <th>Return Date</th>
-                        <th>Device Condition / Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for p in list_peminjaman %}
-                    <tr>
-                        <td>
-                            <div class="user-cell">
-                                <div class="avatar">{{ p.user_nama|slice:":2"|upper }}</div>
-                                <div>
-                                    <span class="user-name">{{ p.user_nama }}</span>
-                                    <span class="user-role">{{ p.user_role }}</span>
-                                </div>
+            <thead>
+                <tr>
+                    <th>User Name</th>
+                    <th>Device Laptop</th>
+                    <th>Tanggal Pinjam</th>
+                    <th>Durasi</th>
+                    <th>Jatuh Tempo</th>
+                    <th>Status</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in list_peminjaman %}
+                <tr>
+                    <td>
+                        <div class="user-cell">
+                            <div class="avatar">{{ p.user_nama|slice:":2"|upper }}</div>
+                            <div>
+                                <span class="user-name">{{ p.user_nama }}</span>
+                                <span class="user-role">{{ p.user_role }}</span>
                             </div>
-                        </td>
-                        <td>{{ p.laptop_nama }}</td>
-                        <td>{{ p.tanggal_pinjam|date:"d M Y"|default:"-" }}</td>
-                        <td>{{ p.tanggal_kembali|date:"d M Y"|default:"-" }}</td>
-                        <td>
-                            {% if p.status|lower == 'kembali' or p.status|lower == 'selesai' %}
-                            <span class="badge badge-excellent">{{ p.status }}</span>
-                            {% elif p.status|lower == 'dipinjam' or p.status|lower == 'aktif' %}
-                            <span class="badge badge-good">{{ p.status }}</span>
+                        </div>
+                    </td>
+                    <td>{{ p.laptop_nama }}</td>
+                    <td>{{ p.tanggal_pinjam|date:"d M Y"|default:"-" }}</td>
+                    <td>
+                        {% if p.durasi_hari is not None %}
+                            <span style="font-weight:600; color:#0f172a;">{{ p.durasi_hari }} hari</span>
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if p.tanggal_jatuh_tempo %}
+                            {% if p.sisa_hari is not None %}
+                                {% if p.sisa_hari < 0 %}
+                                <span style="color:#dc2626; font-weight:700;">{{ p.tanggal_jatuh_tempo|date:"d M Y" }} <br><small>(Lewat {{ p.sisa_hari|stringformat:"d"|slice:"1:" }} hari)</small></span>
+                                {% elif p.sisa_hari <= 3 %}
+                                <span style="color:#f59e0b; font-weight:700;">{{ p.tanggal_jatuh_tempo|date:"d M Y" }} <br><small>({{ p.sisa_hari }} hari lagi)</small></span>
+                                {% else %}
+                                <span style="color:#15803d; font-weight:600;">{{ p.tanggal_jatuh_tempo|date:"d M Y" }}</span>
+                                {% endif %}
                             {% else %}
-                            <span class="badge badge-scratch">{{ p.status }}</span>
+                            {{ p.tanggal_jatuh_tempo|date:"d M Y" }}
                             {% endif %}
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="5" style="text-align: center; color: #94a3b8; padding: 30px;">Tidak ada riwayat
-                            peminjaman.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                        {% else %}
+                            <span style="color:#94a3b8;">-</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if p.status|lower == 'kembali' or p.status|lower == 'selesai' %}
+                        <span class="badge badge-excellent">{{ p.status }}</span>
+                        {% elif p.status|lower == 'dipinjam' or p.status|lower == 'aktif' %}
+                        <span class="badge badge-good">{{ p.status }}</span>
+                        {% elif p.status|lower == 'dikembalikan' %}
+                        <span class="badge badge-scratch" style="background:#fef3c7; color:#b45309;">Menunggu Konfirmasi</span>
+                        {% else %}
+                        <span class="badge badge-scratch">{{ p.status }}</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if p.status|lower == 'dikembalikan' %}
+                        <form method="POST" action="{% url 'konfirmasi_pengembalian_hc' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="id_peminjaman" value="{{ p.id_peminjaman }}">
+                            <button type="submit" style="padding:6px 12px; background:#10b981; color:white; border:none; border-radius:4px; font-weight:600; cursor:pointer; font-size:12px;">Konfirmasi Terima</button>
+                        </form>
+                        {% else %}
+                        -
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" style="text-align: center; color: #94a3b8; padding: 30px;">Tidak ada riwayat
+                        peminjaman.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
 
             <div class="pagination" style="display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-top: 1px solid #f1f5f9;">
                 <span class="pagination-text">Menampilkan {{ list_peminjaman.start_index }} - {{ list_peminjaman.end_index }} dari {{ list_peminjaman.paginator.count }} peminjaman</span>
                 <div class="pagination-controls" style="display: flex; gap: 6px; align-items: center;">
                     {% if list_peminjaman.has_previous %}
-                        <a href="?page={{ list_peminjaman.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">
+                        <a href="?page={{ list_peminjaman.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if laptop_id %}&laptop_id={{ laptop_id }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">
                             <i class="fa-solid fa-chevron-left"></i>
                         </a>
                     {% endif %}
@@ -417,12 +456,12 @@
                         {% if list_peminjaman.number == num %}
                             <span class="page-btn active" style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; background: #0b57c6; color: white; font-weight: bold; font-size: 12px;">{{ num }}</span>
                         {% elif num > list_peminjaman.number|add:'-3' and num < list_peminjaman.number|add:'3' %}
-                            <a href="?page={{ num }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">{{ num }}</a>
+                            <a href="?page={{ num }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if laptop_id %}&laptop_id={{ laptop_id }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">{{ num }}</a>
                         {% endif %}
                     {% endfor %}
 
                     {% if list_peminjaman.has_next %}
-                        <a href="?page={{ list_peminjaman.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">
+                        <a href="?page={{ list_peminjaman.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if laptop_id %}&laptop_id={{ laptop_id }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">
                             <i class="fa-solid fa-chevron-right"></i>
                         </a>
                     {% endif %}

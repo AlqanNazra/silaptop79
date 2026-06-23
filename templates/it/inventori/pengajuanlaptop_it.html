@@ -258,21 +258,21 @@
             border-radius: 50%;
         }
 
-        .status-badge.pending {
+        .status-badge.menunggu {
             background-color: #EFF6FF;
             color: #1D4ED8;
         }
 
-        .status-badge.pending::before {
+        .status-badge.menunggu::before {
             background-color: #3B82F6;
         }
 
-        .status-badge.approved {
+        .status-badge.disetujui {
             background-color: #F0FDF4;
             color: #15803D;
         }
 
-        .status-badge.approved::before {
+        .status-badge.disetujui::before {
             background-color: #22C55E;
         }
 
@@ -381,18 +381,41 @@
             <!-- Search and Filter Form -->
             <div style="margin-bottom: 24px;">
                 <form method="GET" action="" style="display: flex; gap: 12px; width: 100%;">
+                    <input type="hidden" name="tab" value="{{ active_tab }}">
                     <input type="text" name="q" placeholder="Cari pemohon atau spesifikasi..." value="{{ search_query }}" style="flex: 1; padding: 12px 16px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px;">
                     <select name="status" style="padding: 12px 16px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background: white;">
                         <option value="">Semua Status IT</option>
-                        <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
-                        <option value="approved" {% if status_filter == 'approved' %}selected{% endif %}>Approved</option>
-                        <option value="rejected" {% if status_filter == 'rejected' %}selected{% endif %}>Rejected</option>
+                        <option value="menunggu" {% if status_filter == 'menunggu' %}selected{% endif %}>Menunggu</option>
+                        <option value="disetujui" {% if status_filter == 'disetujui' %}selected{% endif %}>Disetujui</option>
+                        <option value="ditolak" {% if status_filter == 'ditolak' %}selected{% endif %}>Ditolak</option>
                     </select>
                     <button type="submit" style="background-color: #0b57c6; color: white; padding: 12px 24px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">Cari</button>
+                    <a href="?tab={{ active_tab }}" style="padding: 12px 24px; background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; border-radius: 8px; text-decoration: none; font-size: 14px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 6px; font-family: 'Inter', sans-serif;">
+                        <i class="fa-solid fa-rotate-left"></i> Reset
+                    </a>
                 </form>
             </div>
 
             <div class="table-card">
+                <!-- Sub-tab Headers -->
+                <div class="tabs-container" style="display: flex; gap: 8px; border-bottom: 1px solid #e2e8f0; padding: 12px 24px 0; background: #f8fafc; border-top-left-radius: 12px; border-top-right-radius: 12px;">
+                    <a href="?tab=belum_disetujui{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" 
+                       style="padding: 12px 16px; font-size: 14px; font-weight: 600; text-decoration: none; color: {% if active_tab == 'belum_disetujui' %}#0b57c6{% else %}#64748b{% endif %}; border-bottom: 3px solid {% if active_tab == 'belum_disetujui' %}#0b57c6{% else %}transparent{% endif %}; transition: all 0.2s; display: flex; align-items: center; gap: 8px;">
+                        <i class="fa-solid fa-clock"></i> Belum Disetujui
+                        <span style="background: {% if active_tab == 'belum_disetujui' %}#dbeafe{% else %}#e2e8f0{% endif %}; color: {% if active_tab == 'belum_disetujui' %}#0b57c6{% else %}#475569{% endif %}; padding: 2px 8px; border-radius: 9999px; font-size: 11px; font-weight: bold;">{{ total_belum_disetujui }}</span>
+                    </a>
+                    <a href="?tab=sedang_berlangsung{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" 
+                       style="padding: 12px 16px; font-size: 14px; font-weight: 600; text-decoration: none; color: {% if active_tab == 'sedang_berlangsung' %}#0b57c6{% else %}#64748b{% endif %}; border-bottom: 3px solid {% if active_tab == 'sedang_berlangsung' %}#0b57c6{% else %}transparent{% endif %}; transition: all 0.2s; display: flex; align-items: center; gap: 8px;">
+                        <i class="fa-solid fa-laptop-medical"></i> Sedang Berlangsung
+                        <span style="background: {% if active_tab == 'sedang_berlangsung' %}#dbeafe{% else %}#e2e8f0{% endif %}; color: {% if active_tab == 'sedang_berlangsung' %}#0b57c6{% else %}#475569{% endif %}; padding: 2px 8px; border-radius: 9999px; font-size: 11px; font-weight: bold;">{{ total_sedang_berlangsung }}</span>
+                    </a>
+                    <a href="?tab=riwayat_selesai{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" 
+                       style="padding: 12px 16px; font-size: 14px; font-weight: 600; text-decoration: none; color: {% if active_tab == 'riwayat_selesai' %}#0b57c6{% else %}#64748b{% endif %}; border-bottom: 3px solid {% if active_tab == 'riwayat_selesai' %}#0b57c6{% else %}transparent{% endif %}; transition: all 0.2s; display: flex; align-items: center; gap: 8px;">
+                        <i class="fa-solid fa-circle-check"></i> Riwayat Selesai
+                        <span style="background: {% if active_tab == 'riwayat_selesai' %}#dbeafe{% else %}#e2e8f0{% endif %}; color: {% if active_tab == 'riwayat_selesai' %}#0b57c6{% else %}#475569{% endif %}; padding: 2px 8px; border-radius: 9999px; font-size: 11px; font-weight: bold;">{{ total_riwayat_selesai }}</span>
+                    </a>
+                </div>
+
                 <div class="table-header">
                     <h2>Daftar Unit Perlu Disiapkan</h2>
                 </div>
@@ -427,9 +450,17 @@
                                     {% if pengajuan.status_it == 'ready' %}
                                     <span class="status-badge ready">Siap Diambil</span>
                                     {% elif pengajuan.status_it == 'configuring' %}
-                                    <span class="status-badge pending">Konfigurasi</span>
+                                    <span class="status-badge menunggu">Konfigurasi</span>
+                                    {% elif pengajuan.status_it == 'dipinjam' %}
+                                    <span class="status-badge ready" style="background-color: #DBEAFE; color: #1E40AF; border-color: #BFDBFE;">Dipinjam</span>
+                                    {% elif pengajuan.status_it == 'dikembalikan' %}
+                                    <span class="status-badge menunggu" style="background-color: #FEF3C7; color: #B45309; border-color: #FDE68A;">Dikembalikan</span>
+                                    {% elif pengajuan.status_it == 'selesai' %}
+                                    <span class="status-badge ready" style="background-color: #D1FAE5; color: #065F46; border-color: #A7F3D0;">Selesai</span>
+                                    {% elif pengajuan.status_it == 'ditolak' %}
+                                    <span class="status-badge ditolak">Ditolak</span>
                                     {% else %}
-                                    <span class="status-badge approved">Menunggu Antrean</span>
+                                    <span class="status-badge disetujui">Menunggu Antrean</span>
                                     {% endif %}
                                 </td>
                                 <td align="center">
@@ -451,10 +482,10 @@
                     {% if list_pengajuan %}
                     <!-- Pagination -->
                     <div class="pagination-container" style="display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-top: 1px solid #f1f5f9;">
-                        <span class="pagination-text" style="font-size: 14px; color: #64748b;">Menampilkan {{ list_pengajuan.start_index }} - {{ list_pengajuan.end_index }} dari {{ total_pengajuan }} pengajuan</span>
+                        <span class="pagination-text" style="font-size: 14px; color: #64748b;">Menampilkan {{ list_pengajuan.start_index }} - {{ list_pengajuan.end_index }} dari {{ list_pengajuan.paginator.count }} pengajuan</span>
                         <div class="pagination-controls" style="display: flex; gap: 6px; align-items: center;">
                             {% if list_pengajuan.has_previous %}
-                                <a href="?page={{ list_pengajuan.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">
+                                <a href="?page={{ list_pengajuan.previous_page_number }}&tab={{ active_tab }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">
                                     <i class="fa-solid fa-chevron-left"></i>
                                 </a>
                             {% endif %}
@@ -463,12 +494,12 @@
                                 {% if list_pengajuan.number == num %}
                                     <span class="page-btn active" style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; background: #0b57c6; color: white; font-weight: bold; font-size: 12px;">{{ num }}</span>
                                 {% elif num > list_pengajuan.number|add:'-3' and num < list_pengajuan.number|add:'3' %}
-                                    <a href="?page={{ num }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">{{ num }}</a>
+                                    <a href="?page={{ num }}&tab={{ active_tab }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">{{ num }}</a>
                                 {% endif %}
                             {% endfor %}
 
                             {% if list_pengajuan.has_next %}
-                                <a href="?page={{ list_pengajuan.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">
+                                <a href="?page={{ list_pengajuan.next_page_number }}&tab={{ active_tab }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">
                                     <i class="fa-solid fa-chevron-right"></i>
                                 </a>
                             {% endif %}

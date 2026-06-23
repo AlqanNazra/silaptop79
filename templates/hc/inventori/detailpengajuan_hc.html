@@ -90,7 +90,7 @@
         }
 
         /* Status Badge */
-        .status-badge-pending {
+        .status-badge-menunggu {
             background: #fef9c3;
             color: #a16207;
             padding: 6px 14px;
@@ -396,17 +396,17 @@
                                 pengajuan.tanggal_pengajuan|date:"d F Y" }}</p>
                         </div>
                     </div>
-                    {% if pengajuan.status|lower == 'approved' %}
-                    <div class="status-badge-pending" style="background: #dcfce7; color: #166534;">
-                        <i class="fa-solid fa-circle" style="font-size: 8px;"></i> APPROVED
+                    {% if pengajuan.status|lower == 'disetujui' or pengajuan.status|lower == 'approved' %}
+                    <div class="status-badge-menunggu" style="background: #dcfce7; color: #166534;">
+                        <i class="fa-solid fa-circle" style="font-size: 8px;"></i> DISETUJUI
                     </div>
-                    {% elif pengajuan.status|lower == 'rejected' %}
-                    <div class="status-badge-pending" style="background: #fee2e2; color: #991b1b;">
-                        <i class="fa-solid fa-circle" style="font-size: 8px;"></i> REJECTED
+                    {% elif pengajuan.status|lower == 'ditolak' or pengajuan.status|lower == 'rejected' %}
+                    <div class="status-badge-menunggu" style="background: #fee2e2; color: #991b1b;">
+                        <i class="fa-solid fa-circle" style="font-size: 8px;"></i> DITOLAK
                     </div>
                     {% else %}
-                    <div class="status-badge-pending">
-                        <i class="fa-solid fa-circle" style="font-size: 8px;"></i> PENDING
+                    <div class="status-badge-menunggu">
+                        <i class="fa-solid fa-circle" style="font-size: 8px;"></i> MENUNGGU
                     </div>
                     {% endif %}
                 </div>
@@ -439,7 +439,7 @@
                 </div>
             </div>
 
-            {% if pengajuan.status|lower == 'pending' %}
+            {% if pengajuan.status|lower == 'menunggu' or pengajuan.status|lower == 'pending' %}
             <div class="action-buttons-wrapper">
                 <a href="{% url 'inventori:setujui_pengajuan_hc' %}?id={{ pengajuan.id_pengajuan }}"
                     style="flex: 1; text-decoration: none;">
@@ -467,7 +467,7 @@
             <form method="POST" action="{% url 'inventori:detailpengajuan_hc' %}?id={{ pengajuan.id_pengajuan }}"
                 style="width: 100%;">
                 {% csrf_token %}
-                <input type="hidden" name="action" value="rejected">
+                <input type="hidden" name="action" value="ditolak">
                 <div class="modal-reason-group">
                     <label>Alasan Penolakan</label>
                     <textarea name="alasan_penolakan" class="modal-textarea" required

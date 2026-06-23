@@ -157,7 +157,7 @@ def run_test():
         id_user=User.objects.get(id_user='USR-003'),
         kebutuhan_role='developer',
         kebutuhan_requirement='Intel i7, 16GB RAM',
-        status='pending',
+        status='menunggu',
         bulan='2026-06-01',
         keterangan='Untuk developer baru',
         perusahaan='Tujuh Sembilan'
@@ -174,7 +174,7 @@ def run_test():
 
     # Approve Pengajuan POST
     response = client.post(detail_pengajuan_url, {
-        'action': 'approved'
+        'action': 'disetujui'
     })
     
     from django.contrib.messages import get_messages
@@ -188,8 +188,8 @@ def run_test():
     
     # Verify in DB
     test_req.refresh_from_db()
-    assert test_req.status == 'approved', f"Expected status 'approved', got {test_req.status}"
-    print("Pengajuan successfully approved!")
+    assert test_req.status == 'disetujui', f"Expected status 'disetujui', got {test_req.status}"
+    print("Pengajuan successfully disetujui!")
 
     # Clean up test pengajuan
     test_req.delete()

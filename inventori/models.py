@@ -102,7 +102,7 @@ class Pengajuan(models.Model):
     keterangan = models.TextField(null=True, blank=True)
     perusahaan = models.TextField()
 
-    status = models.CharField(max_length=20, default='pending')
+    status = models.CharField(max_length=20, default='menunggu')
     tanggal_pengajuan = models.DateTimeField(auto_now_add=True)
     tanggal_approval = models.DateTimeField(null=True, blank=True)
 
@@ -123,6 +123,7 @@ class Peminjaman(models.Model):
 
     tanggal_pinjam = models.DateField()
     tanggal_kembali = models.DateField(null=True, blank=True)
+    tanggal_jatuh_tempo = models.DateField(null=True, blank=True)
 
     status = models.CharField(max_length=50)
     keterangan = models.TextField(null=True, blank=True)

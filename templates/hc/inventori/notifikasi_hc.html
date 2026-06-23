@@ -5,12 +5,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Notifikasi Pengajuan - SiLaptop79</title>
+    <title>Notifikasi - SiLaptop79</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1.1">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
     <style>
         body {
@@ -18,6 +19,7 @@
             font-family: 'Inter', sans-serif;
             display: flex;
             min-height: 100vh;
+            background: #f8fafc;
         }
 
         .main-dashboard-content {
@@ -55,9 +57,27 @@
             transition: color 0.2s;
         }
 
-        .back-link:hover {
-            color: #0369A1;
+        .back-link:hover { color: #0369A1; }
+
+        .summary-row {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
         }
+
+        .summary-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 18px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .chip-red { background: #FEE2E2; color: #DC2626; }
+        .chip-yellow { background: #FEF9C3; color: #B45309; }
+        .chip-blue { background: #DBEAFE; color: #1D4ED8; }
 
         .notif-list {
             display: flex;
@@ -82,17 +102,10 @@
             transform: translateY(-1px);
         }
 
-        .notif-card.urgent {
-            border-left: 4px solid #DC2626;
-        }
-
-        .notif-card.warning {
-            border-left: 4px solid #F59E0B;
-        }
-
-        .notif-card.info {
-            border-left: 4px solid #3B82F6;
-        }
+        .notif-card.urgent { border-left: 4px solid #DC2626; }
+        .notif-card.warning { border-left: 4px solid #F59E0B; }
+        .notif-card.info { border-left: 4px solid #3B82F6; }
+        .notif-card.pengembalian { border-left: 4px solid #8B5CF6; }
 
         .notif-icon {
             flex-shrink: 0;
@@ -104,25 +117,12 @@
             justify-content: center;
         }
 
-        .notif-card.urgent .notif-icon {
-            background: #FEF2F2;
-            color: #DC2626;
-        }
+        .notif-card.urgent .notif-icon { background: #FEF2F2; color: #DC2626; }
+        .notif-card.warning .notif-icon { background: #FFFBEB; color: #D97706; }
+        .notif-card.info .notif-icon { background: #EFF6FF; color: #2563EB; }
+        .notif-card.pengembalian .notif-icon { background: #EDE9FE; color: #7C3AED; }
 
-        .notif-card.warning .notif-icon {
-            background: #FFFBEB;
-            color: #D97706;
-        }
-
-        .notif-card.info .notif-icon {
-            background: #EFF6FF;
-            color: #2563EB;
-        }
-
-        .notif-body {
-            flex: 1;
-            min-width: 0;
-        }
+        .notif-body { flex: 1; min-width: 0; }
 
         .notif-title {
             font-size: 15px;
@@ -144,6 +144,7 @@
             gap: 16px;
             font-size: 12px;
             color: #94A3B8;
+            flex-wrap: wrap;
         }
 
         .notif-meta .tag {
@@ -153,20 +154,10 @@
             font-size: 11px;
         }
 
-        .tag.urgent {
-            background: #FEF2F2;
-            color: #DC2626;
-        }
-
-        .tag.warning {
-            background: #FFFBEB;
-            color: #D97706;
-        }
-
-        .tag.info {
-            background: #EFF6FF;
-            color: #2563EB;
-        }
+        .tag.urgent { background: #FEF2F2; color: #DC2626; }
+        .tag.warning { background: #FFFBEB; color: #D97706; }
+        .tag.info { background: #EFF6FF; color: #2563EB; }
+        .tag.pengembalian { background: #EDE9FE; color: #7C3AED; }
 
         .notif-time {
             font-size: 13px;
@@ -204,53 +195,102 @@
         </a>
 
         <div class="page-header">
-            <h1>🔔 Notifikasi Pengajuan Mendesak</h1>
-            <p>Daftar pengajuan laptop yang waktu penggunaannya sudah dekat dan memerlukan tindakan segera.</p>
+            <h1>🔔 Pusat Notifikasi</h1>
+            <p>Semua notifikasi terkait pengajuan, pengembalian laptop, dan jatuh tempo peminjaman.</p>
+        </div>
+
+        <!-- Summary Chips -->
+        <div class="summary-row">
+            {% if total_pengajuan_menunggu > 0 %}
+            <span class="summary-chip chip-blue">
+                <i class="fa-solid fa-inbox"></i>
+                {{ total_pengajuan_menunggu }} Pengajuan Menunggu
+            </span>
+            {% endif %}
+            {% if total_pengembalian_menunggu > 0 %}
+            <span class="summary-chip chip-yellow">
+                <i class="fa-solid fa-laptop-code"></i>
+                {{ total_pengembalian_menunggu }} Pengembalian Perlu Dikonfirmasi
+            </span>
+            {% endif %}
         </div>
 
         <div class="notif-list">
             {% if notifications %}
                 {% for notif in notifications %}
-                <div class="notif-card {{ notif.urgency_class }}">
+                <div class="notif-card {{ notif.urgency_class }} {% if notif.tipe == 'pengembalian' %}pengembalian{% endif %}">
                     <div class="notif-icon">
-                        {% if notif.urgency_class == 'urgent' %}
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                            stroke-linecap="round" stroke-linejoin="round">
+                        {% if notif.tipe == 'pengembalian' %}
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                            <polyline points="16 17 21 12 16 7"></polyline>
+                            <line x1="21" y1="12" x2="9" y2="12"></line>
+                        </svg>
+                        {% elif notif.tipe == 'jatuh_tempo' %}
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                        {% elif notif.urgency_class == 'urgent' %}
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="12" cy="12" r="10"></circle>
                             <line x1="12" y1="8" x2="12" y2="12"></line>
                             <line x1="12" y1="16" x2="12.01" y2="16"></line>
                         </svg>
-                        {% elif notif.urgency_class == 'warning' %}
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                            stroke-linecap="round" stroke-linejoin="round">
+                        {% else %}
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
                             <line x1="12" y1="9" x2="12" y2="13"></line>
                             <line x1="12" y1="17" x2="12.01" y2="17"></line>
                         </svg>
-                        {% else %}
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <polyline points="12 6 12 12 16 14"></polyline>
-                        </svg>
                         {% endif %}
                     </div>
                     <div class="notif-body">
-                        <div class="notif-title">Pengajuan #{{ notif.id_pengajuan }} — {{ notif.user_nama }}</div>
-                        <div class="notif-desc">
-                            Membutuhkan laptop untuk posisi <strong>{{ notif.kebutuhan_role }}</strong> di {{ notif.perusahaan }}.
-                            Tanggal mulai kerja: <strong>{{ notif.bulan }}</strong>. Waktu tersisa tinggal sedikit dan laptop belum disiapkan.
-                            {% if notif.keterangan %}
-                            <br><small style="color: #64748b; font-style: italic;">"{{ notif.keterangan }}"</small>
-                            {% endif %}
-                        </div>
-                        <div class="notif-meta">
-                            <span class="tag {{ notif.urgency_class }}">{{ notif.urgency_tag }}</span>
-                            {% if notif.tanggal_pengajuan %}
-                            <span>Diajukan pada {{ notif.tanggal_pengajuan }}</span>
-                            {% endif %}
-                            <a href="{% url 'detailpengajuan_hc' %}?id={{ notif.id_pengajuan }}" style="margin-left: auto; color: #0284c7; font-weight: 600; text-decoration: none; font-size: 13px;">Tinjau Detail &rarr;</a>
-                        </div>
+                        {% if notif.tipe == 'pengembalian' %}
+                            <div class="notif-title">Pengembalian Laptop — {{ notif.user_nama }}</div>
+                            <div class="notif-desc">
+                                <strong>{{ notif.laptop_nama }}</strong> telah dikembalikan oleh <strong>{{ notif.user_nama }}</strong>
+                                pada <strong>{{ notif.tanggal_kembali }}</strong>. Mohon konfirmasi penerimaan laptop ini.
+                                {% if notif.keterangan and notif.keterangan != '-' %}
+                                <br><small style="color:#64748b; font-style:italic;">Catatan: "{{ notif.keterangan }}"</small>
+                                {% endif %}
+                            </div>
+                            <div class="notif-meta">
+                                <span class="tag pengembalian">{{ notif.urgency_tag }}</span>
+                                <span>Dikembalikan {{ notif.time_str }}</span>
+                                <a href="{% url 'riwayatpeminjamanlaptop_hc' %}" style="margin-left:auto; color:#7c3aed; font-weight:600; text-decoration:none; font-size:13px;">
+                                    Lihat Riwayat &rarr;
+                                </a>
+                            </div>
+                        {% elif notif.tipe == 'jatuh_tempo' %}
+                            <div class="notif-title">Jatuh Tempo Peminjaman — {{ notif.user_nama }}</div>
+                            <div class="notif-desc">
+                                Laptop <strong>{{ notif.laptop_nama }}</strong> yang dipinjam oleh <strong>{{ notif.user_nama }}</strong>
+                                memiliki jatuh tempo pada <strong>{{ notif.tanggal_jatuh_tempo }}</strong>. Segera hubungi peminjam.
+                            </div>
+                            <div class="notif-meta">
+                                <span class="tag {{ notif.urgency_class }}">{{ notif.urgency_tag }}</span>
+                                <a href="{% url 'riwayatpeminjamanlaptop_hc' %}" style="margin-left:auto; color:#0284c7; font-weight:600; text-decoration:none; font-size:13px;">
+                                    Lihat Riwayat &rarr;
+                                </a>
+                            </div>
+                        {% else %}
+                            <div class="notif-title">Pengajuan #{{ notif.id_pengajuan }} — {{ notif.user_nama }}</div>
+                            <div class="notif-desc">
+                                Membutuhkan laptop untuk posisi <strong>{{ notif.kebutuhan_role }}</strong> di {{ notif.perusahaan }}.
+                                Tanggal mulai kerja: <strong>{{ notif.bulan }}</strong>. Waktu tersisa tinggal sedikit dan laptop belum disiapkan.
+                                {% if notif.keterangan %}
+                                <br><small style="color: #64748b; font-style: italic;">"{{ notif.keterangan }}"</small>
+                                {% endif %}
+                            </div>
+                            <div class="notif-meta">
+                                <span class="tag {{ notif.urgency_class }}">{{ notif.urgency_tag }}</span>
+                                {% if notif.tanggal_pengajuan %}
+                                <span>Diajukan pada {{ notif.tanggal_pengajuan }}</span>
+                                {% endif %}
+                                <a href="{% url 'detailpengajuan_hc' %}?id={{ notif.id_pengajuan }}" style="margin-left: auto; color: #0284c7; font-weight: 600; text-decoration: none; font-size: 13px;">Tinjau Detail &rarr;</a>
+                            </div>
+                        {% endif %}
                     </div>
                     <div class="notif-time">{{ notif.time_str }}</div>
                 </div>
@@ -261,8 +301,8 @@
                         <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
                         <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
                     </svg>
-                    <h3>Tidak Ada Notifikasi Pengajuan</h3>
-                    <p>Semua pengajuan pending memiliki waktu persiapan yang cukup atau sudah diproses.</p>
+                    <h3>Tidak Ada Notifikasi</h3>
+                    <p>Semua pengajuan dan peminjaman dalam keadaan baik. Tidak ada tindakan yang diperlukan saat ini.</p>
                 </div>
             {% endif %}
         </div>

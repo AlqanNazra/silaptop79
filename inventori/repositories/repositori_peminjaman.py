@@ -152,6 +152,7 @@ class PeminjamanRepository:
     def _map_to_dto(self, row):
         return PeminjamanDTO(
             id_peminjaman=row.get("id_peminjaman"),
+            id_pengajuan=row.get("id_pengajuan"),
             id_user=row.get("id_user"),
             id_laptop_inventori=row.get("id_laptop_inventori"),
             tanggal_pinjam=row.get("tanggal_pinjam"),

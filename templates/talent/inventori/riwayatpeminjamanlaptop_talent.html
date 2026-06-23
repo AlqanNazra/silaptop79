@@ -320,7 +320,7 @@
         }
 
         /* Status Badge */
-        .badge-returned {
+        .badge-dikembalikan {
             display: inline-flex;
             align-items: center;
             gap: 6px;
@@ -334,7 +334,7 @@
             letter-spacing: 0.5px;
         }
 
-        .badge-returned .dot {
+        .badge-dikembalikan .dot {
             width: 6px;
             height: 6px;
             background-color: #22C55E;
@@ -442,7 +442,16 @@
                 </div>
                 <h2 class="active-device-title">{{ active_laptop.nama_laptop }} ({{ active_laptop.model }})</h2>
                 <p class="active-device-desc">
-                    Anda telah meminjam perangkat ini sejak {{ active_peminjaman.tanggal_pinjam|date:"d M Y" }}. Jika Anda telah menyelesaikan sprint saat ini, harap mulai proses pengembalian agar tersedia bagi orang lain.
+                    Anda telah meminjam perangkat ini sejak {{ active_peminjaman.tanggal_pinjam|date:"d M Y" }}.
+                    {% if active_jatuh_tempo %}
+                    Jatuh tempo: <strong>{{ active_jatuh_tempo|date:"d M Y" }}</strong>
+                    {% if active_sisa_hari is not None %}
+                    ({% if active_sisa_hari < 0 %}<span style="color:#dc2626;">⚠️ Lewat {{ active_sisa_hari|stringformat:"d"|slice:"1:" }} hari!</span>
+                    {% elif active_sisa_hari == 0 %}<span style="color:#dc2626;">⚠️ Hari ini jatuh tempo!</span>
+                    {% elif active_sisa_hari <= 3 %}<span style="color:#d97706;">{{ active_sisa_hari }} hari lagi</span>
+                    {% else %}{{ active_sisa_hari }} hari lagi{% endif %})
+                    {% endif %}
+                    {% endif %}
                 </p>
                 <div class="active-card-actions">
                     <a href="{% url 'pengembalianlaptop_talent' %}" style="text-decoration:none;">
@@ -538,30 +547,44 @@
                                     <span class="periode-sub-text">Ket: {{ p.keterangan|default:"-" }}</span>
                                 </td>
                                 <td>
-                                    <span class="durasi-text">-</span>
+                                    <span class="durasi-text">{{ p.durasi_hari }} Hari</span>
                                 </td>
                                 <td>
                                     {% if p.status == 'selesai' or p.status == 'dikembalikan' %}
-                                    <span class="badge-returned">
+                                    <span class="badge-dikembalikan">
                                         <span class="dot"></span>
                                         DIKEMBALIKAN
                                     </span>
                                     {% elif p.status == 'dipinjam' or p.status == 'aktif' %}
-                                    <span class="badge-returned" style="background-color: #DBEAFE; color: #1E40AF;">
+                                    <span class="badge-dikembalikan" style="background-color: #DBEAFE; color: #1E40AF;">
                                         <span class="dot" style="background-color: #2563EB;"></span>
                                         DIPINJAM
                                     </span>
+                                    {% elif p.status == 'ready' or p.status == 'siap_diambil' %}
+                                    <span class="badge-dikembalikan" style="background-color: #FEF3C7; color: #B45309;">
+                                        <span class="dot" style="background-color: #F59E0B;"></span>
+                                        SIAP DIAMBIL
+                                    </span>
                                     {% else %}
-                                    <span class="badge-returned" style="background-color: #FEE2E2; color: #991B1B;">
+                                    <span class="badge-dikembalikan" style="background-color: #FEE2E2; color: #991B1B;">
                                         <span class="dot" style="background-color: #EF4444;"></span>
                                         {{ p.status|upper }}
                                     </span>
                                     {% endif %}
                                 </td>
                                 <td>
-                                    <a href="{% url 'detaillaptop_talent' %}" style="text-decoration:none;">
-                                        <button class="btn-table-action">Detail</button>
-                                    </a>
+                                    <div style="display: flex; gap: 8px; align-items: center; justify-content: center;">
+                                        {% if p.status == 'ready' or p.status == 'siap_diambil' %}
+                                        <form method="POST" action="{% url 'konfirmasi_penerimaan_talent' %}" style="margin: 0; display: inline;">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="id_peminjaman" value="{{ p.id_peminjaman }}">
+                                            <button type="submit" class="btn-table-action" style="background-color: #10B981; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: all 0.2s;">Terima Laptop</button>
+                                        </form>
+                                        {% endif %}
+                                        <a href="{% url 'detaillaptop_talent' %}" style="text-decoration:none;">
+                                            <button class="btn-table-action">Detail</button>
+                                        </a>
+                                    </div>
                                 </td>
                             </tr>
                             {% empty %}

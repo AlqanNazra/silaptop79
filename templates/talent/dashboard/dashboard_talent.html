@@ -249,11 +249,11 @@
             background-color: #CBD5E1;
         }
 
-        .stat-box.rejected::before {
+        .stat-box.ditolak::before {
             background-color: #EF4444;
         }
 
-        .stat-box.approved::before {
+        .stat-box.disetujui::before {
             background-color: #22C55E;
         }
 
@@ -276,11 +276,11 @@
             color: #64748B;
         }
 
-        .stat-box.rejected .stat-box-label {
+        .stat-box.ditolak .stat-box-label {
             color: #EF4444;
         }
 
-        .stat-box.approved .stat-box-label {
+        .stat-box.disetujui .stat-box-label {
             color: #22C55E;
         }
 
@@ -385,30 +385,30 @@
             border-radius: 50%;
         }
 
-        .status-badge.pending {
+        .status-badge.menunggu {
             background-color: #EFF6FF;
             color: #1D4ED8;
         }
 
-        .status-badge.pending::before {
+        .status-badge.menunggu::before {
             background-color: #3B82F6;
         }
 
-        .status-badge.approved {
+        .status-badge.disetujui {
             background-color: #F0FDF4;
             color: #15803D;
         }
 
-        .status-badge.approved::before {
+        .status-badge.disetujui::before {
             background-color: #22C55E;
         }
 
-        .status-badge.rejected {
+        .status-badge.ditolak {
             background-color: #FEF2F2;
             color: #991B1B;
         }
 
-        .status-badge.rejected::before {
+        .status-badge.ditolak::before {
             background-color: #EF4444;
         }
     </style>
@@ -449,6 +449,29 @@
                     </div>
                 </div>
 
+                <!-- Notifikasi Section -->
+                {% if notifikasi_talent %}
+                <div class="activity-section" style="margin-bottom: 24px; background: #fff; padding: 24px; border-radius: 12px; border: 1px solid #e2e8f0;">
+                    <div class="section-header" style="margin-bottom: 16px;">
+                        <div class="section-title">
+                            <h3 style="color: #0f172a; font-size: 16px; font-weight: 600; margin: 0;">Notifikasi Terbaru</h3>
+                            <p style="color: #64748b; font-size: 13px; margin: 4px 0 0 0;">Pembaruan status pengajuan Anda</p>
+                        </div>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                        {% for notif in notifikasi_talent %}
+                        <div style="padding: 12px 16px; border-radius: 8px; border-left: 4px solid {% if notif.status == 'disetujui' %}#10b981{% else %}#ef4444{% endif %}; background: #f8fafc; display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <p style="margin: 0; font-size: 14px; color: #334155; font-weight: 500;">{{ notif.pesan }}</p>
+                                <span style="font-size: 12px; color: #94a3b8; display: block; margin-top: 4px;">{{ notif.waktu }}</span>
+                            </div>
+                            <span class="status-badge {{ notif.status }}">{{ notif.status|capfirst }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
                 <!-- Activity Section -->
                 <div class="activity-section">
                     <div class="section-header">
@@ -480,12 +503,12 @@
                                 </svg>
                                 MENUNGGU
                             </div>
-                            <p class="stat-box-value">{{ total_pending }}</p>
+                            <p class="stat-box-value">{{ total_menunggu }}</p>
                             <p class="stat-box-desc">Pengajuan laptop diproses</p>
                         </div>
 
                         <!-- Ditolak -->
-                        <div class="stat-box rejected">
+                        <div class="stat-box ditolak">
                             <div class="stat-box-label">
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                     stroke-width="2.5">
@@ -500,7 +523,7 @@
                         </div>
 
                         <!-- Disetujui -->
-                        <div class="stat-box approved">
+                        <div class="stat-box disetujui">
                             <div class="stat-box-label">
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                     stroke-width="2.5">
