@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tambah Proyek Baru - SiLaptop79</title>
-
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -363,7 +363,7 @@
             <h1 class="page-title">Tambah Proyek Baru</h1>
             <p class="page-subtitle">Daftarkan proyek baru serta konfigurasikan role, tumpukan teknologi, dan bobot DSS kriteria laptop pendukungnya.</p>
             
-            <form action="{% url 'tambahproyek_it' %}" method="POST">
+            <form id="form-tambah-proyek" action="{% url 'tambahproyek_it' %}" method="POST">
                 {% csrf_token %}
                 <div class="row-container">
                     
@@ -516,6 +516,31 @@
     {{ role_data_json|json_script:"role-data" }}
 
     <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const form = document.getElementById("form-tambah-proyek");
+            if (!form) return;
+            form.addEventListener("submit", function (e) {
+                const roleSelects = document.querySelectorAll(".role-select");
+                const selectedRoles = [];
+                for (const select of roleSelects) {
+                    const roleId = select.value;
+                    if (!roleId) {
+                        continue;
+                    }
+                    if (selectedRoles.includes(roleId)) {
+                        e.preventDefault();
+                        Swal.fire({
+                            icon: "warning",
+                            title: "Role Duplikat",
+                            text: "Role yang sama tidak boleh dipilih lebih dari satu kali dalam satu proyek.",
+                            confirmButtonText: "OK"
+                        });
+                        return false;
+                    }
+                    selectedRoles.push(roleId);
+                }
+            });
+        });
         const roleData = JSON.parse(document.getElementById("role-data").textContent);
 
         document.addEventListener("change", function(e) {

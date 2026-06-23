@@ -4,37 +4,33 @@ CREATE TABLE inventori_proyek (
     user_perusahaan VARCHAR(255),
     mulai_proyek DATE,
     akhir_proyek DATE,
+    jenis_proyek VARCHAR (255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 ALTER TABLE inventori_proyek ALTER COLUMN updated_at DROP NOT NULL;
 
-
 CREATE OR REPLACE FUNCTION tambah_proyek(
     p_nama_proyek VARCHAR,
     p_user_perusahaan VARCHAR,
     p_mulai_proyek DATE,
-    p_akhir_proyek DATE
+    p_akhir_proyek DATE,
+    p_jenis_proyek VARCHAR
 )
 RETURNS VARCHAR
-AS $$ 
+AS $$
 DECLARE
     v_id_proyek VARCHAR;
 BEGIN
-
     v_id_proyek :=
-        f_generate_id(
-            'PRYK',
-            'inventori_proyek',
-            'id_proyek'
-        );
-
+        f_generate_id('PRYK','inventori_proyek','id_proyek');
     INSERT INTO inventori_proyek(
         id_proyek,
         nama_proyek,
         user_perusahaan,
         mulai_proyek,
         akhir_proyek,
+        jenis_proyek,
         created_at,
         updated_at
     )
@@ -44,12 +40,11 @@ BEGIN
         p_user_perusahaan,
         p_mulai_proyek,
         p_akhir_proyek,
+        p_jenis_proyek,
         CURRENT_TIMESTAMP,
         CURRENT_TIMESTAMP
     );
-
     RETURN v_id_proyek;
-
 END;
 $$ LANGUAGE plpgsql;
 
@@ -60,32 +55,27 @@ CREATE OR REPLACE FUNCTION update_proyek(
     p_nama_proyek VARCHAR,
     p_user_perusahaan VARCHAR,
     p_mulai_proyek DATE,
-    p_akhir_proyek DATE
+    p_akhir_proyek DATE,
+    p_jenis_proyek VARCHAR
 )
-RETURNS BOOLEAN AS
-$$
+RETURNS BOOLEAN
+AS $$
 BEGIN
-
     UPDATE inventori_proyek
     SET
         nama_proyek = p_nama_proyek,
         user_perusahaan = p_user_perusahaan,
         mulai_proyek = p_mulai_proyek,
         akhir_proyek = p_akhir_proyek,
+        jenis_proyek = p_jenis_proyek,
         updated_at = CURRENT_TIMESTAMP
     WHERE id_proyek = p_id_proyek;
-
     IF NOT FOUND THEN
-        RAISE EXCEPTION
-        'Proyek tidak ditemukan';
+        RAISE EXCEPTION 'Proyek tidak ditemukan';
     END IF;
-
     RETURN TRUE;
-
 END;
-$$
-LANGUAGE plpgsql;
-
+$$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION hapus_proyek(
     p_id_proyek VARCHAR
@@ -124,18 +114,28 @@ CREATE OR REPLACE FUNCTION get_proyek(
 )
 RETURNS TABLE(
     id_proyek VARCHAR,
-    nama_proyek VARCHAR
+    nama_proyek VARCHAR,
+    user_perusahaan VARCHAR,
+    mulai_proyek DATE,
+    akhir_proyek DATE,
+    jenis_proyek VARCHAR,
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP
 )
 AS $$
 BEGIN
-
     RETURN QUERY
     SELECT
         p.id_proyek,
-        p.nama_proyek
-    FROM proyek p
+        p.nama_proyek,
+        p.user_perusahaan,
+        p.mulai_proyek,
+        p.akhir_proyek,
+        p.jenis_proyek,
+        p.created_at,
+        p.updated_at
+    FROM inventori_proyek p
     WHERE p.id_proyek = p_id;
-
 END;
 $$ LANGUAGE plpgsql;
 
@@ -177,7 +177,6 @@ END;
 $$
 LANGUAGE plpgsql;
 
-
 CREATE OR REPLACE FUNCTION get_detail_proyek(
     p_id_proyek VARCHAR
 )
@@ -186,23 +185,19 @@ RETURNS TABLE(
     nama_proyek VARCHAR,
     nama_role VARCHAR
 )
-AS
-$$
+AS $$
 BEGIN
-
     RETURN QUERY
-
     SELECT
         p.id_proyek,
         p.nama_proyek,
         r.nama_role
-    FROM proyek p
-    JOIN projectrole pr
+    FROM inventori_proyek p
+    JOIN inventori_project_role pr
         ON pr.id_proyek = p.id_proyek
-    JOIN role r
+    JOIN inventori_role r
         ON r.id_role = pr.id_role
     WHERE p.id_proyek = p_id_proyek;
-
 END;
 $$ LANGUAGE plpgsql;
 
@@ -214,20 +209,16 @@ RETURNS TABLE(
     id_role VARCHAR,
     nama_role VARCHAR
 )
-AS
-$$
+AS $$
 BEGIN
-
     RETURN QUERY
-
     SELECT
         r.id_role,
         r.nama_role
-    FROM projectrole pr
-    JOIN role r
+    FROM inventori_project_role pr
+    JOIN inventori_role r
         ON r.id_role = pr.id_role
     WHERE pr.id_proyek = p_id_proyek;
-
 END;
 $$ LANGUAGE plpgsql;
 
@@ -238,24 +229,18 @@ RETURNS TABLE(
     id_teknologi VARCHAR,
     nama_teknologi VARCHAR
 )
-AS
-$$
+AS $$
 BEGIN
-
     RETURN QUERY
-
     SELECT DISTINCT
         t.id_teknologi,
         t.nama_teknologi
-    FROM teknologi t
-    JOIN role_teknologi rt
-        ON rt.id_teknologi = t.id_teknologi
-    JOIN role r
-        ON r.id_role = rt.id_role
-    JOIN projectrole pr
-        ON pr.id_role = r.id_role
+    FROM inventori_project_role pr
+    JOIN inventori_role_teknologi rt
+        ON rt.id_role = pr.id_role
+    JOIN inventori_teknologi t
+        ON t.id_teknologi = rt.id_teknologi
     WHERE pr.id_proyek = p_id_proyek;
-
 END;
 $$ LANGUAGE plpgsql;
 
@@ -267,26 +252,18 @@ RETURNS TABLE(
     total_teknologi BIGINT,
     rata_bobot FLOAT
 )
-AS
-$$
+AS $$
 BEGIN
-
     RETURN QUERY
-
     SELECT
         COUNT(DISTINCT pr.id_role),
         COUNT(DISTINCT rt.id_teknologi),
         COALESCE(AVG(b.nilai_bobot),0)
-
-    FROM projectrole pr
-
-    LEFT JOIN role_teknologi rt
+    FROM inventori_project_role pr
+    LEFT JOIN inventori_role_teknologi rt
         ON rt.id_role = pr.id_role
-
-    LEFT JOIN bobot_kriteria b
-        ON b.id_role = pr.id_role
-
+    LEFT JOIN dss_bobot_kriteria b
+        ON b.id_role_teknologi = rt.id_role_teknologi
     WHERE pr.id_proyek = p_id_proyek;
-
 END;
 $$ LANGUAGE plpgsql;
