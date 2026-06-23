@@ -153,7 +153,7 @@ class Servicepreposesdata:
         role_match = []
         min_ram = role_requirement["min_ram"]
         min_storage = role_requirement["min_storage"]
-        min_processor_score = role_requirement["min_processor_score"]
+        # min_processor_score = role_requirement["min_processor_score"]
         for item in data_list:
             ram = item.get("ram_kapasitas", 0)
             storage = item.get("storage_kapasitas", 0)
@@ -164,7 +164,7 @@ class Servicepreposesdata:
             if (
                 ram >= min_ram
                 and storage >= min_storage
-                and processor_score >= min_processor_score
+                # and processor_score >= min_processor_score
             ):
                 role_match.append(item)
         return {

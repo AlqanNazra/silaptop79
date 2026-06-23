@@ -2672,6 +2672,11 @@ def tambahproyek_it_view(request):
                 akhir_proyek=request.POST.get("akhir_proyek")
             )
             role_ids = request.POST.getlist("role_ids[]")
+
+            if len(role_ids) != len(set(role_ids)):
+                raise Exception(
+                    "Role yang sama tidak boleh dipilih lebih dari satu kali dalam satu proyek."
+                )
             with transaction.atomic():
                 result = (service_proyek.tambah_proyek(proyek_data))
                 
