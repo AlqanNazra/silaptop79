@@ -17,7 +17,17 @@ class LaptopInventoriRepository(ILaptopInventoriRepository):
     def ambil_laptop(self):
         with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute("SELECT * FROM ambil_laptop_inventori()")
-            return cur.fetchall()
+            rows = cur.fetchall()
+            for r in rows:
+                if r.get('berat') is None:
+                    r['berat'] = 0
+                if r.get('baterai') is None:
+                    r['baterai'] = 0
+                if r.get('benchmark_score') is None:
+                    r['benchmark_score'] = 0
+                if r.get('ukuran_layar') is None:
+                    r['ukuran_layar'] = 0
+            return rows
 
     def ambil_spek_laptop(self,id_laptop):
         with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
@@ -62,7 +72,17 @@ class LaptopInventoriRepository(ILaptopInventoriRepository):
 
         with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute(query, params)
-            return cur.fetchall()
+            rows = cur.fetchall()
+            for r in rows:
+                if r.get('berat') is None:
+                    r['berat'] = 0
+                if r.get('baterai') is None:
+                    r['baterai'] = 0
+                if r.get('benchmark_score') is None:
+                    r['benchmark_score'] = 0
+                if r.get('ukuran_layar') is None:
+                    r['ukuran_layar'] = 0
+            return rows
         
     def ambil_detail_laptop(self, id_laptop):
         query = """

@@ -83,18 +83,30 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         }
 
-        // Find or create pagination container
+        // Find or create pagination container locally to this table/wrapper
         let paginationContainer = null;
-        let parent = table.parentElement;
-        while (parent && !paginationContainer) {
-            paginationContainer = parent.querySelector('.pagination-container');
-            if (paginationContainer && paginationContainer.closest('table') === table) {
-                paginationContainer = null; // not valid
+        let sibling = table.nextElementSibling;
+        if (sibling && (sibling.classList.contains('pagination-container') || sibling.classList.contains('pagination-row'))) {
+            paginationContainer = sibling;
+        }
+        if (!paginationContainer && table.parentElement) {
+            let parentSibling = table.parentElement.nextElementSibling;
+            if (parentSibling && (parentSibling.classList.contains('pagination-container') || parentSibling.classList.contains('pagination-row'))) {
+                paginationContainer = parentSibling;
             }
-            parent = parent.parentElement;
         }
 
-        if (!paginationContainer) {
+        if (paginationContainer) {
+            // Clean up any existing length wrappers or selectors inside the matched container
+            const existing = paginationContainer.querySelectorAll('.table-length-wrapper, .per-page-selector');
+            existing.forEach(el => el.remove());
+            
+            // Standardize container contents for client-side pagination
+            paginationContainer.innerHTML = `
+                <span class="pagination-text" style="font-size: 14px; color: #64748b;"></span>
+                <div class="pagination-controls" style="display: flex; gap: 6px; align-items: center;"></div>
+            `;
+        } else {
             paginationContainer = document.createElement('div');
             paginationContainer.className = 'pagination-container';
             paginationContainer.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-top: 1px solid #f1f5f9;';
@@ -102,18 +114,11 @@ document.addEventListener("DOMContentLoaded", function() {
                 <span class="pagination-text" style="font-size: 14px; color: #64748b;"></span>
                 <div class="pagination-controls" style="display: flex; gap: 6px; align-items: center;"></div>
             `;
-            const insertTarget = table.closest('.table-container') || table;
+            const insertTarget = table.closest('.table-container') || table.parentElement || table;
             insertTarget.parentNode.insertBefore(paginationContainer, insertTarget.nextSibling);
         }
 
         // Inject page size selector
-        // Clean up any existing length wrappers inside the table's card or parent area to avoid duplicates
-        const parentContainer = table.closest('.table-card') || table.parentNode;
-        if (parentContainer) {
-            const existingWrappers = parentContainer.querySelectorAll('.table-length-wrapper');
-            existingWrappers.forEach(w => w.remove());
-        }
-
         const selectWrapper = document.createElement('div');
         selectWrapper.className = 'table-length-wrapper';
         selectWrapper.style.cssText = 'display: flex; align-items: center; gap: 8px; font-size: 14px; color: #475569; font-family: "Inter", sans-serif;';

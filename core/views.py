@@ -366,9 +366,12 @@ def detailpengajuan_it_view(request):
         user_obj = User.objects.filter(id_user=pengajuan.id_user).first()
         pengajuan.user_nama = user_obj.nama if user_obj else pengajuan.id_user
 
-        from inventori.models import Proyek
+        from inventori.models import Proyek, Role
         proyek_obj = Proyek.objects.filter(id_proyek=pengajuan.id_proyek).first()
         pengajuan.proyek_nama = proyek_obj.nama_proyek if proyek_obj else "-"
+
+        role_obj = Role.objects.filter(nama_role__iexact=pengajuan.kebutuhan_role).first()
+        id_role = role_obj.id_role if role_obj else ""
 
         if request.method == 'POST':
             action = request.POST.get('action')
@@ -387,7 +390,9 @@ def detailpengajuan_it_view(request):
                 return redirect('pengajuanlaptop_it')
 
         context = {
-            'pengajuan': pengajuan
+            'pengajuan': pengajuan,
+            'id_role': id_role,
+            'id_proyek': pengajuan.id_proyek or ""
         }
         return render(request, 'it/inventori/detailpengajuan_it.html', context)
         
@@ -787,8 +792,9 @@ def inputkriteria_hc_view(request):
                     # min_processor=int(minimum_requirement.get("score_processro",0) or 0)
                 )
             service = Servicesaw(conn)
+            user_id = request.user.id_user if (hasattr(request.user, 'id_user') and request.user.id_user) else 'U001'
             hasil = service.proses_dss_saw(
-                id_user="USR_0001",
+                id_user=user_id,
                 id_bobot=selected_role ,
                 sumber_data=jenis_rekomendasi,
                 filter_data=filter_data,
@@ -1521,8 +1527,9 @@ def inputkriteria_it_view(request):
                 )
 
             service = Servicesaw(conn)
+            user_id = request.user.id_user if (hasattr(request.user, 'id_user') and request.user.id_user) else 'U002'
             hasil = service.proses_dss_saw(
-                id_user="USR_0001",
+                id_user=user_id,
                 id_bobot=selected_role ,
                 sumber_data=jenis_rekomendasi,
                 filter_data=filter_data,
@@ -1663,8 +1670,67 @@ def tambahspek_it_view(request):
 
 
 
-def editdatalaptop_it_view(request):
-    return render(request, 'it/inventori/editdatalaptop_it.html')
+def editdatalaptop_it_view(request, id_laptop):
+    from inventori.models import LaptopInventori, Processor, RAM, Storage
+    from inventori.services.laptop_inventori.update import UpdateLaptopInventoriService
+    from inventori.dto.dto_laptop_inventori import LaptopInventoriDTO
+    try:
+        laptop = LaptopInventori.objects.get(id_laptop_inventori=id_laptop)
+    except LaptopInventori.DoesNotExist:
+        messages.error(request, 'Laptop tidak ditemukan.')
+        return redirect('manajemen_laptop_it')
+
+    if request.method == 'POST':
+        try:
+            update_service = UpdateLaptopInventoriService()
+            kondisi = request.POST.get('kondisi')
+            status = request.POST.get('status')
+            lokasi = request.POST.get('lokasi')
+
+            if laptop.status.lower() == 'dipinjam' and status and status.lower() != 'dipinjam':
+                raise ValueError("Laptop sedang aktif dipinjam dan tidak dapat diubah statusnya.")
+
+            if kondisi:
+                update_service.update_kondisi(id_laptop, kondisi)
+            if status:
+                update_service.update_status(id_laptop, status, lokasi)
+
+            # Update spesifikasi
+            id_processor = request.POST.get('id_processor')
+            id_ram = request.POST.get('id_ram')
+            id_storage = request.POST.get('id_storage')
+            
+            if id_processor and id_ram and id_storage:
+                dto = LaptopInventoriDTO(
+                    nama_laptop=laptop.nama_laptop,
+                    model=laptop.model,
+                    os=laptop.os,
+                    kondisi=kondisi or laptop.kondisi,
+                    status=status or laptop.status,
+                    lokasi=lokasi or laptop.lokasi,
+                    id_processor=id_processor,
+                    id_ram=id_ram,
+                    id_storage=id_storage,
+                    id_laptop_inventori=id_laptop
+                )
+                update_service.update_spek(dto)
+
+            messages.success(request, 'Data laptop berhasil diperbarui.')
+            return redirect('detaillaptop_it', id_laptop=id_laptop)
+        except Exception as e:
+            messages.error(request, f'Gagal mengupdate laptop: {str(e)}')
+
+    processors = Processor.objects.all()
+    rams = RAM.objects.all()
+    storages = Storage.objects.all()
+    
+    context = {
+        'laptop': laptop,
+        'processors': processors,
+        'rams': rams,
+        'storages': storages,
+    }
+    return render(request, 'it/inventori/editdatalaptop_it.html', context)
 
 
 

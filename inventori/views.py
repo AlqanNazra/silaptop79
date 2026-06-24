@@ -56,11 +56,11 @@ def manajemen_laptop_page(request):
     storage_filter = request.GET.get('storage', '').strip()
 
     try:
-        per_page = int(request.GET.get('per_page', 10))
-        if per_page not in [10, 15, 25]:
-            per_page = 10
+        per_page = int(request.GET.get('per_page', 15))
+        if per_page not in [5, 10, 15, 25, 50]:
+            per_page = 15
     except ValueError:
-        per_page = 10
+        per_page = 15
 
     laptops = LaptopInventori.objects.select_related('id_processor', 'id_ram', 'id_storage').all()
 
@@ -84,7 +84,7 @@ def manajemen_laptop_page(request):
     laptops = laptops.order_by('id_laptop_inventori')
 
     from django.core.paginator import Paginator
-    paginator = Paginator(laptops, 999999)
+    paginator = Paginator(laptops, per_page)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
@@ -93,8 +93,12 @@ def manajemen_laptop_page(request):
         'total': laptops.count(),
         'search_query': search_query,
         'status_filter': status_filter,
+        'ram_filter': ram_filter,
+        'storage_filter': storage_filter,
+        'per_page': per_page,
     }
     return render(request, 'hc/inventori/manajemenlaptop_hc.html', context)
+
 
 
 # @login_required
@@ -361,12 +365,15 @@ def detailpengajuan_hc_view(request):
             messages.error(request, 'Data pengajuan tidak ditemukan.')
             return redirect('pengajuanlaptop_hc')
 
-        from inventori.models import User, Proyek
+        from inventori.models import User, Proyek, Role
         user_obj = User.objects.filter(id_user=pengajuan.id_user).first()
         pengajuan.user_nama = user_obj.nama if user_obj else pengajuan.id_user
 
         proyek_obj = Proyek.objects.filter(id_proyek=pengajuan.id_proyek).first()
         pengajuan.proyek_nama = proyek_obj.nama_proyek if proyek_obj else "-"
+
+        role_obj = Role.objects.filter(nama_role__iexact=pengajuan.kebutuhan_role).first()
+        id_role = role_obj.id_role if role_obj else ""
 
         if request.method == 'POST':
             action = request.POST.get('action')
@@ -388,7 +395,9 @@ def detailpengajuan_hc_view(request):
                 return redirect('pengajuanlaptop_hc')
 
         context = {
-            'pengajuan': pengajuan
+            'pengajuan': pengajuan,
+            'id_role': id_role,
+            'id_proyek': pengajuan.id_proyek or ""
         }
         return render(request, 'hc/inventori/detailpengajuan_hc.html', context)
         

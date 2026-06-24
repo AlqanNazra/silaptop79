@@ -351,7 +351,7 @@
                         <option value="16" {% if ram_filter == '16' %}selected{% endif %}>16 GB</option>
                         <option value="32" {% if ram_filter == '32' %}selected{% endif %}>32 GB</option>
                     </select>
-
+ 
                     <select id="storage-select" name="storage"
                         style="padding: 12px 16px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: 'Inter', sans-serif; font-weight: 500; color: #475569; background: white; cursor: pointer;">
                         <option value="">Semua Storage</option>
@@ -428,15 +428,16 @@
                             style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: #64748b; margin-right: 12px;">
                             <span>Tampilkan:</span>
                             <select
-                                onchange="window.location.href = '?page=1&per_page=' + this.value + '{% if search_query %}&q={{ search_query|escapejs }}{% endif %}{% if status_filter %}&status={{ status_filter|escapejs }}{% endif %}';"
+                                onchange="window.location.href = '?page=1&per_page=' + this.value + '{% if search_query %}&q={{ search_query|escapejs }}{% endif %}{% if status_filter %}&status={{ status_filter|escapejs }}{% endif %}{% if ram_filter %}&ram={{ ram_filter|escapejs }}{% endif %}{% if storage_filter %}&storage={{ storage_filter|escapejs }}{% endif %}';"
                                 style="padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; color: #334155; background-color: #ffffff; cursor: pointer;">
-                                <option value="10" {% if per_page == 10 %}selected{% endif %}>10</option>
+                                <option value="5" {% if per_page == 5 %}selected{% endif %}>5</option>
                                 <option value="15" {% if per_page == 15 %}selected{% endif %}>15</option>
                                 <option value="25" {% if per_page == 25 %}selected{% endif %}>25</option>
+                                <option value="50" {% if per_page == 50 %}selected{% endif %}>50</option>
                             </select>
                         </div>
                         {% if laptops.has_previous %}
-                        <a href="?page={{ laptops.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if ram_filter %}&ram={{ ram_filter }}{% endif %}{% if storage_filter %}&storage={{ storage_filter }}{% endif %}"
+                        <a href="?page={{ laptops.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if ram_filter %}&ram={{ ram_filter }}{% endif %}{% if storage_filter %}&storage={{ storage_filter }}{% endif %}{% if per_page %}&per_page={{ per_page }}{% endif %}"
                             class="page-btn"
                             style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">
                             <i class="fa-solid fa-chevron-left"></i>
@@ -449,7 +450,7 @@
                             style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; background: #0b57c6; color: white; font-weight: bold; font-size: 12px;">{{
                             num }}</span>
                         {% elif num > laptops.number|add:'-3' and num < laptops.number|add:'3' %} <a
-                            href="?page={{ num }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}"
+                            href="?page={{ num }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if ram_filter %}&ram={{ ram_filter }}{% endif %}{% if storage_filter %}&storage={{ storage_filter }}{% endif %}{% if per_page %}&per_page={{ per_page }}{% endif %}"
                             class="page-btn"
                             style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">
                             {{ num }}</a>
@@ -457,7 +458,7 @@
                             {% endfor %}
 
                             {% if laptops.has_next %}
-                            <a href="?page={{ laptops.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}"
+                            <a href="?page={{ laptops.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if ram_filter %}&ram={{ ram_filter }}{% endif %}{% if storage_filter %}&storage={{ storage_filter }}{% endif %}{% if per_page %}&per_page={{ per_page }}{% endif %}"
                                 class="page-btn"
                                 style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">
                                 <i class="fa-solid fa-chevron-right"></i>

@@ -442,7 +442,7 @@
 
             {% if pengajuan.status|lower == 'menunggu' or pengajuan.status|lower == 'pending' %}
             <div class="action-buttons-wrapper">
-                <a href="{% url 'setujui_pengajuan_it' %}?id={{ pengajuan.id_pengajuan }}" style="flex: 1; text-decoration: none;">
+                <a href="{% url 'inputkriteria_it' %}?id_proyek={{ id_proyek }}&id_role={{ id_role }}" style="flex: 1; text-decoration: none;">
                     <button class="btn-action btn-approve" style="width: 100%;">
                         <i class="fa-solid fa-circle-check"></i> Isi Detail Laptop Pengajuan
                     </button>
