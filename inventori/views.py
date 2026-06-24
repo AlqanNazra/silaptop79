@@ -56,11 +56,11 @@ def manajemen_laptop_page(request):
     storage_filter = request.GET.get('storage', '').strip()
 
     try:
-        per_page = int(request.GET.get('per_page', 5))
-        if per_page not in [5, 15, 25, 50]:
-            per_page = 5
+        per_page = int(request.GET.get('per_page', 10))
+        if per_page not in [10, 15, 25]:
+            per_page = 10
     except ValueError:
-        per_page = 5
+        per_page = 10
 
     laptops = LaptopInventori.objects.select_related('id_processor', 'id_ram', 'id_storage').all()
 
@@ -108,11 +108,11 @@ def pengajuan_page_view(request):
     active_tab = request.GET.get('tab', 'belum_disetujui').strip().lower()
 
     try:
-        per_page = int(request.GET.get('per_page', 5))
-        if per_page not in [5, 15, 25, 50]:
-            per_page = 5
+        per_page = int(request.GET.get('per_page', 10))
+        if per_page not in [10, 15, 25]:
+            per_page = 10
     except ValueError:
-        per_page = 5
+        per_page = 10
 
     try:
         service = PengajuanService()

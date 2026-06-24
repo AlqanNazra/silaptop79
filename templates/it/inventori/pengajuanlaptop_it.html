@@ -448,23 +448,17 @@
                     <a href="?tab=belum_disetujui{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}"
                         style="padding: 12px 16px; font-size: 14px; font-weight: 600; text-decoration: none; color: {% if active_tab == 'belum_disetujui' %}#0b57c6{% else %}#64748b{% endif %}; border-bottom: 3px solid {% if active_tab == 'belum_disetujui' %}#0b57c6{% else %}transparent{% endif %}; transition: all 0.2s; display: flex; align-items: center; gap: 8px;">
                         <i class="fa-solid fa-clock"></i> Belum Disetujui
-                        <span
-                            style="background: {% if active_tab == 'belum_disetujui' %}#dbeafe{% else %}#e2e8f0{% endif %}; color: {% if active_tab == 'belum_disetujui' %}#0b57c6{% else %}#475569{% endif %}; padding: 2px 8px; border-radius: 9999px; font-size: 11px; font-weight: bold;">{{
-                            total_belum_disetujui }}</span>
+                        <span style="background: {% if active_tab == 'belum_disetujui' %}#dbeafe{% else %}#e2e8f0{% endif %}; color: {% if active_tab == 'belum_disetujui' %}#0b57c6{% else %}#475569{% endif %}; padding: 2px 8px; border-radius: 9999px; font-size: 11px; font-weight: bold;">{{ total_belum_disetujui }}</span>
                     </a>
                     <a href="?tab=sedang_berlangsung{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}"
                         style="padding: 12px 16px; font-size: 14px; font-weight: 600; text-decoration: none; color: {% if active_tab == 'sedang_berlangsung' %}#0b57c6{% else %}#64748b{% endif %}; border-bottom: 3px solid {% if active_tab == 'sedang_berlangsung' %}#0b57c6{% else %}transparent{% endif %}; transition: all 0.2s; display: flex; align-items: center; gap: 8px;">
                         <i class="fa-solid fa-laptop-medical"></i> Sedang Berlangsung
-                        <span
-                            style="background: {% if active_tab == 'sedang_berlangsung' %}#dbeafe{% else %}#e2e8f0{% endif %}; color: {% if active_tab == 'sedang_berlangsung' %}#0b57c6{% else %}#475569{% endif %}; padding: 2px 8px; border-radius: 9999px; font-size: 11px; font-weight: bold;">{{
-                            total_sedang_berlangsung }}</span>
+                        <span style="background: {% if active_tab == 'sedang_berlangsung' %}#dbeafe{% else %}#e2e8f0{% endif %}; color: {% if active_tab == 'sedang_berlangsung' %}#0b57c6{% else %}#475569{% endif %}; padding: 2px 8px; border-radius: 9999px; font-size: 11px; font-weight: bold;">{{ total_sedang_berlangsung }}</span>
                     </a>
                     <a href="?tab=riwayat_selesai{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}"
                         style="padding: 12px 16px; font-size: 14px; font-weight: 600; text-decoration: none; color: {% if active_tab == 'riwayat_selesai' %}#0b57c6{% else %}#64748b{% endif %}; border-bottom: 3px solid {% if active_tab == 'riwayat_selesai' %}#0b57c6{% else %}transparent{% endif %}; transition: all 0.2s; display: flex; align-items: center; gap: 8px;">
                         <i class="fa-solid fa-circle-check"></i> Riwayat Selesai
-                        <span
-                            style="background: {% if active_tab == 'riwayat_selesai' %}#dbeafe{% else %}#e2e8f0{% endif %}; color: {% if active_tab == 'riwayat_selesai' %}#0b57c6{% else %}#475569{% endif %}; padding: 2px 8px; border-radius: 9999px; font-size: 11px; font-weight: bold;">{{
-                            total_riwayat_selesai }}</span>
+                        <span style="background: {% if active_tab == 'riwayat_selesai' %}#dbeafe{% else %}#e2e8f0{% endif %}; color: {% if active_tab == 'riwayat_selesai' %}#0b57c6{% else %}#475569{% endif %}; padding: 2px 8px; border-radius: 9999px; font-size: 11px; font-weight: bold;">{{ total_riwayat_selesai }}</span>
                     </a>
                 </div>
 
@@ -592,10 +586,9 @@
                             <select
                                 onchange="window.location.href = '?page=1&per_page=' + this.value + '{% if search_query %}&q={{ search_query|escapejs }}{% endif %}{% if status_filter %}&status={{ status_filter|escapejs }}{% endif %}';"
                                 style="padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; color: #334155; background-color: #ffffff; cursor: pointer;">
-                                <option value="5" {% if per_page == 5 %}selected{% endif %}>5</option>
+                                <option value="10" {% if per_page == 10 %}selected{% endif %}>10</option>
                                 <option value="15" {% if per_page == 15 %}selected{% endif %}>15</option>
                                 <option value="25" {% if per_page == 25 %}selected{% endif %}>25</option>
-                                <option value="50" {% if per_page == 50 %}selected{% endif %}>50</option>
                             </select>
 
                             {% if list_pengajuan.has_previous %}

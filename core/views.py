@@ -198,11 +198,11 @@ def pengajuanlaptop_it_view(request):
     active_tab = request.GET.get('tab', 'belum_disetujui').strip().lower()
 
     try:
-        per_page = int(request.GET.get('per_page', 5))
-        if per_page not in [5, 15, 25, 50]:
-            per_page = 5
+        per_page = int(request.GET.get('per_page', 10))
+        if per_page not in [10, 15, 25]:
+            per_page = 10
     except ValueError:
-        per_page = 5
+        per_page = 10
 
     try:
         service = PengajuanService()
@@ -1264,11 +1264,11 @@ def manajemenlaptop_it_view(request):
     status_filter = request.GET.get('status', '')
 
     try:
-        per_page = int(request.GET.get('per_page', 5))
-        if per_page not in [5, 15, 25, 50]:
-            per_page = 5
+        per_page = int(request.GET.get('per_page', 10))
+        if per_page not in [10, 15, 25]:
+            per_page = 10
     except ValueError:
-        per_page = 5
+        per_page = 10
 
     from inventori.models import LaptopInventori
     laptops = LaptopInventori.objects.select_related('id_processor', 'id_ram', 'id_storage').all()
@@ -1661,11 +1661,7 @@ def tambahspek_it_view(request):
 
     return render(request, 'it/dss/tambahspek_it.html')
 
-def detaillaptop_it_view(request):
-    return render(request, 'it/inventori/detaillaptop_it.html')
 
-def riwayatpeminjamanlaptop_it_view(request):
-    return render(request, 'it/inventori/riwayatpeminjamanlaptop_it.html')
 
 def editdatalaptop_it_view(request):
     return render(request, 'it/inventori/editdatalaptop_it.html')
@@ -2338,11 +2334,11 @@ def pengajuanlaptop_talent_view(request):
             ]
 
         try:
-            per_page = int(request.GET.get('per_page', 5))
-            if per_page not in [5, 15, 25, 50]:
-                per_page = 5
+            per_page = int(request.GET.get('per_page', 10))
+            if per_page not in [10, 15, 25]:
+                per_page = 10
         except ValueError:
-            per_page = 5
+            per_page = 10
 
         import datetime as dt
         semua_pengajuan.sort(
@@ -2436,11 +2432,11 @@ def riwayatpeminjamanlaptop_talent_view(request):
     status_filter = request.GET.get('status', '')
 
     try:
-        per_page = int(request.GET.get('per_page', 5))
-        if per_page not in [5, 15, 25, 50]:
-            per_page = 5
+        per_page = int(request.GET.get('per_page', 10))
+        if per_page not in [10, 15, 25]:
+            per_page = 10
     except ValueError:
-        per_page = 5
+        per_page = 10
 
     try:
         user_id = request.user.id_user if hasattr(request.user, 'id_user') else None
