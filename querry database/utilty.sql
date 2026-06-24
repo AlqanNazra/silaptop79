@@ -54,7 +54,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-DROP FUNCTION getfilteredlaptopinventori
+DROP FUNCTION getfilteredlaptopinventori(character varying,character varying,character varying,character varying,double precision,double precision,double precision,character varying,character varying,character varying,integer,integer,integer,integer,integer,integer,integer,character varying,integer,integer,integer,character varying)
+
 -- Filter Inventori
 CREATE OR REPLACE FUNCTION GetFilteredLaptopinventori(
     f_id_laptop_inventori VARCHAR DEFAULT NULL,
@@ -69,6 +70,7 @@ CREATE OR REPLACE FUNCTION GetFilteredLaptopinventori(
     f_nama_processor VARCHAR DEFAULT NULL,
     f_manufacturer VARCHAR DEFAULT NULL,
     f_processor_model VARCHAR DEFAULT NULL,
+    f_processor_score INT DEFAULT NULL,
 
     f_cores INT DEFAULT NULL,
     f_min_cores INT DEFAULT NULL,
@@ -91,12 +93,11 @@ RETURNS TABLE (
     lokasi VARCHAR,
     ukuran_layar FLOAT,
     baterai FLOAT,
-    berat FLOAT,
     nama_processor VARCHAR,
     manufacturer VARCHAR,
     processor_model VARCHAR,
     cores INT,
-    benchmark_score INTEGER,
+    processor_score INTEGER,
     ram_kapasitas INT,
     ram_tipe VARCHAR,
     storage_kapasitas INT,
@@ -105,25 +106,24 @@ RETURNS TABLE (
 AS $$
 BEGIN
     RETURN QUERY
-	SELECT
-	    li.id_laptop_inventori,
-	    li.kondisi,
-	    li.status,
-	    li.lokasi,
-	    li.ukuran_layar,
-	    li.baterai,
-	    li.berat,
-	    li.nama_processor,
-	    li.manufacturer,
-	    li.processor_model,
-	    li.cores,
-	    li.benchmark_score,
-	    li.ram_kapasitas,
-	    li.ram_tipe,
-	    li.storage_kapasitas,
-	    li.storage_tipe
-
-    FROM ambil_laptop_inventori() li
+    SELECT
+        li.id_laptop_inventori,
+        li.kondisi,
+        li.status,
+        li.lokasi,
+        li.ukuran_layar,
+        li.baterai,
+        li.nama_processor,
+        p.manufacturer,       -- Diambil dari tabel processor
+        p.model AS processor_model, -- Diambil dari tabel processor
+        p.cores,              -- Diambil dari tabel processor
+        p.processor_score,    -- Diambil dari tabel processor
+        li.ram_kapasitas,
+        li.ram_tipe,
+        li.storage_kapasitas,
+        li.storage_tipe
+    FROM public.ambil_laptop_inventori() li
+    LEFT JOIN public.inventori_processor p ON li.nama_processor = p.nama_processor-- JOIN DISINI
 
     WHERE
         -- IDENTITAS
@@ -139,24 +139,25 @@ BEGIN
         AND (f_min_ukuran_layar IS NULL OR li.ukuran_layar >= f_min_ukuran_layar)
         AND (f_max_ukuran_layar IS NULL OR li.ukuran_layar <= f_max_ukuran_layar)
 
-        -- PROCESSOR
+        -- PROCESSOR (Menggunakan alias 'p' dari tabel processor)
         AND (f_nama_processor IS NULL OR li.nama_processor = f_nama_processor)
-        AND (f_manufacturer IS NULL OR li.manufacturer = f_manufacturer)
-        AND (f_processor_model IS NULL OR li.processor_model = f_processor_model)
+        AND (f_manufacturer IS NULL OR p.manufacturer = f_manufacturer)
+        AND (f_processor_model IS NULL OR p.model = f_processor_model)
+        AND (f_processor_score IS NULL OR p.processor_score >= f_processor_score)
 
         -- CORES
-        AND (f_cores IS NULL OR li.cores = f_cores)
-        AND (f_min_cores IS NULL OR li.cores >= f_min_cores)
-        AND (f_max_cores IS NULL OR li.cores <= f_max_cores)
+        AND (f_cores IS NULL OR p.cores = f_cores)
+        AND (f_min_cores IS NULL OR p.cores >= f_min_cores)
+        AND (f_max_cores IS NULL OR p.cores <= f_max_cores)
 
-        -- RAM (FIXED SESUAI JOIN)
-        AND (f_ram_kapasitas IS NULL OR li.ram_kapasitas = f_ram_kapasitas)
+        -- RAM
+        AND (f_ram_kapasitas IS NULL OR li.ram_kapasitas >= f_min_ram_kapasitas)
         AND (f_min_ram_kapasitas IS NULL OR li.ram_kapasitas >= f_min_ram_kapasitas)
         AND (f_max_ram_kapasitas IS NULL OR li.ram_kapasitas <= f_max_ram_kapasitas)
         AND (f_ram_tipe IS NULL OR li.ram_tipe = f_ram_tipe)
 
-        -- STORAGE (FIXED SESUAI JOIN)
-        AND (f_storage_kapasitas IS NULL OR li.storage_kapasitas = f_storage_kapasitas)
+        -- STORAGE
+        AND (f_storage_kapasitas IS NULL OR li.storage_kapasitas >= f_min_storage)
         AND (f_min_storage IS NULL OR li.storage_kapasitas >= f_min_storage)
         AND (f_max_storage IS NULL OR li.storage_kapasitas <= f_max_storage)
         AND (f_storage_tipe IS NULL OR li.storage_tipe = f_storage_tipe);
@@ -164,7 +165,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-DROP FUNCTION getfilteredlaptoppengadaan
+DROP FUNCTION getfilteredlaptoppengadaan(character varying,numeric,integer,integer,character varying,double precision,double precision,double precision,double precision,double precision,double precision,character varying,character varying,character varying,integer,integer,integer,integer,integer,integer,integer,character varying,integer,integer,integer,character varying)
 
 -- FILTER PENGADAAN
 CREATE OR REPLACE FUNCTION GetFilteredLaptopPengadaan(
@@ -191,6 +192,7 @@ CREATE OR REPLACE FUNCTION GetFilteredLaptopPengadaan(
     f_cores INT DEFAULT NULL,
     f_min_cores INT DEFAULT NULL,
     f_max_cores INT DEFAULT NULL,
+    f_processor_score INT DEFAULT NULL,
 
     -- RAM
     f_ram_kapasitas INT DEFAULT NULL,
@@ -210,12 +212,11 @@ RETURNS TABLE (
     gpu VARCHAR,
     ukuran_layar FLOAT,
     baterai FLOAT,
-    berat FLOAT,
     nama_processor VARCHAR,
     manufacturer VARCHAR,
     processor_model VARCHAR,
     cores INT,
-    benchmark_score INTEGER,
+    processor_score INTEGER,
     ram_kapasitas INT,
     ram_tipe VARCHAR,
     storage_kapasitas INT,
@@ -224,23 +225,25 @@ RETURNS TABLE (
 AS $$
 BEGIN
     RETURN QUERY
-	SELECT
-	    lp.id_laptop_pengadaan,
-	    lp.harga,
-	    lp.gpu,
-	    lp.ukuran_layar,
-	    lp.baterai,
-	    lp.berat,
-	    lp.nama_processor,
-	    lp.manufacturer,
-	    lp.processor_model,
-	    lp.cores,
-	    lp.benchmark_score,
-	    lp.ram_kapasitas,
-	    lp.ram_tipe,
-	    lp.storage_kapasitas,
-	    lp.storage_tipe
+    SELECT
+        lp.id_laptop_pengadaan,
+        lp.harga,
+        lp.gpu,
+        lp.ukuran_layar,
+        lp.baterai,
+        lp.nama_processor,
+        p.manufacturer,       -- Diambil dari tabel processor
+        p.model AS processor_model, -- Diambil dari tabel processor
+        p.cores,              -- Diambil dari tabel processor
+        p.processor_score,    -- Diambil dari tabel processor
+        lp.ram_kapasitas,
+        lp.ram_tipe,
+        lp.storage_kapasitas,
+        lp.storage_tipe
     FROM ambil_laptop_pengadaan() lp
+    LEFT JOIN public.inventori_processor p
+    ON lp.nama_processor = p.nama_processor
+-- JOIN DISINI
 
     WHERE
         -- ID
@@ -266,22 +269,23 @@ BEGIN
 
         -- PROCESSOR
         AND (f_nama_processor IS NULL OR lp.nama_processor ILIKE '%' || f_nama_processor || '%')
-        AND (f_manufacturer IS NULL OR lp.manufacturer = f_manufacturer)
-        AND (f_processor_model IS NULL OR lp.processor_model ILIKE '%' || f_processor_model || '%')
+        AND (f_manufacturer IS NULL OR p.manufacturer = f_manufacturer)
+        AND (f_processor_model IS NULL OR p.model ILIKE '%' || f_processor_model || '%')
+        AND (f_processor_score IS NULL OR p.processor_score >= f_processor_score) -- Sudah diperbaiki ke alias 'p'
 
         -- CORES
-        AND (f_cores IS NULL OR lp.cores = f_cores)
-        AND (f_min_cores IS NULL OR lp.cores >= f_min_cores)
-        AND (f_max_cores IS NULL OR lp.cores <= f_max_cores)
+        AND (f_cores IS NULL OR p.cores = f_cores)
+        AND (f_min_cores IS NULL OR p.cores >= f_min_cores)
+        AND (f_max_cores IS NULL OR p.cores <= f_max_cores)
 
         -- RAM
-        AND (f_ram_kapasitas IS NULL OR lp.ram_kapasitas = f_ram_kapasitas)
+        AND (f_ram_kapasitas IS NULL OR lp.ram_kapasitas = f_min_ram_kapasitas)
         AND (f_min_ram_kapasitas IS NULL OR lp.ram_kapasitas >= f_min_ram_kapasitas)
         AND (f_max_ram_kapasitas IS NULL OR lp.ram_kapasitas <= f_max_ram_kapasitas)
         AND (f_ram_tipe IS NULL OR lp.ram_tipe = f_ram_tipe)
 
         -- STORAGE
-        AND (f_storage_kapasitas IS NULL OR lp.storage_kapasitas = f_storage_kapasitas)
+        AND (f_storage_kapasitas IS NULL OR lp.storage_kapasitas = f_min_storage)
         AND (f_min_storage IS NULL OR lp.storage_kapasitas >= f_min_storage)
         AND (f_max_storage IS NULL OR lp.storage_kapasitas <= f_max_storage)
         AND (f_storage_tipe IS NULL OR lp.storage_tipe = f_storage_tipe);

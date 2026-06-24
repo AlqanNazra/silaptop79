@@ -3,9 +3,13 @@ CREATE TABLE inventori_role (
     nama_role VARCHAR(100) NOT NULL UNIQUE,
     min_ram INTEGER NOT NULL,
     min_storage INTEGER NOT NULL,
+    nama_processor VARCHAR(255),
     min_processor_score INTEGER NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+ALTER TABLE inventori_role
+ADD COLUMN nama_processor VARCHAR(255);
 
 DROP FUNCTION tambah_role
 
@@ -13,6 +17,7 @@ CREATE OR REPLACE FUNCTION tambah_role(
     p_nama_role VARCHAR,
     p_min_ram INTEGER,
     p_min_storage INTEGER,
+    p_nama_processor VARCHAR,
     p_min_processor_score INTEGER
 )
 RETURNS VARCHAR
@@ -39,8 +44,8 @@ BEGIN
             'id_role'
         );
 
-    INSERT INTO inventori_role(id_role,nama_role,min_ram,min_storage,min_processor_score,created_at)
-    VALUES(v_id_role,p_nama_role,p_min_ram,p_min_storage,p_min_processor_score,CURRENT_TIMESTAMP);
+INSERT INTO inventori_role(id_role,nama_role,min_ram,min_storage,nama_processor,min_processor_score,created_at)
+VALUES(v_id_role,p_nama_role,p_min_ram,p_min_storage,p_nama_processor,p_min_processor_score,CURRENT_TIMESTAMP);
     RETURN v_id_role;
 END;
 $$ LANGUAGE plpgsql;
@@ -50,6 +55,7 @@ CREATE OR REPLACE FUNCTION update_role(
     p_nama_role VARCHAR,
     p_min_ram INTEGER,
     p_min_storage INTEGER,
+	p_nama_processor VARCHAR,
     p_min_processor_score INTEGER
 )
 RETURNS BOOLEAN AS
@@ -60,6 +66,7 @@ BEGIN
         nama_role = p_nama_role,
         min_ram = p_min_ram,
         min_storage = p_min_storage,
+		nama_processor = p_nama_processor,
         min_processor_score = p_min_processor_score
     WHERE id_role = p_id_role;
     IF NOT FOUND THEN
@@ -68,14 +75,16 @@ BEGIN
     RETURN TRUE;
 END;
 $$ LANGUAGE plpgsql;
-CREATE OR REPLACE FUNCTION get_role_by_id(
-    p_id_role VARCHAR
-)
+
+drop function get_role_by_id
+
+CREATE OR REPLACE FUNCTION get_role_by_id(p_id_role VARCHAR)
 RETURNS TABLE(
     id_role VARCHAR,
     nama_role VARCHAR,
     min_ram INTEGER,
     min_storage INTEGER,
+    nama_processor VARCHAR,
     min_processor_score INTEGER
 )
 AS
@@ -87,11 +96,14 @@ SELECT
     r.nama_role,
     r.min_ram,
     r.min_storage,
+    r.nama_processor,
     r.min_processor_score
 FROM inventori_role r
 WHERE r.id_role = p_id_role;
 END;
 $$ LANGUAGE plpgsql;
+
+drop function get_all_role
 
 CREATE OR REPLACE FUNCTION get_all_role()
 RETURNS TABLE(
@@ -99,6 +111,7 @@ RETURNS TABLE(
     nama_role VARCHAR,
     min_ram INTEGER,
     min_storage INTEGER,
+	nama_processor VARCHAR,
     min_processor_score INTEGER
 )
 AS
@@ -109,6 +122,7 @@ SELECT
     r.id_role,
     r.nama_role,
     r.min_ram,
+	r.nama_processor,
     r.min_storage,
     r.min_processor_score
 FROM inventori_role r

@@ -504,31 +504,34 @@
                 </div>
 
                 <div class="grid-3-cols">
-
                     <div class="form-group">
-
-                        <label>Minimum Processor Score</label>
-
-                        <input
-                            type="number"
-                            name="min_processor_score"
-                            class="form-control"
+                        <label>Minimum Processor</label>
+                        <select
                             id="minProcessor"
+                            name="id_processor"
+                            class="form-control">
+                            <option value="">
+                                -- Pilih Processor --
+                            </option>
+                            {% for processor in processor_list %}
+                                <option
+                                    value="{{ processor.id_processor }}"
+                                    data-score="{{ processor.processor_score }}"
+                                    data-name="{{ processor.nama_processor }}"
+                                    {% if processor.processor_score == role_requirement.min_processor_score %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    {{ processor.nama_processor }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <input type="hidden" id="minProcessorScore" name="min_processor_score"
                             value="{{ role_requirement.min_processor_score|default:'' }}">
-
                     </div>
-
                     <div class="form-group">
-
                         <label>Minimum RAM (GB)</label>
-
-                        <input
-                            type="number"
-                            name="min_ram"
-                            class="form-control"
-                            id="minRam"
-                            value="{{ role_requirement.min_ram|default:'' }}">
-
+                            <input type="number" name="min_ram" class="form-control" id="minRam" value="{{ role_requirement.min_ram|default:'' }}">
                     </div>
 
                     <div class="form-group">
@@ -870,6 +873,32 @@ function loadRoleData() {
             url;
     }
 }
+const processorSelect =
+    document.getElementById("minProcessor");
+
+const processorScore =
+    document.getElementById("minProcessorScore");
+
+function updateProcessorScore() {
+
+    const selectedOption =
+        processorSelect.options[
+            processorSelect.selectedIndex
+        ];
+
+    processorScore.value =
+        selectedOption.dataset.score || "";
+}
+
+if (processorSelect) {
+
+    processorSelect.addEventListener(
+        "change",
+        updateProcessorScore
+    );
+
+    updateProcessorScore();
+}
 
 projectSelect.addEventListener(
     "change",
@@ -956,7 +985,7 @@ if(btnDefaultRole){
                 "minProcessor"
             ).value =
                 defaultRoleData.minProcessor;
-
+            updateProcessorScore();
             document.getElementById(
                 "minRam"
             ).value =

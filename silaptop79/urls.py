@@ -161,11 +161,7 @@ urlpatterns = [
     path('inputkriteria_hc/', inputkriteria_hc_view, name='inputkriteria_hc'),
     path('hasilrekomendasi_hc/', hasilrekomendasi_hc_view, name='hasilrekomendasi_hc'),
     path("laptop/", laptop_dashboard, name="laptop_dashboard"),
-    path(
-    'it/manajemen-role-teknologi/',
-    manajemen_role_teknologi_it_view,
-    name='manajemenroleteknologi_it'
-),
+    path('it/manajemen-role-teknologi/',manajemen_role_teknologi_it_view,name='manajemenroleteknologi_it'),
 
 path(
     'it/tambah-role/',

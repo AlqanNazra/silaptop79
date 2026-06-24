@@ -11,7 +11,7 @@ CREATE TABLE dss_laptoppengadaan (
     gpu VARCHAR(255),
     ukuran_layar FLOAT CHECK (ukuran_layar > 0),
     baterai FLOAT CHECK (baterai > 0),
-    berat FLOAT CHECK (berat > 0),,
+    berat FLOAT CHECK (berat > 0),
     FOREIGN KEY (id_processor) REFERENCES inventori_processor(id_processor),
     FOREIGN KEY (id_ram) REFERENCES inventori_ram(id_ram),
     FOREIGN KEY (id_storage) REFERENCES inventori_storage(id_storage)
@@ -59,6 +59,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP FUNCTION ambil_laptop_pengadaan()
 
 CREATE OR REPLACE FUNCTION ambil_laptop_pengadaan()
 RETURNS TABLE (
@@ -75,7 +76,7 @@ RETURNS TABLE (
     processor_model VARCHAR,
     cores INT,
     threads INT,
-    benchmark_score INTEGER,
+    processor_score INTEGER,
     ram_kapasitas INT,
     ram_tipe VARCHAR,
     storage_kapasitas INT,
@@ -97,7 +98,7 @@ BEGIN
         pro.model,
         pro.cores,
         pro.threads,
-        pro.benchmark_score,
+        pro.processor_score,
         r.kapasitas_gb,
         r.tipe,
         s.kapasitas_gb,

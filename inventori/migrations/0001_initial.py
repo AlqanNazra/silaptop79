@@ -25,7 +25,7 @@ class Migration(migrations.Migration):
                 ('base_clock', models.FloatField()),
                 ('max_clock', models.FloatField()),
                 ('arsitektur', models.CharField(max_length=100)),
-                ('benchmark_score', models.IntegerField(default=0)),
+                ('processor_score', models.IntegerField(default=0)),
                 ('benchmark_url', models.TextField(blank=True, null=True)),
                 ('keterangan', models.TextField(blank=True, null=True)),
             ],

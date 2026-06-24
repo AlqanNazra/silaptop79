@@ -6,7 +6,7 @@ CREATE TABLE processor (
     nama_processor VARCHAR(255),
     manufacturer VARCHAR(255),
     model VARCHAR(255),
-    benchmark_score INTEGER NOT NULL,
+    processor_score INTEGER NOT NULL,
     cores INTEGER CHECK (cores > 0),
     threads INTEGER CHECK (threads > 0),
     base_clock FLOAT CHECK (base_clock > 0),
@@ -14,6 +14,8 @@ CREATE TABLE processor (
     arsitektur VARCHAR(100),
     keterangan TEXT
 );
+
+select * from inventori_processor
 
 CREATE OR REPLACE FUNCTION tambah_processor(
     f_nama_processor VARCHAR,
@@ -39,7 +41,7 @@ BEGIN
         base_clock,
         max_clock,
         arsitektur,
-		benchmark_score,
+		processor_score,
         keterangan
     )
     VALUES (
@@ -60,6 +62,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+drop function ambil_processor
+
 CREATE OR REPLACE FUNCTION ambil_processor()
 RETURNS TABLE (
     id_processor VARCHAR,
@@ -70,20 +74,36 @@ RETURNS TABLE (
     threads INT,
     base_clock FLOAT,
     max_clock FLOAT,
+    processor_score INT,
     arsitektur VARCHAR,
-	
     keterangan TEXT
 )
-AS $$
+AS
+$$
 BEGIN
     RETURN QUERY
-    SELECT * FROM inventori_processor;
+    SELECT
+        p.id_processor,
+        p.nama_processor,
+        p.manufacturer,
+        p.model,
+        p.cores,
+        p.threads,
+        p.base_clock::FLOAT,
+        p.max_clock::FLOAT,
+        p.processor_score,
+        p.arsitektur,
+        p.keterangan
+    FROM inventori_processor p;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION ambil_processor_by_id(f_id BIGINT)
+
+DROP FUNCTION IF EXISTS ambil_processor_by_id(VARCHAR);
+
+CREATE OR REPLACE FUNCTION ambil_processor_by_id(f_id VARCHAR)
 RETURNS TABLE (
-    id_processor BIGINT,
+    id_processor VARCHAR,  -- Diubah jadi VARCHAR karena formatnya 'PROS_0002'
     nama_processor VARCHAR,
     manufacturer VARCHAR,
     model VARCHAR,
@@ -91,6 +111,7 @@ RETURNS TABLE (
     threads INT,
     base_clock FLOAT,
     max_clock FLOAT,
+	processor_score INT,
     arsitektur VARCHAR,
     keterangan TEXT
 )
@@ -104,21 +125,24 @@ BEGIN
         p.cores, 
         p.threads, 
         p.base_clock, 
-        p.max_clock, 
+        p.max_clock,
+		p.processor_score INT,
         p.arsitektur, 
-        p.keterangan FROM inventori_processor
+        p.keterangan 
+    FROM inventori_processor p -- <-- PERBAIKAN: Harus ada spasi lalu huruf 'p' di sini!
     WHERE p.id_processor = f_id;
 END;
 $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION update_processor(
-    f_id INT,
+    f_id VARCHAR,
     f_nama_processor VARCHAR,
     f_manufacturer VARCHAR,
     f_model VARCHAR,
     f_cores INT,
     f_threads INT,
     f_base_clock FLOAT,
+	f_processor_score INT,
     f_max_clock FLOAT,
     f_arsitektur VARCHAR,
     f_keterangan TEXT
@@ -129,6 +153,7 @@ BEGIN
     SET 
         nama_processor = f_nama_processor,
         manufacturer = f_manufacturer,
+		processor_score = f_processor_score,
         model = f_model,
         cores = f_cores,
         threads = f_threads,
@@ -142,7 +167,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION hapus_processor(f_id INT)
+CREATE OR REPLACE FUNCTION hapus_processor(f_id VARCHAR)
 RETURNS TEXT AS $$
 BEGIN
     DELETE FROM inventori_processor

@@ -33,6 +33,8 @@ from .db import get_connection
 from inventori.repositories.repositori_projectrole import ProjectRoleRepository
 from inventori.services.service_projectrole import ProjectRoleService
 from inventori.dto.dto_projectrole import ProjectRoleDTO
+from django.http import JsonResponse
+from inventori.services.processor.read import ReadProcessorService
 
 # ==========================================
 # 1. HUMAN CAPITAL (HC) VIEWS
@@ -501,7 +503,8 @@ def inputkriteria_hc_view(request):
     selected_role_teknologi = (
     request.GET.get("id_role_teknologi")
     or request.POST.get("id_role_teknologi"))
-    role_requirement = None
+    processor_service = ReadProcessorService()
+    processor_list = processor_service.ambil_processor()
     bobot_role = None
     # ==========================
     # LOAD ROLE REQUIREMENT
@@ -520,36 +523,23 @@ def inputkriteria_hc_view(request):
                 "nama_role": role.nama_role,
                 "min_ram": role.min_ram,
                 "min_storage": role.min_storage,
+                "nama_processor": role.nama_processor,
                 "min_processor_score": role.min_processor_score
             }
             repo_bobot = BobotKriteriaRepository(conn)
             aggregation_service = AggregationService(conn)
             hasil_teknologi = []
-            # print("JUMLAH ROLETEK =",role_teknologi_list.count())
             for rt in role_teknologi_list:
                 # print("=" * 40)
                 # print("ROLETEK :",rt.id_role_teknologi)
                 # print("TEKNOLOGI :",rt.teknologi.nama_teknologi)
-                rows = (
-                    repo_bobot
-                    .ambil_bobot_role_teknologi(
-                        rt.id_role_teknologi
-                    )
-                )
+                rows = (repo_bobot.ambil_bobot_role_teknologi(rt.id_role_teknologi))
                 # print("JUMLAH BOBOT :",len(rows))
-                # hasil_teknologi.append(
-                #     rows
-                # )
+                hasil_teknologi.append(rows)
             if hasil_teknologi:
-                bobot_role = (
-                    aggregation_service
-                    .aggregate_teknologi_role(
-                        hasil_teknologi
-                    )
-                )
+                bobot_role = (aggregation_service.aggregate_teknologi_role(hasil_teknologi))
             else:
                 bobot_role = {}
-
             # print("BOBOT AGREGASI =",bobot_role)
         except Exception as e:
             print("ERROR ROLE REQUIREMENT:",str(e))
@@ -567,7 +557,6 @@ def inputkriteria_hc_view(request):
         # print("MIN HARGA =", min_harga)
         # print("ACTION =", action)
         try:
-
             raw_weights = [
                 {
                     "id_kriteria": "KRIT_0001",
@@ -673,7 +662,7 @@ def inputkriteria_hc_view(request):
                 filter_data = FilterInventoriDTO(
                     min_ram_kapasitas=int(minimum_requirement.get("ram",0) or 0),
                     min_storage=int(minimum_requirement.get("storage",0) or 0),
-                    # min_processor=int(minimum_requirement.get("score_processro",0) or 0)
+                    processor_score=int(minimum_requirement.get("processor_score",0) or 0)
                 )
 
             else:
@@ -682,7 +671,7 @@ def inputkriteria_hc_view(request):
                     min_ram_kapasitas=int(minimum_requirement.get("ram",0) or 0),
                     min_storage=int(minimum_requirement.get("storage",0) or 0),
                     min_harga=int(minimum_requirement.get("min_harga",0) or 0),
-                    # min_processor=int(minimum_requirement.get("score_processro",0) or 0)
+                    processor_score=int(minimum_requirement.get("processor_score",0) or 0)
                 )
             service = Servicesaw(conn)
             hasil = service.proses_dss_saw(
@@ -698,7 +687,10 @@ def inputkriteria_hc_view(request):
             if hasil.get("status") != "success":
                 messages.error(
                     request,
-                    hasil.get("message","Gagal menjalankan DSS")
+                    hasil.get(
+                        "message",
+                        "Gagal menjalankan DSS"
+                    )
                 )
                 return redirect("inputkriteria_it")
             request.session["ranking_sesuai"] = (
@@ -712,16 +704,29 @@ def inputkriteria_hc_view(request):
                 ["ranking"]
             )
             request.session["warning_dss"] = (hasil.get("warning"))
-            request.session["jenis_rekomendasi"] = (request.POST.get("jenis_rekomendasi","inventori"))
+            request.session["jenis_rekomendasi"] = (
+                request.POST.get(
+                    "jenis_rekomendasi",
+                    "inventori"
+                )
+            )
             warning_dss = request.session.get("warning_dss")
-            return redirect("hasilrekomendasi_hc")        
+            return redirect("hasilrekomendasi_it")        
         except Exception as e:
             import traceback
             # print(traceback.format_exc())
             messages.error(request,f"Gagal memproses DSS: {str(e)}")
     projects = (Proyek.objects.all().order_by("nama_proyek"))
     role_teknologi = (
-        RoleTeknologi.objects.select_related("role","teknologi").order_by("role__nama_role","teknologi__nama_teknologi")
+        RoleTeknologi.objects
+        .select_related(
+            "role",
+            "teknologi"
+        )
+        .order_by(
+            "role__nama_role",
+            "teknologi__nama_teknologi"
+        )
     )
     project_role_mapping = []
     for pr in ProjectRole.objects.select_related("proyek","role"):
@@ -734,6 +739,7 @@ def inputkriteria_hc_view(request):
         "projects": projects,
         "role_teknologi": role_teknologi,
         "role_requirement": role_requirement,
+        "processor_list": processor_list,
         "bobot_role": bobot_role,
         "selected_project": selected_project,
         "selected_role_teknologi": selected_role,
@@ -757,7 +763,6 @@ def inputkriteria_hc_view(request):
             "bobot": bobot
         })
         context["role_teknologi_data"] = role_teknologi_data
-
     return render(request,"hc/dss/inputkriteria_hc.html",context)
 
 
@@ -848,7 +853,7 @@ def hasilrekomendasi_hc_view(request):
 
                         "benchmark":
                             laptop.get(
-                                "benchmark_score",
+                                "processor_score",
                                 0
                             )
                     }
@@ -869,7 +874,7 @@ def hasilrekomendasi_hc_view(request):
                         "storage":pengadaan.get("storage_kapasitas",0),
                         "layar":pengadaan.get("ukuran_layar",0),
                         "harga":pengadaan.get("harga",0),
-                        "benchmark":pengadaan.get("benchmark_score",0),
+                        "benchmark":pengadaan.get("processor_score",0),
                         "gpu":pengadaan.get("gpu","-"),
                         "baterai":pengadaan.get("baterai",0),
                         "berat":pengadaan.get("berat",0)
@@ -999,7 +1004,7 @@ def detailrekomendasi_hc_view(request):
             "processor_model": pengadaan.get("processor_model", "-"),
             "cores": pengadaan.get("cores", 0),
             "threads": pengadaan.get("threads", 0),
-            "benchmark_score": pengadaan.get("benchmark_score", 0),
+            "processor_score": pengadaan.get("processor_score", 0),
             "ram": pengadaan.get("ram_kapasitas", 0),
             "ram_tipe": pengadaan.get("ram_tipe", "-"),
             "storage": pengadaan.get("storage_kapasitas", 0),
@@ -1153,8 +1158,8 @@ def inputkriteria_it_view(request):
     selected_role_teknologi = (
     request.GET.get("id_role_teknologi")
     or request.POST.get("id_role_teknologi"))
-
-    role_requirement = None
+    processor_service = ReadProcessorService()
+    processor_list = processor_service.ambil_processor()
     bobot_role = None
     # ==========================
     # LOAD ROLE REQUIREMENT
@@ -1166,29 +1171,19 @@ def inputkriteria_it_view(request):
             print("=" * 50)
             print("AMBIL ROLETEK")
             print("=" * 50)
-
-            role_teknologi_list = (
-                RoleTeknologi.objects
-                .select_related("teknologi")
-                .filter(
-                    role_id=selected_role
-                )
-            )
-
+            role_teknologi_list = (RoleTeknologi.objects.select_related("teknologi").filter(role_id=selected_role))
             print("JUMLAH ROLETEK =",role_teknologi_list.count())
             role_requirement = {
                 "id_role": role.id_role,
                 "nama_role": role.nama_role,
                 "min_ram": role.min_ram,
                 "min_storage": role.min_storage,
+                "nama_processor": role.nama_processor,
                 "min_processor_score": role.min_processor_score
             }
             repo_bobot = BobotKriteriaRepository(conn)
             aggregation_service = AggregationService(conn)
-
             hasil_teknologi = []
-
-            print("JUMLAH ROLETEK =",role_teknologi_list.count())
             for rt in role_teknologi_list:
                 print("=" * 40)
                 print("ROLETEK :",rt.id_role_teknologi)
@@ -1340,7 +1335,7 @@ def inputkriteria_it_view(request):
                 filter_data = FilterInventoriDTO(
                     min_ram_kapasitas=int(minimum_requirement.get("ram",0) or 0),
                     min_storage=int(minimum_requirement.get("storage",0) or 0),
-                    # min_processor=int(minimum_requirement.get("score_processro",0) or 0)
+                    processor_score=int(minimum_requirement.get("processor_score",0) or 0)
                 )
 
             else:
@@ -1349,7 +1344,7 @@ def inputkriteria_it_view(request):
                     min_ram_kapasitas=int(minimum_requirement.get("ram",0) or 0),
                     min_storage=int(minimum_requirement.get("storage",0) or 0),
                     min_harga=int(minimum_requirement.get("min_harga",0) or 0),
-                    # min_processor=int(minimum_requirement.get("score_processro",0) or 0)
+                    processor_score=int(minimum_requirement.get("processor_score",0) or 0)
                 )
 
             service = Servicesaw(conn)
@@ -1421,6 +1416,7 @@ def inputkriteria_it_view(request):
         "projects": projects,
         "role_teknologi": role_teknologi,
         "role_requirement": role_requirement,
+        "processor_list": processor_list,
         "bobot_role": bobot_role,
         "selected_project": selected_project,
         "selected_role_teknologi": selected_role,
@@ -1588,7 +1584,7 @@ def hasilrekomendasi_it_view(request):
 
                         "benchmark":
                             laptop.get(
-                                "benchmark_score",
+                                "processor_score",
                                 0
                             )
                     }
@@ -1609,7 +1605,7 @@ def hasilrekomendasi_it_view(request):
                         "storage":pengadaan.get("storage_kapasitas",0),
                         "layar":pengadaan.get("ukuran_layar",0),
                         "harga":pengadaan.get("harga",0),
-                        "benchmark":pengadaan.get("benchmark_score",0),
+                        "benchmark":pengadaan.get("processor_score",0),
                         "gpu":pengadaan.get("gpu","-"),
                         "baterai":pengadaan.get("baterai",0),
                         "berat":pengadaan.get("berat",0)
@@ -1740,7 +1736,7 @@ def detailrekomendasi_it_view(request):
             "processor_model": pengadaan.get("processor_model", "-"),
             "cores": pengadaan.get("cores", 0),
             "threads": pengadaan.get("threads", 0),
-            "benchmark_score": pengadaan.get("benchmark_score", 0),
+            "processor_score": pengadaan.get("processor_score", 0),
             "ram": pengadaan.get("ram_kapasitas", 0),
             "ram_tipe": pengadaan.get("ram_tipe", "-"),
             "storage": pengadaan.get("storage_kapasitas", 0),
@@ -2591,33 +2587,31 @@ def tambah_komponen_it_view(request):
 def manajemen_role_teknologi_it_view(request):
     from django.core.paginator import Paginator
     from django.db.models import Q
-
+    processor_service = ReadProcessorService()
+    processor_list = (processor_service.ambil_processor_dropdown())
     search_role = request.GET.get('q_role', '')
     search_tech = request.GET.get('q_tech', '')
-
     role_list = (Role.objects.prefetch_related('teknologi_role__teknologi').order_by('nama_role'))
     teknologi_list = (Teknologi.objects.order_by('nama_teknologi'))
     if search_role:
         role_list = role_list.filter(Q(nama_role__icontains=search_role))
-
     if search_tech:
-        teknologi_list = teknologi_list.filter(Q(nama_teknologi__icontains=search_tech) | Q(kategori__icontains=search_tech))
+        teknologi_list = teknologi_list.filter(Q(nama_teknologi__icontains=search_tech) |Q(kategori__icontains=search_tech))
     paginator_role = Paginator(role_list, 5)
     page_role = request.GET.get('page_role')
     role_obj = paginator_role.get_page(page_role)
     paginator_tech = Paginator(teknologi_list, 5)
     page_tech = request.GET.get('page_tech')
     tech_obj = paginator_tech.get_page(page_tech)
-    active_tab = request.GET.get('tab', 'role')
     context = {
         "role_list": role_obj,
         "tech_page": tech_obj,
         "teknologi_list": teknologi_list,
+        "processor_list": processor_list,
         "search_role": search_role,
         "search_tech": search_tech,
-        "active_tab": active_tab,
     }
-    return render(request,"it/inventori/manajemenroleteknologi_it.html",context)
+    return render(request,"it/inventori/manajemenroleteknologi_it.html", context)
 def tambah_teknologi_it_view(request):
     conn = get_connection()
     repo = TeknologiRepository(conn)
@@ -2659,10 +2653,18 @@ def tambah_role_it_view(request):
             # ==========================
             # CREATE ROLE
             # ==========================
-            role_dto = RoleDTO(nama_role=request.POST.get("nama_role"),
+            id_processor = request.POST.get("id_processor")
+            processor_service = ReadProcessorService()
+            processor = (processor_service.ambil_by_id(id_processor))
+            print("PROCESSOR:")
+            print(processor)
+            print(type(processor))
+            role_dto = RoleDTO(
+                nama_role=request.POST.get("nama_role"),
                 min_ram=int(request.POST.get("min_ram",0)),
                 min_storage=int(request.POST.get("min_storage",0)),
-                min_processor_score=int(request.POST.get("min_processor_score",0))
+                nama_processor=processor["nama_processor"],
+                min_processor_score=int(request.POST.get("min_processor_score"))
             )
             id_role = (role_service.tambah_role(role_dto))
             teknologi_ids = (request.POST.getlist("teknologi"))
@@ -2752,7 +2754,7 @@ def tambah_role_it_view(request):
     return redirect(
         "manajemenroleteknologi_it"
     )
-    
+
 def hapus_role_it_view(request,id_role):
     conn = get_connection()
     role_repo = (RoleRepository(conn))

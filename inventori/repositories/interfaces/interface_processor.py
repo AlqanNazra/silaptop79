@@ -11,7 +11,7 @@ class IProcessorRepository(ABC):
         pass
         
     @abstractmethod
-    def ambil_precessor_by_id(self,id_processor):
+    def ambil_processor_by_id(self,id_processor):
         pass
     
     @abstractmethod
@@ -20,4 +20,7 @@ class IProcessorRepository(ABC):
     
     @abstractmethod
     def hapus_processor(self, id_processor):
+        pass
+    @abstractmethod
+    def ambil_processor_dropdown(self):
         pass

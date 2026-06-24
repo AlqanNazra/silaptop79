@@ -22,7 +22,7 @@ class Processor(models.Model):
     base_clock = models.FloatField()
     max_clock = models.FloatField()
     arsitektur = models.CharField(max_length=100)
-    benchmark_score = models.IntegerField(default=0)
+    processor_score = models.IntegerField(default=0)
 
     keterangan = models.TextField(
         null=True,
@@ -143,6 +143,7 @@ class Role(models.Model):
     nama_role = models.CharField(max_length=100,unique=True)
     min_ram = models.IntegerField(default=0)
     min_storage = models.IntegerField(default=0)
+    nama_processor = models.CharField(max_length=20)
     min_processor_score = models.IntegerField(default=0)
     created_at = models.DateTimeField(default=timezone.now)
     class Meta:
