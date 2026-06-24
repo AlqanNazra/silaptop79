@@ -183,7 +183,7 @@
 
         .specs-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(5, 1fr);
             gap: 24px;
             margin-bottom: 30px;
         }
@@ -371,8 +371,6 @@
                 </div>
                 <p class="spec-label">Processor</p>
                 <h3 class="spec-value">{{ laptop.id_processor.nama_processor|default:"-" }}</h3>
-                <span class="spec-subtext">{{ laptop.id_processor.manufacturer|default:"" }} {{
-                    laptop.id_processor.model|default:"" }}</span>
             </div>
 
             <!-- Card 2: Memory RAM -->
@@ -381,8 +379,7 @@
                     <i class="fa-solid fa-memory"></i>
                 </div>
                 <p class="spec-label">Memory RAM</p>
-                <h3 class="spec-value">{{ laptop.id_ram.kapasitas_gb|default:"0" }} GB {{ laptop.id_ram.tipe|default:""
-                    }}</h3>
+                <h3 class="spec-value">{{ laptop.id_ram.kapasitas_gb|default:"0" }} GB</h3>
             </div>
 
             <!-- Card 3: Storage -->
@@ -391,8 +388,7 @@
                     <i class="fa-solid fa-database"></i>
                 </div>
                 <p class="spec-label">Storage</p>
-                <h3 class="spec-value">{{ laptop.id_storage.kapasitas_gb|default:"0" }} GB {{
-                    laptop.id_storage.tipe|default:"" }}</h3>
+                <h3 class="spec-value">{{ laptop.id_storage.kapasitas_gb|default:"0" }} GB</h3>
             </div>
 
             <!-- Card 4: Condition -->
@@ -411,15 +407,6 @@
                 </div>
                 <p class="spec-label">Layar</p>
                 <h3 class="spec-value">{{ laptop.ukuran_layar|default:"-" }} inch</h3>
-            </div>
-
-            <!-- Card 6: Availability Status -->
-            <div class="spec-card">
-                <div class="spec-icon-box">
-                    <i class="fa-solid fa-circle-check"></i>
-                </div>
-                <p class="spec-label">Status Aset</p>
-                <h3 class="spec-value">{{ laptop.status|upper }}</h3>
             </div>
 
         </div>

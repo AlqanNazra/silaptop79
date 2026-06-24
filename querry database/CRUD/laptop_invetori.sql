@@ -27,11 +27,10 @@ BEGIN
         kondisi,
         status,
         lokasi,
-        processor_id, 
-        ram_id,
-        storage_id,
-        ukuran_layar,
-        baterai -- Tambahkan kolom target
+        id_processor, 
+        id_ram,
+        id_storage,
+        ukuran_layar
     )
     VALUES (
         f_generate_id('INV','inventori_laptopinventori','id_laptop_inventori'),
@@ -45,8 +44,7 @@ BEGIN
         NULLIF(f_id_processor, '')::bigint, 
         NULLIF(f_id_ram, '')::bigint,       
         NULLIF(f_id_storage, '')::bigint,   
-        f_ukuran_layar,
-        f_baterai -- Masukkan nilainya di sini
+        f_ukuran_layar
     );
 END;
 $$ LANGUAGE plpgsql;
@@ -128,7 +126,7 @@ SELECT
     li.lokasi,
 
     li.ukuran_layar,
-    li.baterai,
+    NULL::float AS baterai,
 
     pro.nama_processor,
     pro.manufacturer,
@@ -259,9 +257,9 @@ RETURNS TEXT AS $$
 BEGIN
     UPDATE inventori_laptopinventori
     SET 
-        processor_id = f_id_processor,
-        ram_id = f_id_ram,
-        storage_id = f_id_storage
+        id_processor = f_id_processor,
+        id_ram = f_id_ram,
+        id_storage = f_id_storage
     WHERE id_laptop_inventori = f_id_laptop_inventori;
 
     RETURN 'Spesifikasi berhasil diupdate!';
@@ -321,7 +319,7 @@ SELECT
     li.lokasi,
 
     li.ukuran_layar,
-    li.baterai,
+    NULL::float AS baterai,
 
     pro.nama_processor,
     pro.manufacturer,

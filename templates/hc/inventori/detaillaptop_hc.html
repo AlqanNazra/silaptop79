@@ -70,9 +70,9 @@
         }
 
         .btn-back-pill {
-            background-color: #e8edf9;
-            color: #0b57c6;
-            padding: 10px 24px;
+            background-color: #e2e8f0;
+            color: #334155;
+            padding: 10px 20px;
             border-radius: 8px;
             text-decoration: none;
             font-weight: 600;
@@ -81,7 +81,7 @@
         }
 
         .btn-back-pill:hover {
-            background-color: #d1dffb;
+            background-color: #cbd5e1;
         }
 
         /* Grid Layout */
@@ -173,7 +173,7 @@
             font-size: 12px;
         }
 
-        /* Specs Section */
+        /* Specs Grid */
         .specs-heading {
             font-size: 18px;
             font-weight: 800;
@@ -246,8 +246,8 @@
             flex: 1;
             background-color: #0b57c6;
             color: white;
-            padding: 14px 24px;
-            border-radius: 50px;
+            padding: 16px;
+            border-radius: 8px;
             font-weight: 700;
             font-size: 14px;
             border: none;
@@ -268,9 +268,9 @@
         .btn-grey-action {
             flex: 1;
             background-color: #e2e8f0;
-            color: #0b57c6;
-            padding: 14px 24px;
-            border-radius: 50px;
+            color: #334155;
+            padding: 16px;
+            border-radius: 8px;
             font-weight: 700;
             font-size: 14px;
             border: none;
@@ -291,33 +291,21 @@
 
 <body>
 
-    {% include 'hc/components/sidebar.html' with active_page='manajemen_laptop' %}
+    {% include 'it/components/sidebar.html' with active_page='data_laptop' %}
 
     <div class="main-content">
 
-        <!-- Alert Popup Modal -->
+        <!-- Flash Messages -->
         {% if messages %}
-        <div class="modal-overlay" id="alertModal" style="display: flex; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center;">
-            <div class="modal-box" style="background: white; border-radius: 16px; padding: 32px; max-width: 400px; width: 90%; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.15);">
-                {% for message in messages %}
-                    {% if message.tags == 'success' %}
-                    <div class="modal-icon" style="width: 56px; height: 56px; border-radius: 50%; background: #dcfce7; color: #15803d; display: flex; align-items: center; justify-content: center; font-size: 24px; margin: 0 auto 16px;">
-                        <i class="fa-solid fa-circle-check"></i>
-                    </div>
-                    <div class="modal-title" style="font-size: 18px; font-weight: 700; color: #1e293b; margin-bottom: 8px;">Berhasil!</div>
-                    <div class="modal-text" style="font-size: 14px; color: #64748b; line-height: 1.5; margin-bottom: 24px;">{{ message }}</div>
-                    {% else %}
-                    <div class="modal-icon" style="width: 56px; height: 56px; border-radius: 50%; background: #fee2e2; color: #dc2626; display: flex; align-items: center; justify-content: center; font-size: 24px; margin: 0 auto 16px;">
-                        <i class="fa-solid fa-circle-xmark"></i>
-                    </div>
-                    <div class="modal-title" style="font-size: 18px; font-weight: 700; color: #1e293b; margin-bottom: 8px;">Gagal!</div>
-                    <div class="modal-text" style="font-size: 14px; color: #64748b; line-height: 1.5; margin-bottom: 24px;">{{ message }}</div>
-                    {% endif %}
-                {% endfor %}
-                <div class="modal-actions" style="display: flex; justify-content: center;">
-                    <button type="button" class="modal-btn" style="padding: 10px 32px; border: none; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; background: #0b57c6; color: white; box-shadow: 0 4px 12px rgba(11, 87, 198, 0.2);" onclick="hideAlertModal()">Tutup</button>
-                </div>
+        <div style="margin-bottom:20px; width: 100%;">
+            {% for message in messages %}
+            <div style="padding:12px 20px; border-radius:8px; margin-bottom:8px; font-size:14px; font-weight:500;
+                {% if message.tags == 'success' %}background:#dcfce7; color:#15803d; border:1px solid #bbf7d0;
+                {% elif message.tags == 'error' %}background:#fee2e2; color:#dc2626; border:1px solid #fecaca;
+                {% else %}background:#dbeafe; color:#2563eb; border:1px solid #bfdbfe;{% endif %}">
+                {{ message }}
             </div>
+            {% endfor %}
         </div>
         {% endif %}
 
@@ -325,7 +313,7 @@
 
         <div class="top-nav">
             <h1 class="page-title">Detail Laptop</h1>
-            <a href="{% url 'inventori:manajemen_laptop' %}" class="btn-back-pill">Kembali ke Daftar</a>
+            <a href="{% url 'manajemen_laptop_it' %}" class="btn-back-pill">Kembali ke Daftar</a>
         </div>
 
         <div class="content-grid">
@@ -383,8 +371,6 @@
                 </div>
                 <p class="spec-label">Processor</p>
                 <h3 class="spec-value">{{ laptop.id_processor.nama_processor|default:"-" }}</h3>
-                <span class="spec-subtext">{{ laptop.id_processor.manufacturer|default:"" }} {{
-                    laptop.id_processor.model|default:"" }}</span>
             </div>
 
             <!-- Card 2: Memory RAM -->
@@ -393,8 +379,7 @@
                     <i class="fa-solid fa-memory"></i>
                 </div>
                 <p class="spec-label">Memory RAM</p>
-                <h3 class="spec-value">{{ laptop.id_ram.kapasitas_gb|default:"0" }} GB {{ laptop.id_ram.tipe|default:""
-                    }}</h3>
+                <h3 class="spec-value">{{ laptop.id_ram.kapasitas_gb|default:"0" }} GB</h3>
             </div>
 
             <!-- Card 3: Storage -->
@@ -403,8 +388,7 @@
                     <i class="fa-solid fa-database"></i>
                 </div>
                 <p class="spec-label">Storage</p>
-                <h3 class="spec-value">{{ laptop.id_storage.kapasitas_gb|default:"0" }} GB {{
-                    laptop.id_storage.tipe|default:"" }}</h3>
+                <h3 class="spec-value">{{ laptop.id_storage.kapasitas_gb|default:"0" }} GB</h3>
             </div>
 
             <!-- Card 4: Condition -->
@@ -438,11 +422,10 @@
 
         <!-- Action Buttons -->
         <div class="bottom-actions" style="display: flex; gap: 15px; align-items: center; width: 100%;">
-            <a href="{% url 'inventori:editdatalaptop_hc' laptop.id_laptop_inventori %}" class="btn-blue-action"
-                style="flex: 1;">
+            <a href="{% url 'editdatalaptop_it' laptop.id_laptop_inventori %}" class="btn-blue-action" style="flex: 1;">
                 <i class="fa-solid fa-pen"></i> Edit Data
             </a>
-            <a href="{% url 'inventori:riwayatpeminjamanlaptop_hc' %}" class="btn-grey-action" style="flex: 1;">
+            <a href="{% url 'riwayatpeminjamanlaptop_it' %}" class="btn-grey-action" style="flex: 1;">
                 <i class="fa-solid fa-clock-rotate-left"></i> Riwayat Peminjaman
             </a>
             <button type="button" class="btn-grey-action" style="color: #dc2626; flex: 1;" onclick="showDeleteModal()">
@@ -453,19 +436,29 @@
     </div>
 
     <!-- Delete Confirmation Modal -->
-    <div class="modal-overlay" id="deleteModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center;">
-        <div class="modal-box" style="background: white; border-radius: 16px; padding: 32px; max-width: 420px; width: 90%; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.15);">
-            <div class="modal-icon" style="width: 56px; height: 56px; border-radius: 50%; background: #fee2e2; color: #dc2626; display: flex; align-items: center; justify-content: center; font-size: 24px; margin: 0 auto 16px;">
+    <div class="modal-overlay" id="deleteModal"
+        style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center;">
+        <div class="modal-box"
+            style="background: white; border-radius: 16px; padding: 32px; max-width: 420px; width: 90%; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.15);">
+            <div class="modal-icon"
+                style="width: 56px; height: 56px; border-radius: 50%; background: #fee2e2; color: #dc2626; display: flex; align-items: center; justify-content: center; font-size: 24px; margin: 0 auto 16px;">
                 <i class="fa-solid fa-triangle-exclamation"></i>
             </div>
-            <div class="modal-title" style="font-size: 18px; font-weight: 700; color: #1e293b; margin-bottom: 8px;">Hapus Aset Laptop?</div>
-            <div class="modal-text" style="font-size: 14px; color: #64748b; line-height: 1.5; margin-bottom: 24px;">Apakah Anda yakin ingin menghapus laptop <strong>"{{ laptop.nama_laptop }}"</strong> dari sistem inventori? Tindakan ini tidak dapat dibatalkan.</div>
+            <div class="modal-title" style="font-size: 18px; font-weight: 700; color: #1e293b; margin-bottom: 8px;">
+                Hapus Aset Laptop?</div>
+            <div class="modal-text" style="font-size: 14px; color: #64748b; line-height: 1.5; margin-bottom: 24px;">
+                Apakah Anda yakin ingin menghapus laptop <strong>"{{ laptop.nama_laptop }}"</strong> dari sistem
+                inventori? Tindakan ini tidak dapat dibatalkan.</div>
             <div class="modal-actions" style="display: flex; gap: 12px; justify-content: center;">
-                <button type="button" class="modal-btn" style="padding: 10px 24px; border: none; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; background: #f1f5f9; color: #475569;" onclick="hideDeleteModal()">Batal</button>
-                <form action="{% url 'inventori:detaillaptop_hc' laptop.id_laptop_inventori %}" method="POST" style="margin: 0;">
+                <button type="button" class="modal-btn"
+                    style="padding: 10px 24px; border: none; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; background: #f1f5f9; color: #475569;"
+                    onclick="hideDeleteModal()">Batal</button>
+                <form action="{% url 'detaillaptop_it' laptop.id_laptop_inventori %}" method="POST" style="margin: 0;">
                     {% csrf_token %}
                     <input type="hidden" name="action" value="hapus">
-                    <button type="submit" class="modal-btn" style="padding: 10px 24px; border: none; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; background: #dc2626; color: white;">Ya, Hapus</button>
+                    <button type="submit" class="modal-btn"
+                        style="padding: 10px 24px; border: none; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; background: #dc2626; color: white;">Ya,
+                        Hapus</button>
                 </form>
             </div>
         </div>
@@ -476,26 +469,15 @@
             document.getElementById('deleteModal').style.display = 'flex';
         }
 
+        // Hide Delete Modal
         function hideDeleteModal() {
             document.getElementById('deleteModal').style.display = 'none';
         }
 
         // Close modal on overlay click
-        document.getElementById('deleteModal').addEventListener('click', function(e) {
+        document.getElementById('deleteModal').addEventListener('click', function (e) {
             if (e.target === this) hideDeleteModal();
         });
-
-        function hideAlertModal() {
-            const alertModal = document.getElementById('alertModal');
-            if (alertModal) alertModal.style.display = 'none';
-        }
-
-        const alertModal = document.getElementById('alertModal');
-        if (alertModal) {
-            alertModal.addEventListener('click', function(e) {
-                if (e.target === this) hideAlertModal();
-            });
-        }
     </script>
 </body>
 

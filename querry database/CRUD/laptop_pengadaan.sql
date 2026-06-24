@@ -11,7 +11,7 @@ CREATE TABLE dss_laptoppengadaan (
     gpu VARCHAR(255),
     ukuran_layar FLOAT CHECK (ukuran_layar > 0),
     baterai FLOAT CHECK (baterai > 0),
-    berat FLOAT CHECK (berat > 0),,
+    berat FLOAT CHECK (berat > 0),
     FOREIGN KEY (id_processor) REFERENCES inventori_processor(id_processor),
     FOREIGN KEY (id_ram) REFERENCES inventori_ram(id_ram),
     FOREIGN KEY (id_storage) REFERENCES inventori_storage(id_storage)
