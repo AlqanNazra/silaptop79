@@ -7,46 +7,41 @@ CREATE TABLE inventori_role (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+DROP FUNCTION tambah_role
+
 CREATE OR REPLACE FUNCTION tambah_role(
     p_nama_role VARCHAR,
     p_min_ram INTEGER,
     p_min_storage INTEGER,
     p_min_processor_score INTEGER
 )
-RETURNS BOOLEAN AS
+RETURNS VARCHAR
+AS
 $$
 DECLARE
     v_exist INTEGER;
+    v_id_role VARCHAR;
 BEGIN
 
     SELECT COUNT(*)
     INTO v_exist
     FROM inventori_role
-    WHERE LOWER(nama_role) = LOWER(p_nama_role);
+    WHERE LOWER(nama_role)=LOWER(p_nama_role);
+
     IF v_exist > 0 THEN
         RAISE EXCEPTION 'Role sudah ada';
     END IF;
-    INSERT INTO inventori_role(
-        id_role,
-        nama_role,
-        min_ram,
-        min_storage,
-        min_processor_score,
-        created_at
-    )
-    VALUES(
+
+    v_id_role :=
         f_generate_id(
             'ROLE',
             'inventori_role',
             'id_role'
-        ),
-        p_nama_role,
-        p_min_ram,
-        p_min_storage,
-        p_min_processor_score,
-        CURRENT_TIMESTAMP
-    );
-    RETURN TRUE;
+        );
+
+    INSERT INTO inventori_role(id_role,nama_role,min_ram,min_storage,min_processor_score,created_at)
+    VALUES(v_id_role,p_nama_role,p_min_ram,p_min_storage,p_min_processor_score,CURRENT_TIMESTAMP);
+    RETURN v_id_role;
 END;
 $$ LANGUAGE plpgsql;
 

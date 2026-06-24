@@ -27,61 +27,42 @@ class TeknologiService:
         # TeknologiValidation.validate_nama_teknologi(
         #     data.nama_teknologi
         # )
-
         try:
-
             with transaction.atomic():
-
                 result = self.teknologi_repo.tambah_teknologi(
                     data
                 )
-
                 self.conn.commit()
-
                 logger.info(
                     f"Tambah teknologi sukses: "
                     f"{data.nama_teknologi}"
                 )
-
                 return {
                     "success": True,
                     "message": "Berhasil tambah teknologi"
                 }
-
         except Exception as e:
-
             self.conn.rollback()
-
             logger.error(str(e))
-
             raise e
 
     # ====================================
     # UPDATE
     # ====================================
     def update(self, data):
-
         try:
-
             with transaction.atomic():
-
                 result = self.teknologi_repo.update_teknologi(
                     data
                 )
-
                 self.conn.commit()
-
                 return {
                     "success": True,
                     "message": "Berhasil update teknologi"
                 }
-
         except Exception as e:
-
             self.conn.rollback()
-
             logger.error(str(e))
-
             raise e
 
     # ====================================
@@ -112,7 +93,7 @@ class TeknologiService:
     # ====================================
     def validateVersion(self, version):
 
-        TeknologiValidation.validate_version(version)
+        # TeknologiValidation.validate_version(version)
 
         return {
             "success": True,
@@ -153,3 +134,5 @@ class TeknologiService:
                 }
             ]
         }
+    def ambil_semua(self):
+        return (self.teknologi_repo.get_all_teknologi())

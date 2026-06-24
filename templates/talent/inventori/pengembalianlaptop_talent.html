@@ -447,6 +447,30 @@
                         <h2 class="device-title">{{ active_laptop.nama_laptop }} ({{ active_laptop.model }})</h2>
                         <span class="serial-label">NOMOR SERI</span>
                         <span class="serial-badge">{{ active_laptop.no_inventori }}</span>
+
+                        <!-- Info Durasi & Jatuh Tempo (TC-TRX-16 & TC-TRX-17) -->
+                        <div style="display:flex; gap:16px; margin-top:16px; flex-wrap:wrap;">
+                            {% if durasi_aktif is not None %}
+                            <div style="background:#EFF6FF; border:1px solid #BFDBFE; border-radius:10px; padding:12px 20px; flex:1; min-width:160px;">
+                                <div style="font-size:11px; font-weight:700; color:#1E40AF; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px;">⏱ Durasi Dipinjam</div>
+                                <div style="font-size:20px; font-weight:800; color:#1D4ED8;">{{ durasi_aktif }} hari</div>
+                                <div style="font-size:12px; color:#3B82F6;">sejak {{ active_peminjaman.tanggal_pinjam|date:"d M Y" }}</div>
+                            </div>
+                            {% endif %}
+                            {% if peminjaman_db and peminjaman_db.tanggal_jatuh_tempo %}
+                            <div style="background:{% if sisa_jatuh_tempo is not None and sisa_jatuh_tempo <= 3 %}#FEF2F2{% elif sisa_jatuh_tempo is not None and sisa_jatuh_tempo <= 7 %}#FFFBEB{% else %}#F0FDF4{% endif %}; border:1px solid {% if sisa_jatuh_tempo is not None and sisa_jatuh_tempo <= 3 %}#FECACA{% elif sisa_jatuh_tempo is not None and sisa_jatuh_tempo <= 7 %}#FDE68A{% else %}#BBF7D0{% endif %}; border-radius:10px; padding:12px 20px; flex:1; min-width:160px;">
+                                <div style="font-size:11px; font-weight:700; color:{% if sisa_jatuh_tempo is not None and sisa_jatuh_tempo <= 3 %}#B91C1C{% elif sisa_jatuh_tempo is not None and sisa_jatuh_tempo <= 7 %}#B45309{% else %}#15803D{% endif %}; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px;">📅 Jatuh Tempo</div>
+                                <div style="font-size:18px; font-weight:800; color:{% if sisa_jatuh_tempo is not None and sisa_jatuh_tempo <= 3 %}#DC2626{% elif sisa_jatuh_tempo is not None and sisa_jatuh_tempo <= 7 %}#D97706{% else %}#16A34A{% endif %};">{{ peminjaman_db.tanggal_jatuh_tempo|date:"d M Y" }}</div>
+                                {% if sisa_jatuh_tempo is not None %}
+                                <div style="font-size:12px; color:#64748B;">
+                                    {% if sisa_jatuh_tempo < 0 %}⚠️ Sudah lewat {{ sisa_jatuh_tempo|stringformat:"d"|slice:"1:" }} hari!
+                                    {% elif sisa_jatuh_tempo == 0 %}⚠️ Jatuh tempo hari ini!
+                                    {% else %}{{ sisa_jatuh_tempo }} hari lagi{% endif %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </div>
                     </div>
 
                     <!-- Kondisi Perangkat Selection -->
@@ -507,7 +531,7 @@
                             </div>
                             <div class="form-group">
                                 <label for="jadwal">Jadwal Penyerahan</label>
-                                <input type="date" id="jadwal" name="jadwal" required>
+                                <input type="date" id="jadwal" name="jadwal" required min="{% now 'Y-m-d' %}">
                             </div>
                         </div>
 
@@ -558,6 +582,30 @@
             const selectedCard = document.querySelector(`.condition-card.${type}`);
             selectedCard.classList.add(`active-${type}`);
         }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const jadwalInput = document.getElementById("jadwal");
+            if (jadwalInput) {
+                const today = new Date();
+                const year = today.getFullYear();
+                const month = String(today.getMonth() + 1).padStart(2, '0');
+                const day = String(today.getDate()).padStart(2, '0');
+                const formattedToday = `${year}-${month}-${day}`;
+                jadwalInput.setAttribute('min', formattedToday);
+
+                jadwalInput.addEventListener("change", function() {
+                    if (this.value) {
+                        const selectedDate = new Date(this.value + "T00:00:00");
+                        const todayDate = new Date(formattedToday + "T00:00:00");
+                        
+                        if (selectedDate < todayDate) {
+                            alert("Tanggal jadwal penyerahan tidak boleh sebelum hari ini.");
+                            this.value = "";
+                        }
+                    }
+                });
+            }
+        });
     </script>
 </body>
 

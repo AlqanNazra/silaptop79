@@ -130,8 +130,8 @@
         .form-control {
             width: 100%;
             padding: 12px 16px;
-            background-color: #f1f5f9;
-            border: 1px solid transparent;
+            background-color: #ffffff;
+            border: 1px solid #cbd5e1;
             border-radius: 8px;
             font-family: 'Inter', sans-serif;
             font-size: 14px;
@@ -142,8 +142,8 @@
 
         .form-control:focus {
             outline: none;
-            border-color: #cbd5e1;
-            background-color: #e2e8f0;
+            border-color: #94a3b8;
+            background-color: #f8fafc;
         }
 
         .form-control::placeholder {
@@ -289,6 +289,132 @@
             background-color: #f1f5f9;
             border-color: #94a3b8;
         }
+        .project-role-header{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            margin-bottom:15px;
+        }
+
+        .project-role-header h4{
+            margin:0;
+            font-size:15px;
+            font-weight:700;
+        }
+
+        .btn-role-add{
+            background:#2563eb;
+            color:white;
+            border:none;
+            padding:10px 16px;
+            border-radius:8px;
+            cursor:pointer;
+            font-size:13px;
+            font-weight:600;
+        }
+        .project-role-card{
+            position:relative;
+            padding:15px 55px 15px 15px;
+            border:1px solid #dbe3ef;
+            border-radius:8px;
+            margin-bottom:10px;
+            background:#f8fafc;
+        }
+        .project-role-name{
+            font-weight:600;
+            color:#1e293b;
+        }
+
+        .btn-remove-role{
+            position:absolute;
+            right:12px;
+            top:50%;
+            transform:translateY(-50%);
+            width:32px;
+            height:32px;
+            border:none;
+            border-radius:50%;
+            background:#ef4444;
+            color:white;
+            cursor:pointer;
+        }
+        .role-modal{
+            display:none;
+
+            position:fixed;
+
+            inset:0;
+
+            background:rgba(0,0,0,.45);
+
+            z-index:9999;
+        }
+
+        .role-modal-content{
+
+            width:500px;
+
+            max-width:90%;
+
+            background:white;
+
+            margin:100px auto;
+
+            border-radius:12px;
+
+            overflow:hidden;
+        }
+
+        .role-modal-header{
+
+            display:flex;
+
+            justify-content:space-between;
+
+            align-items:center;
+
+            padding:18px 20px;
+
+            border-bottom:1px solid #e5e7eb;
+        }
+
+        .role-modal-close{
+
+            border:none;
+
+            background:none;
+
+            cursor:pointer;
+
+            font-size:18px;
+        }
+
+        .role-modal-list{
+
+            padding:15px;
+        }
+
+        .role-option{
+
+            padding:12px 15px;
+
+            border:1px solid #e2e8f0;
+
+            border-radius:8px;
+
+            margin-bottom:10px;
+
+            cursor:pointer;
+
+            transition:.2s;
+        }
+
+        .role-option:hover{
+
+            background:#eff6ff;
+
+            border-color:#2563eb;
+        }
     </style>
 </head>
 
@@ -361,42 +487,57 @@
                                     >
                                 </div>
                             </div>
-                            <hr style="margin:30px 0;">
-                            <h4
-                                style="
-                                    margin-bottom:15px;
-                                    color:#1e293b;
-                                    font-size:14px;
-                                    font-weight:700;
-                                "
-                            >
-                                Role Yang Digunakan
-                            </h4>
-                            <div
-                                style="
-                                    display:flex;
-                                    flex-wrap:wrap;
-                                    gap:10px;
-                                "
-                            >
-                                {% for role in role_list %}
-                                <span
-                                    class="role-badge"
-                                    title="Persentase {{ role.persentase_role }}"
-                                >
-                                    {{ role.nama_role }}
-                                </span>
-                                {% empty %}
-                                <span
+                                <hr style="margin:30px 0;">
+
+                                <div class="project-role-header">
+                                    <h4>Role yang Dimiliki Proyek</h4>
+
+                                    <button
+                                        type="button"
+                                        id="btn-add-role"
+                                        class="btn-role-add"
+                                    >
+                                        <i class="fa-solid fa-plus"></i>
+                                        Tambah Role
+                                    </button>
+                                </div>
+                                <div id="roles-container">
+                                <div id="roleValidationError"
                                     style="
-                                        color:#94a3b8;
-                                        font-style:italic;
+                                        display:none;
+                                        margin-top:12px;
+                                        padding:12px;
+                                        border-radius:8px;
+                                        background:#fef2f2;
+                                        border:1px solid #fecaca;
+                                        color:#dc2626;
+                                        font-size:14px;
+                                        font-weight:500;
                                     "
                                 >
-                                    Tidak ada role pada proyek ini.
-                                </span>
-                                {% endfor %}
-                            </div>
+                                </div>
+                                                                    {% for role in role_list %}
+                                    <div
+                                        class="project-role-card"
+                                        data-role-id="{{ role.id_role }}"
+                                    >
+                                        <span class="project-role-name">
+                                            {{ role.nama_role }}
+                                        </span>
+                                        <button
+                                            type="button"
+                                            class="btn-remove-role"
+                                        >
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                        <input
+                                            type="hidden"
+                                            name="role_ids[]"
+                                            value="{{ role.id_role }}"
+                                        >
+                                    </div>
+                                    {% endfor %}
+                                </div>
                         </div>
                     </div>
                     <div class="control-card">
@@ -428,37 +569,253 @@
 
         </div>
     </div>
+            <div id="roleModal"class="role-modal">
+            <div class="role-modal-content">
+                <div class="role-modal-header">
+                    <h3>Pilih Role</h3>
+                    <button
+                        type="button"
+                        id="closeRoleModal"
+                        class="role-modal-close"
+                    >
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+                <div class="role-modal-list">
+                    {% for role in all_roles %}
+                    <div
+                        class="role-option"
+                        data-role-id="{{ role.id_role }}"
+                        data-role-name="{{ role.nama_role }}"
+                    >
+                        {{ role.nama_role }}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
 
     <!-- JavaScript to handle dynamic roles addition -->
     <script>
-        document.getElementById('btn-add-role').addEventListener('click', function () {
-            const container = document.getElementById('roles-container');
 
-            const box = document.createElement('div');
-            box.className = 'role-group-box';
-            box.innerHTML = `
-                <button type="button" class="btn-remove-role" title="Hapus Role">
-                    <i class="fa-solid fa-trash-can"></i>
-                </button>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Nama Role</label>
-                        <input type="text" class="form-control" name="role_names[]" placeholder="Contoh: Frontend Developer" required style="background-color: white;">
-                    </div>
-                    <div class="form-group">
-                        <label>Teknologi (pisahkan dengan koma)</label>
-                        <input type="text" class="form-control" name="role_techs[]" placeholder="Contoh: VueJS, TailWind, Vite" required style="background-color: white;">
-                    </div>
-                </div>
-            `;
+    document.addEventListener(
+        "DOMContentLoaded",
+        function(){
 
-            container.appendChild(box);
+            const form =
+                document.querySelector(
+                    'form[action*="edit-proyek"]'
+                );
 
-            // Handle removal
-            box.querySelector('.btn-remove-role').addEventListener('click', function () {
-                box.remove();
+            form.addEventListener(
+                "submit",
+                function(e){
+
+                    const roleList =
+                        document.querySelectorAll(
+                            '#roles-container input[name="role_ids[]"]'
+                        );
+
+                    const errorBox =
+                        document.getElementById(
+                            "roleValidationError"
+                        );
+
+                    if(roleList.length === 0){
+
+                        e.preventDefault();
+
+                        errorBox.style.display =
+                            "block";
+
+                        errorBox.innerHTML =
+                            '<i class="fa-solid fa-circle-exclamation"></i> Proyek harus memiliki minimal 1 role.';
+
+                        return false;
+                    }
+
+                    errorBox.style.display =
+                        "none";
+                }
+            );
+
+        }
+    );
+            document.addEventListener(
+            "click",
+            function(e){
+
+                const btn =
+                    e.target.closest(
+                        ".btn-remove-role"
+                    );
+
+                if(btn){
+
+                    const totalRole =
+                        document.querySelectorAll(
+                            ".project-role-card"
+                        ).length;
+
+                    if(totalRole <= 1){
+
+                        alert(
+                            "Proyek harus memiliki minimal 1 role."
+                        );
+
+                        return;
+                    }
+
+                    btn.closest(
+                        ".project-role-card"
+                    ).remove();
+                }
+
+            }
+        );
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        function(){
+
+            const modal =
+                document.getElementById(
+                    "roleModal"
+                );
+
+            const addButton =
+                document.getElementById(
+                    "btn-add-role"
+                );
+
+            const closeButton =
+                document.getElementById(
+                    "closeRoleModal"
+                );
+
+            const container =
+                document.getElementById(
+                    "roles-container"
+                );
+
+            addButton.addEventListener(
+                "click",
+                function(){
+
+                    modal.style.display =
+                        "block";
+
+                }
+            );
+
+            closeButton.addEventListener(
+                "click",
+                function(){
+
+                    modal.style.display =
+                        "none";
+
+                }
+            );
+
+            document
+            .querySelectorAll(
+                ".role-option"
+            )
+            .forEach(function(item){
+
+                item.addEventListener(
+                    "click",
+                    function(){
+
+                        const roleId =
+                            this.dataset.roleId;
+
+                        const roleName =
+                            this.dataset.roleName;
+                        const existingRoles =
+                            Array.from(
+                                container.querySelectorAll(
+                                    '.project-role-card'
+                                )
+                            ).map(
+                                item =>
+                                item.dataset.roleId
+                            );
+
+                        if(
+                            existingRoles.includes(
+                                roleId
+                            )
+                        ){
+                            alert(
+                                "Role sudah ada pada proyek"
+                            );
+                            return;
+                        }
+
+                        container.insertAdjacentHTML(
+                            "beforeend",
+                            `
+                            <div
+                                class="project-role-card"
+                                data-role-id="${roleId}"
+                            >
+
+                                <span
+                                    class="project-role-name"
+                                >
+                                    ${roleName}
+                                </span>
+
+                                <button
+                                    type="button"
+                                    class="btn-remove-role"
+                                >
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+
+                                <input
+                                    type="hidden"
+                                    name="role_ids[]"
+                                    value="${roleId}"
+                                >
+
+                            </div>
+                            `
+                        );
+
+                        modal.style.display =
+                            "none";
+
+                    }
+                );
+
             });
-        });
+
+            document.addEventListener(
+                "click",
+                function(e){
+
+                    const btn =
+                        e.target.closest(
+                            ".btn-remove-role"
+                        );
+
+                    if(btn){
+
+                        btn.closest(
+                            ".project-role-card"
+                        ).remove();
+
+                    }
+
+                }
+            );
+
+        }
+    );
+
     </script>
 </body>
 

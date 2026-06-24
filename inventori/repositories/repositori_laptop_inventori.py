@@ -10,7 +10,7 @@ class LaptopInventoriRepository(ILaptopInventoriRepository):
             cur.execute("""
                 SELECT tambah_laptop_inventori(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """, (dto.nama_laptop, dto.model, dto.os, dto.kondisi, dto.status, 
-                  dto.lokasi, dto.id_processor, dto.id_ram, dto.id_storage, dto.ukuran_layar, None))
+                  dto.lokasi, dto.id_processor, dto.id_ram, dto.id_storage, dto.ukuran_layar, dto.baterai))
             return cur.fetchone()['tambah_laptop_inventori']
 
 

@@ -12,7 +12,7 @@ class PengajuanRepository:
 
     def tambah_pengajuan(self, data: PengajuanDTO):
         query = """
-        SELECT tambah_pengajuan(%s,%s,%s,%s,%s,%s);
+        SELECT tambah_pengajuan(%s,%s,%s,%s,%s,%s,%s);
         """
 
         with self.conn.cursor() as cur:
@@ -22,7 +22,8 @@ class PengajuanRepository:
                 data.kebutuhan_requirement,
                 data.bulan,
                 data.keterangan,
-                data.perusahaan
+                data.perusahaan,
+                data.id_proyek
             ))
             self.conn.commit()
 
@@ -94,5 +95,6 @@ class PengajuanRepository:
             status=row.get("status"),
             tanggal_pengajuan=row.get("tanggal_pengajuan"),
             tanggal_approval=row.get("tanggal_approval"),
-            approved_by=row.get("approved_by")
+            approved_by=row.get("approved_by"),
+            id_proyek=row.get("id_proyek")
         )

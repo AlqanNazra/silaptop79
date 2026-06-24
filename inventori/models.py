@@ -7,6 +7,7 @@ class User(models.Model):
     email = models.EmailField(unique=True, null=True, blank=True)
     password = models.CharField(max_length=255)
     role = models.CharField(max_length=50)
+    departemen = models.CharField(max_length=100, default='Non IT')
 
     def __str__(self):
         return self.nama
@@ -91,6 +92,7 @@ class LaptopInventori(models.Model):
     id_storage = models.ForeignKey(Storage, on_delete=models.SET_NULL, null=True, db_column='id_storage')
 
     ukuran_layar = models.FloatField(null=True, blank=True)
+    baterai = models.CharField(max_length=50, null=True, blank=True)  # Kapasitas baterai, e.g. "70 Wh"
 
 class Pengajuan(models.Model):
     id_pengajuan = models.CharField(primary_key=True, max_length=100)
@@ -102,9 +104,16 @@ class Pengajuan(models.Model):
     keterangan = models.TextField(null=True, blank=True)
     perusahaan = models.TextField()
 
-    status = models.CharField(max_length=20, default='pending')
+    status = models.CharField(max_length=20, default='menunggu')
     tanggal_pengajuan = models.DateTimeField(auto_now_add=True)
     tanggal_approval = models.DateTimeField(null=True, blank=True)
+    id_proyek = models.ForeignKey(
+        'Proyek',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        db_column='id_proyek'
+    )
 
     approved_by = models.ForeignKey(
         User,
@@ -123,6 +132,7 @@ class Peminjaman(models.Model):
 
     tanggal_pinjam = models.DateField()
     tanggal_kembali = models.DateField(null=True, blank=True)
+    tanggal_jatuh_tempo = models.DateField(null=True, blank=True)
 
     status = models.CharField(max_length=50)
     keterangan = models.TextField(null=True, blank=True)

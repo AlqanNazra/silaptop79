@@ -29,12 +29,12 @@ class BobotKriteriaRepository(IBobotKriteriaRepositoryImpl):
     # =========================
     def tambah_bobot_kriteria(self,data: BobotKriteriaDTO):
         query = """SELECT tambah_bobot_kriteria(%s,%s,%s);"""
-        print("\nSQL INSERT BOBOT")
-        print(
-            data.id_role_teknologi,
-            data.id_kriteria,
-            data.nilai_bobot
-        )
+        # print("\nSQL INSERT BOBOT")
+        # print(
+        #     data.id_role_teknologi,
+        #     data.id_kriteria,
+        #     data.nilai_bobot
+        # )
         with self.conn.cursor() as cur:
             cur.execute(
                 query,
@@ -45,10 +45,10 @@ class BobotKriteriaRepository(IBobotKriteriaRepositoryImpl):
                 )
             )
             result = cur.fetchone()
-            print(
-                "DB RESULT:",
-                result
-            )
+            # print(
+            #     "DB RESULT:",
+            #     result
+            # )
             if result:
                 if isinstance(result, dict):
                     return list(
@@ -79,7 +79,7 @@ class BobotKriteriaRepository(IBobotKriteriaRepositoryImpl):
             return self._format_result(cur, rows, fetch_all=True) # 🔄 Format hasil
         
     def cari_bobot_kriteria_by_roles(self, roles: list):
-        print("FUNCTION REPO KE PANGGIL")  # 🔥 WAJIB MUNCUL
+        # print("FUNCTION REPO KE PANGGIL")  # 🔥 WAJIB MUNCUL
         query = "SELECT * FROM cari_bobot_kriteria_by_roles(%s);"
 
         with self._get_dict_cursor() as cur: # 🔄 Menggunakan helper
@@ -130,11 +130,11 @@ class BobotKriteriaRepository(IBobotKriteriaRepositoryImpl):
         )
         """
 
-        print(
-            "UPDATE PARAM",
-            data.id_bobot,
-            data.nilai_swara
-        )
+        # print(
+        #     "UPDATE PARAM",
+        #     data.id_bobot,
+        #     data.nilai_swara
+        # )
 
         with self.conn.cursor() as cur:
 
@@ -149,12 +149,7 @@ class BobotKriteriaRepository(IBobotKriteriaRepositoryImpl):
             result = cur.fetchone()
 
             self.conn.commit()
-
-            print(
-                "DB RESULT",
-                result
-            )
-
+            # print("DB RESULT",result)
             return result[0]
 
     # =========================
@@ -181,14 +176,14 @@ class BobotKriteriaRepository(IBobotKriteriaRepositoryImpl):
         query = """
             SELECT
                 bk.id_bobot,
-                bk.kriteria_id AS id_kriteria,
+                bk.id_kriteria,
                 k.nama_kriteria,
                 bk.nilai_bobot,
                 bk.nilai_swara
             FROM dss_bobotkriteria bk
             JOIN dss_kriteria k
-                ON k.id_kriteria = bk.kriteria_id
-            WHERE bk.role = %s
+                ON k.id_kriteria = bk.id_kriteria
+            WHERE bk.id_role_teknologi = %s
             ORDER BY bk.nilai_bobot DESC
         """
 
@@ -213,11 +208,11 @@ class BobotKriteriaRepository(IBobotKriteriaRepositoryImpl):
 
         WHERE
 
-            role = %s
+            id_role_teknologi = %s
 
             AND
 
-            kriteria_id = %s
+            id_kriteria = %s
         """
 
         with self.conn.cursor() as cur:
@@ -234,11 +229,25 @@ class BobotKriteriaRepository(IBobotKriteriaRepositoryImpl):
                     data.id_kriteria
                 )
             )
-            print(
-            data.id_role_teknologi,
-            data.id_kriteria,
-            data.nilai_bobot
-        )
-            print("ROW UPDATED:",cur.rowcount)
+        #     print(
+        #     data.id_role_teknologi,
+        #     data.id_kriteria,
+        #     data.nilai_bobot
+        # )
+            # print("ROW UPDATED:",cur.rowcount)
 
         return True
+    def hapus_by_role_teknologi(self,id_role_teknologi):
+        query = """
+        DELETE
+        FROM dss_bobotkriteria
+        WHERE id_role_teknologi = %s
+        """
+        with self.conn.cursor() as cur:
+            cur.execute(
+                query,
+                (
+                    id_role_teknologi,
+                )
+            )
+            return True

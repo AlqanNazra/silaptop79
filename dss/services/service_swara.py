@@ -281,19 +281,19 @@ class ServiceSwara:
                     result
                 )
             
-            print("\nUPDATE DATABASE SWARA")
-            print(
-                "ID BOBOT :",
-                item["id_bobot"]
-            )
-            print(
-                "KRITERIA :",
-                item["nama_kriteria"]
-            )
-            print(
-                "SWARA :",
-                item["nilai_swara"]
-            )
+            # print("\nUPDATE DATABASE SWARA")
+            # print(
+            #     "ID BOBOT :",
+            #     item["id_bobot"]
+            # )
+            # print(
+            #     "KRITERIA :",
+            #     item["nama_kriteria"]
+            # )
+            # print(
+            #     "SWARA :",
+            #     item["nilai_swara"]
+            # )
 
             return {
                 "status": "success",
@@ -320,6 +320,12 @@ class ServiceSwara:
                 raise Exception(
                     hasil["message"]
                 )
+            # print("=" * 50)
+            # print("HASIL SWARA ROLETEK")
+            # print(rt["id_role_teknologi"])
+            # print(type(hasil["data"]))
+            # print(hasil["data"])
+            # print("=" * 50)
             hasil_teknologi.append(
                 hasil["data"]
             )

@@ -15,6 +15,7 @@
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1.1">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
     <style>
         body {
@@ -311,6 +312,35 @@
             background-color: #0369A1;
             transform: translateY(-1px);
         }
+
+        .btn-stopwatch {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            background-color: #FFFFFF;
+            border: 1px solid #E2E8F0;
+            color: #475569;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            text-decoration: none;
+            box-sizing: border-box;
+        }
+
+        .btn-stopwatch:hover {
+            background-color: #F8FAFC;
+            border-color: #0b57c6;
+            color: #0b57c6;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px rgba(11, 87, 198, 0.1);
+        }
+
+        .btn-stopwatch i {
+            font-size: 20px;
+        }
     </style>
 </head>
 
@@ -321,16 +351,21 @@
 
         <div class="main-content">
 
-            <!-- Page Top Header -->
             <div class="page-top">
                 <div class="page-top-left">
                     <h1>Halaman Formulir Pengajuan Laptop Baru</h1>
                     <p>Lengkapi formulir di bawah ini untuk memulai proses pengadaan perangkat laptop baru di departemen
                         Anda.</p>
                 </div>
-                <a href="{% url 'dashboard_talent' %}" class="btn-back">
-                    Kembali ke Dashboard
-                </a>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <a href="{% url 'riwayatpeminjamanlaptop_talent' %}" class="btn-stopwatch"
+                        title="Lihat Riwayat Peminjaman">
+                        <i class="fa-solid fa-stopwatch"></i>
+                    </a>
+                    <a href="{% url 'dashboard_talent' %}" class="btn-back">
+                        Kembali ke Dashboard
+                    </a>
+                </div>
             </div>
 
             <!-- Flash Messages -->
@@ -341,30 +376,47 @@
                 {% csrf_token %}
                 <div class="form-card">
 
-                    <!-- Departemen & Role -->
+                    <!-- Departemen & Proyek & Role -->
                     <div class="form-row">
                         <div class="form-group">
                             <label for="departemen">Departemen</label>
-                            <select id="departemen" name="departemen" required>
-                                <option value="" disabled selected>Pilih Departemen</option>
-                                <option value="it">IT</option>
-                                <option value="hr">Human Resources</option>
-                                <option value="finance">Finance</option>
-                                <option value="marketing">Marketing</option>
-                                <option value="ops">Operations</option>
+                            <select id="departemen" name="departemen" disabled
+                                style="background-color: #f1f5f9; color: #64748b; cursor: not-allowed;">
+                                <option value="IT" {% if user_departemen == 'IT' %}selected{% endif %}>IT</option>
+                                <option value="Non IT" {% if user_departemen == 'Non IT' %}selected{% endif %}>Non IT</option>
+                                <option value="Outsourcing" {% if user_departemen == 'Outsourcing' %}selected{% endif %}>Outsourcing</option>
                             </select>
                         </div>
+
+                        {% if user_departemen == 'IT' or user_departemen == 'Outsourcing' %}
+                        <div class="form-group">
+                            <label for="proyek">Proyek</label>
+                            <select id="proyek" name="proyek" required onchange="updateRoles()">
+                                <option value="" disabled selected>Pilih Proyek</option>
+                                {% for p in projects %}
+                                <option value="{{ p.id_proyek }}">{{ p.nama_proyek }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    {% if user_departemen == 'IT' or user_departemen == 'Outsourcing' %}
+                    <div class="form-row">
                         <div class="form-group">
                             <label for="role">Role</label>
-                            <select id="role" name="role" required>
-                                <option value="" disabled selected>Pilih Role</option>
-                                <option value="developer">Developer</option>
-                                <option value="designer">Designer</option>
-                                <option value="analyst">Analyst</option>
-                                <option value="manager">Manager</option>
+                            <select id="role" name="role" required onchange="updateTechnologies()">
+                                <option value="" disabled selected>Pilih Role (Pilih Proyek terlebih dahulu)</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="techGroup" style="display: none;">
+                            <label for="teknologi">Teknologi yang Digunakan</label>
+                            <select id="teknologi" name="teknologi" required>
+                                <option value="" disabled selected>Pilih Teknologi</option>
                             </select>
                         </div>
                     </div>
+                    {% endif %}
 
                     <hr class="form-divider">
 
@@ -372,8 +424,8 @@
                     <div class="form-group" style="margin-bottom: 28px;">
                         <label>Jenis Pengajuan</label>
                         <div class="jenis-toggle">
-                            <button type="button" class="jenis-btn" onclick="setJenis(this)">Peminjaman Baru</button>
-                            <button type="button" class="jenis-btn" onclick="setJenis(this)">Penggantian</button>
+                            <button class="jenis-btn active" onclick="setJenis(this)">Peminjaman Baru</button>
+                            <button class="jenis-btn" onclick="setJenis(this)">Penggantian</button>
                         </div>
                     </div>
 
@@ -427,21 +479,73 @@
         </div><!-- End Main Content -->
     </div><!-- End Wrapper -->
 
+    {{ project_roles_map|json_script:"project-roles-data" }}
+    {{ role_technologies_map|json_script:"role-technologies-data" }}
+
     <script>
+        function updateRoles() {
+            const projSelect = document.getElementById('proyek');
+            const roleSelect = document.getElementById('role');
+            if (!projSelect || !roleSelect) return;
+
+            const selectedProj = projSelect.value;
+            const projectRolesMap = JSON.parse(document.getElementById('project-roles-data').textContent);
+
+            // Clear current options
+            roleSelect.innerHTML = '<option value="" disabled selected>Pilih Role (Pilih Proyek terlebih dahulu)</option>';
+
+            // Reset teknologi dropdown
+            const techSelect = document.getElementById('teknologi');
+            const techGroup = document.getElementById('techGroup');
+            if (techSelect) {
+                techSelect.innerHTML = '<option value="" disabled selected>Pilih Teknologi (Pilih Role terlebih dahulu)</option>';
+            }
+            if (techGroup) {
+                techGroup.style.display = 'none';
+            }
+
+            if (selectedProj && projectRolesMap[selectedProj]) {
+                roleSelect.innerHTML = '<option value="" disabled selected>Pilih Role</option>';
+                projectRolesMap[selectedProj].forEach(item => {
+                    const opt = document.createElement('option');
+                    opt.value = item.nama_role;
+                    opt.textContent = item.nama_role;
+                    roleSelect.appendChild(opt);
+                });
+            }
+        }
+
+        function updateTechnologies() {
+            const roleSelect = document.getElementById('role');
+            const techSelect = document.getElementById('teknologi');
+            const techGroup = document.getElementById('techGroup');
+            if (!roleSelect || !techSelect || !techGroup) return;
+
+            const selectedRole = roleSelect.value;
+            const roleTechDataEl = document.getElementById('role-technologies-data');
+            if (!roleTechDataEl) return;
+            const roleTechnologiesMap = JSON.parse(roleTechDataEl.textContent);
+
+            // Clear current options
+            techSelect.innerHTML = '<option value="" disabled selected>Pilih Teknologi</option>';
+
+            if (selectedRole && roleTechnologiesMap[selectedRole] && roleTechnologiesMap[selectedRole].length > 0) {
+                roleTechnologiesMap[selectedRole].forEach(item => {
+                    const opt = document.createElement('option');
+                    opt.value = item.nama_teknologi;
+                    opt.textContent = item.nama_teknologi;
+                    techSelect.appendChild(opt);
+                });
+                techGroup.style.display = 'flex';
+            } else {
+                techSelect.innerHTML = '<option value="" disabled selected>Tidak Ada Teknologi Terkait</option>';
+                techGroup.style.display = 'none';
+            }
+        }
+
         function setJenis(el) {
             document.querySelectorAll('.jenis-btn').forEach(b => b.classList.remove('active'));
             el.classList.add('active');
-        }
-
-        function setUrgensi(el, isKritis) {
-            document.querySelectorAll('.urgensi-card').forEach(c => {
-                c.classList.remove('active', 'active-red');
-            });
-            if (isKritis) {
-                el.classList.add('active-red');
-            } else {
-                el.classList.add('active');
-            }
         }
     </script>
 </body>

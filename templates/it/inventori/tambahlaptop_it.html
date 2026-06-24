@@ -147,8 +147,8 @@
         .form-control {
             width: 100%;
             padding: 12px 16px;
-            background-color: #f1f5f9;
-            border: 1px solid transparent;
+            background-color: #ffffff;
+            border: 1px solid #cbd5e1;
             border-radius: 8px;
             font-family: 'Inter', sans-serif;
             font-size: 14px;
@@ -169,8 +169,8 @@
 
         .form-control:focus {
             outline: none;
-            border-color: #cbd5e1;
-            background-color: #e2e8f0;
+            border-color: #94a3b8;
+            background-color: #f8fafc;
         }
 
         .form-control::placeholder {
@@ -235,7 +235,7 @@
 <body>
 
     <div class="dashboard-wrapper">
-        {% include 'it/components/sidebar.html' with active_page='data_laptop' %}
+        {% include 'hc/components/sidebar.html' with active_page='manajemen_laptop' %}
 
         <div class="main-dashboard-content">
 
@@ -257,7 +257,7 @@
             <p class="page-subtitle">Silakan lengkapi formulir di bawah ini untuk menambahkan aset perangkat keras baru
                 ke dalam sistem inventaris digital Prism Logic.</p>
 
-            <form action="{% url 'tambahlaptop_it' %}" method="POST" enctype="multipart/form-data">
+            <form action="{% url 'tambahlaptop_hc' %}" method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
 
                 <!-- General Information -->
@@ -276,7 +276,7 @@
                                     placeholder="Contoh: MacBook Pro 14 M3 Max">
                             </div>
                         </div>
-                        <div class="form-row">
+                        <div class="form-row" style="grid-template-columns: 1fr 1fr 1fr;">
                             <div class="form-group">
                                 <label>Brand/Model</label>
                                 <select class="form-control" name="model" required>
@@ -292,6 +292,10 @@
                                 <label>Operating System (OS)</label>
                                 <input type="text" class="form-control" name="os" required
                                     placeholder="Contoh: macOS Sequoia / Windows 11">
+                            </div>
+                            <div class="form-group">
+                                <label>Baterai (Wh)</label>
+                                <input type="text" class="form-control" name="baterai" placeholder="Contoh: 70">
                             </div>
                         </div>
                     </div>
@@ -312,7 +316,8 @@
                                 <select class="form-control" name="id_processor" required>
                                     <option value="" disabled selected>Pilih Processor</option>
                                     {% for proc in processors %}
-                                    <option value="{{ proc.id_processor }}">{{ proc.nama_processor }} ({{ proc.manufacturer }})</option>
+                                    <option value="{{ proc.id_processor }}">{{ proc.nama_processor }} ({{
+                                        proc.manufacturer }})</option>
                                     {% endfor %}
                                 </select>
                             </div>
@@ -332,14 +337,14 @@
                                 <select class="form-control" name="id_storage" required>
                                     <option value="" disabled selected>Pilih Kapasitas</option>
                                     {% for storage in storages %}
-                                    <option value="{{ storage.id_storage }}">{{ storage.kapasitas_gb }} GB {{ storage.tipe }}</option>
+                                    <option value="{{ storage.id_storage }}">{{ storage.kapasitas_gb }} GB {{
+                                        storage.tipe }}</option>
                                     {% endfor %}
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label>Screen Size (Inch)</label>
-                                <input type="text" class="form-control" name="ukuran_layar"
-                                    placeholder="Misal: 14">
+                                <input type="text" class="form-control" name="ukuran_layar" placeholder="Misal: 14">
                             </div>
                         </div>
                     </div>
@@ -387,7 +392,7 @@
                     <button type="submit" class="btn-submit">
                         <i class="fa-solid fa-lock"></i> Simpan Data
                     </button>
-                    <a href="{% url 'manajemen_laptop_it' %}" class="btn-cancel">
+                    <a href="{% url 'manajemen_laptop_hc' %}" class="btn-cancel">
                         <i class="fa-solid fa-xmark"></i> Batal
                     </a>
                 </div>

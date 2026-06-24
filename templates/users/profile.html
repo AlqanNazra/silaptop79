@@ -502,7 +502,7 @@
                 <div>
                     <div class="breadcrumb">
                         {% if custom_user.role|upper == 'HC' %}
-                            <a href="{% url 'dashboardhc' %}">Dashboard</a>
+                            <a href="{% url 'dashboard_hc' %}">Dashboard</a>
                         {% elif custom_user.role|upper == 'IT' %}
                             <a href="{% url 'dashboard_it' %}">Dashboard</a>
                         {% else %}

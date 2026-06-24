@@ -109,9 +109,9 @@ class AggregationService:
         aggregate_result: dict
     ):
 
-        print(
-            "\n=== HASIL AGGREGASI ==="
-        )
+        # print(
+        #     "\n=== HASIL AGGREGASI ==="
+        # )
 
         total = 0
 
@@ -120,13 +120,13 @@ class AggregationService:
             nilai
         ) in aggregate_result.items():
 
-            print(
-                f"{kriteria} = {nilai}"
-            )
+            # print(
+            #     f"{kriteria} = {nilai}"
+            # )
 
             total += nilai
 
-        print("\nTOTAL =", total)
+        # print("\nTOTAL =", total)
     def aggregate_teknologi_role(
         self,
         list_hasil_teknologi
@@ -143,8 +143,24 @@ class AggregationService:
         counter = {}
 
         for teknologi in list_hasil_teknologi:
+            # print("\nTEKNOLOGI TYPE =", type(teknologi))
+            # print("TEKNOLOGI DATA =", teknologi)
 
             for item in teknologi:
+                # print(
+                #     "KRITERIA:",
+                #     item["nama_kriteria"]
+                # )
+
+                # print(
+                #     "BOBOT:",
+                #     item["nilai_bobot"]
+                # )
+
+                # print(
+                #     "SWARA:",
+                #     item["nilai_swara"]
+                # )
 
                 nama = item[
                     "nama_kriteria"

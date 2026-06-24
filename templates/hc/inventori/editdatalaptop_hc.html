@@ -179,22 +179,27 @@
             width: 100%;
             padding: 12px 16px;
             border-radius: 8px;
-            border: none;
-            background-color: #eff3f8;
+            border: 1px solid #cbd5e1;
+            background-color: #ffffff;
             font-family: inherit;
             font-size: 13px;
             color: #1e293b;
             font-weight: 500;
             box-sizing: border-box;
             outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input:focus {
+            border-color: #94a3b8;
         }
 
         select {
             width: 100%;
             padding: 12px 16px;
             border-radius: 8px;
-            border: none;
-            background-color: #eff3f8;
+            border: 1px solid #cbd5e1;
+            background-color: #ffffff;
             font-family: inherit;
             font-size: 13px;
             color: #1e293b;
@@ -207,6 +212,8 @@
             background-position: right 16px center;
             background-size: 14px;
             padding-right: 40px;
+            cursor: pointer;
+            transition: border-color 0.2s;
         }
 
         /* Layout rows */
@@ -235,7 +242,7 @@
                 <h1 class="page-title">Edit Data Laptop</h1>
             </div>
             <div class="header-actions">
-                <a href="{% url 'inventori:detaillaptop_hc' laptop.id_laptop_inventori %}" class="btn-cancel-text">Batal</a>
+                <a href="{% url 'detaillaptop_hc' laptop.id_laptop_inventori %}" class="btn-cancel-text">Batal</a>
                 <button type="submit" form="editForm" class="btn-submit-pill">Simpan Perubahan</button>
             </div>
         </div>
@@ -254,7 +261,7 @@
         </div>
         {% endif %}
 
-        <form id="editForm" method="POST" action="{% url 'inventori:editdatalaptop_hc' laptop.id_laptop_inventori %}">
+        <form id="editForm" method="POST" action="{% url 'editdatalaptop_hc' laptop.id_laptop_inventori %}">
             {% csrf_token %}
             <div class="edit-grid">
 

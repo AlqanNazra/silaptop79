@@ -66,3 +66,16 @@ class RoleTeknologiService:
             self.conn.rollback()
             logger.error(str(e))
             raise Exception(str(e))
+        
+    def hapus_by_role(self,id_role):
+        query = """
+        DELETE
+        FROM role_teknologi
+        WHERE id_role = %s
+        """
+        with self.conn.cursor() as cur:
+            cur.execute(
+                query,
+                (id_role,)
+            )
+            return True

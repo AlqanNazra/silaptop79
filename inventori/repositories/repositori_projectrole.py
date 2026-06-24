@@ -6,7 +6,6 @@ logger = logging.getLogger(__name__)
 
 
 class ProjectRoleRepository(IProjectRoleRepository):
-
     def __init__(self, conn):
         self.conn = conn
 
@@ -109,3 +108,16 @@ class ProjectRoleRepository(IProjectRoleRepository):
                 else:
                     return result[0]
             return None
+        
+    def hapus_by_project(self,id_proyek):
+        query = """
+        DELETE FROM inventori_project_role
+        WHERE id_proyek = %s;
+        """
+        with self.conn.cursor() as cur:
+            cur.execute(query,(id_proyek,))
+            logger.info(
+                f"Hapus seluruh role proyek "
+                f"{id_proyek}"
+            )
+            return True

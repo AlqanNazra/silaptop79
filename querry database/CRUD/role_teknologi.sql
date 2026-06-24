@@ -16,7 +16,7 @@ CREATE TABLE role_teknologi (
     UNIQUE(id_role, id_teknologi)
 );
 
-CREATE OR REPLACE FUNCTION tambah_role_teknologi(
+CREATE OR REPLACE FUNCTION  tambah_role_teknologi(
     p_id_role VARCHAR,
     p_id_teknologi VARCHAR
 )

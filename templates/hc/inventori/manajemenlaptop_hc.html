@@ -326,23 +326,49 @@
             {% include 'components/messages_popup.html' %}
 
             <!-- Top Actions -->
-            <form id="filter-form" method="GET" action="" class="top-actions" style="margin-bottom: 24px; display: flex; gap: 16px; align-items: center; justify-content: space-between; width: 100%;">
+            <form id="filter-form" method="GET" action="" class="top-actions"
+                style="margin-bottom: 24px; display: flex; gap: 16px; align-items: center; justify-content: space-between; width: 100%;">
                 <div class="search-box" style="flex: 1; max-width: 500px; display: flex; gap: 8px;">
-                    <input type="text" id="search-input" name="q" value="{{ search_query }}" placeholder="Cari serial number, model, atau merk..." style="width: 100%; padding: 12px 16px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: 'Inter', sans-serif; background: #ffffff;">
-                </div>
-                
-                <div style="display: flex; gap: 12px; align-items: center;">
-                    <select id="status-select" name="status" style="padding: 12px 16px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: 'Inter', sans-serif; font-weight: 500; color: #475569; background: white; cursor: pointer;">
-                        <option value="">Semua Status</option>
-                        <option value="tersedia" {% if status_filter == 'tersedia' %}selected{% endif %}>Tersedia</option>
-                        <option value="dipinjam" {% if status_filter == 'dipinjam' %}selected{% endif %}>Dipinjam</option>
-                        <option value="rusak" {% if status_filter == 'rusak' %}selected{% endif %}>Rusak</option>
-                    </select>
-                    
-                    <a href="?" class="btn-secondary" style="padding: 12px 20px; border-radius: 8px; text-decoration: none; background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; font-size: 14px; font-weight: 600; font-family: 'Inter', sans-serif;">Reset</a>
+                    <input type="text" id="search-input" name="q" value="{{ search_query }}"
+                        placeholder="Cari serial number, model, atau merk..."
+                        style="width: 100%; padding: 12px 16px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: 'Inter', sans-serif; background: #ffffff;">
                 </div>
 
-                <a href="{% url 'inventori:tambahlaptop_hc' %}" class="btn-add" style="background-color: #0b57c6; color: white; padding: 12px 20px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
+                <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                    <select id="status-select" name="status"
+                        style="padding: 12px 16px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: 'Inter', sans-serif; font-weight: 500; color: #475569; background: white; cursor: pointer;">
+                        <option value="">Semua Status</option>
+                        <option value="tersedia" {% if status_filter=='tersedia' %}selected{% endif %}>Tersedia</option>
+                        <option value="dipinjam" {% if status_filter=='dipinjam' %}selected{% endif %}>Dipinjam</option>
+                        <option value="rusak" {% if status_filter=='rusak' %}selected{% endif %}>Rusak</option>
+                    </select>
+
+                    <select id="ram-select" name="ram"
+                        style="padding: 12px 16px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: 'Inter', sans-serif; font-weight: 500; color: #475569; background: white; cursor: pointer;">
+                        <option value="">Semua RAM</option>
+                        <option value="4" {% if ram_filter=='4' %}selected{% endif %}>4 GB</option>
+                        <option value="8" {% if ram_filter=='8' %}selected{% endif %}>8 GB</option>
+                        <option value="16" {% if ram_filter=='16' %}selected{% endif %}>16 GB</option>
+                        <option value="32" {% if ram_filter=='32' %}selected{% endif %}>32 GB</option>
+                    </select>
+
+                    <select id="storage-select" name="storage"
+                        style="padding: 12px 16px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: 'Inter', sans-serif; font-weight: 500; color: #475569; background: white; cursor: pointer;">
+                        <option value="">Semua Storage</option>
+                        <option value="128" {% if storage_filter=='128' %}selected{% endif %}>128 GB</option>
+                        <option value="256" {% if storage_filter=='256' %}selected{% endif %}>256 GB</option>
+                        <option value="512" {% if storage_filter=='512' %}selected{% endif %}>512 GB</option>
+                        <option value="1024" {% if storage_filter=='1024' %}selected{% endif %}>1024 GB (1 TB)</option>
+                    </select>
+
+                    <a href="?" class="btn-secondary"
+                        style="padding: 12px 20px; border-radius: 8px; text-decoration: none; background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; font-size: 14px; font-weight: 600; font-family: 'Inter', sans-serif; display: inline-flex; align-items: center; gap: 6px;">
+                        <i class="fa-solid fa-rotate-left"></i> Reset
+                    </a>
+                </div>
+
+                <a href="{% url 'tambahlaptop_hc' %}" class="btn-add"
+                    style="background-color: #0b57c6; color: white; padding: 12px 20px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
                     <i class="fa-solid fa-plus"></i> Tambah Laptop
                 </a>
             </form>
@@ -380,8 +406,7 @@
                                 </div>
                             </td>
                             <td>
-                                <a href="{% url 'inventori:detaillaptop_hc' laptop.id_laptop_inventori %}"
-                                    class="btn-detail"
+                                <a href="{% url 'detaillaptop_hc' laptop.id_laptop_inventori %}" class="btn-detail"
                                     style="text-decoration:none; padding:6px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:12px; color:#475569; font-weight:600;">Detail</a>
                             </td>
                         </tr>
@@ -394,37 +419,51 @@
                     </tbody>
                 </table>
 
-                <div class="pagination-container" style="display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-top: 1px solid #f1f5f9;">
-                    <span class="pagination-text">Menampilkan {{ laptops.start_index }} - {{ laptops.end_index }} dari {{ total }} aset</span>
+                <div class="pagination-container"
+                    style="display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-top: 1px solid #f1f5f9;">
+                    <span class="pagination-text">Menampilkan {{ laptops.start_index }} - {{ laptops.end_index }} dari
+                        {{ total }} aset</span>
                     <div class="pagination-controls" style="display: flex; gap: 6px; align-items: center;">
-                        <div class="per-page-selector" style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: #64748b; margin-right: 12px;">
+                        <div class="per-page-selector"
+                            style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: #64748b; margin-right: 12px;">
                             <span>Tampilkan:</span>
-                            <select onchange="window.location.href = '?page=1&per_page=' + this.value + '{% if search_query %}&q={{ search_query|escapejs }}{% endif %}{% if status_filter %}&status={{ status_filter|escapejs }}{% endif %}';" style="padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; color: #334155; background-color: #ffffff; cursor: pointer;">
-                                <option value="5" {% if per_page == 5 %}selected{% endif %}>5</option>
-                                <option value="15" {% if per_page == 15 %}selected{% endif %}>15</option>
-                                <option value="25" {% if per_page == 25 %}selected{% endif %}>25</option>
-                                <option value="50" {% if per_page == 50 %}selected{% endif %}>50</option>
+                            <select
+                                onchange="window.location.href = '?page=1&per_page=' + this.value + '{% if search_query %}&q={{ search_query|escapejs }}{% endif %}{% if status_filter %}&status={{ status_filter|escapejs }}{% endif %}';"
+                                style="padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; color: #334155; background-color: #ffffff; cursor: pointer;">
+                                <option value="5" {% if per_page==5 %}selected{% endif %}>5</option>
+                                <option value="15" {% if per_page==15 %}selected{% endif %}>15</option>
+                                <option value="25" {% if per_page==25 %}selected{% endif %}>25</option>
+                                <option value="50" {% if per_page==50 %}selected{% endif %}>50</option>
                             </select>
                         </div>
                         {% if laptops.has_previous %}
-                            <a href="?page={{ laptops.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if per_page %}&per_page={{ per_page }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">
-                                <i class="fa-solid fa-chevron-left"></i>
-                            </a>
+                        <a href="?page={{ laptops.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if ram_filter %}&ram={{ ram_filter }}{% endif %}{% if storage_filter %}&storage={{ storage_filter }}{% endif %}"
+                            class="page-btn"
+                            style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">
+                            <i class="fa-solid fa-chevron-left"></i>
+                        </a>
                         {% endif %}
-                        
-                        {% for num in laptops.paginator.page_range %}
-                            {% if laptops.number == num %}
-                                <span class="page-btn active" style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; background: #0b57c6; color: white; font-weight: bold; font-size: 12px;">{{ num }}</span>
-                            {% elif num > laptops.number|add:'-3' and num < laptops.number|add:'3' %}
-                                <a href="?page={{ num }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if per_page %}&per_page={{ per_page }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">{{ num }}</a>
-                            {% endif %}
-                        {% endfor %}
 
-                        {% if laptops.has_next %}
-                            <a href="?page={{ laptops.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if per_page %}&per_page={{ per_page }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">
+                        {% for num in laptops.paginator.page_range %}
+                        {% if laptops.number == num %}
+                        <span class="page-btn active"
+                            style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; background: #0b57c6; color: white; font-weight: bold; font-size: 12px;">{{
+                            num }}</span>
+                        {% elif num > laptops.number|add:'-3' and num < laptops.number|add:'3' %} <a
+                            href="?page={{ num }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}"
+                            class="page-btn"
+                            style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">
+                            {{ num }}</a>
+                            {% endif %}
+                            {% endfor %}
+
+                            {% if laptops.has_next %}
+                            <a href="?page={{ laptops.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}"
+                                class="page-btn"
+                                style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">
                                 <i class="fa-solid fa-chevron-right"></i>
                             </a>
-                        {% endif %}
+                            {% endif %}
                     </div>
                 </div>
 
@@ -434,24 +473,32 @@
     </div> <!-- End Wrapper -->
 
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
+        document.addEventListener("DOMContentLoaded", function () {
             const filterForm = document.getElementById("filter-form");
             const searchInput = document.getElementById("search-input");
             const statusSelect = document.getElementById("status-select");
+            const ramSelect = document.getElementById("ram-select");
+            const storageSelect = document.getElementById("storage-select");
             let debounceTimer;
 
+            const triggerSubmit = function () {
+                filterForm.submit();
+            };
+
             if (statusSelect) {
-                statusSelect.addEventListener("change", function() {
-                    filterForm.submit();
-                });
+                statusSelect.addEventListener("change", triggerSubmit);
+            }
+            if (ramSelect) {
+                ramSelect.addEventListener("change", triggerSubmit);
+            }
+            if (storageSelect) {
+                storageSelect.addEventListener("change", triggerSubmit);
             }
 
             if (searchInput) {
-                searchInput.addEventListener("input", function() {
+                searchInput.addEventListener("input", function () {
                     clearTimeout(debounceTimer);
-                    debounceTimer = setTimeout(function() {
-                        filterForm.submit();
-                    }, 500);
+                    debounceTimer = setTimeout(triggerSubmit, 500);
                 });
 
                 // Focus behavior: let user type continuously

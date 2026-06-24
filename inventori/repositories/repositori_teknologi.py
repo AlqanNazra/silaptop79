@@ -65,28 +65,22 @@ class TeknologiRepository(ITeknologiRepository):
     # GET ALL
     # ====================================
     def get_all_teknologi(self):
-
         query = """
         SELECT
             id_teknologi,
             nama_teknologi,
-            created_at,
-            updated_at
+            kategori
         FROM inventori_teknologi
         ORDER BY nama_teknologi;
         """
-
         with self.conn.cursor() as cur:
-
             cur.execute(query)
-
             columns = [col[0] for col in cur.description]
-
             result = []
-
             for row in cur.fetchall():
-                result.append(dict(zip(columns, row)))
-
+                result.append(
+                    dict(zip(columns, row))
+                )
             return result
 
     # ====================================

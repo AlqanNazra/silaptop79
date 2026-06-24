@@ -24,7 +24,7 @@ from inventori.dto.dto_role import RoleDTO
 from inventori.repositories.repositori_laptop_inventori import LaptopInventoriRepository
 from dss.repositories.repositori_laptop_pengadaan import LaptopPengadaanRepository
 from decimal import Decimal
-
+from dss.services.service_validator_saw import ServiceValidatorSAW
 from inventori.repositories.repositori_role_teknologi import RoleTeknologiRepository
 class Servicesaw:
 
@@ -92,18 +92,27 @@ class Servicesaw:
         self,
         id_role
     ):
-        print("ROLE YANG DICARI =", id_role)
+        # print("ROLE YANG DICARI =", id_role)
 
         role = self.repoRole.get_by_id(id_role)
 
-        print("\n=== ROLE RAW ===")
-        print(role)
-        print(type(role))
+        # print("\n=== ROLE RAW ===")
+        # print(role)
+        # print(type(role))
 
         if not role:
             raise Exception(
                 f"Role {id_role} tidak ditemukan"
             )
+
+        if isinstance(role, dict):
+            return {
+                "id_role": role.get("id_role"),
+                "nama_role": role.get("nama_role"),
+                "min_ram": role.get("min_ram"),
+                "min_storage": role.get("min_storage"),
+                "min_processor_score": role.get("min_processor_score")
+            }
 
         return {
             "id_role": role[0],
@@ -113,39 +122,62 @@ class Servicesaw:
             "min_processor_score": role[4]
         }
     def normalisasi_saw(self, data_preproses):  
-        print("\n=== DEBUG NORMALISASI START ===")
+        # print("\n=== DEBUG NORMALISASI START ===")
+        print("=== NORMALISASI SAW VERSI BARU ===")
 
-        if not data_preproses:
-            print("DATA PREPROCESS KOSONG")
-            return []
+        # if not data_preproses:
+        #     print("DATA PREPROCESS KOSONG")
+        #     return []
 
-        print("JUMLAH DATA:", len(data_preproses))
-        print("SAMPLE:", data_preproses[0])
+        # print("JUMLAH DATA:", len(data_preproses))
+        # print("SAMPLE:", data_preproses[0])
 
         kriteria_data = self.repoK.ambil_kriteria()
 
-        print("KRITERIA:")
-        print(kriteria_data)
-        for i, k in enumerate(kriteria_data):
-            print(
-                f"KRITERIA[{i}] =",
-                k,
-                "TYPE=",
-                type(k)
-            )
+        # print("KRITERIA:")
+        # print(kriteria_data)
+        # for i, k in enumerate(kriteria_data):
+        #     print(
+        #         f"KRITERIA[{i}] =",
+        #         k,
+        #         "TYPE=",
+        #         type(k)
+        #     )
         map_tipe = {k['nama_kriteria']: k['tipe_kriteria'].lower() for k in kriteria_data}
-        keys = data_preproses[0].keys()
+        # print("\n" + "="*50)
+        # print("KLASIFIKASI KRITERIA")
+        # print("="*50)
+
+        # for nama, tipe in map_tipe.items():
+        #     print(
+        #         f"{nama:<20} -> {tipe.upper()}"
+        #     )
+        keys = list(data_preproses[0].keys())
+        # print("KEYS =", keys)
         max_values = {}
         min_values = {}
-        
+        keys = list(data_preproses[0].keys())
+        # print("\n=== DEBUG KEYS ===")
+        # print(keys)
         for key in keys:
-            if key == "id":
-                continue
-            all_vals = [item[key] for item in data_preproses if item[key] is not None]
-            max_values[key] = max(all_vals) if all_vals else 0
-            min_values[key] = min(all_vals) if all_vals else 0
+            # print(f"\nPROSES -> {key}")
+            # if key == "id":
+            #     print("SKIP ID")
+            #     continue
+            try:
+                all_vals = [item[key] for item in data_preproses if item[key] is not None]
+                # print("JUMLAH =", len(all_vals))
+                max_values[key] = max(all_vals)
+                min_values[key] = min(all_vals)
+                # print( f"MAX={max_values[key]} "f"MIN={min_values[key]}")
+            except Exception as e:
+                print(f"ERROR SAAT PROSES {key}")
+                print(str(e))
 
         hasil_normalisasi = []
+        # print("\n=== CEK KEY PREPROSES ===")
+        # for i, item in enumerate(data_preproses):
+        #     print(f"ITEM {i}:",list(item.keys()))
 
         for item in data_preproses:
             normal_item = {"id": item["id"]}
@@ -162,13 +194,70 @@ class Servicesaw:
                     continue
 
                 if tipe == 'benefit':
-                    normal_item[key] = nilai / max_values[key] if max_values[key] != 0 else 0
+                    # if key not in max_values:
+                    #     print("\nERROR KEY")
+                    #     print("KEY =", key)
+                    #     print("MAX VALUES")
+                    #     print(max_values)
+                    #     print("ITEM")
+                    #     print(item)
+                    # normal_item[key] = nilai / max_values[key] if max_values[key] != 0 else 0\
+                    # =======================================
+                    #  TESTING
+                    # =======================================
+                    hasil = nilai / max_values[key]
+                    # print(
+                    #     f"[BENEFIT] "
+                    #     f"{key}: "
+                    #     f"{nilai}/{max_values[key]}"
+                    #     f" = {hasil:.4f}"
+                    # )
+                    normal_item[key] = hasil
                 elif tipe == 'cost':
-                    normal_item[key] = min_values[key] / nilai if nilai != 0 else 0
+                    # if key not in max_values:
+                    #     print("\nERROR KEY")
+                    #     print("KEY =", key)
+                    #     print("MAX VALUES")
+                    #     print(max_values)
+                    #     print("ITEM")
+                    #     print(item)
+                    # normal_item[key] = min_values[key] / nilai if nilai != 0 else 0
+                    # =======================================
+                    #  TESTING
+                    # =====================================
+                    hasil = min_values[key] / nilai
+                    # print(
+                    #     f"[COST] "
+                    #     f"{key}: "
+                    #     f"{min_values[key]}/{nilai}"
+                    #     f" = {hasil:.4f}"
+                    # )
+                    normal_item[key] = hasil
                 else:
                     normal_item[key] = 0
 
             hasil_normalisasi.append(normal_item)
+            # print("\n" + "="*50)
+            # print("HASIL NORMALISASI")
+            # print("="*50)
+            # print("\n" + "="*50)
+            # print("VALIDASI NORMALISASI")
+            # print("="*50)
+            for item in hasil_normalisasi:
+                for key, value in item.items():
+                    if key == "id":
+                        continue
+            #         if value < 0 or value > 1:
+            #             valid = False
+            #             print(f"ERROR "f"{item['id']} "f"{key}={value}")
+            # if valid:
+            #     print("STATUS : VALID")
+            #     print("Semua nilai berada pada rentang 0-1")
+            # else:
+            #     print("STATUS : INVALID")
+
+            for item in hasil_normalisasi:
+                print(item)
 
         return hasil_normalisasi
     
@@ -185,18 +274,18 @@ class Servicesaw:
                 role_teknologi_list
             )
         )
-        print("\n====================")
-        print("BOBOT HASIL AGREGASI ROLE")
-        print("====================")
+        # print("\n====================")
+        # print("BOBOT HASIL AGREGASI ROLE")
+        # print("====================")
 
 
-        for k,v in hasil_role["hasil_role"].items():
+        # for k,v in hasil_role["hasil_role"].items():
 
-            print(
-                k,
-                "=",
-                v
-            )
+        #     print(
+        #         k,
+        #         "=",
+        #         v
+        #     )
         
 
         return hasil_role["hasil_role"]
@@ -204,24 +293,26 @@ class Servicesaw:
     def hitung_saw_data(self, data_normalisasi, role: list):
         if not data_normalisasi:
             return []
-        print("\n=== DEBUG HITUNG SAW ===")
+        # print("\n=== DEBUG HITUNG SAW ===")
 
-        print("ROLE:")
-        print(role)
+        # print("ROLE:")
+        # print(role)
 
-        print("DATA NORMALISASI:")
-        print(data_normalisasi)
+        # print("DATA NORMALISASI:")
+        # print(data_normalisasi)
 
-        if len(data_normalisasi) > 0:
-            print("SAMPLE:")
-            print(data_normalisasi[0])
+        # if len(data_normalisasi) > 0:
+        #     print("SAMPLE:")
+        #     print(data_normalisasi[0])
 
         bobot = self.get_bobot_saw(role)
-        print("BOBOT:")
-        print(bobot)
+        validator = ServiceValidatorSAW()
+        validator.validate_bobot(bobot)
+        # print("BOBOT:")
+        # print(bobot)
 
-        for k,v in bobot.items():
-            print(k, v)
+        # for k,v in bobot.items():
+        #     print(k, v)
         hasil = []
 
         for item in data_normalisasi:
@@ -241,7 +332,8 @@ class Servicesaw:
 
         # for item in data_normalisasi[:3]:
         #     print("DATA:", item)
-
+        validator = ServiceValidatorSAW()
+        validator.validate_bobot(bobot)
         return hasil
     
     
@@ -272,12 +364,16 @@ class Servicesaw:
     
     def proses_saw_pipeline(self, list_alternatif, role):
         data_pre = self.servisPD.preprocessing(list_alternatif)
-        print("\n=== PREPROCESSING ===")
-        print(data_pre[0])
+        # print("\n=== PREPROCESSING ===")
+        # print(data_pre[0])
         
         data_normalisasi = self.normalisasi_saw(data_pre)
+        validator = ServiceValidatorSAW()
+        validator.validate_normalisasi(data_normalisasi)
         hasil_saw = self.hitung_saw_data(data_normalisasi, role)
         ranking = self.ranking_saw(hasil_saw)
+        validator.validate_skor(ranking)
+        validator.validate_ranking(ranking)
 
         for i, item in enumerate(ranking, start=1):
             item["rank"] = i
@@ -338,9 +434,9 @@ class Servicesaw:
                     create_at=datetime.now()
                 )
             )
-            print("\n=== ID DSS HASIL INSERT ===")
-            print(id_dss)
-            print(type(id_dss))
+            # print("\n=== ID DSS HASIL INSERT ===")
+            # print(id_dss)
+            # print(type(id_dss))
             hasil_filter = self.servisPD.filtering_data(
                 sumber_data,
                 filter_data
@@ -356,10 +452,10 @@ class Servicesaw:
                 )
             )
 
-            print(
-                "TOTAL DATA INVENTORI =",
-                len(semua_data)
-            )
+            # print(
+            #     "TOTAL DATA INVENTORI =",
+            #     len(semua_data)
+            # )
             # print("=== RAW DATA ===")
             # print(data_raw[0])
             # if not data_raw:
@@ -384,14 +480,13 @@ class Servicesaw:
             hasil_role = None
             if role_match_data:
                 hasil_role = (
-                    self.proses_saw_pipeline(
-                        role_match_data,
-                        role
-                    )
-                )
-                ranking_role = (
-                    hasil_role["ranking"]
-                )
+                    self.proses_saw_pipeline(role_match_data,role))
+                ranking_role = (hasil_role["ranking"])
+            validator = ServiceValidatorSAW()
+            # validator.validate_alternatif(role_match_data)
+            validator.validate_skor(hasil_role["ranking"])
+            validator.validate_ranking(hasil_role["ranking"])
+            validator.print_report()
             # DATASET 2 ALTERNATIF LAIN
             hasil_fallback = (
                 self.proses_saw_pipeline(
@@ -410,9 +505,9 @@ class Servicesaw:
                 )
             else:
                 id_hasil_role = None
-            print("\n=== DEBUG ID DSS ===")
-            print(id_dss)
-            print(type(id_dss))
+            # print("\n=== DEBUG ID DSS ===")
+            # print(id_dss)
+            # print(type(id_dss))
             id_hasil_fallback = (
                 self.simpan_hasil_saw(
                     id_dss,
@@ -562,6 +657,7 @@ class Servicesaw:
         #         "status": "error",
         #         "message": str(e)
         #     }
+
         except Exception as e:
             conn.rollback()
 

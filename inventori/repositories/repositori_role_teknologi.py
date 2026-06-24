@@ -88,13 +88,60 @@ class RoleTeknologiRepository(
             return True
     def get_by_role(self,id_role):
         query = """
-            SELECT
-                *
-            FROM role_teknologi
-            WHERE id_role = %s
+        SELECT
+            id_role_teknologi,
+            id_role,
+            id_teknologi
+        FROM role_teknologi
+        WHERE id_role = %s
         """
-        with self.conn.cursor(
-            cursor_factory=RealDictCursor
-        ) as cur:
+        with self.conn.cursor() as cur:
+            cur.execute(
+                query,
+                (id_role,)
+            )
+            columns = [
+                col[0]
+                for col in cur.description
+            ]
+            result = []
+            for row in cur.fetchall():
+                result.append(
+                    dict(
+                        zip(
+                            columns,
+                            row
+                        )
+                    )
+                )
+            return result
+        
+    def hapus_by_role(self, id_role):
+        query = """
+        DELETE FROM role_teknologi
+        WHERE id_role = %s;
+        """
+        with self.conn.cursor() as cur:
             cur.execute(query,(id_role,))
-            return cur.fetchall()
+            return True
+        
+    def get_relasi(self,id_role,id_teknologi):
+        query = """
+        SELECT
+            id_role_teknologi
+        FROM role_teknologi
+        WHERE
+            id_role = %s
+            AND id_teknologi = %s
+        """
+        with self.conn.cursor() as cur:
+            cur.execute(
+                query,
+                (
+                    id_role,
+                    id_teknologi
+                )
+            )
+            return cur.fetchone()
+    
+                

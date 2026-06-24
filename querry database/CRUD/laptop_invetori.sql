@@ -14,7 +14,7 @@ CREATE OR REPLACE FUNCTION tambah_laptop_inventori(
     f_id_ram VARCHAR,       
     f_id_storage VARCHAR,   
     f_ukuran_layar FLOAT,
-    f_baterai FLOAT 
+    f_baterai VARCHAR 
 )
 RETURNS VOID AS $$
 BEGIN
@@ -30,7 +30,8 @@ BEGIN
         id_processor, 
         id_ram,
         id_storage,
-        ukuran_layar
+        ukuran_layar,
+        baterai
     )
     VALUES (
         f_generate_id('INV','inventori_laptopinventori','id_laptop_inventori'),
@@ -44,7 +45,8 @@ BEGIN
         NULLIF(f_id_processor, '')::bigint, 
         NULLIF(f_id_ram, '')::bigint,       
         NULLIF(f_id_storage, '')::bigint,   
-        f_ukuran_layar
+        f_ukuran_layar,
+        f_baterai
     );
 END;
 $$ LANGUAGE plpgsql;
@@ -114,7 +116,7 @@ RETURNS TABLE (
 )
 AS $$
 BEGIN
-RETURN QUERY
+Return QUERY
 SELECT
     li.id_laptop_inventori,
     li.no_inventori,
@@ -126,7 +128,7 @@ SELECT
     li.lokasi,
 
     li.ukuran_layar,
-    NULL::float AS baterai,
+    li.baterai,
 
     pro.nama_processor,
     pro.manufacturer,
@@ -224,20 +226,20 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION update_kondisi_inventori (f_id_laptop_inventori VARCHAR(100), f_kondisi VARCHAR(100))
-RETURNs TEXT AS $$
+RETURNS TEXT AS $$
 BEGIN
     UPDATE inventori_laptopinventori
-    set kondisi = f_kondisi
+    SET kondisi = f_kondisi
     WHERE id_laptop_inventori = f_id_laptop_inventori;
     RETURN 'Kondisi berhasil diupdate!';
 END;
 $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION update_status_inventori (f_id_laptop_inventori VARCHAR(100), f_status VARCHAR(100), f_lokasi VARCHAR(100) DEFAULT NULL)
-RETURNs TEXT AS $$
+RETURNS TEXT AS $$
 BEGIN
     UPDATE inventori_laptopinventori
-    set status = f_status, lokasi = f_lokasi
+    SET status = f_status, lokasi = f_lokasi
     WHERE id_laptop_inventori = f_id_laptop_inventori;
     RETURN 'status berhasil diupdate!';
 END;

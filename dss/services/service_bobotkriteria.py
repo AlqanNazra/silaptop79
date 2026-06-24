@@ -215,12 +215,12 @@ class ServiceBobotKriteria:
 
                         nilai_swara=None
                     )
-                    print(
-                        "KRITERIA:",
-                        item["id_kriteria"],
-                        "BOBOT:",
-                        item["nilai_bobot"]
-                    )
+                    # print(
+                    #     "KRITERIA:",
+                    #     item["id_kriteria"],
+                    #     "BOBOT:",
+                    #     item["nilai_bobot"]
+                    # )
 
                     self.repoBK.tambah_bobot_kriteria(
                         dto
