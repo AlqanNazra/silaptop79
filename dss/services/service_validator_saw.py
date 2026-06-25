@@ -23,7 +23,7 @@ class ServiceValidatorSAW:
     def validate_bobot(self, bobot):
 
         print("\n" + "=" * 50)
-        print("VALIDASI BOBOT")
+        print("")
         print("=" * 50)
 
         total = 0

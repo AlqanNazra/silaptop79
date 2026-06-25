@@ -34,3 +34,23 @@ class ProcessorRepository(IProcessorRepository):
         with self.conn.cursor() as cur:
             cur.execute("SELECT hapus_processor(%s)", (id_processor,))
             return cur.fetchone()['hapus_processor']
+    
+    from psycopg2.extras import RealDictCursor
+
+
+    def ambil_processor_dropdown(self):
+
+        with self.conn.cursor(
+            cursor_factory=RealDictCursor
+        ) as cur:
+
+            cur.execute("""
+                SELECT
+                    id_processor,
+                    nama_processor,
+                    processor_score
+                FROM inventori_processor
+                ORDER BY nama_processor
+            """)
+
+            return cur.fetchall()

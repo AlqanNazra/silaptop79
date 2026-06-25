@@ -29,6 +29,7 @@ class FilterPengadaanDTO:
         nama_processor: str = None,
         manufacturer: str = None,
         processor_model: str = None,
+        processor_score: int = None,
         cores: int = None,
         min_cores: int = None,
         max_cores: int = None,
@@ -55,6 +56,7 @@ class FilterPengadaanDTO:
         self.nama_processor = nama_processor
         self.manufacturer = manufacturer
         self.processor_model = processor_model
+        self.processor_score = processor_score
         self.cores = cores
         self.min_cores = min_cores
         self.max_cores = max_cores
@@ -83,6 +85,7 @@ class FilterPengadaanDTO:
             self.nama_processor,
             self.manufacturer,
             self.processor_model,
+            self.processor_score,
             self.cores,
             self.min_cores,
             self.max_cores,

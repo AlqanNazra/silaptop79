@@ -15,6 +15,7 @@ class RoleRepository(IRoleRepository):
                 %s,
                 %s,
                 %s,
+                %s,
                 %s
             );
         """
@@ -25,6 +26,7 @@ class RoleRepository(IRoleRepository):
                     data.nama_role,
                     data.min_ram,
                     data.min_storage,
+                    data.nama_processor,
                     data.min_processor_score
                 )
             )
@@ -35,6 +37,7 @@ class RoleRepository(IRoleRepository):
 
         query = """
             SELECT update_role(
+                %s,
                 %s,
                 %s,
                 %s,
@@ -52,6 +55,7 @@ class RoleRepository(IRoleRepository):
                     data.nama_role,
                     data.min_ram,
                     data.min_storage,
+                    data.nama_processor,
                     data.min_processor_score
                 )
             )
@@ -134,15 +138,15 @@ class RoleRepository(IRoleRepository):
             )
 
             return cur.fetchall()
+    from psycopg2.extras import RealDictCursor
     def get_by_id(self, id_role: str):
         query = """
             SELECT *
             FROM get_role_by_id(%s);
         """
-        with self.conn.cursor() as cur:
+        with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute(query, (id_role,))
-            row = cur.fetchone()
-            return row
+            return cur.fetchone()
     def get_all(self):
         query = """
             SELECT *
@@ -158,6 +162,7 @@ class RoleRepository(IRoleRepository):
                     "nama_role": row[1],
                     "min_ram": row[2],
                     "min_storage": row[3],
-                    "min_processor_score": row[4]
+                    "nama_processor": row[4],
+                    "min_processor_score": row[5]
                 })
             return hasil

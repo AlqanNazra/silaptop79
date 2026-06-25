@@ -122,7 +122,7 @@ class LaptopPengadaanRepository(ILaptopPengadaanRepositoryImpl):
                 %s, %s, %s,
                 %s, %s, %s,
                 %s, %s, %s, %s,
-                %s, %s, %s, %s
+                %s, %s, %s, %s,%s
             );
         """
 
@@ -148,7 +148,7 @@ class LaptopPengadaanRepository(ILaptopPengadaanRepositoryImpl):
             pro.model AS processor_model,
             pro.cores,
             pro.threads,
-            pro.benchmark_score,
+            pro.processor_score,
             r.kapasitas_gb AS ram_kapasitas,
             r.tipe AS ram_tipe,
             s.kapasitas_gb AS storage_kapasitas,

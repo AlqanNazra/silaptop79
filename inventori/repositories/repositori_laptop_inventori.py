@@ -64,7 +64,7 @@ class LaptopInventoriRepository(ILaptopInventoriRepository):
                 %s, %s, %s,
                 %s, %s, %s,
                 %s, %s, %s, %s,
-                %s, %s, %s, %s
+                %s, %s, %s, %s,%s
             );
         """
 

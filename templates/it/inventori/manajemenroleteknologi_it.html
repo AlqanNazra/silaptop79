@@ -701,12 +701,21 @@
                                 <input type="number" name="min_storage" class="form-control" placeholder="256" min="1" required>
                             </div>
                         </div>
-
-                        <div class="form-grid">
-                            <div class="form-group">
-                                <label>Min Processor Benchmark Score</label>
-                                <input type="number" name="min_processor_score" class="form-control" placeholder="5000" min="1" required>
-                            </div>
+                        <div class="form-grid" style="margin-bottom:24px;">
+                            <label>Minimum Processor</label>
+                            <select name="id_processor" id="processorSelect" class="form-control" required>
+                                <option value="">
+                                    -- Pilih Processor --
+                                </option>
+                                {% for processor in processor_list %}
+                                <option
+                                    value="{{ processor.id_processor }}"
+                                    data-score="{{ processor.processor_score }}">
+                                    {{ processor.nama_processor }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <input type="hidden" id="processorScore" name="min_processor_score" required>
                         </div>
                         <div class="form-group" style="margin-bottom:24px;">
                         <label>Teknologi Pendukung</label>
@@ -1162,6 +1171,20 @@
 </div>
 
 <script>
+    document
+        .getElementById("processorSelect")
+        .addEventListener("change", function(){
+
+            const score =
+                this.options[
+                    this.selectedIndex
+                ].dataset.score;
+
+            document.getElementById(
+                "processorScore"
+            ).value = score;
+
+        });
     document.getElementById("editRoleForm").addEventListener(
             "submit",
             function(e){

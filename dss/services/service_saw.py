@@ -1,4 +1,7 @@
+from collections import defaultdict
+from copy import deepcopy
 from datetime import datetime
+from itertools import combinations
 import traceback
 
 from dss.services.service_bobotkriteria import ServiceBobotKriteria
@@ -88,18 +91,12 @@ class Servicesaw:
                 "Tidak ditemukan laptop yang memenuhi spesifikasi minimum role"
         }
 
-    def get_role_requirement(
-        self,
-        id_role
-    ):
+    def get_role_requirement(self,id_role):
         # print("ROLE YANG DICARI =", id_role)
-
         role = self.repoRole.get_by_id(id_role)
-
         # print("\n=== ROLE RAW ===")
         # print(role)
         # print(type(role))
-
         if not role:
             raise Exception(
                 f"Role {id_role} tidak ditemukan"
@@ -115,15 +112,15 @@ class Servicesaw:
             }
 
         return {
-            "id_role": role[0],
-            "nama_role": role[1],
-            "min_ram": role[2],
-            "min_storage": role[3],
-            "min_processor_score": role[4]
+            "id_role": role["id_role"],
+            "nama_role": role["nama_role"],
+            "min_ram": role["min_ram"],
+            "min_storage": role["min_storage"],
+            "min_processor_score": role["min_processor_score"]
         }
     def normalisasi_saw(self, data_preproses):  
         # print("\n=== DEBUG NORMALISASI START ===")
-        print("=== NORMALISASI SAW VERSI BARU ===")
+        # print("=== NORMALISASI SAW VERSI BARU ===")
 
         # if not data_preproses:
         #     print("DATA PREPROCESS KOSONG")
@@ -181,11 +178,9 @@ class Servicesaw:
 
         for item in data_preproses:
             normal_item = {"id": item["id"]}
-
             for key in keys:
                 if key == "id":
                     continue
-
                 tipe = map_tipe.get(key, "benefit")
                 nilai = item.get(key, 0)
 
@@ -256,8 +251,8 @@ class Servicesaw:
             # else:
             #     print("STATUS : INVALID")
 
-            for item in hasil_normalisasi:
-                print(item)
+            # for item in hasil_normalisasi:
+            #     print(item)
 
         return hasil_normalisasi
     
@@ -361,11 +356,10 @@ class Servicesaw:
             list_alternatif.append(item)
 
         return list_alternatif
-    
     def proses_saw_pipeline(self, list_alternatif, role):
         data_pre = self.servisPD.preprocessing(list_alternatif)
-        # print("\n=== PREPROCESSING ===")
-        # print(data_pre[0])
+        print("\n=== PREPROCESSING ===")
+        print(data_pre[0])
         
         data_normalisasi = self.normalisasi_saw(data_pre)
         validator = ServiceValidatorSAW()
@@ -421,6 +415,154 @@ class Servicesaw:
                 )
             )
 
+    from itertools import combinations
+    from collections import defaultdict
+    from copy import deepcopy
+
+    def jalankan_simulasi_sensitivitas_43(self,data_preproses,role):
+        print(">>> VERSI SENSITIVITAS 43 AKTIF <<<")
+        print("\n" + "=" * 80)
+        print("UJI SENSITIVITAS SWARA-SAW")
+        print("=" * 80)
+        data_norm = self.normalisasi_saw(data_preproses)
+        base_bobot = self.get_bobot_saw(role)
+        data_kriteria = self.repoK.ambil_kriteria()
+        # print("\n=== KRITERIA DB ===")
+        # for x in data_kriteria:
+        #     print(x)
+        hardware = []
+        fisik = []
+        for item in data_kriteria:
+            if (item["golongan_kriteria"].lower()== "hardware"):
+                hardware.append(item["nama_kriteria"])
+            elif (item["golongan_kriteria"].lower()== "fisik"):
+                fisik.append(item["nama_kriteria"])
+        kombinasi_uji = []
+        print("HARDWARE =", hardware)
+        print("FISIK =", fisik)
+        # =====================================
+        # SINGLE CRITERIA
+        # =====================================
+        for k in hardware + fisik:
+            kombinasi_uji.append([k])
+        for r in [2, 3]:
+            for combo in combinations(hardware,r):
+                kombinasi_uji.append(list(combo))
+        # =====================================
+        # FISIK
+        # =====================================
+        for r in [2, 3]:
+            for combo in combinations(fisik,r):
+                kombinasi_uji.append(list(combo))
+        persentase_uji = [0.10,0.20,0.30]
+        # =====================================
+        # BASELINE
+        # =====================================
+        hasil_baseline = self.hitung_saw_data(data_norm,role)
+        ranking_baseline = self.ranking_saw(hasil_baseline)
+        baseline_top1 = (ranking_baseline[0]["id"])
+        perubahan_rank1 = 0
+        detail_kasus = []
+        total_kasus = 1
+        # =====================================
+        # SIMULASI
+        # =====================================
+        for combo in kombinasi_uji:
+            for pct in persentase_uji:
+                bobot_baru = deepcopy(base_bobot)
+                for k in combo:
+                    if k in bobot_baru:
+                        bobot_baru[k] *= (1 + pct)
+                total = sum(bobot_baru.values())
+                for k in bobot_baru:
+                    bobot_baru[k] /= total
+                hasil_saw = []
+                for item in data_norm:
+                    skor = 0
+                    for nama_kriteria, bobot in bobot_baru.items():
+                        skor += (item.get(nama_kriteria,0)* bobot)
+                    hasil_saw.append({"id": item["id"],"skor": round(skor,6)})
+                ranking = self.ranking_saw(hasil_saw)
+                total_kasus += 1
+                top1 = ranking[0]["id"]
+                if top1 != baseline_top1:
+                    perubahan_rank1 += 1
+                detail_kasus.append({
+                    "kombinasi": combo,
+                    "persentase":int(pct * 100),
+                    "rank1":top1,
+                    "skor":ranking[0]["skor"]
+                })
+        stabilitas = round(((total_kasus - 1- perubahan_rank1)/(total_kasus - 1)) * 100,2)
+        print("\n" + "=" * 80)
+        print("BASELINE")
+        print("=" * 80)
+
+        for i, item in enumerate(
+                ranking_baseline[:5],
+                start=1):
+
+            print(
+                f"{i}. "
+                f"{item['id']} "
+                f"({item['skor']:.6f})"
+            )
+        print("\n" + "-" * 80)
+        print(
+            f"SKENARIO "
+            f"{'+'.join(combo)} "
+            f"+{int(pct*100)}%"
+        )
+
+        print("-" * 80)
+
+        for i, item in enumerate(
+                ranking[:5],
+                start=1):
+
+            print(
+                f"{i}. "
+                f"{item['id']} "
+                f"({item['skor']:.6f})"
+            )
+        if top1 != baseline_top1:
+            print(
+                f"PERUBAHAN TOP-1 : "
+                f"{baseline_top1}"
+                f" -> "
+                f"{top1}"
+            )
+        print("\n" + "=" * 80)
+        print("RINGKASAN SENSITIVITAS")
+        print("=" * 80)
+
+        print(
+            "BASELINE TOP-1 :",
+            baseline_top1
+        )
+
+        print(
+            "TOTAL KASUS :",
+            total_kasus
+        )
+
+        print(
+            "PERUBAHAN TOP-1 :",
+            perubahan_rank1
+        )
+
+        print(
+            "STABILITAS :",
+            f"{stabilitas}%"
+        )
+        return {
+            "total_kasus":total_kasus,
+            "baseline_rank1":baseline_top1,
+            "perubahan_rank1":perubahan_rank1,
+            "stabilitas":stabilitas,
+            "detail":detail_kasus
+        }
+
     def proses_dss_saw(self,id_user,id_bobot,sumber_data,filter_data,role: list,debug=False):
         conn = self.conn
         try:
@@ -465,27 +607,41 @@ class Servicesaw:
             #         "message": "Data laptop tidak ditemukan"
             #     }
             role_requirement = self.get_role_requirement(role[0])
-            hasil_split = (
-                self.servisPD.split_role_requirement(
-                    data_raw,
-                    role_requirement
-                )
-            )
-
-            role_match_data = (
-                hasil_split["role_match"]
-            )
+            print(role_requirement)
+            hasil_split = (self.servisPD.split_role_requirement(data_raw,role_requirement))
+            print("\n=== HASIL SPLIT ===")
+            print("TOTAL RAW =", len(data_raw))
+            print("TOTAL ROLE MATCH =", len(hasil_split["role_match"]))
+            role_match_data = (hasil_split["role_match"])
             # DATASET 1 REKOMENDASI SESUAI ROLE
             ranking_role = []
             hasil_role = None
+            hasil_sensitivitas = None
             if role_match_data:
-                hasil_role = (
-                    self.proses_saw_pipeline(role_match_data,role))
+                print(
+                "PIPELINE MENERIMA",
+                len(role_match_data),
+                "DATA")
+                hasil_role = (self.proses_saw_pipeline(role_match_data,role))
+                print("\n=== HASIL ROLE KEYS ===")
+                print(hasil_role.keys())
+                
                 ranking_role = (hasil_role["ranking"])
+                # ==================================
+                # UJI SENSITIVITAS
+                # ==================================
+                hasil_sensitivitas = (self.jalankan_simulasi_sensitivitas_43(hasil_role["preprocessing"],role))
+                
             validator = ServiceValidatorSAW()
             # validator.validate_alternatif(role_match_data)
-            validator.validate_skor(hasil_role["ranking"])
-            validator.validate_ranking(hasil_role["ranking"])
+            if hasil_role and "ranking" in hasil_role:
+                validator.validate_skor(
+                    hasil_role["ranking"]
+                )
+                validator.validate_ranking(
+                    hasil_role["ranking"]
+                )
+
             validator.print_report()
             # DATASET 2 ALTERNATIF LAIN
             hasil_fallback = (
@@ -615,6 +771,7 @@ class Servicesaw:
             # ==========================================
             return {
                 "status": "success",
+                "sensitivitas":hasil_sensitivitas,
                 "warning":
                     None
                     if role_match_data

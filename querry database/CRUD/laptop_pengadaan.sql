@@ -59,6 +59,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP FUNCTION ambil_laptop_pengadaan()
 
 CREATE OR REPLACE FUNCTION ambil_laptop_pengadaan()
 RETURNS TABLE (
@@ -75,7 +76,7 @@ RETURNS TABLE (
     processor_model VARCHAR,
     cores INT,
     threads INT,
-    benchmark_score INTEGER,
+    processor_score INTEGER,
     ram_kapasitas INT,
     ram_tipe VARCHAR,
     storage_kapasitas INT,
@@ -97,7 +98,7 @@ BEGIN
         pro.model,
         pro.cores,
         pro.threads,
-        pro.benchmark_score,
+        pro.processor_score,
         r.kapasitas_gb,
         r.tipe,
         s.kapasitas_gb,

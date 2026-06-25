@@ -45,24 +45,19 @@ class Servicepreposesdata:
 
             return []
     
-    def filtering_data(
-        self,
-        sumber_data: str,
-        data: Union[FilterPengadaanDTO, FilterInventoriDTO]
-    ) -> dict:
+    def filtering_data(self, sumber_data: str, data: Union[FilterPengadaanDTO, FilterInventoriDTO]) -> dict:
         try:
             with self.conn:
-
                 if sumber_data == "pengadaan":
-
                     if not isinstance(data, FilterPengadaanDTO):
                         return {
                             "status": "error",
                             "message": "Untuk pengadaan, gunakan FilterPengadaanDTO"
                         }
-
                     result = self.repoLP.filter_pengadaan(data)
-
+                    print("\n=== DEBUG INVENTORI RESULT ===")
+                    if result:
+                        print(result[0])
                     return {
                         "status": "success",
                         "sumber": "pengadaan",
@@ -70,17 +65,16 @@ class Servicepreposesdata:
                         "total": len(result),
                         "message": f"Berhasil mengambil {len(result)} data pengadaan"
                     }
-
                 elif sumber_data == "inventori":
-
                     if not isinstance(data, FilterInventoriDTO):
                         return {
                             "status": "error",
                             "message": "Untuk inventori, gunakan FilterInventoriDTO"
                         }
-
                     result = self.repoLI.filter_inventori(data)
-
+                    print("\n=== DEBUG INVENTORI RESULT ===")
+                    if result:
+                        print(result[0])
                     return {
                         "status": "success",
                         "sumber": "inventori",
@@ -116,57 +110,40 @@ class Servicepreposesdata:
     #     return hasil
 
     def preprocessing(self, data_list):
-
         hasil = []
-
+        print("\n=== DEBUG RAW PREPROCESSING ===")
+        for item in data_list[:5]:
+            print(item)
         for item in data_list:
-
             hasil.append({
-
-                "id":
-                    item.get("id_laptop_inventori")
-                    or item.get("id_laptop_pengadaan"),
-
-                "processor":
-                    item.get("benchmark_score", 0),
-
-                "ram":
-                    item.get("ram_kapasitas", 0),
-
-                "storage":
-                    item.get("storage_kapasitas", 0),
-
-                "berat":
-                    item.get("berat", 0),
-
-                "layar":
-                    item.get("ukuran_layar", 0),
-
-                "baterai":
-                    item.get("baterai", 0)
-
+                "id": item.get("id_laptop_inventori") or item.get("id_laptop_pengadaan"),
+                "processor": item.get("processor_score", 0),
+                "ram": item.get("ram_kapasitas", 0),
+                "storage": item.get("storage_kapasitas", 0),
+                "berat": item.get("berat", 0),
+                "layar": item.get("ukuran_layar", 0),
+                "baterai": item.get("baterai", 0)
             })
-
         return hasil
 
     def split_role_requirement(self,data_list,role_requirement):
+        print("\n=== MASUK SPLIT ROLE REQUIREMENT ===")
         role_match = []
-        min_ram = role_requirement["min_ram"]
-        min_storage = role_requirement["min_storage"]
-        # min_processor_score = role_requirement["min_processor_score"]
+        min_ram = int(role_requirement["min_ram"] or 0)
+        min_storage = int(role_requirement["min_storage"] or 0)
+        min_processor_score = int(role_requirement["min_processor_score"] or 0)
         for item in data_list:
             ram = item.get("ram_kapasitas", 0)
             storage = item.get("storage_kapasitas", 0)
-            processor_score = (
-                item.get("benchmark_score")
-                or 0
-            )
+            processor_score = int(item.get("processor_score", 0))
+            print("MIN PROC =",min_processor_score,"| DATA PROC =",processor_score)
             if (
                 ram >= min_ram
                 and storage >= min_storage
-                # and processor_score >= min_processor_score
+                and processor_score >= min_processor_score
             ):
                 role_match.append(item)
+                print("TOTAL ROLE MATCH =", len(role_match))
         return {
             "role_match": role_match,
             "fallback": data_list

@@ -18,3 +18,11 @@ class ReadProcessorService:
             return repo.ambil_processor_by_id(id_processor)
         finally:
             conn.close()
+
+    def ambil_processor_dropdown(self):
+        conn = get_connection()
+        try:
+            repo = ProcessorRepository(conn)
+            return repo.ambil_processor_dropdown()
+        finally:
+            conn.close()

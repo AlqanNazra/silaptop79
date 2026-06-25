@@ -38,7 +38,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION ambil_processor()
+CREATE OR REPLACE FUNCTION ambil_nilai_alternatif()
 RETURNS TABLE (
     id_nilai_alternatif VARCHAR,
     nilai_alternatif Float,
@@ -53,7 +53,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION ambil_processor_by_id(f_id VARCHAR)
+CREATE OR REPLACE FUNCTION ambil_nilai_alternatif_by_id(f_id VARCHAR)
 RETURNS TABLE (
     id_nilai_alternatif VARCHAR,
     nilai_alternatif Float,
@@ -73,7 +73,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION update_processor(
+CREATE OR REPLACE FUNCTION update_nilai_alternatif(
     f_id_nilai_alternatif VARCHAR,
     f_nilai_alternatif Float,
     f_nilai_normalisasi Float,
@@ -94,7 +94,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION hapus_processor(f_id INT)
+CREATE OR REPLACE FUNCTION hapus_nilai_alternatif(f_id INT)
 RETURNS TEXT AS $$
 BEGIN
     DELETE FROM dss_nilaialternatif
