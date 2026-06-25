@@ -14,6 +14,7 @@ from core.views import (
     detailrekomendasiscrapping_hc_view,
     manajemen_role_teknologi_it_view,
     notifikasi_hc_view,
+    konfirmasi_pengembalian_hc_view,
     manajementalent_hc_view,
     manajemenuser_hc_view,
     tambahuser_hc_view,
@@ -40,6 +41,7 @@ from core.views import (
     manajemenpengadaan_it_view,
     detailpengadaan_it_view,
     editpengadaan_it_view,
+    tambahpengadaan_it_view,
     setujui_pengajuan_it_view,
     tambah_komponen_it_view,
     manajemenproyek_it_view,
@@ -52,6 +54,7 @@ from core.views import (
     pengajuanlaptop_talent_view,
     detaillaptop_talent_view,
     riwayatpeminjamanlaptop_talent_view,
+    konfirmasi_penerimaan_talent_view,
     pengembalianlaptop_talent_view,
     editdatalaptop_talent_view,
     inputkriteria_talent_view,
@@ -62,6 +65,7 @@ from core.views import (
     # Home View
     home_view,
     login_redirect_view,
+    logout_view,
     profile_view,
 )
 from inventori.views import (
@@ -84,7 +88,7 @@ urlpatterns = [
     
     # Authentication (login sementara dinonaktifkan)
     path('login/', auth_views.LoginView.as_view(template_name='auth/login.html'), name='login'),
-    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+    path('logout/', logout_view, name='logout'),
     path('login-redirect/', login_redirect_view, name='login_redirect'),
 
     # Landing Page (Directly to HC Dashboard as requested)
@@ -93,14 +97,15 @@ urlpatterns = [
     # ==========================================
     # HUMAN CAPITAL (HC) ROUTES
     # ==========================================
-    path('hc/', dashboard_hc_view, name='dashboardhc'),
-    path('hc/manajemen-laptop/', manajemenlaptop_hc_view, name='manajemen_laptop'),
+    path('hc/', dashboard_hc_view, name='dashboard_hc'),
+    path('hc/manajemen-laptop/', manajemenlaptop_hc_view, name='manajemen_laptop_hc'),
     path('hc/pengajuan-laptop/', pengajuanlaptop_hc_view, name='pengajuanlaptop_hc'),
     path('hc/detail-pengajuan/', detailpengajuan_hc_view, name='detailpengajuan_hc'),
     path('hc/setujui-pengajuan/', setujui_pengajuan_hc_view, name='setujui_pengajuan_hc'),
     path('hc/tambah-laptop/', tambahlaptop_hc_view, name='tambahlaptop_hc'),
     path('hc/detail-laptop/<str:id_laptop>/', detaillaptop_hc_view, name='detaillaptop_hc'),
     path('hc/riwayat-peminjaman/', riwayatpeminjamanlaptop_hc_view, name='riwayatpeminjamanlaptop_hc'),
+    path('hc/konfirmasi-pengembalian/', konfirmasi_pengembalian_hc_view, name='konfirmasi_pengembalian_hc'),
     path('hc/edit-laptop/<str:id_laptop>/', editdatalaptop_hc_view, name='editdatalaptop_hc'),
     path('hc/input-kriteria/', inputkriteria_hc_view, name='inputkriteria_hc'),
     path('hc/hasil-rekomendasi/', hasilrekomendasi_hc_view, name='hasilrekomendasi_hc'),
@@ -135,6 +140,7 @@ urlpatterns = [
     path('it/manajemen-pengadaan/', manajemenpengadaan_it_view, name='manajemen_pengadaan_it'),
     path('it/detail-pengadaan/', detailpengadaan_it_view, name='detailpengadaan_it'),
     path('it/edit-pengadaan/', editpengadaan_it_view, name='editpengadaan_it'),
+    path('it/tambah-pengadaan/', tambahpengadaan_it_view, name='tambah_pengadaan_it'),
     path('it/setujui-pengajuan/', setujui_pengajuan_it_view, name='setujui_pengajuan_it'),
     path('it/manajemen-proyek/', manajemenproyek_it_view, name='manajemen_proyek_it'),
     path('it/tambah-proyek/', tambahproyek_it_view, name='tambahproyek_it'),
@@ -148,6 +154,7 @@ urlpatterns = [
     path('talent/pengajuan-laptop/', pengajuanlaptop_talent_view, name='pengajuanlaptop_talent'),
     path('talent/detail-laptop/', detaillaptop_talent_view, name='detaillaptop_talent'),
     path('talent/riwayat-peminjaman/', riwayatpeminjamanlaptop_talent_view, name='riwayatpeminjamanlaptop_talent'),
+    path('talent/konfirmasi-penerimaan/', konfirmasi_penerimaan_talent_view, name='konfirmasi_penerimaan_talent'),
     path('talent/pengembalian/', pengembalianlaptop_talent_view, name='pengembalianlaptop_talent'),
     path('talent/edit-laptop/', editdatalaptop_talent_view, name='editdatalaptop_talent'),
     path('talent/input-kriteria/', inputkriteria_talent_view, name='inputkriteria_talent'),

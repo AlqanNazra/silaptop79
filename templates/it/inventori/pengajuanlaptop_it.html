@@ -10,6 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
     <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1.1">
 
@@ -258,21 +259,21 @@
             border-radius: 50%;
         }
 
-        .status-badge.pending {
+        .status-badge.menunggu {
             background-color: #EFF6FF;
             color: #1D4ED8;
         }
 
-        .status-badge.pending::before {
+        .status-badge.menunggu::before {
             background-color: #3B82F6;
         }
 
-        .status-badge.approved {
+        .status-badge.disetujui {
             background-color: #F0FDF4;
             color: #15803D;
         }
 
-        .status-badge.approved::before {
+        .status-badge.disetujui::before {
             background-color: #22C55E;
         }
 
@@ -283,6 +284,24 @@
 
         .status-badge.ready::before {
             background-color: #EA580C;
+        }
+
+        .status-badge.ditolak {
+            background-color: #FEF2F2;
+            color: #B91C1C;
+        }
+
+        .status-badge.ditolak::before {
+            background-color: #EF4444;
+        }
+
+        /* Date column */
+        .date-col {
+            display: flex;
+            flex-direction: column;
+            color: #475569;
+            font-size: 13px;
+            gap: 4px;
         }
 
         .btn-detail {
@@ -305,6 +324,40 @@
             border-color: #cbd5e1;
             color: #0f172a;
         }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn-stopwatch {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background-color: #FFFFFF;
+            border: 1px solid #E2E8F0;
+            color: #475569;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            text-decoration: none;
+        }
+
+        .btn-stopwatch:hover {
+            background-color: #F8FAFC;
+            border-color: #0b57c6;
+            color: #0b57c6;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px rgba(11, 87, 198, 0.1);
+        }
+
+        .btn-stopwatch i {
+            font-size: 18px;
+        }
     </style>
 </head>
 
@@ -316,21 +369,31 @@
         <div class="main-dashboard-content">
 
             <div class="page-header">
-                <div style="display: flex; align-items: center; gap: 12px;">
-                    <h1>Pemenuhan & Penyiapan Laptop</h1>
+                <div>
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <h1>Pemenuhan & Penyiapan Laptop</h1>
 
-                    <a href="{% url 'notifikasi_it' %}" title="Notifikasi Tugas Baru"
-                        style="position: relative; display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 10px; background: #FFF7ED; border: 1px solid #FFEDD5; transition: all 0.2s; text-decoration: none;">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#EA580C" stroke-width="2"
-                             stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-                            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-                        </svg>
-                        <span
-                            style="position: absolute; top: -4px; right: -4px; background: #EA580C; color: white; font-size: 10px; font-weight: 700; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">{{ total_mendesak }}</span>
+                        <a href="{% url 'notifikasi_it' %}" title="Notifikasi Tugas Baru"
+                            style="position: relative; display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 10px; background: #FFF7ED; border: 1px solid #FFEDD5; transition: all 0.2s; text-decoration: none;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#EA580C"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                            </svg>
+                            <span
+                                style="position: absolute; top: -4px; right: -4px; background: #EA580C; color: white; font-size: 10px; font-weight: 700; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">{{
+                                total_mendesak }}</span>
+                        </a>
+                    </div>
+                    <p style="margin-top: 4px;">Pantau pengajuan yang sudah disetujui HC dan siapkan perangkat laptop
+                        yang sesuai spesifikasi permintaan.</p>
+                </div>
+                <div>
+                    <a href="{% url 'riwayatpeminjamanlaptop_it' %}" class="btn-stopwatch"
+                        title="Lihat Riwayat Peminjaman">
+                        <i class="fa-solid fa-stopwatch"></i>
                     </a>
                 </div>
-                <p>Pantau pengajuan yang sudah disetujui HC dan siapkan perangkat laptop yang sesuai spesifikasi permintaan.</p>
             </div>
 
             {% include 'components/messages_popup.html' %}
@@ -378,23 +441,57 @@
                 </div>
             </div>
 
-            <!-- Search and Filter Form -->
-            <div style="margin-bottom: 24px;">
-                <form method="GET" action="" style="display: flex; gap: 12px; width: 100%;">
-                    <input type="text" name="q" placeholder="Cari pemohon atau spesifikasi..." value="{{ search_query }}" style="flex: 1; padding: 12px 16px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px;">
-                    <select name="status" style="padding: 12px 16px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background: white;">
-                        <option value="">Semua Status IT</option>
-                        <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
-                        <option value="approved" {% if status_filter == 'approved' %}selected{% endif %}>Approved</option>
-                        <option value="rejected" {% if status_filter == 'rejected' %}selected{% endif %}>Rejected</option>
-                    </select>
-                    <button type="submit" style="background-color: #0b57c6; color: white; padding: 12px 24px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">Cari</button>
-                </form>
-            </div>
-
             <div class="table-card">
-                <div class="table-header">
-                    <h2>Daftar Unit Perlu Disiapkan</h2>
+                <!-- Sub-tab Headers -->
+                <div class="tabs-container"
+                    style="display: flex; gap: 8px; border-bottom: 1px solid #e2e8f0; padding: 12px 24px 0; background: #f8fafc; border-top-left-radius: 12px; border-top-right-radius: 12px;">
+                    <a href="?tab=belum_disetujui{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}"
+                        style="padding: 12px 16px; font-size: 14px; font-weight: 600; text-decoration: none; color: {% if active_tab == 'belum_disetujui' %}#0b57c6{% else %}#64748b{% endif %}; border-bottom: 3px solid {% if active_tab == 'belum_disetujui' %}#0b57c6{% else %}transparent{% endif %}; transition: all 0.2s; display: flex; align-items: center; gap: 8px;">
+                        <i class="fa-solid fa-clock"></i> Belum Disetujui
+                        <span style="background: {% if active_tab == 'belum_disetujui' %}#dbeafe{% else %}#e2e8f0{% endif %}; color: {% if active_tab == 'belum_disetujui' %}#0b57c6{% else %}#475569{% endif %}; padding: 2px 8px; border-radius: 9999px; font-size: 11px; font-weight: bold;">{{ total_belum_disetujui }}</span>
+                    </a>
+                    <a href="?tab=sedang_berlangsung{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}"
+                        style="padding: 12px 16px; font-size: 14px; font-weight: 600; text-decoration: none; color: {% if active_tab == 'sedang_berlangsung' %}#0b57c6{% else %}#64748b{% endif %}; border-bottom: 3px solid {% if active_tab == 'sedang_berlangsung' %}#0b57c6{% else %}transparent{% endif %}; transition: all 0.2s; display: flex; align-items: center; gap: 8px;">
+                        <i class="fa-solid fa-laptop-medical"></i> Sedang Berlangsung
+                        <span style="background: {% if active_tab == 'sedang_berlangsung' %}#dbeafe{% else %}#e2e8f0{% endif %}; color: {% if active_tab == 'sedang_berlangsung' %}#0b57c6{% else %}#475569{% endif %}; padding: 2px 8px; border-radius: 9999px; font-size: 11px; font-weight: bold;">{{ total_sedang_berlangsung }}</span>
+                    </a>
+                    <a href="?tab=riwayat_selesai{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}"
+                        style="padding: 12px 16px; font-size: 14px; font-weight: 600; text-decoration: none; color: {% if active_tab == 'riwayat_selesai' %}#0b57c6{% else %}#64748b{% endif %}; border-bottom: 3px solid {% if active_tab == 'riwayat_selesai' %}#0b57c6{% else %}transparent{% endif %}; transition: all 0.2s; display: flex; align-items: center; gap: 8px;">
+                        <i class="fa-solid fa-circle-check"></i> Riwayat Selesai
+                        <span style="background: {% if active_tab == 'riwayat_selesai' %}#dbeafe{% else %}#e2e8f0{% endif %}; color: {% if active_tab == 'riwayat_selesai' %}#0b57c6{% else %}#475569{% endif %}; padding: 2px 8px; border-radius: 9999px; font-size: 11px; font-weight: bold;">{{ total_riwayat_selesai }}</span>
+                    </a>
+                </div>
+
+                <div class="table-header"
+                    style="display:flex; flex-direction:column; gap:16px; align-items:stretch; padding: 24px 24px 16px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <h2 style="margin:0;">Daftar Unit Perlu Disiapkan</h2>
+                    </div>
+                    <form id="filter-form" method="GET" action=""
+                        style="display:flex; gap:12px; align-items:center; flex-wrap:wrap; width:100%;">
+                        <input type="hidden" name="tab" value="{{ active_tab }}">
+                        <div style="position: relative; flex: 1; min-width: 260px;">
+                            <i class="fa-solid fa-magnifying-glass"
+                                style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 14px;"></i>
+                            <input type="text" id="search-input" name="q" value="{{ search_query|default:'' }}"
+                                placeholder="Cari pemohon atau spesifikasi..."
+                                style="width: 100%; padding: 10px 16px 10px 40px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: 'Inter', sans-serif; box-sizing: border-box;">
+                        </div>
+                        <select name="status" id="status-select"
+                            style="padding: 10px 16px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: 'Inter', sans-serif; background: white; color: #475569; font-weight: 500; cursor: pointer;">
+                            <option value="">Semua Status IT</option>
+                            <option value="menunggu" {% if status_filter == 'menunggu' %}selected{% endif %}>Menunggu
+                            </option>
+                            <option value="disetujui" {% if status_filter == 'disetujui' %}selected{% endif %}>Disetujui
+                            </option>
+                            <option value="ditolak" {% if status_filter == 'ditolak' %}selected{% endif %}>Ditolak
+                            </option>
+                        </select>
+                        <a href="?tab={{ active_tab }}"
+                            style="padding:10px 20px; background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; border-radius:8px; text-decoration:none; font-size:14px; font-weight:600; font-family:'Inter',sans-serif; display: flex; align-items: center; gap: 6px;">
+                            <i class="fa-solid fa-rotate-left"></i> Reset
+                        </a>
+                    </form>
                 </div>
 
                 <div class="table-responsive" style="width: 100%; overflow-x: auto;">
@@ -404,6 +501,7 @@
                                 <th style="width: 50px; text-align: center;">NO</th>
                                 <th>NAMA PEMOHON</th>
                                 <th>DEPARTEMEN</th>
+                                <th>TANGGAL</th>
                                 <th>STATUS IT</th>
                                 <th style="text-align: center;">AKSI IT</th>
                             </tr>
@@ -412,10 +510,12 @@
                             {% if list_pengajuan %}
                             {% for pengajuan in list_pengajuan %}
                             <tr>
-                                <td align="center" style="font-weight: 500; color: #475569;">{{ forloop.counter0|add:list_pengajuan.start_index }}</td>
+                                <td align="center" style="font-weight: 500; color: #475569;">{{
+                                    forloop.counter0|add:list_pengajuan.start_index }}</td>
                                 <td>
                                     <div class="applicant-cell">
-                                        <div class="avatar-initials blue">{{ pengajuan.user_nama|slice:":2"|upper }}</div>
+                                        <div class="avatar-initials blue">{{ pengajuan.user_nama|slice:":2"|upper }}
+                                        </div>
                                         <div class="applicant-info">
                                             <span class="applicant-name">{{ pengajuan.user_nama }}</span>
                                             <span class="applicant-email">{{ pengajuan.perusahaan|default:"-" }}</span>
@@ -424,23 +524,51 @@
                                 </td>
                                 <td style="color: #475569;">{{ pengajuan.kebutuhan_role|default:"-" }}</td>
                                 <td>
+                                    <div class="date-col">
+                                        {% if pengajuan.tanggal_pengajuan %}
+                                        <span>{{ pengajuan.tanggal_pengajuan|date:"d M" }}</span>
+                                        <span>{{ pengajuan.tanggal_pengajuan|date:"Y" }}</span>
+                                        {% else %}
+                                        <span>-</span>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td>
                                     {% if pengajuan.status_it == 'ready' %}
-                                    <span class="status-badge ready">Siap Diambil</span>
+                                    <span class="status-badge menunggu"
+                                        style="background-color: #FFF7ED; color: #C2410C; border: 1px solid #FDBA74;">Siap
+                                        Diambil</span>
                                     {% elif pengajuan.status_it == 'configuring' %}
-                                    <span class="status-badge pending">Konfigurasi</span>
+                                    <span class="status-badge menunggu"
+                                        style="background-color: #EFF6FF; color: #1D4ED8; border: 1px solid #BFDBFE;">Konfigurasi</span>
+                                    {% elif pengajuan.status_it == 'dipinjam' %}
+                                    <span class="status-badge disetujui"
+                                        style="background-color: #DBEAFE; color: #1E40AF; border: 1px solid #BFDBFE;">Dipinjam</span>
+                                    {% elif pengajuan.status_it == 'dikembalikan' %}
+                                    <span class="status-badge menunggu"
+                                        style="background-color: #FEF3C7; color: #B45309; border: 1px solid #FDE68A;">Dikembalikan</span>
+                                    {% elif pengajuan.status_it == 'selesai' %}
+                                    <span class="status-badge disetujui"
+                                        style="background-color: #D1FAE5; color: #065F46; border: 1px solid #A7F3D0;">Selesai</span>
+                                    {% elif pengajuan.status_it == 'ditolak' %}
+                                    <span class="status-badge ditolak"
+                                        style="background-color: #FEF2F2; color: #B91C1C; border: 1px solid #FCA5A5;">Ditolak</span>
                                     {% else %}
-                                    <span class="status-badge approved">Menunggu Antrean</span>
+                                    <span class="status-badge menunggu"
+                                        style="background-color: #F1F5F9; color: #475569; border: 1px solid #CBD5E1;">Menunggu
+                                        Antrean</span>
                                     {% endif %}
                                 </td>
                                 <td align="center">
                                     <a href="{% url 'detailpengajuan_it' %}?id={{ pengajuan.id_pengajuan }}"
-                                        class="btn-detail" style="text-decoration: none; padding: 6px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px; color: #475569; font-weight: 600; display: inline-block;">Detail</a>
+                                        class="btn-detail"
+                                        style="text-decoration: none; padding: 6px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px; color: #475569; font-weight: 600; display: inline-block;">Detail</a>
                                 </td>
                             </tr>
                             {% endfor %}
                             {% else %}
                             <tr>
-                                <td colspan="5" style="text-align: center; padding: 32px; color: #64748B;">
+                                <td colspan="6" style="text-align: center; padding: 32px; color: #64748B;">
                                     Belum ada antrean pengerjaan laptop untuk IT.
                                 </td>
                             </tr>
@@ -449,29 +577,48 @@
                     </table>
 
                     {% if list_pengajuan %}
-                    <!-- Pagination -->
-                    <div class="pagination-container" style="display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-top: 1px solid #f1f5f9;">
-                        <span class="pagination-text" style="font-size: 14px; color: #64748b;">Menampilkan {{ list_pengajuan.start_index }} - {{ list_pengajuan.end_index }} dari {{ total_pengajuan }} pengajuan</span>
+                    <div class="pagination-container"
+                        style="display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-top: 1px solid #f1f5f9;">
+                        <span class="pagination-text" style="font-size: 14px; color: #64748b;">Menampilkan {{
+                            list_pengajuan.start_index }} - {{ list_pengajuan.end_index }} dari {{
+                            list_pengajuan.paginator.count }} pengajuan</span>
                         <div class="pagination-controls" style="display: flex; gap: 6px; align-items: center;">
-                            {% if list_pengajuan.has_previous %}
-                                <a href="?page={{ list_pengajuan.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">
-                                    <i class="fa-solid fa-chevron-left"></i>
-                                </a>
-                            {% endif %}
-                            
-                            {% for num in list_pengajuan.paginator.page_range %}
-                                {% if list_pengajuan.number == num %}
-                                    <span class="page-btn active" style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; background: #0b57c6; color: white; font-weight: bold; font-size: 12px;">{{ num }}</span>
-                                {% elif num > list_pengajuan.number|add:'-3' and num < list_pengajuan.number|add:'3' %}
-                                    <a href="?page={{ num }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">{{ num }}</a>
-                                {% endif %}
-                            {% endfor %}
+                            <select
+                                onchange="window.location.href = '?page=1&per_page=' + this.value + '{% if search_query %}&q={{ search_query|escapejs }}{% endif %}{% if status_filter %}&status={{ status_filter|escapejs }}{% endif %}';"
+                                style="padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; color: #334155; background-color: #ffffff; cursor: pointer;">
+                                <option value="10" {% if per_page == 10 %}selected{% endif %}>10</option>
+                                <option value="15" {% if per_page == 15 %}selected{% endif %}>15</option>
+                                <option value="25" {% if per_page == 25 %}selected{% endif %}>25</option>
+                            </select>
 
-                            {% if list_pengajuan.has_next %}
-                                <a href="?page={{ list_pengajuan.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">
+                            {% if list_pengajuan.has_previous %}
+                            <a href="?page={{ list_pengajuan.previous_page_number }}&tab={{ active_tab }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}"
+                                class="page-btn"
+                                style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">
+                                <i class="fa-solid fa-chevron-left"></i>
+                            </a>
+                            {% endif %}
+
+                            {% for num in list_pengajuan.paginator.page_range %}
+                            {% if list_pengajuan.number == num %}
+                            <span class="page-btn active"
+                                style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; background: #0b57c6; color: white; font-weight: bold; font-size: 12px;">{{
+                                num }}</span>
+                            {% elif num > list_pengajuan.number|add:'-3' and num < list_pengajuan.number|add:'3' %} <a
+                                href="?page={{ num }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}"
+                                class="page-btn"
+                                style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">
+                                {{ num }}</a>
+                                {% endif %}
+                                {% endfor %}
+
+                                {% if list_pengajuan.has_next %}
+                                <a href="?page={{ list_pengajuan.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}"
+                                    class="page-btn"
+                                    style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">
                                     <i class="fa-solid fa-chevron-right"></i>
                                 </a>
-                            {% endif %}
+                                {% endif %}
                         </div>
                     </div>
                     {% endif %}
@@ -479,6 +626,37 @@
             </div>
         </div>
     </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const filterForm = document.getElementById("filter-form");
+            const searchInput = document.getElementById("search-input");
+            const statusSelect = document.getElementById("status-select");
+            let debounceTimer;
+
+            if (statusSelect) {
+                statusSelect.addEventListener("change", function () {
+                    filterForm.submit();
+                });
+            }
+
+            if (searchInput) {
+                searchInput.addEventListener("input", function () {
+                    clearTimeout(debounceTimer);
+                    debounceTimer = setTimeout(function () {
+                        filterForm.submit();
+                    }, 500);
+                });
+
+                // Maintain focus and cursor position at the end of input after reload
+                if (searchInput.value.length > 0) {
+                    const val = searchInput.value;
+                    searchInput.value = '';
+                    searchInput.focus();
+                    searchInput.value = val;
+                }
+            }
+        });
+    </script>
 </body>
 
 </html>

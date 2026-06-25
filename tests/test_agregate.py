@@ -13,7 +13,7 @@ class TestDSSPipeline(TestCase):
         self.raw_conn = psycopg2.connect(
             dbname="TA",
             user="postgres",
-            password="alqan",
+            password="tegal12",
             host="127.0.0.1",
             port="5432"
         )

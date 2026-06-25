@@ -181,12 +181,12 @@
             border-radius: 50%;
         }
 
-        .status-approved {
+        .status-disetujui {
             background-color: #dcfce7;
             color: #16a34a;
         }
 
-        .status-approved .dot {
+        .status-disetujui .dot {
             background-color: #16a34a;
         }
 
@@ -312,7 +312,10 @@
 
     <div class="main-content">
 
-        <div class="breadcrumb">Kelola Data Pengadaan / <span>MacBook Pro M3 Max 14-inch</span></div>
+        <!-- Flash Messages -->
+        {% include 'components/messages_popup.html' %}
+
+        <div class="breadcrumb">Kelola Data Pengadaan / <span>{{ laptop.nama_laptop }}</span></div>
 
         <div class="top-nav">
             <h1 class="page-title">Detail Pengadaan</h1>
@@ -335,7 +338,7 @@
                     <!-- Screen Gloss/Reflect -->
                     <path d="M35 15L120 115H100L35 35V15Z" fill="white" opacity="0.12" />
                 </svg>
-                <div class="laptop-caption">MacBook Pro M3 Max 14-inch</div>
+                <div class="laptop-caption">{{ laptop.nama_laptop }}</div>
             </div>
 
             <!-- Procurement Administration Card -->
@@ -345,23 +348,23 @@
                     style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
                     <div class="admin-row">
                         <span class="admin-label">ID Pengadaan</span>
-                        <span class="asset-id-pill">PR-LP-2026-001</span>
+                        <span class="asset-id-pill">{{ laptop.id_laptop_pengadaan }}</span>
                     </div>
                     <div class="admin-row">
-                        <span class="admin-label">Supplier</span>
+                        <span class="admin-label">Supplier/Merk</span>
                         <span class="admin-value" style="display: flex; align-items: center; gap: 6px;">
-                            <i class="fa-solid fa-truck" style="color: #0b57c6;"></i> Apple Inc.
+                            <i class="fa-solid fa-truck" style="color: #0b57c6;"></i> {{ laptop.manufacturer|default:"-" }}
                         </span>
                     </div>
                     <div class="admin-row">
                         <span class="admin-label">Status</span>
-                        <span class="status-pill status-approved">
-                            <span class="dot"></span>Approved
+                        <span class="status-pill status-disetujui">
+                            <span class="dot"></span>Tersedia untuk DSS (Scraped)
                         </span>
                     </div>
                     <div class="admin-row">
-                        <span class="admin-label">Tanggal Pengadaan</span>
-                        <span class="admin-value">12 Juni 2026</span>
+                        <span class="admin-label">Harga</span>
+                        <span class="admin-value" style="font-weight: 800; color: #16a34a;">Rp. {{ laptop.harga_format }}</span>
                     </div>
                 </div>
             </div>
@@ -379,8 +382,8 @@
                     <i class="fa-solid fa-microchip"></i>
                 </div>
                 <p class="spec-label">Processor</p>
-                <h3 class="spec-value">Apple M3 Max</h3>
-                <span class="spec-subtext">14-Core CPU Architecture</span>
+                <h3 class="spec-value">{{ laptop.nama_processor|default:"-" }}</h3>
+                <span class="spec-subtext">{{ laptop.processor_model|default:"" }}</span>
             </div>
 
             <!-- Card 2: Memory RAM -->
@@ -389,7 +392,7 @@
                     <i class="fa-solid fa-memory"></i>
                 </div>
                 <p class="spec-label">Memory RAM</p>
-                <h3 class="spec-value">32GB</h3>
+                <h3 class="spec-value">{{ laptop.ram_kapasitas|default:"0" }} GB {{ laptop.ram_tipe|default:"" }}</h3>
             </div>
 
             <!-- Card 3: Storage -->
@@ -398,7 +401,7 @@
                     <i class="fa-solid fa-database"></i>
                 </div>
                 <p class="spec-label">Storage</p>
-                <h3 class="spec-value">1TB SSD</h3>
+                <h3 class="spec-value">{{ laptop.storage_kapasitas|default:"0" }} GB {{ laptop.storage_tipe|default:"" }}</h3>
             </div>
 
             <!-- Card 4: Battery -->
@@ -407,7 +410,7 @@
                     <i class="fa-solid fa-battery-full"></i>
                 </div>
                 <p class="spec-label">Baterai</p>
-                <h3 class="spec-value">7200 mAh</h3>
+                <h3 class="spec-value">{{ laptop.baterai|default:"0" }} mAh</h3>
             </div>
 
             <!-- Card 5: Screen Size -->
@@ -416,7 +419,7 @@
                     <i class="fa-solid fa-laptop"></i>
                 </div>
                 <p class="spec-label">Layar</p>
-                <h3 class="spec-value">14.2-inch Liquid Retina</h3>
+                <h3 class="spec-value">{{ laptop.ukuran_layar|default:"0" }} Inch</h3>
             </div>
 
             <!-- Card 6: Weight -->
@@ -425,19 +428,55 @@
                     <i class="fa-solid fa-weight-hanging"></i>
                 </div>
                 <p class="spec-label">Berat</p>
-                <h3 class="spec-value">1.6 Kg</h3>
+                <h3 class="spec-value">{{ laptop.berat|default:"0" }} Kg</h3>
             </div>
 
         </div>
 
         <!-- Action Buttons -->
-        <div class="bottom-actions">
-            <a href="{% url 'editpengadaan_it' %}" class="btn-blue-action">
+        <div class="bottom-actions" style="display: flex; gap: 15px; align-items: center; width: 100%;">
+            <a href="{% url 'edit_pengadaan_it' %}?id={{ laptop.id_laptop_pengadaan }}" class="btn-blue-action" style="flex: 1;">
                 <i class="fa-solid fa-pen"></i> Edit Data
             </a>
+            <button type="button" class="btn-grey-action" style="color: #dc2626; flex: 1;" onclick="showDeleteModal()">
+                <i class="fa-solid fa-trash"></i> Hapus Data
+            </button>
         </div>
 
     </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal-overlay" id="deleteModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center;">
+        <div class="modal-box" style="background: white; border-radius: 16px; padding: 32px; max-width: 420px; width: 90%; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.15);">
+            <div class="modal-icon" style="width: 56px; height: 56px; border-radius: 50%; background: #fee2e2; color: #dc2626; display: flex; align-items: center; justify-content: center; font-size: 24px; margin: 0 auto 16px;">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div class="modal-title" style="font-size: 18px; font-weight: 700; color: #1e293b; margin-bottom: 8px;">Hapus Data Pengadaan?</div>
+            <div class="modal-text" style="font-size: 14px; color: #64748b; line-height: 1.5; margin-bottom: 24px;">Apakah Anda yakin ingin menghapus data pengadaan <strong>"{{ laptop.nama_laptop }}"</strong>? Tindakan ini tidak dapat dibatalkan.</div>
+            <div class="modal-actions" style="display: flex; gap: 12px; justify-content: center;">
+                <button type="button" class="modal-btn" style="padding: 10px 24px; border: none; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; background: #f1f5f9; color: #475569;" onclick="hideDeleteModal()">Batal</button>
+                <form action="{% url 'detailpengadaan_it' %}?id={{ laptop.id_laptop_pengadaan }}" method="POST" style="margin: 0;">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="hapus">
+                    <button type="submit" class="modal-btn" style="padding: 10px 24px; border: none; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; background: #dc2626; color: white;">Ya, Hapus</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showDeleteModal() {
+            document.getElementById('deleteModal').style.display = 'flex';
+        }
+
+        function hideDeleteModal() {
+            document.getElementById('deleteModal').style.display = 'none';
+        }
+
+        document.getElementById('deleteModal').addEventListener('click', function(e) {
+            if (e.target === this) hideDeleteModal();
+        });
+    </script>
 
 </body>
 

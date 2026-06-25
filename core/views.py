@@ -76,7 +76,7 @@ def dashboard_hc_view(request):
         service = PengajuanService()
         semua_pengajuan = service.service_ambil_semua_pengajuan()
         total_pengajuan = len(semua_pengajuan)
-        pengajuan_pending = sum(1 for p in semua_pengajuan if p.status and p.status.lower() == 'pending')
+        pengajuan_menunggu = sum(1 for p in semua_pengajuan if p.status and p.status.lower() == 'menunggu')
 
         # Ambil data peminjaman
         peminjaman_service = PeminjamanService()
@@ -106,13 +106,13 @@ def dashboard_hc_view(request):
     except Exception as e:
         total_laptop = 0
         total_pengajuan = 0
-        pengajuan_pending = 0
+        pengajuan_menunggu = 0
         riwayat_pinjam = []
 
     context = {
         'total_laptop': total_laptop,
         'total_pengajuan': total_pengajuan,
-        'pengajuan_pending': pengajuan_pending,
+        'pengajuan_menunggu': pengajuan_menunggu,
         'riwayat_pinjam': riwayat_pinjam,
     }
     return render(request, 'hc/dashboard/dashboard_hc.html', context)
@@ -195,55 +195,107 @@ def manajementalent_hc_view(request):
     return render(request, 'hc/users/manajementalent_hc.html', context)
 
 def pengajuanlaptop_it_view(request):
-    search_query = request.GET.get('q', '')
-    status_filter = request.GET.get('status', '')
+    search_query = request.GET.get('q', '').strip()
+    status_filter = request.GET.get('status', '').strip()
+    active_tab = request.GET.get('tab', 'belum_disetujui').strip().lower()
+
+    try:
+        per_page = int(request.GET.get('per_page', 10))
+        if per_page not in [10, 15, 25]:
+            per_page = 10
+    except ValueError:
+        per_page = 10
 
     try:
         service = PengajuanService()
         semua_pengajuan = service.service_ambil_semua_pengajuan()
 
-        from inventori.models import User
+        from inventori.models import User, Peminjaman
         import datetime
         users_dict = {u.id_user: u.nama for u in User.objects.all()}
         
+        peminjamans = Peminjaman.objects.all()
+        peminjaman_map = {}
+        for p in peminjamans:
+            pengajuan_id = p.id_pengajuan_id
+            if pengajuan_id not in peminjaman_map:
+                peminjaman_map[pengajuan_id] = []
+            peminjaman_map[pengajuan_id].append(p)
+
         total_siap_proses = 0
         total_dikonfigurasi = 0
         total_selesai = 0
         total_mendesak = 0
         today = datetime.date.today()
 
+        # Categorize the pengajuan
+        belum_disetujui_list = []
+        sedang_berlangsung_list = []
+        riwayat_selesai_list = []
+
         for p in semua_pengajuan:
             p.user_nama = users_dict.get(p.id_user, f"User {p.id_user}")
+            p_loans = peminjaman_map.get(p.id_pengajuan, [])
+            is_approved = p.status and p.status.lower() in ['disetujui', 'approved']
             
-            # Map status_it for frontend representation
-            if p.status and p.status.lower() == 'pending':
-                p.status_it = 'configuring' # Configuring / Menunggu Antrean
-                total_siap_proses += 1
-                total_dikonfigurasi += 1
-                # Calculate if urgent (due date <= 7 days)
+            # Jika ditolak, langsung hilang (tidak dimasukkan ke list manapun)
+            if p.status and p.status.lower() in ['ditolak', 'rejected']:
+                continue
+
+            # Calculate if urgent (due date <= 7 days)
+            if p.status and p.status.lower() in ['menunggu', 'pending']:
                 if p.bulan:
                     diff_days = (p.bulan - today).days
                     if diff_days <= 7:
                         total_mendesak += 1
-            elif p.status and p.status.lower() == 'approved':
-                p.status_it = 'ready' # Siap Diambil
-                total_selesai += 1
+
+            if not is_approved:
+                belum_disetujui_list.append(p)
+                p.status_it = 'configuring'
+                total_dikonfigurasi += 1
             else:
-                p.status_it = 'rejected'
+                has_ready = (not p_loans) or any(l.status.lower() == 'ready' for l in p_loans)
+                if has_ready:
+                    # Jika belum diambil oleh talent, hold dulu di belum_disetujui_list dengan status 'ready'
+                    belum_disetujui_list.append(p)
+                    p.status_it = 'ready'
+                    total_siap_proses += 1
+                else:
+                    has_completed = any(l.status.lower() == 'selesai' for l in p_loans)
+                    if has_completed:
+                        riwayat_selesai_list.append(p)
+                        p.status_it = 'selesai'
+                        total_selesai += 1
+                    else:
+                        sedang_berlangsung_list.append(p)
+                        has_returned = any(l.status.lower() == 'dikembalikan' for l in p_loans)
+                        if has_returned:
+                            p.status_it = 'dikembalikan'
+                        else:
+                            p.status_it = 'dipinjam'
         
+        total_belum_disetujui = len(belum_disetujui_list)
+        total_sedang_berlangsung = len(sedang_berlangsung_list)
+        total_riwayat_selesai = len(riwayat_selesai_list)
+        total_pengajuan = total_belum_disetujui + total_sedang_berlangsung + total_riwayat_selesai
+
+        # Select target list based on active tab
+        if active_tab == 'sedang_berlangsung':
+            filtered_pengajuan = sedang_berlangsung_list
+        elif active_tab == 'riwayat_selesai':
+            filtered_pengajuan = riwayat_selesai_list
+        else:
+            active_tab = 'belum_disetujui'
+            filtered_pengajuan = belum_disetujui_list
+
         # Sort by date descending
-        semua_pengajuan.sort(key=lambda x: x.tanggal_pengajuan if x.tanggal_pengajuan else datetime.date.min, reverse=True)
-        
-        total_pengajuan = len(semua_pengajuan)
-        total_pending = sum(1 for p in semua_pengajuan if p.status and p.status.lower() == 'pending')
-        total_disetujui = sum(1 for p in semua_pengajuan if p.status and p.status.lower() == 'approved')
-        total_ditolak = sum(1 for p in semua_pengajuan if p.status and p.status.lower() == 'rejected')
+        filtered_pengajuan.sort(key=lambda x: x.tanggal_pengajuan if x.tanggal_pengajuan else datetime.date.min, reverse=True)
 
         # Filter search
         if search_query:
             q_lower = search_query.lower()
-            semua_pengajuan = [
-                p for p in semua_pengajuan
+            filtered_pengajuan = [
+                p for p in filtered_pengajuan
                 if q_lower in getattr(p, 'user_nama', '').lower() or
                    q_lower in str(getattr(p, 'id_pengajuan', '')).lower() or
                    q_lower in getattr(p, 'spesifikasi_tambahan', '').lower()
@@ -251,23 +303,28 @@ def pengajuanlaptop_it_view(request):
 
         # Filter status
         if status_filter:
-            status_lower = status_filter.lower()
-            semua_pengajuan = [
-                p for p in semua_pengajuan
-                if getattr(p, 'status', '').lower() == status_lower
+            status_map = {
+                'menunggu': ['menunggu', 'pending'],
+                'disetujui': ['disetujui', 'approved'],
+                'ditolak': ['ditolak', 'rejected']
+            }
+            allowed_statuses = status_map.get(status_filter.lower(), [status_filter.lower()])
+            filtered_pengajuan = [
+                p for p in filtered_pengajuan
+                if getattr(p, 'status', '').lower() in allowed_statuses
             ]
 
         from django.core.paginator import Paginator
-        paginator = Paginator(semua_pengajuan, 5)
+        paginator = Paginator(filtered_pengajuan, 999999)
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
 
         context = {
             'list_pengajuan': page_obj,
             'total_pengajuan': total_pengajuan,
-            'total_pending': total_pending,
-            'total_disetujui': total_disetujui,
-            'total_ditolak': total_ditolak,
+            'total_belum_disetujui': total_belum_disetujui,
+            'total_sedang_berlangsung': total_sedang_berlangsung,
+            'total_riwayat_selesai': total_riwayat_selesai,
             'total_siap_proses': total_siap_proses,
             'total_dikonfigurasi': total_dikonfigurasi,
             'total_selesai': total_selesai,
@@ -280,15 +337,16 @@ def pengajuanlaptop_it_view(request):
             'error_message': f'Gagal memuat data pengajuan: {str(e)}',
             'list_pengajuan': [],
             'total_pengajuan': 0,
-            'total_pending': 0,
-            'total_disetujui': 0,
-            'total_ditolak': 0,
+            'total_belum_disetujui': 0,
+            'total_sedang_berlangsung': 0,
+            'total_riwayat_selesai': 0,
             'total_siap_proses': 0,
             'total_dikonfigurasi': 0,
             'total_selesai': 0,
             'total_mendesak': 0,
             'search_query': search_query,
             'status_filter': status_filter,
+            'active_tab': active_tab,
         }
 
     return render(request, 'it/inventori/pengajuanlaptop_it.html', context)
@@ -310,14 +368,23 @@ def detailpengajuan_it_view(request):
         user_obj = User.objects.filter(id_user=pengajuan.id_user).first()
         pengajuan.user_nama = user_obj.nama if user_obj else pengajuan.id_user
 
+        from inventori.models import Proyek, Role
+        proyek_obj = Proyek.objects.filter(id_proyek=pengajuan.id_proyek).first()
+        pengajuan.proyek_nama = proyek_obj.nama_proyek if proyek_obj else "-"
+
+        role_obj = Role.objects.filter(nama_role__iexact=pengajuan.kebutuhan_role).first()
+        id_role = role_obj.id_role if role_obj else ""
+
         if request.method == 'POST':
             action = request.POST.get('action')
-            if action in ['approved', 'rejected']:
+            if action in ['disetujui', 'ditolak']:
                 user_id = request.user.id_user if hasattr(request.user, 'id_user') else None
+                
+                db_status = 'approved' if action == 'disetujui' else 'rejected'
                 
                 dto = PengajuanDTO(
                     id_pengajuan=id_pengajuan,
-                    status=action,
+                    status=db_status,
                     approved_by=user_id
                 )
                 service.service_approve_pengajuan(dto)
@@ -325,7 +392,9 @@ def detailpengajuan_it_view(request):
                 return redirect('pengajuanlaptop_it')
 
         context = {
-            'pengajuan': pengajuan
+            'pengajuan': pengajuan,
+            'id_role': id_role,
+            'id_proyek': pengajuan.id_proyek or ""
         }
         return render(request, 'it/inventori/detailpengajuan_it.html', context)
         
@@ -428,8 +497,9 @@ def detaillaptop_it_view(request, id_laptop):
     return render(request, 'it/inventori/detaillaptop_it.html', context)
 
 def riwayatpeminjamanlaptop_it_view(request):
-    search_query = request.GET.get('q', '')
-    status_filter = request.GET.get('status', '')
+    search_query = request.GET.get('q', '').strip()
+    status_filter = request.GET.get('status', '').strip()
+    laptop_id = request.GET.get('laptop_id', '').strip()
 
     try:
         service = PeminjamanService()
@@ -439,22 +509,57 @@ def riwayatpeminjamanlaptop_it_view(request):
         users_role_dict = {u.id_user: u.role for u in User.objects.all()}
         laptops_dict = {l.id_laptop_inventori: l.nama_laptop for l in LaptopInventori.objects.all()}
         
+        from inventori.models import Peminjaman as PeminjamanModel
+        import datetime as _dt
+        today_it = _dt.date.today()
+        
+        # Build DB lookup for jatuh_tempo
+        db_peminjaman_map_it = {
+            pm.id_peminjaman: pm for pm in PeminjamanModel.objects.all()
+        }
+        
         for p in riwayat_list:
             p.user_nama = users_dict.get(p.id_user, p.id_user)
             p.user_role = users_role_dict.get(p.id_user, "-")
             p.laptop_nama = laptops_dict.get(p.id_laptop_inventori, p.id_laptop_inventori)
+            # Kalkulasi durasi peminjaman (TC-TRX-16)
+            if p.tanggal_pinjam:
+                if p.tanggal_kembali:
+                    p.durasi_hari = (p.tanggal_kembali - p.tanggal_pinjam).days
+                else:
+                    p.durasi_hari = (today_it - p.tanggal_pinjam).days
+            else:
+                p.durasi_hari = 0
+            # Sisa hari menuju jatuh tempo (TC-TRX-17) - ambil dari DB
+            db_p = db_peminjaman_map_it.get(p.id_peminjaman)
+            p.tanggal_jatuh_tempo = db_p.tanggal_jatuh_tempo if db_p else None
+            if p.tanggal_jatuh_tempo:
+                p.sisa_hari = (p.tanggal_jatuh_tempo - today_it).days
+            else:
+                p.sisa_hari = None
             
         total_peminjaman = len(riwayat_list)
         peminjam_terakhir = "-"
+        
         sorted_p = sorted(riwayat_list, key=lambda x: str(x.tanggal_pinjam) if x.tanggal_pinjam else "", reverse=True)
         if sorted_p:
             peminjam_terakhir = sorted_p[0].user_nama
 
+        # Filter by laptop_id if present
+        filtered_p = sorted_p
+        if laptop_id:
+            filtered_p = [p for p in filtered_p if str(p.id_laptop_inventori) == laptop_id]
+            total_peminjaman = len(filtered_p)
+            if filtered_p:
+                peminjam_terakhir = filtered_p[0].user_nama
+            else:
+                peminjam_terakhir = "-"
+
         # Filter search
         if search_query:
             q_lower = search_query.lower()
-            riwayat_list = [
-                p for p in riwayat_list
+            filtered_p = [
+                p for p in filtered_p
                 if q_lower in getattr(p, 'user_nama', '').lower() or
                    q_lower in getattr(p, 'laptop_nama', '').lower() or
                    q_lower in str(getattr(p, 'id_peminjaman', '')).lower()
@@ -463,13 +568,13 @@ def riwayatpeminjamanlaptop_it_view(request):
         # Filter status
         if status_filter:
             status_lower = status_filter.lower()
-            riwayat_list = [
-                p for p in riwayat_list
+            filtered_p = [
+                p for p in filtered_p
                 if getattr(p, 'status', '').lower() == status_lower
             ]
 
         from django.core.paginator import Paginator
-        paginator = Paginator(riwayat_list, 5)
+        paginator = Paginator(filtered_p, 999999)
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
             
@@ -479,6 +584,7 @@ def riwayatpeminjamanlaptop_it_view(request):
             'peminjam_terakhir': peminjam_terakhir,
             'search_query': search_query,
             'status_filter': status_filter,
+            'laptop_id': laptop_id,
         }
     except Exception as e:
         messages.error(request, f'Gagal memuat riwayat: {str(e)}')
@@ -488,6 +594,7 @@ def riwayatpeminjamanlaptop_it_view(request):
             'peminjam_terakhir': "-",
             'search_query': search_query,
             'status_filter': status_filter,
+            'laptop_id': laptop_id,
         }
     return render(request, 'it/inventori/riwayatpeminjamanlaptop_it.html', context)
 
@@ -674,8 +781,9 @@ def inputkriteria_hc_view(request):
                     processor_score=int(minimum_requirement.get("processor_score",0) or 0)
                 )
             service = Servicesaw(conn)
+            user_id = request.user.id_user if (hasattr(request.user, 'id_user') and request.user.id_user) else 'U001'
             hasil = service.proses_dss_saw(
-                id_user="USR_0001",
+                id_user=user_id,
                 id_bobot=selected_role ,
                 sumber_data=jenis_rekomendasi,
                 filter_data=filter_data,
@@ -685,14 +793,8 @@ def inputkriteria_hc_view(request):
             # print("\n=== HASIL SERVICE ===")
             # print(hasil)
             if hasil.get("status") != "success":
-                messages.error(
-                    request,
-                    hasil.get(
-                        "message",
-                        "Gagal menjalankan DSS"
-                    )
-                )
-                return redirect("inputkriteria_it")
+                messages.error(request, hasil.get("message","Gagal menjalankan DSS"))
+                return redirect("inputkriteria_hc")
             request.session["ranking_sesuai"] = (
                 hasil["data"]
                 ["rekomendasi_sesuai_role"]
@@ -906,10 +1008,10 @@ def hasilrekomendasi_hc_view(request):
         elif sort_by == "harga_asc" and jenis_rekomendasi == "pengadaan":
             ranking_sesuai.sort(key=lambda x: x["detail"].get("harga", 0))
         
-        paginator = Paginator(ranking_sesuai, 10)  # Tampilkan 10 item per halaman
+        paginator = Paginator(ranking_sesuai, 999999)  # Tampilkan 10 item per halaman
         page_number = request.GET.get('page')
         rangking_page = paginator.get_page(page_number)
-        alternatif_paginator = Paginator(ranking_alternatif, 10)
+        alternatif_paginator = Paginator(ranking_alternatif, 999999)
         alternatif_page_number = request.GET.get('alternatif_page')
         ranking_alternatif = alternatif_paginator.get_page(alternatif_page_number)
 
@@ -1030,19 +1132,18 @@ def detailrekomendasiscrapping_hc_view(request):
     return render(request, 'hc/dss/detailrekomendasiscrapping_hc.html')
 
 def notifikasi_hc_view(request):
-    from inventori.models import Pengajuan
+    from inventori.models import Pengajuan, Peminjaman
     import datetime
-    
-    # Get all pending pengajuan
-    pending_list = Pengajuan.objects.filter(status='pending').select_related('id_user').order_by('bulan')
     
     today = datetime.date.today()
     notifications = []
     
-    for p in pending_list:
+    # 1. Notifikasi pengajuan menunggu persetujuan
+    menunggu_list = Pengajuan.objects.filter(status='menunggu').select_related('id_user').order_by('bulan')
+    
+    for p in menunggu_list:
         diff_days = (p.bulan - today).days
         
-        # Determine urgency class & tag
         if diff_days <= 3:
             urgency_class = 'urgent'
             urgency_tag = 'Sangat Mendesak'
@@ -1053,7 +1154,6 @@ def notifikasi_hc_view(request):
             urgency_class = 'info'
             urgency_tag = 'Segera Disiapkan'
             
-        # Time string
         if diff_days < 0:
             time_str = f"Lewat {abs(diff_days)} hari"
         elif diff_days == 0:
@@ -1064,6 +1164,7 @@ def notifikasi_hc_view(request):
             time_str = f"{diff_days} hari lagi"
             
         notifications.append({
+            'tipe': 'pengajuan',
             'id_pengajuan': p.id_pengajuan,
             'user_nama': p.id_user.nama if p.id_user else '',
             'kebutuhan_role': p.kebutuhan_role,
@@ -1075,9 +1176,71 @@ def notifikasi_hc_view(request):
             'time_str': time_str,
             'keterangan': p.keterangan
         })
+    
+    # 2. Notifikasi pengembalian laptop menunggu konfirmasi HC (TC-TRX-18)
+    from inventori.models import User as InvUser, LaptopInventori as LapInv
+    pengembalian_list = Peminjaman.objects.filter(status='dikembalikan').select_related('id_user', 'id_laptop_inventori')
+    users_dict = {u.id_user: u.nama for u in InvUser.objects.all()}
+    for pem in pengembalian_list:
+        user_nama = users_dict.get(pem.id_user_id, pem.id_user_id)
+        laptop_nama = pem.id_laptop_inventori.nama_laptop if pem.id_laptop_inventori else pem.id_laptop_inventori_id
+        tgl_kembali = pem.tanggal_kembali
+        if tgl_kembali:
+            sisa = (today - tgl_kembali).days
+            if sisa <= 0:
+                waktu_str = "Hari ini"
+            else:
+                waktu_str = f"{sisa} hari lalu"
+        else:
+            waktu_str = "-"
+        notifications.append({
+            'tipe': 'pengembalian',
+            'id_peminjaman': pem.id_peminjaman,
+            'user_nama': user_nama,
+            'laptop_nama': laptop_nama,
+            'tanggal_kembali': tgl_kembali.strftime('%d %B %Y') if tgl_kembali and hasattr(tgl_kembali, 'strftime') else str(tgl_kembali or '-'),
+            'keterangan': pem.keterangan or '-',
+            'urgency_class': 'warning',
+            'urgency_tag': 'Menunggu Konfirmasi',
+            'time_str': waktu_str,
+        })
+    
+    # 3. Notifikasi jatuh tempo hampir tiba (TC-TRX-17)
+    aktif_list = Peminjaman.objects.filter(status__in=['dipinjam', 'aktif']).select_related('id_user', 'id_laptop_inventori')
+    for pem in aktif_list:
+        if hasattr(pem, 'tanggal_jatuh_tempo') and pem.tanggal_jatuh_tempo:
+            sisa = (pem.tanggal_jatuh_tempo - today).days
+            if sisa <= 3:
+                urgency_class = 'urgent'
+                urgency_tag = 'Jatuh Tempo Hampir Tiba'
+            elif sisa <= 7:
+                urgency_class = 'warning'
+                urgency_tag = 'Jatuh Tempo Segera'
+            else:
+                continue  # Skip if plenty of time
+            user_nama = users_dict.get(pem.id_user_id, pem.id_user_id)
+            laptop_nama = pem.id_laptop_inventori.nama_laptop if pem.id_laptop_inventori else pem.id_laptop_inventori_id
+            if sisa < 0:
+                time_str = f"Lewat {abs(sisa)} hari (Telat!)"
+            elif sisa == 0:
+                time_str = "Hari ini (Jatuh Tempo)"
+            else:
+                time_str = f"{sisa} hari lagi"
+            notifications.append({
+                'tipe': 'jatuh_tempo',
+                'id_peminjaman': pem.id_peminjaman,
+                'user_nama': user_nama,
+                'laptop_nama': laptop_nama,
+                'tanggal_jatuh_tempo': pem.tanggal_jatuh_tempo.strftime('%d %B %Y'),
+                'urgency_class': urgency_class,
+                'urgency_tag': urgency_tag,
+                'time_str': time_str,
+            })
         
     return render(request, 'hc/inventori/notifikasi_hc.html', {
-        'notifications': notifications
+        'notifications': notifications,
+        'total_pengembalian_menunggu': len([n for n in notifications if n.get('tipe') == 'pengembalian']),
+        'total_pengajuan_menunggu': len([n for n in notifications if n.get('tipe') == 'pengajuan']),
     })
 
 
@@ -1091,22 +1254,29 @@ def dashboard_it_view(request):
         service = PengajuanService()
         semua_pengajuan = service.service_ambil_semua_pengajuan()
         total_pengajuan = len(semua_pengajuan)
-        pengajuan_pending = sum(1 for p in semua_pengajuan if p.status and p.status.lower() == 'pending')
+        pengajuan_menunggu = sum(1 for p in semua_pengajuan if p.status and p.status.lower() == 'menunggu')
     except Exception:
         total_laptop = 0
         total_pengajuan = 0
-        pengajuan_pending = 0
+        pengajuan_menunggu = 0
 
     context = {
         'total_laptop': total_laptop,
         'total_pengajuan': total_pengajuan,
-        'pengajuan_pending': pengajuan_pending,
+        'pengajuan_menunggu': pengajuan_menunggu,
     }
     return render(request, 'it/dashboard/dashboard_it.html', context)
 
 def manajemenlaptop_it_view(request):
     search_query = request.GET.get('q', '')
     status_filter = request.GET.get('status', '')
+
+    try:
+        per_page = int(request.GET.get('per_page', 10))
+        if per_page not in [10, 15, 25]:
+            per_page = 10
+    except ValueError:
+        per_page = 10
 
     from inventori.models import LaptopInventori
     laptops = LaptopInventori.objects.select_related('id_processor', 'id_ram', 'id_storage').all()
@@ -1134,6 +1304,7 @@ def manajemenlaptop_it_view(request):
         'total': laptops.count(),
         'search_query': search_query,
         'status_filter': status_filter,
+        'per_page': per_page,
     }
     return render(request, 'it/inventori/manajemenlaptop_it.html', context)
 
@@ -1348,8 +1519,9 @@ def inputkriteria_it_view(request):
                 )
 
             service = Servicesaw(conn)
+            user_id = request.user.id_user if (hasattr(request.user, 'id_user') and request.user.id_user) else 'U002'
             hasil = service.proses_dss_saw(
-                id_user="USR_0001",
+                id_user=user_id,
                 id_bobot=selected_role ,
                 sumber_data=jenis_rekomendasi,
                 filter_data=filter_data,
@@ -1489,14 +1661,73 @@ def tambahspek_it_view(request):
 
     return render(request, 'it/dss/tambahspek_it.html')
 
-def detaillaptop_it_view(request):
-    return render(request, 'it/inventori/detaillaptop_it.html')
 
-def riwayatpeminjamanlaptop_it_view(request):
-    return render(request, 'it/inventori/riwayatpeminjamanlaptop_it.html')
 
-def editdatalaptop_it_view(request):
-    return render(request, 'it/inventori/editdatalaptop_it.html')
+def editdatalaptop_it_view(request, id_laptop):
+    from inventori.models import LaptopInventori, Processor, RAM, Storage
+    from inventori.services.laptop_inventori.update import UpdateLaptopInventoriService
+    from inventori.dto.dto_laptop_inventori import LaptopInventoriDTO
+    try:
+        laptop = LaptopInventori.objects.get(id_laptop_inventori=id_laptop)
+    except LaptopInventori.DoesNotExist:
+        messages.error(request, 'Laptop tidak ditemukan.')
+        return redirect('manajemen_laptop_it')
+
+    if request.method == 'POST':
+        try:
+            update_service = UpdateLaptopInventoriService()
+            kondisi = request.POST.get('kondisi')
+            status = request.POST.get('status')
+            lokasi = request.POST.get('lokasi')
+
+            if laptop.status.lower() == 'dipinjam' and status and status.lower() != 'dipinjam':
+                raise ValueError("Laptop sedang aktif dipinjam dan tidak dapat diubah statusnya.")
+
+            if kondisi:
+                update_service.update_kondisi(id_laptop, kondisi)
+            if status:
+                update_service.update_status(id_laptop, status, lokasi)
+
+            # Update spesifikasi
+            id_processor = request.POST.get('id_processor')
+            id_ram = request.POST.get('id_ram')
+            id_storage = request.POST.get('id_storage')
+            
+            if id_processor and id_ram and id_storage:
+                dto = LaptopInventoriDTO(
+                    nama_laptop=laptop.nama_laptop,
+                    model=laptop.model,
+                    os=laptop.os,
+                    kondisi=kondisi or laptop.kondisi,
+                    status=status or laptop.status,
+                    lokasi=lokasi or laptop.lokasi,
+                    id_processor=id_processor,
+                    id_ram=id_ram,
+                    id_storage=id_storage,
+                    id_laptop_inventori=id_laptop
+                )
+                update_service.update_spek(dto)
+
+            messages.success(request, 'Data laptop berhasil diperbarui.')
+            return redirect('detaillaptop_it', id_laptop=id_laptop)
+        except Exception as e:
+            messages.error(request, f'Gagal mengupdate laptop: {str(e)}')
+
+    processors = Processor.objects.all()
+    rams = RAM.objects.all()
+    storages = Storage.objects.all()
+    
+    context = {
+        'laptop': laptop,
+        'processors': processors,
+        'rams': rams,
+        'storages': storages,
+    }
+    return render(request, 'it/inventori/editdatalaptop_it.html', context)
+
+
+
+
 def hasilrekomendasi_it_view(request):
     conn = get_connection()
 
@@ -1637,10 +1868,10 @@ def hasilrekomendasi_it_view(request):
         elif sort_by == "harga_asc" and jenis_rekomendasi == "pengadaan":
             ranking_sesuai.sort(key=lambda x: x["detail"].get("harga", 0))
         
-        paginator = Paginator(ranking_sesuai, 10)  # Tampilkan 10 item per halaman
+        paginator = Paginator(ranking_sesuai, 999999)  # Tampilkan 10 item per halaman
         page_number = request.GET.get('page')
         rangking_page = paginator.get_page(page_number)
-        alternatif_paginator = Paginator(ranking_alternatif, 10)
+        alternatif_paginator = Paginator(ranking_alternatif, 999999)
         alternatif_page_number = request.GET.get('alternatif_page')
         ranking_alternatif = alternatif_paginator.get_page(alternatif_page_number)
 
@@ -1781,13 +2012,13 @@ def notifikasi_it_view(request):
     from inventori.models import Pengajuan
     import datetime
     
-    # Get all pending pengajuan
-    pending_list = Pengajuan.objects.filter(status='pending').select_related('id_user').order_by('bulan')
+    # Get all menunggu pengajuan
+    menunggu_list = Pengajuan.objects.filter(status='menunggu').select_related('id_user').order_by('bulan')
     
     today = datetime.date.today()
     notifications = []
     
-    for p in pending_list:
+    for p in menunggu_list:
         diff_days = (p.bulan - today).days
         
         # Determine urgency class & tag
@@ -1833,35 +2064,175 @@ def notifikasi_it_view(request):
 def manajemenpengadaan_it_view(request):
     search_query = request.GET.get('q', '')
     
-    mock_pengadaan = [
-        {"id": 1, "name": "MacBook Pro M3 Max 14-inch", "brand": "Apple Inc."},
-        {"id": 2, "name": "ThinkPad X1 Carbon Gen 10", "brand": "Lenovo"},
-        {"id": 3, "name": "ASUS ROG Zephyrus G14", "brand": "ASUS"},
-    ]
-    
-    if search_query:
-        mock_pengadaan = [
-            item for item in mock_pengadaan
-            if search_query.lower() in item["name"].lower() or search_query.lower() in item["brand"].lower()
-        ]
+    conn = get_connection()
+    try:
+        repo = LaptopPengadaanRepository(conn)
+        raw_list = repo.ambil_laptop_pengadaan()
         
-    from django.core.paginator import Paginator
-    paginator = Paginator(mock_pengadaan, 5)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    
-    context = {
-        'pengadaan_list': page_obj,
-        'search_query': search_query,
-        'total': len(mock_pengadaan),
-    }
-    return render(request, 'it/inventori/manajemenpengadaan_it.html', context)
+        if search_query:
+            raw_list = [
+                item for item in raw_list
+                if (search_query.lower() in item.get("nama_laptop", "").lower() or 
+                    search_query.lower() in item.get("manufacturer", "").lower() or
+                    search_query.lower() in item.get("nama_processor", "").lower())
+            ]
+        
+        from django.core.paginator import Paginator
+        paginator = Paginator(raw_list, 999999)
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+        
+        context = {
+            'pengadaan_list': page_obj,
+            'search_query': search_query,
+            'total': len(raw_list),
+        }
+        return render(request, 'it/inventori/manajemenpengadaan_it.html', context)
+    finally:
+        conn.close()
 
 def detailpengadaan_it_view(request):
-    return render(request, 'it/inventori/detailpengadaan_it.html')
+    laptop_id = request.GET.get('id')
+    if not laptop_id:
+        messages.error(request, 'ID laptop tidak ditemukan.')
+        return redirect('manajemen_pengadaan_it')
+        
+    conn = get_connection()
+    try:
+        repo = LaptopPengadaanRepository(conn)
+        
+        # Handle delete action
+        if request.method == 'POST' and request.POST.get('action') == 'hapus':
+            try:
+                repo.hapus_laptop_pengadaan(laptop_id)
+                messages.success(request, 'Data laptop pengadaan berhasil dihapus!')
+                return redirect('manajemen_pengadaan_it')
+            except Exception as e:
+                messages.error(request, f'Gagal menghapus laptop pengadaan: {str(e)}')
+                return redirect('manajemen_pengadaan_it')
+
+        laptop = repo.ambil_laptop_pengadaan_by_id(laptop_id)
+        if not laptop:
+            messages.error(request, 'Laptop pengadaan tidak ditemukan.')
+            return redirect('manajemen_pengadaan_it')
+            
+        laptop['harga_format'] = f"Rp. {laptop.get('harga', 0):,.0f}".replace(",", ".")
+        
+        context = {
+            'laptop': laptop
+        }
+        return render(request, 'it/inventori/detailpengadaan_it.html', context)
+    finally:
+        conn.close()
 
 def editpengadaan_it_view(request):
-    return render(request, 'it/inventori/editpengadaan_it.html')
+    laptop_id = request.GET.get('id')
+    if not laptop_id:
+        messages.error(request, 'ID laptop tidak ditemukan.')
+        return redirect('manajemen_pengadaan_it')
+        
+    conn = get_connection()
+    try:
+        repo = LaptopPengadaanRepository(conn)
+        laptop = repo.ambil_laptop_pengadaan_by_id(laptop_id)
+        if not laptop:
+            messages.error(request, 'Laptop pengadaan tidak ditemukan.')
+            return redirect('manajemen_pengadaan_it')
+            
+        if request.method == 'POST':
+            try:
+                nama_laptop = request.POST.get('nama_laptop')
+                harga = int(request.POST.get('harga', 0))
+                gpu = request.POST.get('gpu')
+                ukuran_layar = float(request.POST.get('ukuran_layar') or 0.0)
+                baterai = float(request.POST.get('baterai') or 0.0)
+                berat = float(request.POST.get('berat') or 0.0)
+                
+                id_processor = request.POST.get('id_processor') or None
+                id_ram = request.POST.get('id_ram') or None
+                id_storage = request.POST.get('id_storage') or None
+                
+                from dss.repositories.dto.dto_laptop_pengadaan import LaptopPengadaanDTO
+                dto = LaptopPengadaanDTO(
+                    id_laptop_pengadaan=laptop_id,
+                    nama_laptop=nama_laptop,
+                    harga=harga,
+                    gpu=gpu,
+                    ukuran_layar=ukuran_layar,
+                    baterai=baterai,
+                    berat=berat,
+                    id_processor=id_processor,
+                    id_ram=id_ram,
+                    id_storage=id_storage
+                )
+                repo.update_laptop_pengadaan(dto)
+                repo.update_spek_pengadaan(dto)
+                
+                messages.success(request, 'Data laptop pengadaan berhasil diperbarui!')
+                return redirect(f"/it/detail-pengadaan/?id={laptop_id}")
+            except Exception as e:
+                messages.error(request, f'Gagal memperbarui data: {str(e)}')
+                
+        processors = Processor.objects.all()
+        rams = RAM.objects.all()
+        storages = Storage.objects.all()
+        
+        context = {
+            'laptop': laptop,
+            'processors': processors,
+            'rams': rams,
+            'storages': storages,
+        }
+        return render(request, 'it/inventori/editpengadaan_it.html', context)
+    finally:
+        conn.close()
+
+def tambahpengadaan_it_view(request):
+    if request.method == 'POST':
+        conn = get_connection()
+        try:
+            repo = LaptopPengadaanRepository(conn)
+            nama_laptop = request.POST.get('nama_laptop')
+            harga = int(request.POST.get('harga', 0))
+            gpu = request.POST.get('gpu')
+            ukuran_layar = float(request.POST.get('ukuran_layar') or 0.0)
+            baterai = float(request.POST.get('baterai') or 0.0)
+            berat = float(request.POST.get('berat') or 0.0)
+            
+            id_processor = request.POST.get('id_processor') or None
+            id_ram = request.POST.get('id_ram') or None
+            id_storage = request.POST.get('id_storage') or None
+            
+            from dss.repositories.dto.dto_laptop_pengadaan import LaptopPengadaanDTO
+            dto = LaptopPengadaanDTO(
+                nama_laptop=nama_laptop,
+                harga=harga,
+                gpu=gpu,
+                ukuran_layar=ukuran_layar,
+                baterai=baterai,
+                berat=berat,
+                id_processor=id_processor,
+                id_ram=id_ram,
+                id_storage=id_storage
+            )
+            repo.tambah_laptop_pengadaan(dto)
+            messages.success(request, 'Laptop pengadaan berhasil ditambahkan!')
+            return redirect('manajemen_pengadaan_it')
+        except Exception as e:
+            messages.error(request, f'Gagal menambahkan laptop pengadaan: {str(e)}')
+        finally:
+            conn.close()
+            
+    processors = Processor.objects.all()
+    rams = RAM.objects.all()
+    storages = Storage.objects.all()
+    
+    context = {
+        'processors': processors,
+        'rams': rams,
+        'storages': storages,
+    }
+    return render(request, 'it/inventori/tambahpengadaan_it.html', context)
 
 # ==========================================
 # 3. TALENT VIEWS
@@ -1876,9 +2247,9 @@ def dashboard_talent_view(request):
         if user_id:
             semua_pengajuan = [p for p in semua_pengajuan if getattr(p, 'id_user', None) == user_id]
             
-        total_pending = sum(1 for p in semua_pengajuan if p.status and p.status.lower() == 'pending')
-        total_ditolak = sum(1 for p in semua_pengajuan if p.status and p.status.lower() == 'rejected')
-        total_disetujui = sum(1 for p in semua_pengajuan if p.status and p.status.lower() == 'approved')
+        total_menunggu = sum(1 for p in semua_pengajuan if p.status and p.status.lower() == 'menunggu')
+        total_ditolak = sum(1 for p in semua_pengajuan if p.status and p.status.lower() == 'ditolak')
+        total_disetujui = sum(1 for p in semua_pengajuan if p.status and p.status.lower() == 'disetujui')
         
         service_peminjaman = PeminjamanService()
         semua_peminjaman = service_peminjaman.service_ambil_semua_peminjaman()
@@ -1889,18 +2260,34 @@ def dashboard_talent_view(request):
         
         semua_pengajuan.sort(key=lambda x: x.tanggal_pengajuan, reverse=True)
         recent_pengajuan = semua_pengajuan[:5]
+        
+        # Build notifications based on recent status changes (not menunggu)
+        notifikasi_talent = []
+        import datetime
+        from django.utils import timezone
+        
+        for p in semua_pengajuan:
+            if p.status and p.status.lower() in ['disetujui', 'ditolak']:
+                # Asumsikan jika disetujui/ditolak, kita tambahkan ke notifikasi (maksimal 3 terbaru)
+                if len(notifikasi_talent) < 3:
+                    notifikasi_talent.append({
+                        'pesan': f"Pengajuan Anda untuk role {p.kebutuhan_role} telah {p.status.upper()}.",
+                        'waktu': p.tanggal_pengajuan.strftime("%d %b %Y") if p.tanggal_pengajuan else "Baru saja",
+                        'status': p.status.lower()
+                    })
 
         context = {
-            'total_pending': total_pending,
+            'total_menunggu': total_menunggu,
             'total_ditolak': total_ditolak,
             'total_disetujui': total_disetujui,
             'total_selesai': total_selesai,
-            'recent_pengajuan': recent_pengajuan
+            'recent_pengajuan': recent_pengajuan,
+            'notifikasi_talent': notifikasi_talent
         }
     except Exception as e:
         context = {
             'error_message': str(e),
-            'total_pending': 0,
+            'total_menunggu': 0,
             'total_ditolak': 0,
             'total_disetujui': 0,
             'total_selesai': 0,
@@ -1923,15 +2310,47 @@ def pengajuanlaptop_talent_view(request):
                 if hasattr(request.user, 'id_user')
                 else None
             )
-        if request.method == 'POST':
 
+        from inventori.models import User, Proyek, ProjectRole, Role, RoleTeknologi
+        user_obj = None
+        if user_id:
+            try:
+                user_obj = User.objects.get(id_user=user_id)
+            except User.DoesNotExist:
+                pass
+        
+        user_departemen = user_obj.departemen if user_obj else 'Non IT'
+
+        if request.method == 'POST':
             from datetime import datetime
 
-            departemen = request.POST.get('departemen') or 'Internal'
-            role = request.POST.get('role') or 'Unknown'
-            spesifikasi = request.POST.get('spesifikasi') or '-'
+            departemen = user_departemen
+            if user_departemen in ['IT', 'Outsourcing']:
+                role = request.POST.get('role') or 'Unknown'
+                selected_tech = request.POST.get('teknologi') or '-'
+                spesifikasi_input = request.POST.get('spesifikasi') or '-'
+                if selected_tech != '-':
+                    spesifikasi = f"Teknologi: {selected_tech} | Spesifikasi: {spesifikasi_input}"
+                else:
+                    spesifikasi = spesifikasi_input
+            else:
+                role = 'Non-IT'
+                spesifikasi = '-'
             alasan = request.POST.get('alasan') or '-'
 
+            # Validate double booking (maksimal 1 laptop aktif dipinjam)
+            from inventori.services.service_peminjaman import PeminjamanService
+            p_service = PeminjamanService()
+            all_peminjaman = p_service.service_ambil_semua_peminjaman()
+            has_active_borrow = any(
+                str(p.id_user) == str(user_id) and p.status and p.status.lower() in ['dipinjam', 'aktif']
+                for p in all_peminjaman
+            )
+            if has_active_borrow:
+                messages.error(request, 'Gagal mengajukan: Anda masih meminjam laptop aktif.')
+                return redirect('pengajuanlaptop_talent')
+
+            proyek_id = request.POST.get('proyek') or None
             dto = PengajuanDTO(
                 id_user=user_id,
                 kebutuhan_role=role,
@@ -1939,7 +2358,8 @@ def pengajuanlaptop_talent_view(request):
                 bulan=datetime.now().date(),
                 keterangan=alasan,
                 perusahaan=departemen,
-                status='pending'
+                status='menunggu',
+                id_proyek=proyek_id
             )
 
             service.service_tambah_pengajuan(dto)
@@ -1972,6 +2392,13 @@ def pengajuanlaptop_talent_view(request):
                 if getattr(p, 'status', '').lower() == status_lower
             ]
 
+        try:
+            per_page = int(request.GET.get('per_page', 10))
+            if per_page not in [10, 15, 25]:
+                per_page = 10
+        except ValueError:
+            per_page = 10
+
         import datetime as dt
         semua_pengajuan.sort(
             key=lambda x: x.tanggal_pengajuan if x.tanggal_pengajuan else dt.date.min,
@@ -1983,11 +2410,39 @@ def pengajuanlaptop_talent_view(request):
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
 
+        projects = Proyek.objects.all()
+        project_roles_map = {}
+        for pr in ProjectRole.objects.select_related('proyek', 'role'):
+            proj_id = pr.proyek.id_proyek
+            if proj_id not in project_roles_map:
+                project_roles_map[proj_id] = []
+            project_roles_map[proj_id].append({
+                'id_role': pr.role.id_role,
+                'nama_role': pr.role.nama_role,
+            })
+
+        role_technologies_map = {}
+        for rt in RoleTeknologi.objects.select_related('role', 'teknologi'):
+            r_name = rt.role.nama_role
+            if r_name not in role_technologies_map:
+                role_technologies_map[r_name] = []
+            role_technologies_map[r_name].append({
+                'id_teknologi': rt.teknologi.id_teknologi,
+                'nama_teknologi': rt.teknologi.nama_teknologi,
+            })
+
+        from datetime import datetime
+        today_str = datetime.now().strftime('%Y-%m-%d')
+
         context = {
             'list_pengajuan': page_obj,
             'total_pengajuan': len(semua_pengajuan),
             'search_query': search_query,
             'status_filter': status_filter,
+            'user_departemen': user_departemen,
+            'projects': projects,
+            'project_roles_map': project_roles_map,
+            'role_technologies_map': role_technologies_map,
         }
 
         return render(
@@ -2003,6 +2458,7 @@ def pengajuanlaptop_talent_view(request):
             'total_pengajuan': 0,
             'search_query': search_query,
             'status_filter': status_filter,
+            'user_departemen': 'Non IT',
         }
         return render(
             request,
@@ -2035,6 +2491,13 @@ def riwayatpeminjamanlaptop_talent_view(request):
     status_filter = request.GET.get('status', '')
 
     try:
+        per_page = int(request.GET.get('per_page', 10))
+        if per_page not in [10, 15, 25]:
+            per_page = 10
+    except ValueError:
+        per_page = 10
+
+    try:
         user_id = request.user.id_user if hasattr(request.user, 'id_user') else None
         service = PeminjamanService()
         riwayat_list = service.service_ambil_semua_peminjaman()
@@ -2055,11 +2518,32 @@ def riwayatpeminjamanlaptop_talent_view(request):
             else:
                 p.nama_laptop = "Unknown Laptop"
                 p.no_inventori = p.id_laptop_inventori
+                
+            from datetime import date
+            if p.tanggal_pinjam:
+                if p.tanggal_kembali:
+                    p.durasi_hari = (p.tanggal_kembali - p.tanggal_pinjam).days
+                else:
+                    p.durasi_hari = (date.today() - p.tanggal_pinjam).days
+            else:
+                p.durasi_hari = 0
 
         active_peminjaman = next((r for r in riwayat_list if r.status and r.status.lower() in ['dipinjam', 'aktif']), None)
         active_laptop = None
+        active_jatuh_tempo = None
+        active_sisa_hari = None
         if active_peminjaman:
             active_laptop = LaptopInventori.objects.filter(id_laptop_inventori=active_peminjaman.id_laptop_inventori).first()
+            # Ambil jatuh_tempo dari DB (TC-TRX-17)
+            from inventori.models import Peminjaman as PeminjamanModel
+            import datetime as _dt
+            try:
+                db_pem = PeminjamanModel.objects.get(id_peminjaman=active_peminjaman.id_peminjaman)
+                active_jatuh_tempo = db_pem.tanggal_jatuh_tempo
+                if active_jatuh_tempo:
+                    active_sisa_hari = (active_jatuh_tempo - _dt.date.today()).days
+            except Exception:
+                pass
 
         # Filter search
         if search_query:
@@ -2091,8 +2575,11 @@ def riwayatpeminjamanlaptop_talent_view(request):
             'total_selesai': total_selesai,
             'active_peminjaman': active_peminjaman,
             'active_laptop': active_laptop,
+            'active_jatuh_tempo': active_jatuh_tempo,
+            'active_sisa_hari': active_sisa_hari,
             'search_query': search_query,
             'status_filter': status_filter,
+            'per_page': per_page,
         }
     except Exception as e:
         context = {
@@ -2109,10 +2596,11 @@ def riwayatpeminjamanlaptop_talent_view(request):
     return render(request, 'talent/inventori/riwayatpeminjamanlaptop_talent.html', context)
 
 def pengembalianlaptop_talent_view(request):
+    from inventori.models import Peminjaman, LaptopInventori
     user_id = request.user.id_user if hasattr(request.user, 'id_user') else None
     if not user_id:
         messages.error(request, 'Anda harus login terlebih dahulu.')
-        return redirect('login')
+        return redirect('riwayatpeminjamanlaptop_talent')
 
     service = PeminjamanService()
     try:
@@ -2138,27 +2626,32 @@ def pengembalianlaptop_talent_view(request):
             else:
                 db_kondisi = 'rusak_berat'
                 
-            laptop = LaptopInventori.objects.filter(id_laptop_inventori=active_peminjaman.id_laptop_inventori).first()
-            lokasi = laptop.lokasi if laptop else 'Kantor Pusat'
+            from datetime import datetime
+            import datetime as dt
             
-            dto = PeminjamanDTO(
-                id_peminjaman=active_peminjaman.id_peminjaman,
-                keterangan=f"{alasan} - {catatan}",
-                status='selesai'
-            )
-            dto.lokasi = lokasi
+            # Update Peminjaman menjadi dikembalikan
+            jadwal = request.POST.get('jadwal')
+            if jadwal:
+                parsed_jadwal = datetime.strptime(jadwal, '%Y-%m-%d').date()
+                if parsed_jadwal < dt.date.today():
+                    messages.error(request, 'Gagal memproses pengembalian: Tanggal jadwal penyerahan tidak boleh sebelum hari ini.')
+                    return redirect('pengembalianlaptop_talent')
             
-            service.service_pengembalian_laptop(dto)
+            peminjaman = Peminjaman.objects.get(id_peminjaman=active_peminjaman.id_peminjaman)
+            peminjaman.status = 'dikembalikan'
+            peminjaman.keterangan = f"{alasan} - {catatan}"
+            if jadwal:
+                peminjaman.tanggal_kembali = datetime.strptime(jadwal, '%Y-%m-%d').date()
+            else:
+                peminjaman.tanggal_kembali = datetime.now().date()
+            peminjaman.save()
             
-            if laptop:
-                if db_kondisi != 'baik':
-                    laptop.kondisi = db_kondisi
-                    laptop.status = 'rusak'
-                else:
-                    laptop.status = 'tersedia'
-                laptop.save()
+            # Update kondisi fisik laptop langsung
+            laptop = LaptopInventori.objects.get(id_laptop_inventori=active_peminjaman.id_laptop_inventori)
+            laptop.kondisi = db_kondisi
+            laptop.save()
             
-            messages.success(request, 'Pengembalian perangkat berhasil diajukan.')
+            messages.success(request, 'Pengembalian laptop berhasil disubmit. Menunggu konfirmasi HC.')
             return redirect('riwayatpeminjamanlaptop_talent')
             
         if not active_peminjaman:
@@ -2167,9 +2660,29 @@ def pengembalianlaptop_talent_view(request):
             
         active_laptop = LaptopInventori.objects.filter(id_laptop_inventori=active_peminjaman.id_laptop_inventori).first()
         
+        # Ambil data dari DB untuk jatuh_tempo yang sudah tersimpan (TC-TRX-17)
+        peminjaman_db = None
+        if active_peminjaman:
+            try:
+                peminjaman_db = Peminjaman.objects.get(id_peminjaman=active_peminjaman.id_peminjaman)
+            except Exception:
+                pass
+        
+        import datetime as _dt
+        today = _dt.date.today()
+        durasi_aktif = None
+        sisa_jatuh_tempo = None
+        if active_peminjaman and active_peminjaman.tanggal_pinjam:
+            durasi_aktif = (today - active_peminjaman.tanggal_pinjam).days
+        if peminjaman_db and peminjaman_db.tanggal_jatuh_tempo:
+            sisa_jatuh_tempo = (peminjaman_db.tanggal_jatuh_tempo - today).days
+        
         context = {
             'active_peminjaman': active_peminjaman,
             'active_laptop': active_laptop,
+            'peminjaman_db': peminjaman_db,
+            'durasi_aktif': durasi_aktif,
+            'sisa_jatuh_tempo': sisa_jatuh_tempo,
         }
         return render(request, 'talent/inventori/pengembalianlaptop_talent.html', context)
         
@@ -2198,50 +2711,23 @@ def login_redirect_view(request):
         return redirect('login')
     role = getattr(request.user, 'role', '').upper()
     if role == 'HC':
-        return redirect('dashboardhc')
+        return redirect('dashboard_hc')
     elif role == 'IT':
         return redirect('dashboard_it')
     elif role in ('TALENT', 'EMPLOYEE'):
         return redirect('dashboard_talent')
-    return redirect('dashboardhc')
+    return redirect('dashboard_hc')
 
 def home_view(request):
     return login_redirect_view(request)
 
+def logout_view(request):
+    from django.contrib.auth import logout
+    logout(request)
+    return redirect('login')
 
-# Procurement management views for IT (Added to fix NoReverseMatch)
-def manajemenpengadaan_it_view(request):
-    search_query = request.GET.get('q', '')
-    
-    mock_pengadaan = [
-        {"id": 1, "name": "MacBook Pro M3 Max 14-inch", "brand": "Apple Inc."},
-        {"id": 2, "name": "ThinkPad X1 Carbon Gen 10", "brand": "Lenovo"},
-        {"id": 3, "name": "ASUS ROG Zephyrus G14", "brand": "ASUS"},
-    ]
-    
-    if search_query:
-        mock_pengadaan = [
-            item for item in mock_pengadaan
-            if search_query.lower() in item["name"].lower() or search_query.lower() in item["brand"].lower()
-        ]
-        
-    from django.core.paginator import Paginator
-    paginator = Paginator(mock_pengadaan, 5)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    
-    context = {
-        'pengadaan_list': page_obj,
-        'search_query': search_query,
-        'total': len(mock_pengadaan),
-    }
-    return render(request, 'it/inventori/manajemenpengadaan_it.html', context)
 
-def detailpengadaan_it_view(request):
-    return render(request, 'it/inventori/detailpengadaan_it.html')
 
-def editpengadaan_it_view(request):
-    return render(request, 'it/inventori/editpengadaan_it.html')
 
 def setujui_pengajuan_it_view(request):
     from inventori.models import LaptopInventori
@@ -2292,14 +2778,23 @@ def setujui_pengajuan_it_view(request):
             # Eksekusi
             service.service_approve_dan_pinjam(dto_peng, dto_pem)
 
-            messages.success(request, 'Pengajuan berhasil disetujui oleh IT dan laptop telah dipinjamkan.')
+            # Update Peminjaman status to 'ready'
+            peminjaman = Peminjaman.objects.filter(id_pengajuan=pengajuan_id).first()
+            if peminjaman:
+                peminjaman.status = 'ready'
+                peminjaman.save()
+
+            messages.success(request, 'Pengajuan berhasil disetujui oleh IT dan laptop siap diambil oleh Talent.')
             return redirect('pengajuanlaptop_it')
         except Exception as e:
             messages.error(request, f'Gagal menyetujui pengajuan: {str(e)}')
             return redirect(f"{request.path}?id={pengajuan_id}")
 
     # GET Request: Fetch and Map Laptop Specifications
-    laptops = LaptopInventori.objects.filter(status__in=['tersedia', 'Available', 'Tersedia']).select_related('id_processor', 'id_ram', 'id_storage')
+    from inventori.models import Peminjaman
+    # Exclude laptops that have an active loan (assigned)
+    active_laptop_ids = Peminjaman.objects.filter(status__in=['dipinjam', 'aktif', 'dikembalikan']).values_list('id_laptop_inventori', flat=True)
+    laptops = LaptopInventori.objects.filter(status__in=['tersedia', 'Available', 'Tersedia']).exclude(id_laptop_inventori__in=active_laptop_ids).select_related('id_processor', 'id_ram', 'id_storage')
     for laptop in laptops:
         laptop.id = laptop.id_laptop_inventori
         
@@ -2352,7 +2847,7 @@ def manajemenproyek_it_view(request):
 
     proyek_list = proyek_list.order_by('id_proyek')
 
-    paginator = Paginator(proyek_list, 5)
+    paginator = Paginator(proyek_list, 999999)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
@@ -2596,11 +3091,11 @@ def manajemen_role_teknologi_it_view(request):
     if search_role:
         role_list = role_list.filter(Q(nama_role__icontains=search_role))
     if search_tech:
-        teknologi_list = teknologi_list.filter(Q(nama_teknologi__icontains=search_tech) |Q(kategori__icontains=search_tech))
+        teknologi_list = teknologi_list.filter(Q(nama_teknologi__icontains=search_tech) | Q(kategori__icontains=search_tech))
     paginator_role = Paginator(role_list, 5)
     page_role = request.GET.get('page_role')
     role_obj = paginator_role.get_page(page_role)
-    paginator_tech = Paginator(teknologi_list, 5)
+    paginator_tech = Paginator(teknologi_list, 999999)
     page_tech = request.GET.get('page_tech')
     tech_obj = paginator_tech.get_page(page_tech)
     context = {
@@ -2650,6 +3145,11 @@ def tambah_role_it_view(request):
             print("===================================")
             print("\nPOST DATA:")
             print(dict(request.POST))
+            nama_role = request.POST.get("nama_role", "").strip()
+            if Role.objects.filter(nama_role__iexact=nama_role).exists():
+                messages.error(request, f"Role dengan nama '{nama_role}' sudah ada.")
+                return redirect("manajemenroleteknologi_it")
+
             # ==========================
             # CREATE ROLE
             # ==========================
@@ -3012,10 +3512,11 @@ def tambahuser_hc_view(request):
         nama                = request.POST.get('nama', '').strip()
         email               = request.POST.get('email', '').strip() or None
         role                = request.POST.get('role', '').strip()
+        departemen          = request.POST.get('departemen', 'Non IT').strip()
         password            = request.POST.get('password', '')
         konfirmasi_password = request.POST.get('konfirmasi_password', '')
 
-        form_data = {'nama': nama, 'email': email, 'role': role}
+        form_data = {'nama': nama, 'email': email, 'role': role, 'departemen': departemen}
 
         if not nama or not role or not password:
             messages.error(request, 'Nama, role, dan password wajib diisi.')
@@ -3040,6 +3541,7 @@ def tambahuser_hc_view(request):
                 nama=nama,
                 email=email,
                 role=role,
+                departemen=departemen,
                 password=password,
             )
             messages.success(request, f'Pengguna "{nama}" ({role}) berhasil ditambahkan dengan ID {new_id}.')
@@ -3052,15 +3554,16 @@ def tambahuser_hc_view(request):
 
 
 def edit_user_hc_view(request):
-    """Edit data pengguna (nama, email, role, password)."""
+    """Edit data pengguna (nama, email, role, departemen, password)."""
     from inventori.models import User
 
     if request.method == 'POST':
-        id_user  = request.POST.get('id_user', '').strip()
-        nama     = request.POST.get('nama', '').strip()
-        email    = request.POST.get('email', '').strip() or None
-        role     = request.POST.get('role', '').strip()
-        password = request.POST.get('password', '')
+        id_user    = request.POST.get('id_user', '').strip()
+        nama       = request.POST.get('nama', '').strip()
+        email      = request.POST.get('email', '').strip() or None
+        role       = request.POST.get('role', '').strip()
+        departemen = request.POST.get('departemen', 'Non IT').strip()
+        password   = request.POST.get('password', '')
 
         if not id_user or not nama or not role:
             messages.error(request, 'Data tidak lengkap.')
@@ -3071,6 +3574,7 @@ def edit_user_hc_view(request):
             user.nama = nama
             user.email = email
             user.role = role
+            user.departemen = departemen
             if password:
                 if len(password) < 8:
                     messages.error(request, 'Password baru minimal 8 karakter.')
@@ -3198,3 +3702,41 @@ def profile_view(request):
     }
     return render(request, 'users/profile.html', context)
 
+
+def konfirmasi_pengembalian_hc_view(request):
+    if request.method == 'POST':
+        from inventori.models import Peminjaman, LaptopInventori
+        id_peminjaman = request.POST.get('id_peminjaman')
+        
+        try:
+            peminjaman = Peminjaman.objects.get(id_peminjaman=id_peminjaman)
+            peminjaman.status = 'selesai'
+            peminjaman.save()
+            
+            # Ubah status laptop menjadi tersedia (atau rusak jika kondisi fisik tidak baik)
+            laptop = LaptopInventori.objects.get(id_laptop_inventori=peminjaman.id_laptop_inventori_id)
+            if laptop.kondisi == 'baik':
+                laptop.status = 'tersedia'
+            else:
+                laptop.status = 'rusak'
+            laptop.save()
+            
+            messages.success(request, f'Pengembalian dengan ID {id_peminjaman} berhasil dikonfirmasi.')
+        except Exception as e:
+            messages.error(request, f'Terjadi kesalahan saat konfirmasi: {e}')
+            
+    return redirect('riwayatpeminjamanlaptop_hc')
+
+
+def konfirmasi_penerimaan_talent_view(request):
+    if request.method == 'POST':
+        from inventori.models import Peminjaman
+        id_peminjaman = request.POST.get('id_peminjaman')
+        try:
+            peminjaman = Peminjaman.objects.get(id_peminjaman=id_peminjaman)
+            peminjaman.status = 'dipinjam'
+            peminjaman.save()
+            messages.success(request, 'Berhasil mengonfirmasi penerimaan laptop. Status sekarang aktif dipinjam.')
+        except Exception as e:
+            messages.error(request, f'Gagal melakukan konfirmasi: {str(e)}')
+    return redirect('riwayatpeminjamanlaptop_talent')

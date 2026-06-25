@@ -98,7 +98,19 @@ class Servicesaw:
         # print(role)
         # print(type(role))
         if not role:
-            raise Exception(f"Role {id_role} tidak ditemukan")
+            raise Exception(
+                f"Role {id_role} tidak ditemukan"
+            )
+
+        if isinstance(role, dict):
+            return {
+                "id_role": role.get("id_role"),
+                "nama_role": role.get("nama_role"),
+                "min_ram": role.get("min_ram"),
+                "min_storage": role.get("min_storage"),
+                "min_processor_score": role.get("min_processor_score")
+            }
+
         return {
             "id_role": role["id_role"],
             "nama_role": role["nama_role"],

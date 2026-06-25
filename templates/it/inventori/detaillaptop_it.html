@@ -25,11 +25,20 @@
             min-height: 100vh;
         }
 
+        .sidebar {
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            flex-shrink: 0;
+        }
+
         .main-content {
             flex: 1;
-            margin-left: 260px;
             padding: 40px 50px;
             box-sizing: border-box;
+            max-width: none;
+            margin: 0;
+            min-width: 0;
         }
 
         /* Top Nav */
@@ -78,7 +87,7 @@
         /* Grid Layout */
         .content-grid {
             display: grid;
-            grid-template-columns: 1fr 320px;
+            grid-template-columns: 1.5fr 1fr;
             gap: 30px;
             align-items: start;
         }
@@ -174,7 +183,7 @@
 
         .specs-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(5, 1fr);
             gap: 24px;
             margin-bottom: 30px;
         }
@@ -362,8 +371,6 @@
                 </div>
                 <p class="spec-label">Processor</p>
                 <h3 class="spec-value">{{ laptop.id_processor.nama_processor|default:"-" }}</h3>
-                <span class="spec-subtext">{{ laptop.id_processor.manufacturer|default:"" }} {{
-                    laptop.id_processor.model|default:"" }}</span>
             </div>
 
             <!-- Card 2: Memory RAM -->
@@ -372,8 +379,7 @@
                     <i class="fa-solid fa-memory"></i>
                 </div>
                 <p class="spec-label">Memory RAM</p>
-                <h3 class="spec-value">{{ laptop.id_ram.kapasitas_gb|default:"0" }} GB {{ laptop.id_ram.tipe|default:""
-                    }}</h3>
+                <h3 class="spec-value">{{ laptop.id_ram.kapasitas_gb|default:"0" }} GB</h3>
             </div>
 
             <!-- Card 3: Storage -->
@@ -382,8 +388,7 @@
                     <i class="fa-solid fa-database"></i>
                 </div>
                 <p class="spec-label">Storage</p>
-                <h3 class="spec-value">{{ laptop.id_storage.kapasitas_gb|default:"0" }} GB {{
-                    laptop.id_storage.tipe|default:"" }}</h3>
+                <h3 class="spec-value">{{ laptop.id_storage.kapasitas_gb|default:"0" }} GB</h3>
             </div>
 
             <!-- Card 4: Condition -->
@@ -404,15 +409,6 @@
                 <h3 class="spec-value">{{ laptop.ukuran_layar|default:"-" }} inch</h3>
             </div>
 
-            <!-- Card 6: Availability Status -->
-            <div class="spec-card">
-                <div class="spec-icon-box">
-                    <i class="fa-solid fa-circle-check"></i>
-                </div>
-                <p class="spec-label">Status Aset</p>
-                <h3 class="spec-value">{{ laptop.status|upper }}</h3>
-            </div>
-
         </div>
 
         <!-- Action Buttons -->
@@ -420,7 +416,7 @@
             <a href="{% url 'editdatalaptop_it' laptop.id_laptop_inventori %}" class="btn-blue-action" style="flex: 1;">
                 <i class="fa-solid fa-pen"></i> Edit Data
             </a>
-            <a href="{% url 'riwayatpeminjamanlaptop_it' %}" class="btn-grey-action" style="flex: 1;">
+            <a href="{% url 'riwayatpeminjamanlaptop_it' %}?laptop_id={{ laptop.id_laptop_inventori }}" class="btn-grey-action" style="flex: 1;">
                 <i class="fa-solid fa-clock-rotate-left"></i> Riwayat Peminjaman
             </a>
             <button type="button" class="btn-grey-action" style="color: #dc2626; flex: 1;" onclick="showDeleteModal()">
@@ -467,5 +463,3 @@
 </body>
 
 </html>
-
-#uibaru

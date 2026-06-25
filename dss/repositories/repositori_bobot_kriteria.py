@@ -184,7 +184,6 @@ class BobotKriteriaRepository(IBobotKriteriaRepositoryImpl):
             JOIN dss_kriteria k
                 ON k.id_kriteria = bk.id_kriteria
             WHERE bk.id_role_teknologi = %s
-            AND bk.is_active = TRUE
             ORDER BY bk.nilai_bobot DESC
         """
 
@@ -214,10 +213,6 @@ class BobotKriteriaRepository(IBobotKriteriaRepositoryImpl):
             AND
 
             id_kriteria = %s
-
-            AND
-
-            is_active = TRUE
         """
 
         with self.conn.cursor() as cur:

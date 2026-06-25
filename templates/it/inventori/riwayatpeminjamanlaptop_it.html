@@ -366,9 +366,10 @@
                     <tr>
                         <th>User Name</th>
                         <th>Device Laptop</th>
-                        <th>Borrow Date</th>
-                        <th>Return Date</th>
-                        <th>Device Condition / Status</th>
+                        <th>Tanggal Pinjam</th>
+                        <th>Durasi</th>
+                        <th>Jatuh Tempo</th>
+                        <th>Status</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -385,12 +386,33 @@
                         </td>
                         <td>{{ p.laptop_nama }}</td>
                         <td>{{ p.tanggal_pinjam|date:"d M Y"|default:"-" }}</td>
-                        <td>{{ p.tanggal_kembali|date:"d M Y"|default:"-" }}</td>
+                        <td>
+                            {% if p.durasi_hari is not None %}
+                                <span style="font-weight:600; color:#0f172a;">{{ p.durasi_hari }} hari</span>
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if p.sisa_hari is not None %}
+                                {% if p.sisa_hari < 0 %}
+                                <span style="color:#dc2626; font-weight:700;">Lewat {{ p.sisa_hari|stringformat:"d"|slice:"1:" }} hari</span>
+                                {% elif p.sisa_hari <= 3 %}
+                                <span style="color:#f59e0b; font-weight:700;">{{ p.sisa_hari }} hari lagi</span>
+                                {% else %}
+                                <span style="color:#15803d;">{{ p.sisa_hari }} hari lagi</span>
+                                {% endif %}
+                            {% else %}
+                                <span style="color:#94a3b8;">-</span>
+                            {% endif %}
+                        </td>
                         <td>
                             {% if p.status|lower == 'kembali' or p.status|lower == 'selesai' %}
                             <span class="badge badge-excellent">{{ p.status }}</span>
                             {% elif p.status|lower == 'dipinjam' or p.status|lower == 'aktif' %}
                             <span class="badge badge-good">{{ p.status }}</span>
+                            {% elif p.status|lower == 'dikembalikan' %}
+                            <span class="badge badge-scratch" style="background:#fef3c7; color:#b45309;">Menunggu Konfirmasi</span>
                             {% else %}
                             <span class="badge badge-scratch">{{ p.status }}</span>
                             {% endif %}
@@ -398,7 +420,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="5" style="text-align: center; color: #94a3b8; padding: 30px;">Tidak ada riwayat peminjaman.</td>
+                        <td colspan="6" style="text-align: center; color: #94a3b8; padding: 30px;">Tidak ada riwayat peminjaman.</td>
                     </tr>
                     {% endfor %}
                 </tbody>

@@ -68,12 +68,16 @@ BEGIN
     INSERT INTO role_teknologi(
         id_role_teknologi,
         id_role,
-        id_teknologi
+        id_teknologi,
+        is_default,
+        created_at
     )
     VALUES(
         v_id_role_teknologi,
         p_id_role,
-        p_id_teknologi
+        p_id_teknologi,
+        TRUE,
+        CURRENT_TIMESTAMP
     );
 
     RETURN v_id_role_teknologi;

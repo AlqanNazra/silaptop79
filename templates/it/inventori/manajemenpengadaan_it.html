@@ -309,30 +309,30 @@
             border-radius: 50%;
         }
 
-        .status-approved {
+        .status-disetujui {
             background-color: #dcfce7;
             color: #16a34a;
         }
 
-        .status-approved .dot {
+        .status-disetujui .dot {
             background-color: #16a34a;
         }
 
-        .status-pending {
+        .status-menunggu {
             background-color: #fff3cd;
             color: #856404;
         }
 
-        .status-pending .dot {
+        .status-menunggu .dot {
             background-color: #856404;
         }
 
-        .status-rejected {
+        .status-ditolak {
             background-color: #fee2e2;
             color: #dc2626;
         }
 
-        .status-rejected .dot {
+        .status-ditolak .dot {
             background-color: #dc2626;
         }
 
@@ -454,7 +454,7 @@
                     <div style="display: flex; gap: 12px; align-items: center;">
                         <a href="?" class="btn-secondary" style="padding: 12px 20px; border-radius: 8px; text-decoration: none; background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; font-size: 14px; font-weight: 600; font-family: 'Inter', sans-serif;">Reset</a>
                     </div>
-                    <a href="#" class="btn-primary" style="background-color: #0b57c6; color: white; padding: 12px 20px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
+                    <a href="{% url 'tambah_pengadaan_it' %}" class="btn-primary" style="background-color: #0b57c6; color: white; padding: 12px 20px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
                         <i class="fa-solid fa-plus"></i> Tambah Pengadaan
                     </a>
                 </form>
@@ -477,12 +477,12 @@
                                     <div class="laptop-cell">
                                         <div class="laptop-icon"><i class="fa-solid fa-laptop"></i></div>
                                         <div class="laptop-text">
-                                            <span class="laptop-name">{{ item.name }}</span>
-                                            <span class="laptop-brand">{{ item.brand }}</span>
+                                            <span class="laptop-name">{{ item.nama_laptop }}</span>
+                                            <span class="laptop-brand">{{ item.manufacturer|default:"-" }}</span>
                                         </div>
                                     </div>
                                 </td>
-                                <td style="text-align: right;"><a href="{% url 'detailpengadaan_it' %}"
+                                <td style="text-align: right;"><a href="{% url 'detailpengadaan_it' %}?id={{ item.id_laptop_pengadaan }}"
                                         class="btn-detail">Detail</a></td>
                             </tr>
                             {% empty %}
