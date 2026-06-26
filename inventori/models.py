@@ -125,17 +125,16 @@ class Pengajuan(models.Model):
 
 class Peminjaman(models.Model):
     id_peminjaman = models.CharField(primary_key=True, max_length=100)
-
-    id_pengajuan = models.ForeignKey(Pengajuan, on_delete=models.CASCADE, db_column='id_pengajuan')
-    id_user = models.ForeignKey(User, on_delete=models.CASCADE, db_column='id_user')
-    id_laptop_inventori = models.ForeignKey(LaptopInventori, on_delete=models.CASCADE, db_column='id_laptop')
-
+    id_pengajuan = models.ForeignKey(Pengajuan,on_delete=models.CASCADE,db_column='id_pengajuan')
+    id_user = models.ForeignKey(User,on_delete=models.CASCADE,db_column='id_user')
+    id_laptop_inventori = models.ForeignKey(LaptopInventori,on_delete=models.CASCADE,db_column='id_laptop_inventori')
     tanggal_pinjam = models.DateField()
     tanggal_kembali = models.DateField(null=True, blank=True)
     tanggal_jatuh_tempo = models.DateField(null=True, blank=True)
-
     status = models.CharField(max_length=50)
     keterangan = models.TextField(null=True, blank=True)
+    class Meta:
+        db_table = "inventori_peminjaman"
 
 class RiwayatAktivitas(models.Model):
     id_aktivitas = models.CharField(primary_key=True, max_length=100)

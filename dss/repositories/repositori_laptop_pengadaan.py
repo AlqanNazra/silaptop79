@@ -154,7 +154,7 @@ class LaptopPengadaanRepository(ILaptopPengadaanRepositoryImpl):
             s.kapasitas_gb AS storage_kapasitas,
             s.tipe AS storage_tipe
         FROM dss_laptoppengadaan lp
-        LEFT JOIN inventori_processor pro ON lp.processor_id = pro.id_processor
+        LEFT JOIN inventori_processor pro ON lp.id_processor = pro.id_processor
         LEFT JOIN inventori_ram r ON lp.ram_id = r.id_ram
         LEFT JOIN inventori_storage s ON lp.storage_id = s.id_storage
         WHERE lp.id_laptop_pengadaan = %s;  -- <--- PENTING: Tambahkan ini untuk memfilter berdasarkan ID

@@ -48,10 +48,17 @@ $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION ambil_semua_pengajuan()
 RETURNS TABLE (
-    id_pengajuan VARCHAR,id_user VARCHAR,kebutuhan_role VARCHAR,
-    kebutuhan_requirement TEXT,bulan DATE,keterangan TEXT,
-    perusahaan TEXT,status VARCHAR,tanggal_pengajuan TIMESTAMPTZ,
-    tanggal_approval TIMESTAMPTZ,approved_by VARCHAR,
+    id_pengajuan VARCHAR,
+    id_user VARCHAR,
+    kebutuhan_role VARCHAR,
+    kebutuhan_requirement TEXT,
+    bulan DATE,
+    keterangan TEXT,
+    perusahaan TEXT,
+    status VARCHAR,
+    tanggal_pengajuan TIMESTAMPTZ,
+    tanggal_approval TIMESTAMPTZ,
+    approved_by VARCHAR,
     id_proyek VARCHAR
 )
 AS $$
@@ -68,12 +75,16 @@ BEGIN
         p.status,
         p.tanggal_pengajuan,
         p.tanggal_approval,
-        p.id_approved_by,
+        p.approved_by,
         p.id_proyek
     FROM inventori_pengajuan p
     ORDER BY p.tanggal_pengajuan DESC;
 END;
 $$ LANGUAGE plpgsql;
+
+DROP FUNCTION ambil_semua_pengajuan
+
+DROP FUNCTION cari_pengajuan(character varying)
 
 CREATE OR REPLACE FUNCTION cari_pengajuan(
     f_id_pengajuan VARCHAR
@@ -106,7 +117,7 @@ BEGIN
         p.status,
         p.tanggal_pengajuan,
         p.tanggal_approval,
-        p.id_approved_by,
+        p.approved_by,
         p.id_proyek
     FROM inventori_pengajuan p
     WHERE p.id_pengajuan = f_id_pengajuan;
