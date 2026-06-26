@@ -1,7 +1,7 @@
 -- =============================================
 -- 1. USERS
 -- =============================================
-CREATE TABLE users (
+CREATE TABLE inventori_user (
     id_user VARCHAR(15) PRIMARY KEY,
     nama VARCHAR(255) NOT NULL,
     email VARCHAR(255) UNIQUE,
@@ -9,31 +9,39 @@ CREATE TABLE users (
     role VARCHAR(50) NOT NULL
 );
 
+select * from inventori_user
+
 -- Update database
 ALTER TABLE inventori_user
-ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-ADD COLUMN updated_at TIMESTAMP,
-ADD COLUMN is_active BOOLEAN DEFAULT TRUE;
+ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP,
+ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE,
+ADD COLUMN IF NOT EXISTS departemen VARCHAR(100) NOT NULL DEFAULT 'Non IT';
+ALTER TABLE inventori_user
 ADD CONSTRAINT role_check
 CHECK (role IN ('HC', 'IT', 'TALENT'));
-ADD CONSTRAINT unique_email UNIQUE (email);
 
 -- Ekstention 
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
+select create_user
+
 -- CREATE DATA
 CREATE OR REPLACE FUNCTION create_user(
-    p_id_user VARCHAR,
     p_nama VARCHAR,
     p_email VARCHAR,
     p_password TEXT,
-    p_role VARCHAR
+    p_role VARCHAR,
+    p_departemen VARCHAR DEFAULT 'Non IT'
 )
-RETURNS TEXT AS $$
+RETURNS TEXT AS
+$$
 BEGIN
-    -- VALIDASI EMAIL UNIK
+    -- Validasi email
     IF EXISTS (
-        SELECT 1 FROM inventori_user WHERE email = p_email
+        SELECT 1
+        FROM inventori_user
+        WHERE email = p_email
     ) THEN
         RETURN 'Email sudah digunakan';
     END IF;
@@ -43,19 +51,22 @@ BEGIN
         nama,
         email,
         password,
-        role
+        role,
+        departemen
     )
     VALUES (
         f_generate_id('USR','inventori_user','id_user'),
         p_nama,
         p_email,
         crypt(p_password, gen_salt('bf')),
-        p_role
+        p_role,
+        p_departemen
     );
 
     RETURN 'User berhasil dibuat';
 END;
-$$ LANGUAGE plpgsql;
+$$
+LANGUAGE plpgsql;
 
 -- READ USER
 CREATE OR REPLACE FUNCTION get_all_users()

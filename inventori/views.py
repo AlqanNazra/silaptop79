@@ -380,7 +380,7 @@ def detailpengajuan_hc_view(request):
             if action in ['disetujui', 'ditolak']:
                 from inventori.dto.dto_pengajuan import PengajuanDTO
                 # Get user ID safely
-                user_id = request.user.id_user if hasattr(request.user, 'id_user') else None
+                id_user = request.user.id_user if hasattr(request.user, 'id_user') else None
                 
                 # Map action to English status for DB compatibility
                 db_status = 'approved' if action == 'disetujui' else 'rejected'
@@ -388,7 +388,7 @@ def detailpengajuan_hc_view(request):
                 dto = PengajuanDTO(
                     id_pengajuan=id_pengajuan,
                     status=db_status,
-                    approved_by=user_id
+                    approved_by=id_user
                 )
                 service.service_approve_pengajuan(dto)
                 messages.success(request, f'Pengajuan berhasil di-{action}.')
@@ -433,11 +433,11 @@ def setujui_pengajuan_hc_view(request):
                 return redirect('pengajuanlaptop_hc')
 
             # Buat DTO Pengajuan
-            user_id = request.user.id_user if (hasattr(request.user, 'id_user') and request.user.id_user) else 'USR-001'
+            id_user = request.user.id_user if (hasattr(request.user, 'id_user') and request.user.id_user) else 'USR-001'
             dto_peng = PengajuanDTO(
                 id_pengajuan=pengajuan_id,
                 status='approved',
-                approved_by=user_id
+                approved_by=id_user
             )
 
             # Ambil tanggal jatuh tempo dari form (TC-TRX-17)

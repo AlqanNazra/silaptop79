@@ -59,28 +59,13 @@ class Servicesaw:
             for row in data
         ]
 
-    def proses_dual_dataset(
-        self,
-        data_raw,
-        role_requirement,
-        role
-    ):
-        hasil_split = (
-            self.servisPD.split_role_requirement(
-                data_raw,
-                role_requirement
-            )
-        )
+    def proses_dual_dataset(self,data_raw,role_requirement,role):
+        hasil_split = (self.servisPD.split_role_requirement(data_raw,role_requirement))
         role_match = (hasil_split["role_match"])
         fallback = ( hasil_split["fallback"])
         hasil_role = None
         hasil_fallback = None
-        hasil_role = (
-                self.proses_saw_pipeline(
-                    role_match,
-                    role
-                )
-            )
+        hasil_role = (self.proses_saw_pipeline(role_match,role))
         return {
             "role_result": hasil_role,
             "fallback_result": hasil_fallback,
@@ -98,10 +83,7 @@ class Servicesaw:
         # print(role)
         # print(type(role))
         if not role:
-            raise Exception(
-                f"Role {id_role} tidak ditemukan"
-            )
-
+            raise Exception(f"Role {id_role} tidak ditemukan")
         if isinstance(role, dict):
             return {
                 "id_role": role.get("id_role"),
@@ -257,18 +239,8 @@ class Servicesaw:
         return hasil_normalisasi
     
     def get_bobot_saw(self, role: list):
-
-        role_teknologi_list = (
-            self.repoRoleTeknologi
-            .get_by_role(role[0])
-        )
-
-        hasil_role = (
-            self.servisBK.proses_role(
-                role[0],
-                role_teknologi_list
-            )
-        )
+        role_teknologi_list = (self.repoRoleTeknologi.get_by_role(role[0]))
+        hasil_role = (self.servisBK.proses_role(role[0],role_teknologi_list))
         # print("\n====================")
         # print("BOBOT HASIL AGREGASI ROLE")
         # print("====================")
@@ -341,7 +313,6 @@ class Servicesaw:
     
     def simpan_alternatif_awal(self, data_raw, id_dss, sumber_data):
         list_alternatif = []
-
         for item in data_raw:
             id_alt = self.repoalternatifdss.tambah_alternatif_dss(
                 AlternatifDssDTO(
@@ -351,7 +322,6 @@ class Servicesaw:
                     sumber_data=sumber_data
                 )
             )
-
             item["id"] = id_alt
             list_alternatif.append(item)
 
@@ -360,7 +330,6 @@ class Servicesaw:
         data_pre = self.servisPD.preprocessing(list_alternatif)
         print("\n=== PREPROCESSING ===")
         print(data_pre[0])
-        
         data_normalisasi = self.normalisasi_saw(data_pre)
         validator = ServiceValidatorSAW()
         validator.validate_normalisasi(data_normalisasi)
@@ -380,10 +349,7 @@ class Servicesaw:
         }
         
     def simpan_hasil_saw(self, id_dss, ranking):
-        id_hasil = self.repohasilsaw.buat_hasil_saw(
-            HasilSAWDTO(id_dss=id_dss)
-        )
-
+        id_hasil = self.repohasilsaw.buat_hasil_saw(HasilSAWDTO(id_dss=id_dss))
         for item in ranking:
             self.repodetailhasilsaw.tambah_detail_hasil_saw(
                 DetailHasilSawDTO(

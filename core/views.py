@@ -378,14 +378,14 @@ def detailpengajuan_it_view(request):
         if request.method == 'POST':
             action = request.POST.get('action')
             if action in ['disetujui', 'ditolak']:
-                user_id = request.user.id_user if hasattr(request.user, 'id_user') else None
+                id_user = request.user.id_user if hasattr(request.user, 'id_user') else None
                 
                 db_status = 'approved' if action == 'disetujui' else 'rejected'
                 
                 dto = PengajuanDTO(
                     id_pengajuan=id_pengajuan,
                     status=db_status,
-                    approved_by=user_id
+                    approved_by=id_user
                 )
                 service.service_approve_pengajuan(dto)
                 messages.success(request, f'Pengajuan berhasil di-{action}.')
@@ -781,9 +781,9 @@ def inputkriteria_hc_view(request):
                     processor_score=int(minimum_requirement.get("processor_score",0) or 0)
                 )
             service = Servicesaw(conn)
-            user_id = request.user.id_user if (hasattr(request.user, 'id_user') and request.user.id_user) else 'U001'
+            id_user = request.user.id_user if (hasattr(request.user, 'id_user') and request.user.id_user) else 'U001'
             hasil = service.proses_dss_saw(
-                id_user=user_id,
+                id_user=id_user,
                 id_bobot=selected_role ,
                 sumber_data=jenis_rekomendasi,
                 filter_data=filter_data,
@@ -812,6 +812,9 @@ def inputkriteria_hc_view(request):
                     "inventori"
                 )
             )
+            request.session["selected_role_teknologi"] = selected_role
+            request.session["minimum_requirement"] = minimum_requirement
+            request.session.modified = True
             warning_dss = request.session.get("warning_dss")
             return redirect("hasilrekomendasi_hc")        
         except Exception as e:
@@ -1182,7 +1185,7 @@ def notifikasi_hc_view(request):
     pengembalian_list = Peminjaman.objects.filter(status='dikembalikan').select_related('id_user', 'id_laptop_inventori')
     users_dict = {u.id_user: u.nama for u in InvUser.objects.all()}
     for pem in pengembalian_list:
-        user_nama = users_dict.get(pem.id_user_id, pem.id_user_id)
+        user_nama = users_dict.get(pem.id_id_user, pem.id_id_user)
         laptop_nama = pem.id_laptop_inventori.nama_laptop if pem.id_laptop_inventori else pem.id_laptop_inventori_id
         tgl_kembali = pem.tanggal_kembali
         if tgl_kembali:
@@ -1218,7 +1221,7 @@ def notifikasi_hc_view(request):
                 urgency_tag = 'Jatuh Tempo Segera'
             else:
                 continue  # Skip if plenty of time
-            user_nama = users_dict.get(pem.id_user_id, pem.id_user_id)
+            user_nama = users_dict.get(pem.id_id_user, pem.id_id_user)
             laptop_nama = pem.id_laptop_inventori.nama_laptop if pem.id_laptop_inventori else pem.id_laptop_inventori_id
             if sisa < 0:
                 time_str = f"Lewat {abs(sisa)} hari (Telat!)"
@@ -1519,9 +1522,9 @@ def inputkriteria_it_view(request):
                 )
 
             service = Servicesaw(conn)
-            user_id = request.user.id_user if (hasattr(request.user, 'id_user') and request.user.id_user) else 'U002'
+            id_user = request.user.id_user if (hasattr(request.user, 'id_user') and request.user.id_user) else 'U002'
             hasil = service.proses_dss_saw(
-                id_user=user_id,
+                id_user=id_user,
                 id_bobot=selected_role ,
                 sumber_data=jenis_rekomendasi,
                 filter_data=filter_data,
@@ -2240,12 +2243,12 @@ def tambahpengadaan_it_view(request):
 
 def dashboard_talent_view(request):
     try:
-        user_id = request.user.id_user if hasattr(request.user, 'id_user') else None
+        id_user = request.user.id_user if hasattr(request.user, 'id_user') else None
         
         service_pengajuan = PengajuanService()
         semua_pengajuan = service_pengajuan.service_ambil_semua_pengajuan()
-        if user_id:
-            semua_pengajuan = [p for p in semua_pengajuan if getattr(p, 'id_user', None) == user_id]
+        if id_user:
+            semua_pengajuan = [p for p in semua_pengajuan if getattr(p, 'id_user', None) == id_user]
             
         total_menunggu = sum(1 for p in semua_pengajuan if p.status and p.status.lower() == 'menunggu')
         total_ditolak = sum(1 for p in semua_pengajuan if p.status and p.status.lower() == 'ditolak')
@@ -2253,8 +2256,8 @@ def dashboard_talent_view(request):
         
         service_peminjaman = PeminjamanService()
         semua_peminjaman = service_peminjaman.service_ambil_semua_peminjaman()
-        if user_id:
-            semua_peminjaman = [p for p in semua_peminjaman if getattr(p, 'id_user', None) == user_id]
+        if id_user:
+            semua_peminjaman = [p for p in semua_peminjaman if getattr(p, 'id_user', None) == id_user]
             
         total_selesai = sum(1 for p in semua_peminjaman if p.status and p.status.lower() in ['selesai', 'dikembalikan'])
         
@@ -2302,10 +2305,10 @@ def pengajuanlaptop_talent_view(request):
         service = PengajuanService()
 
         # Ambil user id
-        user_id = request.POST.get('id_user')
+        id_user = request.POST.get('id_user')
 
-        if not user_id:
-            user_id = (
+        if not id_user:
+            id_user = (
                 request.user.id_user
                 if hasattr(request.user, 'id_user')
                 else None
@@ -2313,9 +2316,9 @@ def pengajuanlaptop_talent_view(request):
 
         from inventori.models import User, Proyek, ProjectRole, Role, RoleTeknologi
         user_obj = None
-        if user_id:
+        if id_user:
             try:
-                user_obj = User.objects.get(id_user=user_id)
+                user_obj = User.objects.get(id_user=id_user)
             except User.DoesNotExist:
                 pass
         
@@ -2343,7 +2346,7 @@ def pengajuanlaptop_talent_view(request):
             p_service = PeminjamanService()
             all_peminjaman = p_service.service_ambil_semua_peminjaman()
             has_active_borrow = any(
-                str(p.id_user) == str(user_id) and p.status and p.status.lower() in ['dipinjam', 'aktif']
+                str(p.id_user) == str(id_user) and p.status and p.status.lower() in ['dipinjam', 'aktif']
                 for p in all_peminjaman
             )
             if has_active_borrow:
@@ -2352,7 +2355,7 @@ def pengajuanlaptop_talent_view(request):
 
             proyek_id = request.POST.get('proyek') or None
             dto = PengajuanDTO(
-                id_user=user_id,
+                id_user=id_user,
                 kebutuhan_role=role,
                 kebutuhan_requirement=spesifikasi,
                 bulan=datetime.now().date(),
@@ -2368,10 +2371,10 @@ def pengajuanlaptop_talent_view(request):
 
         semua_pengajuan = service.service_ambil_semua_pengajuan()
 
-        if user_id:
+        if id_user:
             semua_pengajuan = [
                 p for p in semua_pengajuan
-                if getattr(p, 'id_user', None) == user_id
+                if getattr(p, 'id_user', None) == id_user
             ]
 
         # Filter search
@@ -2467,13 +2470,13 @@ def pengajuanlaptop_talent_view(request):
         )
 
 def detaillaptop_talent_view(request):
-    user_id = request.user.id_user if hasattr(request.user, 'id_user') else None
+    id_user = request.user.id_user if hasattr(request.user, 'id_user') else None
     service = PeminjamanService()
     active_laptop = None
     try:
         riwayat_list = service.service_ambil_semua_peminjaman()
-        if user_id:
-            riwayat_list = [p for p in riwayat_list if getattr(p, 'id_user', None) == user_id]
+        if id_user:
+            riwayat_list = [p for p in riwayat_list if getattr(p, 'id_user', None) == id_user]
         
         active_peminjaman = next((r for r in riwayat_list if r.status and r.status.lower() in ['dipinjam', 'aktif']), None)
         if active_peminjaman:
@@ -2498,12 +2501,12 @@ def riwayatpeminjamanlaptop_talent_view(request):
         per_page = 10
 
     try:
-        user_id = request.user.id_user if hasattr(request.user, 'id_user') else None
+        id_user = request.user.id_user if hasattr(request.user, 'id_user') else None
         service = PeminjamanService()
         riwayat_list = service.service_ambil_semua_peminjaman()
         
-        if user_id:
-            riwayat_list = [p for p in riwayat_list if getattr(p, 'id_user', None) == user_id]
+        if id_user:
+            riwayat_list = [p for p in riwayat_list if getattr(p, 'id_user', None) == id_user]
             
         total_peminjaman = len(riwayat_list)
         total_aktif = sum(1 for r in riwayat_list if r.status and r.status.lower() in ['dipinjam', 'aktif'])
@@ -2597,16 +2600,16 @@ def riwayatpeminjamanlaptop_talent_view(request):
 
 def pengembalianlaptop_talent_view(request):
     from inventori.models import Peminjaman, LaptopInventori
-    user_id = request.user.id_user if hasattr(request.user, 'id_user') else None
-    if not user_id:
+    id_user = request.user.id_user if hasattr(request.user, 'id_user') else None
+    if not id_user:
         messages.error(request, 'Anda harus login terlebih dahulu.')
         return redirect('riwayatpeminjamanlaptop_talent')
 
     service = PeminjamanService()
     try:
         riwayat_list = service.service_ambil_semua_peminjaman()
-        if user_id:
-            riwayat_list = [p for p in riwayat_list if getattr(p, 'id_user', None) == user_id]
+        if id_user:
+            riwayat_list = [p for p in riwayat_list if getattr(p, 'id_user', None) == id_user]
         
         active_peminjaman = next((r for r in riwayat_list if r.status and r.status.lower() in ['dipinjam', 'aktif']), None)
         
@@ -2756,11 +2759,11 @@ def setujui_pengajuan_it_view(request):
                 return redirect('pengajuanlaptop_it')
 
             # Buat DTO Pengajuan
-            user_id = request.user.id_user if (hasattr(request.user, 'id_user') and request.user.id_user) else 'USR-002'
+            id_user = request.user.id_user if (hasattr(request.user, 'id_user') and request.user.id_user) else 'USR-002'
             dto_peng = PengajuanDTO(
                 id_pengajuan=pengajuan_id,
                 status='approved',
-                approved_by=user_id
+                approved_by=id_user
             )
 
             # Buat DTO Peminjaman
@@ -3092,7 +3095,7 @@ def manajemen_role_teknologi_it_view(request):
         role_list = role_list.filter(Q(nama_role__icontains=search_role))
     if search_tech:
         teknologi_list = teknologi_list.filter(Q(nama_teknologi__icontains=search_tech) | Q(kategori__icontains=search_tech))
-    paginator_role = Paginator(role_list, 5)
+    paginator_role = Paginator(role_list, 999999)
     page_role = request.GET.get('page_role')
     role_obj = paginator_role.get_page(page_role)
     paginator_tech = Paginator(teknologi_list, 999999)
@@ -3467,7 +3470,7 @@ def edit_teknologi_it_view(
 # HC USER MANAGEMENT VIEWS
 # ==========================================
 
-def _generate_user_id():
+def _generate_id_user():
     """Generate ID pengguna otomatis dengan format USR_XXXX."""
     from inventori.models import User
     existing = (
@@ -3537,7 +3540,7 @@ def tambahuser_hc_view(request):
             return render(request, 'hc/user/tambahuser_hc.html', {'form_data': form_data})
 
         try:
-            new_id = _generate_user_id()
+            new_id = _generate_id_user()
             User.objects.create(
                 id_user=new_id,
                 nama=nama,

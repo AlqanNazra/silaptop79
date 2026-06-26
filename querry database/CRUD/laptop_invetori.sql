@@ -2,6 +2,29 @@
 -- 12. LAPTOP INVENTORI
 -- =============================================
 
+ALTER TABLE inventori_pengajuan
+RENAME COLUMN user_id TO id_user;
+
+ALTER TABLE inventori_pengajuan
+RENAME COLUMN approved_by_id TO approved_by;
+
+ALTER TABLE inventori_pengajuan
+ADD CONSTRAINT fk_pengajuan_user
+FOREIGN KEY (id_user)
+REFERENCES inventori_user(id_user);
+
+ALTER TABLE inventori_pengajuan
+ADD CONSTRAINT fk_pengajuan_approver
+FOREIGN KEY (approved_by)
+REFERENCES inventori_user(id_user);
+
+ALTER TABLE inventori_pengajuan
+ADD CONSTRAINT fk_pengajuan_proyek
+FOREIGN KEY (id_proyek)
+REFERENCES inventori_proyek(id_proyek);
+
+ALTER TABLE inventori_pengajuan
+ADD COLUMN id_proyek VARCHAR(20);
 
 CREATE OR REPLACE FUNCTION tambah_laptop_inventori(
     f_nama_laptop VARCHAR,
@@ -14,7 +37,7 @@ CREATE OR REPLACE FUNCTION tambah_laptop_inventori(
     f_id_ram VARCHAR,       
     f_id_storage VARCHAR,   
     f_ukuran_layar FLOAT,
-    f_baterai VARCHAR 
+    f_baterai FLOAT 
 )
 RETURNS VOID AS $$
 BEGIN
@@ -42,9 +65,9 @@ BEGIN
         f_kondisi,
         f_status,
         f_lokasi,
-        NULLIF(f_id_processor, '')::bigint, 
-        NULLIF(f_id_ram, '')::bigint,       
-        NULLIF(f_id_storage, '')::bigint,   
+        NULLIF(f_id_processor, '')::VARCHAR, 
+        NULLIF(f_id_ram, '')::VARCHAR,       
+        NULLIF(f_id_storage, '')::VARCHAR,   
         f_ukuran_layar,
         f_baterai
     );

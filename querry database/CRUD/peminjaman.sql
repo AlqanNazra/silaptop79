@@ -25,7 +25,7 @@ BEGIN
         tanggal_pinjam,tanggal_kembali,status,keterangan
     )
     VALUES (
-        f_generate_id('PIM','inventori_peminjaman','id_piminjaman'),f_id_user,f_id_laptop_inventori,f_tanggal_pinjam,
+        f_generate_id('PIM','inventori_peminjaman','id_peminjaman'),f_id_user,f_id_laptop_inventori,f_tanggal_pinjam,
         f_tanggal_kembali,f_status,f_keterangan);
 END;
 $$ LANGUAGE plpgsql;
@@ -45,7 +45,7 @@ BEGIN
     SELECT 
         p.id_peminjaman::VARCHAR,
         p.id_user::VARCHAR,
-        p.id_laptop::VARCHAR,
+        p.id_laptop_inventori::VARCHAR,
         p.tanggal_pinjam,
         p.tanggal_kembali,
         p.status::VARCHAR,
@@ -69,7 +69,7 @@ BEGIN
     SELECT 
         p.id_peminjaman::VARCHAR,
         p.id_user::VARCHAR,
-        p.id_laptop::VARCHAR,
+        p.id_laptop_inventori::VARCHAR,
         p.tanggal_pinjam,
         p.tanggal_kembali,
         p.status::VARCHAR,
@@ -99,7 +99,7 @@ $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION pinjam_laptop(
     f_id_user VARCHAR,
-    f_id_laptop VARCHAR,
+    f_id_laptop_inventori VARCHAR,
     f_id_pengajuan VARCHAR,
     f_tanggal_pinjam DATE,
     f_tanggal_kembali DATE,
@@ -125,7 +125,7 @@ BEGIN
 
     IF EXISTS (
         SELECT 1 FROM inventori_peminjaman
-        WHERE id_laptop = f_id_laptop
+        WHERE id_laptop_inventori = f_id_laptop
         AND status = 'dipinjam'
     ) THEN
         RETURN 'Laptop sedang dipinjam';
@@ -145,7 +145,7 @@ BEGIN
         id_peminjaman,
         id_pengajuan,
         id_user,
-        id_laptop,
+        id_laptop_inventori,
         tanggal_pinjam,
         tanggal_kembali,
         status,
@@ -180,7 +180,7 @@ RETURNS TEXT AS $$
 DECLARE
     v_id_laptop VARCHAR;
 BEGIN 
-    SELECT id_laptop INTO v_id_laptop 
+    SELECT id_laptop_inventori INTO v_id_laptop 
     FROM inventori_peminjaman 
     WHERE id_peminjaman = f_id_peminjaman;
 
@@ -209,7 +209,7 @@ BEGIN
     Update inventori_laptopinventori
     SET status = 'rusak' , kondisi = f_kondisi
     WHERE id_laptop_inventori = f_id_laptop;
-    RETURN 'Status laptop' || id_laptop_inventori || 'Sudah diupdate';
+    RETURN 'Status laptop' || f_id_laptop  || 'Sudah diupdate';
 END
 $$ LANGUAGE plpgsql;
 
@@ -219,7 +219,7 @@ BEGIN
     UPDATE inventori_laptopinventori l
     SET status = CASE
         WHEN EXISTS (
-            SELECT 1 FROM peminjaman p
+            SELECT 1 FROM inventori_peminjaman p
             WHERE p.id_laptop_inventori = l.id_laptop_inventori
             AND p.status = 'rusak'
         ) THEN 'dipinjam'
@@ -250,7 +250,7 @@ BEGIN
         p.tanggal_pinjam,
         p.tanggal_kembali
     FROM inventori_laptopinventori li
-    LEFT JOIN peminjaman p
+    LEFT JOIN inventori_peminjaman  p
         ON p.id_laptop_inventori = li.id_laptop_inventori;
 END;
 $$ LANGUAGE plpgsql;
