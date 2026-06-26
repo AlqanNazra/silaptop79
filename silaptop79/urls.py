@@ -162,11 +162,13 @@ urlpatterns = [
     path('talent/detail-rekomendasi/', detailrekomendasi_talent_view, name='detailrekomendasi_talent'),
     path('talent/detail-scrapping/', detailrekomendasiscrapping_talent_view, name='detailrekomendasiscrapping_talent'),
     path('', home_view, name='home'),
-    path(
-    'it/manajemen-role-teknologi/',
-    manajemen_role_teknologi_it_view,
-    name='manajemenroleteknologi_it'
-),
+    path('dashboardhc/', dashboard_hc_view, name='dashboardhc'), # Ini Dashboard baru
+    path('pengajuanlaptop_hc/', pengajuanlaptop_hc_view, name='pengajuanlaptop_hc'),
+    path('tambahlaptop_hc/', tambahlaptop_hc_view, name='tambahlaptop_hc'),
+    path('inputkriteria_hc/', inputkriteria_hc_view, name='inputkriteria_hc'),
+    path('hasilrekomendasi_hc/', hasilrekomendasi_hc_view, name='hasilrekomendasi_hc'),
+    path("laptop/", laptop_dashboard, name="laptop_dashboard"),
+    path('it/manajemen-role-teknologi/',manajemen_role_teknologi_it_view,name='manajemenroleteknologi_it'),
 
 path(
     'it/tambah-role/',

@@ -813,7 +813,7 @@ def inputkriteria_hc_view(request):
                 )
             )
             warning_dss = request.session.get("warning_dss")
-            return redirect("hasilrekomendasi_it")        
+            return redirect("hasilrekomendasi_hc")        
         except Exception as e:
             import traceback
             # print(traceback.format_exc())
@@ -1938,7 +1938,7 @@ def detailrekomendasi_it_view(request):
                     "Laptop tidak ditemukan"
                 )
                 return redirect(
-                    "hasilrekomendasi_hc"
+                    "hasilrekomendasi_it"
                 )
             return render(
                 request,
@@ -3098,6 +3098,7 @@ def manajemen_role_teknologi_it_view(request):
     paginator_tech = Paginator(teknologi_list, 999999)
     page_tech = request.GET.get('page_tech')
     tech_obj = paginator_tech.get_page(page_tech)
+    active_tab = request.GET.get('tab', 'role')
     context = {
         "role_list": role_obj,
         "tech_page": tech_obj,
@@ -3105,6 +3106,7 @@ def manajemen_role_teknologi_it_view(request):
         "processor_list": processor_list,
         "search_role": search_role,
         "search_tech": search_tech,
+        "active_tab": active_tab,
     }
     return render(request,"it/inventori/manajemenroleteknologi_it.html", context)
 def tambah_teknologi_it_view(request):
