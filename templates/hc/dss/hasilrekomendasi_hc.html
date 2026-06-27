@@ -30,6 +30,24 @@
             width: 100%;
         }
 
+        .btn-assign {
+            background: #0b57c6;
+            border: 1px solid #0b57c6;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .btn-assign:hover {
+            background: #09459e;
+            border-color: #09459e;
+        }
+
         .main-dashboard-content {
             flex: 1;
             margin-left: 260px;
@@ -388,12 +406,12 @@
         }
 
         /* Pagination */
-        .pagination-container{
-            display:flex;
-            justify-content:flex-end;
-            align-items:center;
-            padding:18px 24px;
-            border-top:1px solid #f1f5f9;
+        .pagination-container {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            padding: 18px 24px;
+            border-top: 1px solid #f1f5f9;
         }
 
         .pagination-text {
@@ -402,9 +420,9 @@
             font-weight: 500;
         }
 
-        .pagination-controls{
-            display:flex;
-            gap:8px;
+        .pagination-controls {
+            display: flex;
+            gap: 8px;
         }
 
         .page-btn {
@@ -527,13 +545,13 @@
                     <div class="sort-select">
                         Urutkan:
                         <select name="sort" id="sortSelect">
-                            <option value="skor_desc" {% if sort_by == "skor_desc" %}selected{% endif %}>
+                            <option value="skor_desc" {% if sort_by=="skor_desc" %}selected{% endif %}>
                                 Skor SAW (Tertinggi)
                             </option>
-                            <option value="skor_asc" {% if sort_by == "skor_asc" %}selected{% endif %}>
+                            <option value="skor_asc" {% if sort_by=="skor_asc" %}selected{% endif %}>
                                 Skor SAW (Terendah)
                             </option>
-                            <option value="harga_asc" {% if sort_by == "harga_asc" %}selected{% endif %}>
+                            <option value="harga_asc" {% if sort_by=="harga_asc" %}selected{% endif %}>
                                 Harga (Termurah)
                             </option>
                         </select>
@@ -578,9 +596,16 @@
                             {% if jenis_rekomendasi == "pengadaan" %}
                             <td>Rp {{ item.detail.harga|floatformat:0 }}</td>
                             {% endif %}
-                            <td><span class="score-val {% if forloop.counter == 1 %}high{% endif %}">{{ item.skor|floatformat:3 }}</span></td>
-                            <td><a href="{% url 'detailrekomendasi_hc' %}?id={{ item.id }}&jenis={{ jenis_rekomendasi }}" class="btn-detail">
-                                Detail</a>
+                            <td><span class="score-val {% if forloop.counter == 1 %}high{% endif %}">{{
+                                    item.skor|floatformat:3 }}</span></td>
+                            <td style="display:flex; gap:8px;">
+                                <a href="{% url 'detailrekomendasi_hc' %}?id={{ item.id }}&jenis={{ jenis_rekomendasi }}"
+                                    class="btn-detail">
+                                    Detail
+                                </a>
+                                <a href="{% url 'pengajuanlaptop_laptop' item.id %}" class="btn-assign">
+                                    Assign
+                                </a>
                             </td>
                         </tr>
                         {% empty %}
@@ -599,30 +624,23 @@
                     <div class="pagination-controls">
 
                         {% if ranking_sesuai.has_previous %}
-                        <a
-                            href="?page={{ ranking_sesuai.previous_page_number }}&sort={{ sort_by }}"
-                            class="page-btn"
-                        >
+                        <a href="?page={{ ranking_sesuai.previous_page_number }}&sort={{ sort_by }}" class="page-btn">
                             <i class="fa-solid fa-chevron-left"></i>
                         </a>
                         {% endif %}
 
                         {% for num in ranking_sesuai.paginator.page_range %}
 
-                        <a
-                            href="?page={{ num }}&sort={{ sort_by }}"
-                            class="page-btn {% if ranking_sesuai.number == num %}active{% endif %}"
-                        >
+                        <a href="?page={{ num }}&sort={{ sort_by }}"
+                            class="page-btn {% if ranking_sesuai.number == num %}active{% endif %}">
                             {{ num }}
                         </a>
 
                         {% endfor %}
 
                         {% if ranking_sesuai.has_next %}
-                        <a
-                            href="?page={{ ranking_sesuai.next_page_number }}&alt_page={{ ranking_alternatif.number }}&sort={{ sort_by }}"
-                            class="page-btn"
-                        >
+                        <a href="?page={{ ranking_sesuai.next_page_number }}&alt_page={{ ranking_alternatif.number }}&sort={{ sort_by }}"
+                            class="page-btn">
                             <i class="fa-solid fa-chevron-right"></i>
                         </a>
                         {% endif %}
@@ -707,9 +725,13 @@
                                 </span>
                             </td>
                             <td>
-                                <td><a href="{% url 'detailrekomendasi_hc' %}?id={{ item.id }}&jenis={{ jenis_rekomendasi }}" class="btn-detail">
+                            <td><a href="{% url 'detailrekomendasi_hc' %}?id={{ item.id }}&jenis={{ jenis_rekomendasi }}"
+                                    class="btn-detail">
                                     Detail</a>
-                                </td>
+                                <a href="{% url 'pengajuanlaptop_laptop' item.id %}" class="btn-assign">
+                                    Assign
+                                </a>
+                            </td>
                             </td>
 
                         </tr>
@@ -719,9 +741,9 @@
                         <tr>
                             {% if jenis_rekomendasi == "pengadaan" %}
                             <td colspan="8" style="text-align:center;">
-                            {% else %}
+                                {% else %}
                             <td colspan="7" style="text-align:center;">
-                            {% endif %}
+                                {% endif %}
                         </tr>
 
                         {% endfor %}
@@ -734,28 +756,22 @@
                     <div class="pagination-controls">
 
                         {% if ranking_alternatif.has_previous %}
-                        <a
-                            href="?page={{ ranking_alternatif.number }}&alternatif_page={{ ranking_alternatif.previous_page_number }}&sort={{ sort_by }}"
-                            class="page-btn"
-                        >
+                        <a href="?page={{ ranking_alternatif.number }}&alternatif_page={{ ranking_alternatif.previous_page_number }}&sort={{ sort_by }}"
+                            class="page-btn">
                             <i class="fa-solid fa-chevron-left"></i>
                         </a>
                         {% endif %}
 
                         {% for num in ranking_alternatif.paginator.page_range %}
-                        <a
-                            href="?page={{ ranking_alternatif.number }}&alternatif_page={{ num }}&sort={{ sort_by }}"
-                            class="page-btn {% if ranking_alternatif.number == num %}active{% endif %}"
-                        >
+                        <a href="?page={{ ranking_alternatif.number }}&alternatif_page={{ num }}&sort={{ sort_by }}"
+                            class="page-btn {% if ranking_alternatif.number == num %}active{% endif %}">
                             {{ num }}
                         </a>
                         {% endfor %}
 
                         {% if ranking_alternatif.has_next %}
-                        <a
-                            href="?page={{ ranking_alternatif.number }}&alternatif_page={{ ranking_alternatif.next_page_number }}&sort={{ sort_by }}"
-                            class="page-btn"
-                        >
+                        <a href="?page={{ ranking_alternatif.number }}&alternatif_page={{ ranking_alternatif.next_page_number }}&sort={{ sort_by }}"
+                            class="page-btn">
                             <i class="fa-solid fa-chevron-right"></i>
                         </a>
                         {% endif %}
@@ -768,30 +784,30 @@
         </div> <!-- End Main Content -->
     </div> <!-- End Dashboard Wrapper -->
     <script>
-    document.getElementById(
-        "sortSelect"
-    ).addEventListener(
-        "change",
-        function () {
-            const sort =
-                this.value;
-            const url =
-                new URL(
-                    window.location.href
+        document.getElementById(
+            "sortSelect"
+        ).addEventListener(
+            "change",
+            function () {
+                const sort =
+                    this.value;
+                const url =
+                    new URL(
+                        window.location.href
+                    );
+                url.searchParams.set(
+                    "sort",
+                    sort
                 );
-            url.searchParams.set(
-                "sort",
-                sort
-            );
-            url.searchParams.set(
-                "page",
-                1
-            );
-            window.location.href =
-                url.toString();
-        }
-    );
-</script>
+                url.searchParams.set(
+                    "page",
+                    1
+                );
+                window.location.href =
+                    url.toString();
+            }
+        );
+    </script>
 
 </body>
 
