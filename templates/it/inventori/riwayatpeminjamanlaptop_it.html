@@ -389,6 +389,7 @@
         <!-- Search and Filter Form -->
         <div style="margin-bottom: 24px;">
             <form method="GET" action="" style="display: flex; gap: 12px; width: 100%;">
+                {% if per_page %}<input type="hidden" name="per_page" value="{{ per_page }}">{% endif %}
                 <input type="text" name="q" placeholder="Cari nama peminjam, laptop, atau ID..." value="{{ search_query }}" style="flex: 1; padding: 12px 16px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px;">
                 <select name="status" style="padding: 12px 16px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background: white;">
                     <option value="">Semua Status Peminjaman</option>

@@ -341,10 +341,7 @@
                 <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
                     <button type="button" onclick="openFilterModal()" class="btn-secondary"
                         style="padding: 12px 20px; border-radius: 8px; background: #ffffff; color: #0b57c6; border: 1px solid #0b57c6; font-size: 14px; font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;">
-                        <i class="fa-solid fa-filter"></i> Filter Aset {% if status_filter or ram_filter or
-                        storage_filter %}<span
-                            style="background:#0b57c6; color:white; border-radius:50%; width:8px; height:8px; display:inline-block;"></span>{%
-                        endif %}
+                        <i class="fa-solid fa-filter"></i> Filter Aset {% if status_filter or ram_filter or storage_filter %}<span style="background:#0b57c6; color:white; border-radius:50%; width:8px; height:8px; display:inline-block;"></span>{% endif %}
                     </button>
 
                     <a href="?" class="btn-secondary"
@@ -360,21 +357,24 @@
             </form>
 
             <!-- Table Card -->
-            <div class="table-card">
+            <div class="table-card"
+                style="background: #ffffff; border-radius: 16px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02); overflow: hidden; border: 1px solid #f1f5f9; margin-top: 24px;">
                 <table>
                     <thead>
                         <tr>
-                            <th class="col-no">NO</th>
-                            <th>NAMA LAPTOP</th>
+                            <th style="width: 60px;">NO</th>
+                            <th>LAPTOP</th>
                             <th>SERIAL NUMBER</th>
                             <th>STATUS</th>
-                            <th style="width: 80px;">AKSI</th>
+                            <th style="width: 100px;">AKSI</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for laptop in laptops %}
                         <tr>
-                            <td class="col-no">{{ laptops.start_index|add:forloop.counter0|stringformat:"02d" }}</td>
+                            <td class="col-no" style="font-weight: 600; color: #64748b; vertical-align: middle;">
+                                {{ laptops.start_index|add:forloop.counter0|stringformat:"02d" }}
+                            </td>
                             <td>
                                 <div class="laptop-cell">
                                     <div class="laptop-icon"><i class="fa-solid fa-laptop"></i></div>
@@ -387,13 +387,13 @@
                             <td class="col-sn">{{ laptop.no_inventori }}</td>
                             <td>
                                 <div
-                                    class="status-pill {% if laptop.status == 'tersedia' %}status-available{% elif laptop.status == 'dipinjam' %}status-dipinjam{% else %}status-rusak{% endif %}">
+                                    class="status-pill {% if laptop.status == 'tersedia' or laptop.status == 'Available' or laptop.status == 'Tersedia' %}status-available{% elif laptop.status == 'dipinjam' or laptop.status == 'Dipinjam' %}status-dipinjam{% else %}status-rusak{% endif %}">
                                     <span class="dot"></span>{{ laptop.status|title }}
                                 </div>
                             </td>
                             <td>
                                 <a href="{% url 'detaillaptop_hc' laptop.id_laptop_inventori %}" class="btn-detail"
-                                    style="text-decoration:none; padding:6px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:12px; color:#475569; font-weight:600;">Detail</a>
+                                    style="text-decoration:none; padding:6px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:12px; color:#475569; font-weight:600; text-align: center; display: inline-block;">Detail</a>
                             </td>
                         </tr>
                         {% empty %}
@@ -416,9 +416,12 @@
                             <select
                                 onchange="window.location.href = '?page=1&per_page=' + this.value + '{% if search_query %}&q={{ search_query|escapejs }}{% endif %}{% if status_filter %}&status={{ status_filter|escapejs }}{% endif %}{% if ram_filter %}&ram={{ ram_filter|escapejs }}{% endif %}{% if storage_filter %}&storage={{ storage_filter|escapejs }}{% endif %}';"
                                 style="padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; color: #334155; background-color: #ffffff; cursor: pointer;">
-                                <option value="10" {% if per_page == 10 or per_page == '10' %}selected{% endif %}>10</option>
-                                <option value="15" {% if per_page == 15 or per_page == '15' %}selected{% endif %}>15</option>
-                                <option value="25" {% if per_page == 25 or per_page == '25' %}selected{% endif %}>25</option>
+                                <option value="10" {% if per_page == 10 or per_page == '10' %}selected{% endif %}>10
+                                </option>
+                                <option value="15" {% if per_page == 15 or per_page == '15' %}selected{% endif %}>15
+                                </option>
+                                <option value="25" {% if per_page == 25 or per_page == '25' %}selected{% endif %}>25
+                                </option>
                             </select>
                         </div>
                         {% if laptops.has_previous %}
@@ -431,16 +434,11 @@
 
                         {% for num in laptops.paginator.page_range %}
                         {% if laptops.number == num %}
-                        <span class="page-btn active"
-                            style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; background: #0b57c6; color: white; font-weight: bold; font-size: 12px;">{{
-                            num }}</span>
-                        {% elif num > laptops.number|add:'-3' and num < laptops.number|add:'3' %} <a
-                            href="?page={{ num }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if ram_filter %}&ram={{ ram_filter }}{% endif %}{% if storage_filter %}&storage={{ storage_filter }}{% endif %}{% if per_page %}&per_page={{ per_page }}{% endif %}"
-                            class="page-btn"
-                            style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">
-                            {{ num }}</a>
-                            {% endif %}
-                            {% endfor %}
+                        <span class="page-btn active" style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; background: #0b57c6; color: white; font-weight: bold; font-size: 12px;">{{ num }}</span>
+                        {% elif num > laptops.number|add:'-3' and num < laptops.number|add:'3' %}
+                        <a href="?page={{ num }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if ram_filter %}&ram={{ ram_filter }}{% endif %}{% if storage_filter %}&storage={{ storage_filter }}{% endif %}{% if per_page %}&per_page={{ per_page }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">{{ num }}</a>
+                        {% endif %}
+                        {% endfor %}
 
                             {% if laptops.has_next %}
                             <a href="?page={{ laptops.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if ram_filter %}&ram={{ ram_filter }}{% endif %}{% if storage_filter %}&storage={{ storage_filter }}{% endif %}{% if per_page %}&per_page={{ per_page }}{% endif %}"
@@ -531,10 +529,9 @@
                         <select name="status"
                             style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; color: #334155; background: white;">
                             <option value="">Semua Status</option>
-                            <option value="tersedia" {% if status_filter == 'tersedia' %}selected{% endif %}>Tersedia
-                            </option>
-                            <option value="dipinjam" {% if status_filter == 'dipinjam' %}selected{% endif %}>Dipinjam
-                            </option>
+                            <option value="tersedia" {% if status_filter == 'tersedia' %}selected{% endif %}>Tersedia</option>
+                            <option value="dipinjam" {% if status_filter == 'dipinjam' %}selected{% endif %}>Dipinjam</option>
+                            <option value="rusak" {% if status_filter == 'rusak' %}selected{% endif %}>Rusak</option>
                         </select>
                     </div>
 
@@ -562,8 +559,7 @@
                             <option value="128" {% if storage_filter == '128' %}selected{% endif %}>128 GB</option>
                             <option value="256" {% if storage_filter == '256' %}selected{% endif %}>256 GB</option>
                             <option value="512" {% if storage_filter == '512' %}selected{% endif %}>512 GB</option>
-                            <option value="1024" {% if storage_filter == '1024' %}selected{% endif %}>1024 GB (1 TB)
-                            </option>
+                            <option value="1024" {% if storage_filter == '1024' %}selected{% endif %}>1024 GB (1 TB)</option>
                         </select>
                     </div>
                 </div>

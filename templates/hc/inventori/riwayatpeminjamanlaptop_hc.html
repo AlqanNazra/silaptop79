@@ -393,6 +393,7 @@
                 </div>
                 <form method="GET" action="" style="display:flex; gap:12px; align-items:center; flex-wrap:wrap; width:100%;">
                     <input type="hidden" name="laptop_id" value="{{ laptop_id|default:'' }}">
+                    {% if per_page %}<input type="hidden" name="per_page" value="{{ per_page }}">{% endif %}
                     <input type="text" name="q" value="{{ search_query|default:'' }}" placeholder="Cari peminjam, laptop, atau status..." style="flex:1; min-width:260px; padding:10px 16px; border:1px solid #cbd5e1; border-radius:8px; font-family:'Inter',sans-serif;">
                     <select name="status" style="padding:10px 16px; border:1px solid #cbd5e1; border-radius:8px; font-family:'Inter',sans-serif; background:white; color:#475569; font-weight:500;">
                         <option value="">Semua Status</option>

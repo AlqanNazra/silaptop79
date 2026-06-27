@@ -445,6 +445,7 @@
             <!-- Top Actions -->
             <div class="top-actions">
                 <form id="filter-form" method="GET" action="" class="search-wrapper">
+                    {% if per_page %}<input type="hidden" name="per_page" value="{{ per_page }}">{% endif %}
                     <i class="fa-solid fa-magnifying-glass"></i>
                     <input type="text" id="search-input" name="q" placeholder="Cari proyek berdasarkan nama..." value="{{ search_query }}">
                 </form>
