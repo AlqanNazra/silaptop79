@@ -544,14 +544,16 @@
                     <h3>Daftar Peringkat Laptop Sesuai Role</h3>
                     <div class="sort-select">
                         Urutkan:
-                        <select name="sort" id="sortSelect">
-                            <option value="skor_desc" {% if sort_by=="skor_desc" %}selected{% endif %}>
+                            <option value="skor_desc"
+                                {% if sort_by == "skor_desc" %}selected{% endif %}>
                                 Skor SAW (Tertinggi)
                             </option>
-                            <option value="skor_asc" {% if sort_by=="skor_asc" %}selected{% endif %}>
+                            <option value="score-val"
+                                {% if sort_by == "skor_asc" %}selected{% endif %}>
                                 Skor SAW (Terendah)
                             </option>
-                            <option value="harga_asc" {% if sort_by=="harga_asc" %}selected{% endif %}>
+                            <option value="harga_asc"
+                                {% if sort_by == "harga_asc" %}selected{% endif %}>
                                 Harga (Termurah)
                             </option>
                         </select>
@@ -598,12 +600,10 @@
                             {% endif %}
                             <td><span class="score-val {% if forloop.counter == 1 %}high{% endif %}">{{
                                     item.skor|floatformat:3 }}</span></td>
-                            <td style="display:flex; gap:8px;">
-                                <a href="{% url 'detailrekomendasi_hc' %}?id={{ item.id }}&jenis={{ jenis_rekomendasi }}"
+                            <td><a href="{% url 'detailrekomendasi_hc' %}?id={{ item.id }}&jenis={{ jenis_rekomendasi }}"
                                     class="btn-detail">
-                                    Detail
-                                </a>
-                                <a href="{% url 'pengajuanlaptop_laptop' item.id %}" class="btn-assign">
+                                    Detail</a>
+                                <a href="{% url 'pengajuanlaptop_hc' %}" class="btn-assign">
                                     Assign
                                 </a>
                             </td>
@@ -728,7 +728,7 @@
                             <td><a href="{% url 'detailrekomendasi_hc' %}?id={{ item.id }}&jenis={{ jenis_rekomendasi }}"
                                     class="btn-detail">
                                     Detail</a>
-                                <a href="{% url 'pengajuanlaptop_laptop' item.id %}" class="btn-assign">
+                                <a href="{% url 'pengajuanlaptop_hc' %}" class="btn-assign">
                                     Assign
                                 </a>
                             </td>

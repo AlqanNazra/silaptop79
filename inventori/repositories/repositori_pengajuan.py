@@ -5,6 +5,7 @@ from .dto.dto_pengajuan import PengajuanDTO
 from .interfaces.interface_pengajuan import IPengajuanRepository
 
 
+
 class PengajuanRepository:
 
     def __init__(self, conn):
@@ -44,7 +45,6 @@ class PengajuanRepository:
         with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute(query, (id_pengajuan,))
             row = cur.fetchone()
-
             return self._map_to_dto(row) if row else None
 
     def hapus_pengajuan(self, id_pengajuan):

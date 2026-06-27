@@ -873,7 +873,6 @@ def inputkriteria_hc_view(request):
 
 def hasilrekomendasi_hc_view(request):
     conn = get_connection()
-
     try:
         conn = get_connection()
         repo_laptop = LaptopInventoriRepository(conn)
