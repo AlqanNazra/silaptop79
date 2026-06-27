@@ -13,9 +13,9 @@ class TestDSSPipeline(TestCase):
         self.raw_conn = psycopg2.connect(
             dbname="TA",
             user="postgres",
-            password="alqan",
+            password="190105",
             host="127.0.0.1",
-            port="5432"
+            port="5433"
         )
 
         self.swara = ServiceSwara(

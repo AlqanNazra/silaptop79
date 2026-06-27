@@ -166,9 +166,11 @@ class AggregationService:
                     "nama_kriteria"
                 ]
 
-                nilai = item[
-                    "nilai_swara"
-                ]
+                nilai = item.get("nilai_swara")
+                if nilai is None:
+                    nilai = item.get("nilai_bobot")
+                if nilai is None:
+                    nilai = 0.0
 
                 if nama not in hasil:
 

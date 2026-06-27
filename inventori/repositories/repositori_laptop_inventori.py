@@ -35,26 +35,30 @@ class LaptopInventoriRepository(ILaptopInventoriRepository):
             return cur.fetchone()
 
     def update_kondisi(self, id_laptop, kondisi):
-        with self.conn.cursor() as cur:
+        with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute("SELECT update_kondisi_inventori(%s, %s)", (id_laptop, kondisi))
-            return cur.fetchone()['update_kondisi_inventori']
+            res = cur.fetchone()
+            return res.get('update_kondisi_inventori') if res else None
 
     def update_status(self, id_laptop, status, lokasi):
-        with self.conn.cursor() as cur:
+        with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute("SELECT update_status_inventori(%s, %s, %s)", (id_laptop, status, lokasi))
-            return cur.fetchone()['update_status_inventori']
+            res = cur.fetchone()
+            return res.get('update_status_inventori') if res else None
 
     def update_spek(self, dto):
-        with self.conn.cursor() as cur:
+        with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute("""
                 SELECT update_spek_inventori(%s, %s, %s, %s)
             """, (dto.id_laptop_inventori, dto.id_processor, dto.id_ram, dto.id_storage))
-            return cur.fetchone()['update_spek_inventori']
+            res = cur.fetchone()
+            return res.get('update_spek_inventori') if res else None
 
     def hapus_laptop(self, id_laptop):
-        with self.conn.cursor() as cur:
+        with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute("SELECT hapus_laptop_inventori(%s)", (id_laptop,))
-            return cur.fetchone()['hapus_laptop_inventori']
+            res = cur.fetchone()
+            return res.get('hapus_laptop_inventori') if res else None
 
     def filter_inventori(self, filter_dto):
         query = """
@@ -73,6 +77,14 @@ class LaptopInventoriRepository(ILaptopInventoriRepository):
         with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute(query, params)
             rows = cur.fetchall()
+            
+            try:
+                cur.execute("SELECT id_laptop_inventori FROM inventori_peminjaman WHERE status IN ('dipinjam', 'ready', 'aktif');")
+                active_loans = {r['id_laptop_inventori'] for r in cur.fetchall() if r.get('id_laptop_inventori')}
+            except Exception:
+                active_loans = set()
+
+            filtered_rows = []
             for r in rows:
                 if r.get('berat') is None:
                     r['berat'] = 0
@@ -82,7 +94,15 @@ class LaptopInventoriRepository(ILaptopInventoriRepository):
                     r['benchmark_score'] = 0
                 if r.get('ukuran_layar') is None:
                     r['ukuran_layar'] = 0
-            return rows
+                
+                lap_id = r.get('id_laptop_inventori')
+                st = str(r.get('status', '')).lower()
+                kd = str(r.get('kondisi', '')).lower()
+                
+                if lap_id in active_loans or st in ['dipinjam', 'rusak', 'perbaikan'] or kd in ['rusak', 'rusak berat']:
+                    continue
+                filtered_rows.append(r)
+            return filtered_rows
         
     def ambil_detail_laptop(self, id_laptop):
         query = """

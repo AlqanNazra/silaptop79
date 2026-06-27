@@ -245,6 +245,50 @@
             color: #94a3b8;
         }
 
+        /* Status Pills (Data Laptop Standard) */
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        .status-pill .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+        .status-available, .status-selesai, .status-disetujui {
+            background-color: #dcfce7;
+            color: #16a34a;
+        }
+        .status-available .dot, .status-selesai .dot, .status-disetujui .dot {
+            background-color: #16a34a;
+        }
+        .status-dipinjam, .status-aktif {
+            background-color: #dbeafe;
+            color: #2563eb;
+        }
+        .status-dipinjam .dot, .status-aktif .dot {
+            background-color: #2563eb;
+        }
+        .status-warning, .status-dikembalikan, .status-menunggu, .status-ready, .status-belum_diambil {
+            background-color: #fef3c7;
+            color: #d97706;
+        }
+        .status-warning .dot, .status-dikembalikan .dot, .status-menunggu .dot, .status-ready .dot, .status-belum_diambil .dot {
+            background-color: #d97706;
+        }
+        .status-rusak, .status-ditolak, .status-rejected {
+            background-color: #fee2e2;
+            color: #dc2626;
+        }
+        .status-rusak .dot, .status-ditolak .dot, .status-rejected .dot {
+            background-color: #dc2626;
+        }
+
         .badge {
             padding: 5px 12px;
             border-radius: 12px;
@@ -370,7 +414,6 @@
                     <th>Durasi</th>
                     <th>Jatuh Tempo</th>
                     <th>Status</th>
-                    <th>Aksi</th>
                 </tr>
             </thead>
             <tbody>
@@ -413,41 +456,38 @@
                     </td>
                     <td>
                         {% if p.status|lower == 'kembali' or p.status|lower == 'selesai' %}
-                        <span class="badge badge-excellent">{{ p.status }}</span>
+                        <span class="status-pill status-available"><span class="dot"></span>{{ p.status|title }}</span>
                         {% elif p.status|lower == 'dipinjam' or p.status|lower == 'aktif' %}
-                        <span class="badge badge-good">{{ p.status }}</span>
+                        <span class="status-pill status-dipinjam"><span class="dot"></span>{{ p.status|title }}</span>
                         {% elif p.status|lower == 'dikembalikan' %}
-                        <span class="badge badge-scratch" style="background:#fef3c7; color:#b45309;">Menunggu Konfirmasi</span>
+                        <span class="status-pill status-warning"><span class="dot"></span>Menunggu Konfirmasi</span>
                         {% else %}
-                        <span class="badge badge-scratch">{{ p.status }}</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        {% if p.status|lower == 'dikembalikan' %}
-                        <form method="POST" action="{% url 'konfirmasi_pengembalian_hc' %}">
-                            {% csrf_token %}
-                            <input type="hidden" name="id_peminjaman" value="{{ p.id_peminjaman }}">
-                            <button type="submit" style="padding:6px 12px; background:#10b981; color:white; border:none; border-radius:4px; font-weight:600; cursor:pointer; font-size:12px;">Konfirmasi Terima</button>
-                        </form>
-                        {% else %}
-                        -
+                        <span class="status-pill status-warning"><span class="dot"></span>{{ p.status|title }}</span>
                         {% endif %}
                     </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="7" style="text-align: center; color: #94a3b8; padding: 30px;">Tidak ada riwayat
+                    <td colspan="6" style="text-align: center; color: #94a3b8; padding: 30px;">Tidak ada riwayat
                         peminjaman.</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
 
-            <div class="pagination" style="display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-top: 1px solid #f1f5f9;">
-                <span class="pagination-text">Menampilkan {{ list_peminjaman.start_index }} - {{ list_peminjaman.end_index }} dari {{ list_peminjaman.paginator.count }} peminjaman</span>
+            <div class="pagination-container" style="display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-top: 1px solid #f1f5f9;">
+                <span class="pagination-text">Menampilkan {{ list_peminjaman.start_index }} - {{ list_peminjaman.end_index }} dari {{ total_peminjaman }} peminjaman</span>
                 <div class="pagination-controls" style="display: flex; gap: 6px; align-items: center;">
+                    <div class="per-page-selector" style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: #64748b; margin-right: 12px;">
+                        <span>Tampilkan:</span>
+                        <select onchange="window.location.href = '?page=1&per_page=' + this.value + '{% if search_query %}&q={{ search_query|escapejs }}{% endif %}{% if status_filter %}&status={{ status_filter|escapejs }}{% endif %}{% if laptop_id %}&laptop_id={{ laptop_id|escapejs }}{% endif %}';" style="padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; color: #334155; background-color: #ffffff; cursor: pointer;">
+                            <option value="10" {% if per_page == 10 or per_page == '10' %}selected{% endif %}>10</option>
+                            <option value="15" {% if per_page == 15 or per_page == '15' %}selected{% endif %}>15</option>
+                            <option value="25" {% if per_page == 25 or per_page == '25' %}selected{% endif %}>25</option>
+                        </select>
+                    </div>
                     {% if list_peminjaman.has_previous %}
-                        <a href="?page={{ list_peminjaman.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if laptop_id %}&laptop_id={{ laptop_id }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">
+                        <a href="?page={{ list_peminjaman.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if laptop_id %}&laptop_id={{ laptop_id }}{% endif %}{% if per_page %}&per_page={{ per_page }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">
                             <i class="fa-solid fa-chevron-left"></i>
                         </a>
                     {% endif %}
@@ -456,12 +496,12 @@
                         {% if list_peminjaman.number == num %}
                             <span class="page-btn active" style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; background: #0b57c6; color: white; font-weight: bold; font-size: 12px;">{{ num }}</span>
                         {% elif num > list_peminjaman.number|add:'-3' and num < list_peminjaman.number|add:'3' %}
-                            <a href="?page={{ num }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if laptop_id %}&laptop_id={{ laptop_id }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">{{ num }}</a>
+                            <a href="?page={{ num }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if laptop_id %}&laptop_id={{ laptop_id }}{% endif %}{% if per_page %}&per_page={{ per_page }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">{{ num }}</a>
                         {% endif %}
                     {% endfor %}
 
                     {% if list_peminjaman.has_next %}
-                        <a href="?page={{ list_peminjaman.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if laptop_id %}&laptop_id={{ laptop_id }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">
+                        <a href="?page={{ list_peminjaman.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if laptop_id %}&laptop_id={{ laptop_id }}{% endif %}{% if per_page %}&per_page={{ per_page }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">
                             <i class="fa-solid fa-chevron-right"></i>
                         </a>
                     {% endif %}

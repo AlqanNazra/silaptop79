@@ -1,14 +1,74 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<style>
+    .custom-swal-popup {
+        border-radius: 16px !important;
+        padding: 32px !important;
+        max-width: 440px !important;
+        box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04) !important;
+        font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+    }
+    .custom-swal-backdrop {
+        background: rgba(15, 23, 42, 0.6) !important;
+        backdrop-filter: blur(4px) !important;
+    }
+    .custom-swal-confirm {
+        padding: 10px 24px !important;
+        border-radius: 8px !important;
+        font-weight: 600 !important;
+        font-size: 14px !important;
+        box-shadow: none !important;
+    }
+</style>
+
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         {% if messages %}
             {% for message in messages %}
-                Swal.fire({
-                    icon: "{% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}",
-                    title: "{% if message.tags == 'success' %}Berhasil{% elif message.tags == 'error' %}Gagal{% elif message.tags == 'warning' %}Peringatan{% else %}Informasi{% endif %}",
-                    text: "{{ message|escapejs }}",
-                    confirmButtonColor: '#0b57c6'
-                });
+                (function() {
+                    let msgType = "{{ message.tags }}";
+                    let iconHtml = "";
+                    let iconBg = "#eff6ff";
+                    let iconColor = "#2563eb";
+                    let titleText = "Informasi";
+                    let btnBg = "#0b57c6";
+
+                    if (msgType.includes("success")) {
+                        titleText = "Berhasil!";
+                        iconBg = "#dcfce7";
+                        iconColor = "#16a34a";
+                        btnBg = "#16a34a";
+                        iconHtml = '<div style="width:56px; height:56px; background:' + iconBg + '; color:' + iconColor + '; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 20px; font-size:26px;"><i class="fa-solid fa-circle-check"></i></div>';
+                    } else if (msgType.includes("error")) {
+                        titleText = "Gagal!";
+                        iconBg = "#fee2e2";
+                        iconColor = "#dc2626";
+                        btnBg = "#dc2626";
+                        iconHtml = '<div style="width:56px; height:56px; background:' + iconBg + '; color:' + iconColor + '; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 20px; font-size:26px;"><i class="fa-solid fa-circle-xmark"></i></div>';
+                    } else if (msgType.includes("warning")) {
+                        titleText = "Peringatan!";
+                        iconBg = "#fef3c7";
+                        iconColor = "#d97706";
+                        btnBg = "#d97706";
+                        iconHtml = '<div style="width:56px; height:56px; background:' + iconBg + '; color:' + iconColor + '; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 20px; font-size:26px;"><i class="fa-solid fa-triangle-exclamation"></i></div>';
+                    } else {
+                        iconHtml = '<div style="width:56px; height:56px; background:' + iconBg + '; color:' + iconColor + '; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 20px; font-size:26px;"><i class="fa-solid fa-circle-info"></i></div>';
+                    }
+
+                    Swal.fire({
+                        html: iconHtml + 
+                              '<h3 style="margin:0 0 12px; font-size:20px; font-weight:700; color:#1e293b;">' + titleText + '</h3>' +
+                              '<p style="margin:0 0 20px; font-size:14px; color:#64748b; line-height:1.6;">{{ message|escapejs }}</p>',
+                        showConfirmButton: true,
+                        confirmButtonText: 'OK, Mengerti',
+                        confirmButtonColor: btnBg,
+                        customClass: {
+                            popup: 'custom-swal-popup',
+                            backdrop: 'custom-swal-backdrop',
+                            confirmButton: 'custom-swal-confirm'
+                        },
+                        buttonsStyling: true
+                    });
+                })();
             {% endfor %}
         {% endif %}
     });

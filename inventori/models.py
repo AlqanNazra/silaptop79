@@ -14,7 +14,7 @@ class User(models.Model):
 
 class Processor(models.Model):
 
-    id_processor = models.BigAutoField(primary_key=True)
+    id_processor = models.CharField(primary_key=True, max_length=100)
     nama_processor = models.CharField(max_length=255)
     manufacturer = models.CharField(max_length=255)
     model = models.CharField(max_length=255)
@@ -34,9 +34,7 @@ class Processor(models.Model):
         db_table = "inventori_processor"
 
 class RAM(models.Model):
-    id_ram = models.BigAutoField(
-        primary_key=True
-    )
+    id_ram = models.CharField(primary_key=True, max_length=100)
 
     kapasitas_gb = models.IntegerField()
     tipe = models.CharField(max_length=50)
@@ -49,9 +47,7 @@ class RAM(models.Model):
         db_table = "inventori_ram"
 
 class Storage(models.Model):
-    id_storage = models.BigAutoField(
-        primary_key=True
-    )
+    id_storage = models.CharField(primary_key=True, max_length=100)
 
     kapasitas_gb = models.IntegerField()
     tipe = models.CharField(max_length=100)
@@ -71,8 +67,8 @@ class LaptopInventori(models.Model):
         max_length=50,
         choices=[
             ('baik', 'Baik'),
-            ('rusak_ringan', 'Rusak Ringan'),
-            ('rusak_berat', 'Rusak Berat'),
+            ('rusak ringan', 'Rusak Ringan'),
+            ('rusak berat', 'Rusak Berat'),
         ]
     )
 
@@ -93,6 +89,17 @@ class LaptopInventori(models.Model):
 
     ukuran_layar = models.FloatField(null=True, blank=True)
     baterai = models.CharField(max_length=50, null=True, blank=True)  # Kapasitas baterai, e.g. "70 Wh"
+
+    def save(self, *args, **kwargs):
+        if self.kondisi:
+            self.kondisi = str(self.kondisi).replace('_', ' ').strip().lower()
+            if self.kondisi == 'rusak':
+                self.kondisi = 'rusak ringan'
+            if self.kondisi in ['rusak ringan', 'rusak berat']:
+                self.status = 'rusak'
+        if self.status:
+            self.status = str(self.status).strip().lower()
+        super().save(*args, **kwargs)
 
 class Pengajuan(models.Model):
     id_pengajuan = models.CharField(primary_key=True, max_length=100)
@@ -120,7 +127,7 @@ class Pengajuan(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         related_name='approver',
-        db_column='id_approved_by'
+        db_column='approved_by'
     )
 
 class Peminjaman(models.Model):

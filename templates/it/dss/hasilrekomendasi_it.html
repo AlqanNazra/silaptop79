@@ -702,9 +702,7 @@
                             </td>
                             {% endif %}
                             <td>
-                                <span class="score-val {% if forloop.counter == 1 %}high{% endif %}">
-                                    {{ item.skor|floatformat:3 }}
-                                </span>
+                                <span class="score-val {% if forloop.counter == 1 %}high{% endif %}">{{ item.skor|floatformat:3 }}</span>
                             </td>
                             <td>
                                 <button class="btn-detail">

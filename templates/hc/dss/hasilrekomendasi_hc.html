@@ -500,6 +500,29 @@
                 </div>
             </div>
 
+            <!-- Target Assign Card -->
+            <div class="info-card" style="background: #eff6ff; border: 1px solid #bfdbfe; margin-bottom: 24px;">
+                <div class="info-card-icon" style="color: #2563eb;"><i class="fa-solid fa-user-check"></i></div>
+                <div class="info-card-text" style="flex: 1;">
+                    <h4 style="color: #1e3a8a;">Target Pengajuan & Assign Laptop</h4>
+                    {% if selected_pengajuan %}
+                    <p style="color: #1e40af; margin-top: 4px;">
+                        Laptop yang Anda Assign akan otomatis diberikan kepada Talent: <strong>{{ target_user_nama }}</strong> (ID Pengajuan: <strong>{{ selected_pengajuan_id }}</strong> - Role: <strong>{{ selected_pengajuan.kebutuhan_role }}</strong>).
+                    </p>
+                    {% else %}
+                    <div style="display: flex; align-items: center; gap: 12px; margin-top: 8px; flex-wrap: wrap;">
+                        <span style="color: #1e40af; font-size: 14px; font-weight: 500;">Pilih Pengajuan User yang ingin di-assign:</span>
+                        <select onchange="if(this.value) window.location.href='?id_pengajuan='+this.value;" style="padding: 6px 12px; border-radius: 6px; border: 1px solid #93c5fd; font-size: 13px; background: white; color: #1e3a8a; font-weight: 600;">
+                            <option value="" disabled selected>-- Pilih Pengajuan Talent --</option>
+                            {% for p in pending_pengajuan_list %}
+                            <option value="{{ p.id_pengajuan }}">{{ p.user_nama }} ({{ p.kebutuhan_role }}) - {{ p.id_pengajuan }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
             <!-- Metrics Container -->
             <div class="metrics-container">
                 <div class="metric-card">
@@ -545,13 +568,13 @@
                     <div class="sort-select">
                         Urutkan:
                         <select name="sort" id="sortSelect">
-                            <option value="skor_desc" {% if sort_by=="skor_desc" %}selected{% endif %}>
+                            <option value="skor_desc" {% if sort_by == "skor_desc" %}selected{% endif %}>
                                 Skor SAW (Tertinggi)
                             </option>
-                            <option value="skor_asc" {% if sort_by=="skor_asc" %}selected{% endif %}>
+                            <option value="skor_asc" {% if sort_by == "skor_asc" %}selected{% endif %}>
                                 Skor SAW (Terendah)
                             </option>
-                            <option value="harga_asc" {% if sort_by=="harga_asc" %}selected{% endif %}>
+                            <option value="harga_asc" {% if sort_by == "harga_asc" %}selected{% endif %}>
                                 Harga (Termurah)
                             </option>
                         </select>
@@ -596,16 +619,15 @@
                             {% if jenis_rekomendasi == "pengadaan" %}
                             <td>Rp {{ item.detail.harga|floatformat:0 }}</td>
                             {% endif %}
-                            <td><span class="score-val {% if forloop.counter == 1 %}high{% endif %}">{{
-                                    item.skor|floatformat:3 }}</span></td>
+                            <td><span class="score-val {% if forloop.counter == 1 %}high{% endif %}">{{ item.skor|floatformat:3 }}</span></td>
                             <td style="display:flex; gap:8px;">
                                 <a href="{% url 'detailrekomendasi_hc' %}?id={{ item.id }}&jenis={{ jenis_rekomendasi }}"
                                     class="btn-detail">
                                     Detail
                                 </a>
-                                <a href="{% url 'pengajuanlaptop_laptop' item.id %}" class="btn-assign">
+                                <button type="button" class="btn-assign" onclick="triggerAssignModal('{{ item.id }}', '{{ item.detail.nama|escapejs }}', '{% url 'assign_laptop_hc' %}?laptop_id={{ item.id }}{% if selected_pengajuan_id %}&id_pengajuan={{ selected_pengajuan_id }}{% endif %}')">
                                     Assign
-                                </a>
+                                </button>
                             </td>
                         </tr>
                         {% empty %}
@@ -720,18 +742,15 @@
                             </td>
                             {% endif %}
                             <td>
-                                <span class="score-val {% if forloop.counter == 1 %}high{% endif %}">
-                                    {{ item.skor|floatformat:3 }}
-                                </span>
+                                <span class="score-val {% if forloop.counter == 1 %}high{% endif %}">{{ item.skor|floatformat:3 }}</span>
                             </td>
-                            <td>
-                            <td><a href="{% url 'detailrekomendasi_hc' %}?id={{ item.id }}&jenis={{ jenis_rekomendasi }}"
+                            <td style="display:flex; gap:8px;">
+                                <a href="{% url 'detailrekomendasi_hc' %}?id={{ item.id }}&jenis={{ jenis_rekomendasi }}"
                                     class="btn-detail">
                                     Detail</a>
-                                <a href="{% url 'pengajuanlaptop_laptop' item.id %}" class="btn-assign">
+                                <button type="button" class="btn-assign" onclick="triggerAssignModal('{{ item.id }}', '{{ item.detail.nama|escapejs }}', '{% url 'assign_laptop_hc' %}?laptop_id={{ item.id }}{% if selected_pengajuan_id %}&id_pengajuan={{ selected_pengajuan_id }}{% endif %}')">
                                     Assign
-                                </a>
-                            </td>
+                                </button>
                             </td>
 
                         </tr>
@@ -783,6 +802,27 @@
             </div>
         </div> <!-- End Main Content -->
     </div> <!-- End Dashboard Wrapper -->
+    <!-- Modal Verifikasi Assign -->
+    <div id="assignModal" class="modal-overlay" style="display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.6); backdrop-filter:blur(4px); z-index:9999; justify-content:center; align-items:center;">
+        <div class="modal-box" style="background:white; padding:32px; border-radius:16px; max-width:440px; width:90%; box-shadow:0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04); text-align:center; animation: popIn 0.2s ease-out;">
+            <div style="width:56px; height:56px; background:#eff6ff; color:#2563eb; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 20px; font-size:24px;">
+                <i class="fa-solid fa-laptop-code"></i>
+            </div>
+            <h3 style="margin:0 0 12px; font-size:20px; font-weight:700; color:#1e293b;">Konfirmasi Assign Laptop</h3>
+            <p style="margin:0 0 20px; font-size:14px; color:#64748b; line-height:1.6;">
+                Apakah Anda yakin ingin memberikan <strong id="modalLaptopNama" style="color:#0f172a;">Laptop</strong> kepada Talent <strong style="color:#2563eb;">{{ target_user_nama|default:"User Target" }}</strong> (Pengajuan: {{ selected_pengajuan_id }})?
+            </p>
+            <div style="display:flex; gap:12px;">
+                <button type="button" onclick="closeAssignModal()" style="flex:1; padding:10px 16px; border:1px solid #cbd5e1; background:white; color:#475569; border-radius:8px; font-weight:600; font-size:14px; cursor:pointer;">
+                    Batal
+                </button>
+                <a id="modalAssignConfirmBtn" href="#" style="flex:1; padding:10px 16px; background:#2563eb; color:white; border-radius:8px; font-weight:600; font-size:14px; text-decoration:none; display:inline-block; line-height:1.4;">
+                    Ya, Assign
+                </a>
+            </div>
+        </div>
+    </div>
+
     <script>
         document.getElementById(
             "sortSelect"
@@ -807,6 +847,20 @@
                     url.toString();
             }
         );
+
+        function triggerAssignModal(laptopId, laptopNama, assignUrl) {
+            const hasSelected = "{{ selected_pengajuan_id|default:'' }}";
+            if (!hasSelected) {
+                alert("Silakan pilih pengajuan user pada banner di atas terlebih dahulu.");
+                return;
+            }
+            document.getElementById("modalLaptopNama").innerText = laptopNama;
+            document.getElementById("modalAssignConfirmBtn").href = assignUrl;
+            document.getElementById("assignModal").style.display = "flex";
+        }
+        function closeAssignModal() {
+            document.getElementById("assignModal").style.display = "none";
+        }
     </script>
 
 </body>

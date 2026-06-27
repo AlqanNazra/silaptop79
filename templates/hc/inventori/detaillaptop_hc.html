@@ -291,7 +291,7 @@
 
 <body>
 
-    {% include 'it/components/sidebar.html' with active_page='data_laptop' %}
+    {% include 'hc/components/sidebar.html' with active_page='data_laptop' %}
 
     <div class="main-content">
 
@@ -422,25 +422,16 @@
 
         <!-- Action Buttons -->
         <div class="bottom-actions" style="display: flex; gap: 15px; align-items: center; width: 100%;">
-            <<<<<<< HEAD <a href="{% url 'editdatalaptop_it' laptop.id_laptop_inventori %}" class="btn-blue-action"
-                style="flex: 1;">
+            <a href="{% url 'editdatalaptop_hc' laptop.id_laptop_inventori %}" class="btn-blue-action" style="flex: 1;">
                 <i class="fa-solid fa-pen"></i> Edit Data
-                </a>
-                <a href="{% url 'riwayatpeminjamanlaptop_it' %}" class="btn-grey-action" style="flex: 1;">
-                    =======
-                    <a href="{% url 'editdatalaptop_hc' laptop.id_laptop_inventori %}" class="btn-blue-action"
-                        style="flex: 1;">
-                        <i class="fa-solid fa-pen"></i> Edit Data
-                    </a>
-                    <a href="{% url 'riwayatpeminjamanlaptop_hc' %}?laptop_id={{ laptop.id_laptop_inventori }}"
-                        class="btn-grey-action" style="flex: 1;">
-                        >>>>>>> a1a139d7fe39eec54c67501a595a554ddf6d1542
-                        <i class="fa-solid fa-clock-rotate-left"></i> Riwayat Peminjaman
-                    </a>
-                    <button type="button" class="btn-grey-action" style="color: #dc2626; flex: 1;"
-                        onclick="showDeleteModal()">
-                        <i class="fa-solid fa-trash"></i> Hapus Aset
-                    </button>
+            </a>
+            <a href="{% url 'riwayatpeminjamanlaptop_hc' laptop.id_laptop_inventori %}"
+                class="btn-grey-action" style="flex: 1;">
+                <i class="fa-solid fa-clock-rotate-left"></i> Riwayat Peminjaman
+            </a>
+            <button type="button" class="btn-grey-action" style="color: #dc2626; flex: 1;" onclick="showDeleteModal()">
+                <i class="fa-solid fa-trash"></i> Hapus Aset
+            </button>
         </div>
 
     </div>
@@ -460,24 +451,17 @@
                 Apakah Anda yakin ingin menghapus laptop <strong>"{{ laptop.nama_laptop }}"</strong> dari sistem
                 inventori? Tindakan ini tidak dapat dibatalkan.</div>
             <div class="modal-actions" style="display: flex; gap: 12px; justify-content: center;">
-                <<<<<<< HEAD <button type="button" class="modal-btn"
+                <button type="button" class="modal-btn"
                     style="padding: 10px 24px; border: none; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; background: #f1f5f9; color: #475569;"
                     onclick="hideDeleteModal()">Batal</button>
-                    <form action="{% url 'detaillaptop_it' laptop.id_laptop_inventori %}" method="POST"
-                        style="margin: 0;">
-                        =======
-                        <button type="button" class="modal-btn"
-                            style="padding: 10px 24px; border: none; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; background: #f1f5f9; color: #475569;"
-                            onclick="hideDeleteModal()">Batal</button>
-                        <form action="{% url 'detaillaptop_hc' laptop.id_laptop_inventori %}" method="POST"
-                            style="margin: 0;">
-                            >>>>>>> a1a139d7fe39eec54c67501a595a554ddf6d1542
-                            {% csrf_token %}
-                            <input type="hidden" name="action" value="hapus">
-                            <button type="submit" class="modal-btn"
-                                style="padding: 10px 24px; border: none; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; background: #dc2626; color: white;">Ya,
-                                Hapus</button>
-                        </form>
+                <form action="{% url 'detaillaptop_hc' laptop.id_laptop_inventori %}" method="POST"
+                    style="margin: 0;">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="hapus">
+                    <button type="submit" class="modal-btn"
+                        style="padding: 10px 24px; border: none; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; background: #dc2626; color: white;">Ya,
+                        Hapus</button>
+                </form>
             </div>
         </div>
     </div>

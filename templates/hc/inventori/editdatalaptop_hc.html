@@ -360,9 +360,10 @@
                         <div class="form-group">
                             <label>Status Availability</label>
                             <select name="status">
-                                <option value="tersedia" {% if laptop.status == 'tersedia' %}selected{% endif %}>Tersedia</option>
-                                <option value="dipinjam" {% if laptop.status == 'dipinjam' %}selected{% endif %}>Dipinjam</option>
-                                <option value="rusak" {% if laptop.status == 'rusak' %}selected{% endif %}>Rusak</option>
+                                <option value="tersedia" {% if laptop.status == 'tersedia' %}selected{% endif %}>Tersedia
+                                </option>
+                                <option value="dipinjam" {% if laptop.status == 'dipinjam' %}selected{% endif %}>Dipinjam
+                                </option>
                             </select>
                         </div>
                         <div class="form-group">
@@ -373,8 +374,10 @@
                             <label>Device Condition</label>
                             <select name="kondisi">
                                 <option value="baik" {% if laptop.kondisi == 'baik' %}selected{% endif %}>Baik</option>
-                                <option value="rusak_ringan" {% if laptop.kondisi == 'rusak_ringan' %}selected{% endif %}>Rusak Ringan</option>
-                                <option value="rusak_berat" {% if laptop.kondisi == 'rusak_berat' %}selected{% endif %}>Rusak Berat</option>
+                                <option value="rusak_ringan" {% if laptop.kondisi == 'rusak_ringan' %}selected{% endif %}>
+                                    Rusak Ringan</option>
+                                <option value="rusak_berat" {% if laptop.kondisi == 'rusak_berat' %}selected{% endif %}>
+                                    Rusak Berat</option>
                             </select>
                         </div>
                     </div>
