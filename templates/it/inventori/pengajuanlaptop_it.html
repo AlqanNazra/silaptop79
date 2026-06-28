@@ -100,6 +100,10 @@
             background-color: #EA580C;
         }
 
+        .stat-card.red::before {
+            background-color: #DC2626;
+        }
+
         .stat-top {
             display: flex;
             justify-content: space-between;
@@ -131,6 +135,10 @@
 
         .stat-card.orange .stat-icon {
             color: #EA580C;
+        }
+
+        .stat-card.red .stat-icon {
+            color: #DC2626;
         }
 
         .stat-number {
@@ -398,9 +406,10 @@
             {% include 'components/messages_popup.html' %}
 
             <div class="stats-row">
+                <!-- Stat 1 -->
                 <div class="stat-card blue">
                     <div class="stat-top">
-                        <span class="stat-title">Siap Diproses</span>
+                        <span class="stat-title">Total Permintaan</span>
                         <svg class="stat-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
@@ -409,34 +418,59 @@
                             <line x1="3" y1="10" x2="21" y2="10"></line>
                         </svg>
                     </div>
-                    <div class="stat-number">{{ total_siap_proses }}</div>
-                    <div class="stat-subtitle">Persetujuan HC selesai</div>
+                    <div class="stat-number">{{ total_pengajuan }}</div>
+                    <div class="stat-subtitle trend-up">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            style="display:inline; margin-right:2px;">
+                            <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline>
+                            <polyline points="16 7 22 7 22 13"></polyline>
+                        </svg>
+                        +12% dari bulan lalu
+                    </div>
                 </div>
 
-                <div class="stat-card orange">
+                <!-- Stat 2 -->
+                <div class="stat-card light-blue">
                     <div class="stat-top">
-                        <span class="stat-title">Sedang Dikonfigurasi</span>
+                        <span class="stat-title">Menunggu</span>
                         <svg class="stat-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="12" cy="12" r="10"></circle>
                             <polyline points="12 6 12 12 16 14"></polyline>
                         </svg>
                     </div>
-                    <div class="stat-number">{{ total_dikonfigurasi }}</div>
-                    <div class="stat-subtitle">Instalasi OS & Software</div>
+                    <div class="stat-number">{{ total_menunggu }}</div>
+                    <div class="stat-subtitle">Membutuhkan persetujuan</div>
                 </div>
 
+                <!-- Stat 3 -->
                 <div class="stat-card green">
                     <div class="stat-top">
-                        <span class="stat-title">Selesai Dialokasikan</span>
+                        <span class="stat-title">Disetujui</span>
                         <svg class="stat-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
                             <polyline points="22 4 12 14.01 9 11.01"></polyline>
                         </svg>
                     </div>
-                    <div class="stat-number">{{ total_selesai }}</div>
-                    <div class="stat-subtitle">Sudah serah terima</div>
+                    <div class="stat-number">{{ total_disetujui }}</div>
+                    <div class="stat-subtitle" style="color: #16A34A;">Bulan ini</div>
+                </div>
+
+                <!-- Stat 4 -->
+                <div class="stat-card red">
+                    <div class="stat-top">
+                        <span class="stat-title">Ditolak</span>
+                        <svg class="stat-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="15" y1="9" x2="9" y2="15"></line>
+                            <line x1="9" y1="9" x2="15" y2="15"></line>
+                        </svg>
+                    </div>
+                    <div class="stat-number">{{ total_ditolak }}</div>
+                    <div class="stat-subtitle" style="color: #DC2626;">Review diperlukan</div>
                 </div>
             </div>
 
@@ -455,6 +489,12 @@
                         <span style="background: {% if active_tab == 'sedang_berlangsung' %}#dbeafe{% else %}#e2e8f0{% endif %}; color: {% if active_tab == 'sedang_berlangsung' %}#0b57c6{% else %}#475569{% endif %}; padding: 2px 8px; border-radius: 9999px; font-size: 11px; font-weight: bold;">{{ total_sedang_berlangsung }}</span>
                     </a>
                     <a href="?tab=riwayat_selesai{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}"
+                        style="padding: 12px 16px; font-size: 14px; font-weight: 600; text-decoration: none; color: {% if active_tab == 'riwayat_selesai' %}#0b57c6{% else %}#64748b{% endif %}; border-bottom: 3px solid {% if active_tab == 'riwayat_selesai' %}#0b57c6{% else %}transparent{% endif %}; transition: all 0.2s; display: flex; align-items: center; gap: 8px;">
+                        <i class="fa-solid fa-circle-check"></i> Riwayat Selesai
+                        <span style="background: {% if active_tab == 'riwayat_selesai' %}#dbeafe{% else %}#e2e8f0{% endif %}; color: {% if active_tab == 'riwayat_selesai' %}#0b57c6{% else %}#475569{% endif %}; padding: 2px 8px; border-radius: 9999px; font-size: 11px; font-weight: bold;">{{ total_riwayat_selesai }}</span>
+                    </a>
+                </div>
+
                 <div class="table-header" style="display:flex; flex-direction:column; gap:16px; align-items:stretch; padding: 24px 24px 16px;">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         <h2 style="margin:0;">Daftar Unit Perlu Disiapkan</h2>
@@ -487,8 +527,8 @@
                                 <th>SPESIFIKASI DIBUTUHKAN</th>
                                 <th>JUMLAH/PROYEK</th>
                                 <th>TANGGAL PENGAJUAN</th>
-                                <th>STATUS IT</th>
-                                <th style="width: 100px; text-align: center;">AKSI</th>
+                                <th style="padding: 16px 24px; text-align: left; font-weight: 600; color: #475569;">STATUS</th>
+                                <th style="padding: 16px 24px; text-align: left; font-weight: 600; color: #475569;">AKSI</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -501,46 +541,50 @@
                                         <div class="avatar-initials blue">{{ pengajuan.user_nama|slice:":2"|upper }}</div>
                                         <div class="applicant-info">
                                             <span class="applicant-name">{{ pengajuan.user_nama }}</span>
+                                            <span class="applicant-email">{{ pengajuan.perusahaan|default:"-" }}</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td style="color: #475569;">{{ pengajuan.kebutuhan_requirement|default:pengajuan.kebutuhan_role|default:"-" }}</td>
+                                <td style="color: #475569;">{{ pengajuan.proyek_nama|default:"1 Unit" }}</td>
+                                <td>
+                                    <div class="date-col">
+                                        {% if pengajuan.tanggal_pengajuan %}
+                                        <span>{{ pengajuan.tanggal_pengajuan|date:"d M" }}</span>
+                                        <span>{{ pengajuan.tanggal_pengajuan|date:"Y" }}</span>
+                                        {% else %}
                                         <span>-</span>
                                         {% endif %}
                                     </div>
                                 </td>
                                 <td>
-                                    {% if pengajuan.status_it == 'ready' %}
-                                    <span class="status-badge menunggu"
-                                        style="background-color: #FFF7ED; color: #C2410C; border: 1px solid #FDBA74;">Siap
-                                        Diambil</span>
-                                    {% elif pengajuan.status_it == 'configuring' %}
-                                    <span class="status-badge menunggu"
-                                        style="background-color: #EFF6FF; color: #1D4ED8; border: 1px solid #BFDBFE;">Konfigurasi</span>
-                                    {% elif pengajuan.status_it == 'dipinjam' %}
+                                    {% if pengajuan.status_display == 'dipinjam' %}
                                     <span class="status-badge disetujui"
                                         style="background-color: #DBEAFE; color: #1E40AF; border: 1px solid #BFDBFE;">Dipinjam</span>
-                                    {% elif pengajuan.status_it == 'dikembalikan' %}
+                                    {% elif pengajuan.status_display == 'dikembalikan' %}
                                     <span class="status-badge menunggu"
                                         style="background-color: #FEF3C7; color: #B45309; border: 1px solid #FDE68A;">Dikembalikan</span>
-                                    {% elif pengajuan.status_it == 'selesai' %}
+                                    {% elif pengajuan.status_display == 'selesai' %}
                                     <span class="status-badge disetujui"
                                         style="background-color: #D1FAE5; color: #065F46; border: 1px solid #A7F3D0;">Selesai</span>
-                                    {% elif pengajuan.status_it == 'ditolak' %}
-                                    <span class="status-badge ditolak"
-                                        style="background-color: #FEF2F2; color: #B91C1C; border: 1px solid #FCA5A5;">Ditolak</span>
-                                    {% else %}
+                                    {% elif pengajuan.status_display == 'ready' or pengajuan.status_display == 'belum diambil' %}
                                     <span class="status-badge menunggu"
-                                        style="background-color: #F1F5F9; color: #475569; border: 1px solid #CBD5E1;">Menunggu
-                                        Antrean</span>
+                                        style="background-color: #FFF7ED; color: #C2410C; border: 1px solid #FDBA74;">Belum Diambil</span>
+                                    {% elif pengajuan.status_display == 'ditolak' or pengajuan.status|lower == 'ditolak' or pengajuan.status|lower == 'rejected' %}
+                                    <span class="status-badge ditolak">Ditolak</span>
+                                    {% else %}
+                                    <span class="status-badge menunggu">Menunggu</span>
                                     {% endif %}
                                 </td>
                                 <td align="center">
                                     <a href="{% url 'detailpengajuan_it' %}?id={{ pengajuan.id_pengajuan }}"
-                                        class="btn-detail"
-                                        style="text-decoration: none; padding: 6px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px; color: #475569; font-weight: 600; display: inline-block;">Detail</a>
+                                        class="btn-detail">Detail</a>
                                 </td>
                             </tr>
                             {% endfor %}
                             {% else %}
                             <tr>
-                                <td colspan="6" style="text-align: center; padding: 32px; color: #64748B;">
+                                <td colspan="7" style="text-align: center; padding: 32px; color: #64748B;">
                                     Belum ada antrean pengerjaan laptop untuk IT.
                                 </td>
                             </tr>
@@ -549,7 +593,7 @@
                     </table>
 
                     {% if list_pengajuan %}
-                    <div class="pagination-container"
+                    <div class="pagination-container-new"
                         style="display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-top: 1px solid #f1f5f9;">
                         <span class="pagination-text" style="font-size: 14px; color: #64748b;">Menampilkan {{
                             list_pengajuan.start_index }} - {{ list_pengajuan.end_index }} dari {{
@@ -558,7 +602,7 @@
                             <div class="per-page-selector" style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: #64748b; margin-right: 12px;">
                                 <span>Tampilkan:</span>
                                 <select
-                                    onchange="window.location.href = '?page=1&per_page=' + this.value + '{% if search_query %}&q={{ search_query|escapejs }}{% endif %}{% if status_filter %}&status={{ status_filter|escapejs }}{% endif %}';"
+                                    onchange="window.location.href = '?page=1&per_page=' + this.value + '{% if search_query %}&q={{ search_query|escapejs }}{% endif %}{% if status_filter %}&status={{ status_filter|escapejs }}{% endif %}{% if active_tab %}&tab={{ active_tab|escapejs }}{% endif %}';"
                                     style="padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; color: #334155; background-color: #ffffff; cursor: pointer;">
                                     <option value="10" {% if per_page == 10 or per_page == '10' %}selected{% endif %}>10</option>
                                     <option value="15" {% if per_page == 15 or per_page == '15' %}selected{% endif %}>15</option>
@@ -567,7 +611,7 @@
                             </div>
 
                             {% if list_pengajuan.has_previous %}
-                            <a href="?page={{ list_pengajuan.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if per_page %}&per_page={{ per_page }}{% endif %}"
+                            <a href="?page={{ list_pengajuan.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if per_page %}&per_page={{ per_page }}{% endif %}{% if active_tab %}&tab={{ active_tab }}{% endif %}"
                                 class="page-btn"
                                 style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">
                                 <i class="fa-solid fa-chevron-left"></i>
@@ -578,12 +622,12 @@
                             {% if list_pengajuan.number == num %}
                             <span class="page-btn active" style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; background: #0b57c6; color: white; font-weight: bold; font-size: 12px;">{{ num }}</span>
                             {% elif num > list_pengajuan.number|add:'-3' and num < list_pengajuan.number|add:'3' %}
-                            <a href="?page={{ num }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if per_page %}&per_page={{ per_page }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">{{ num }}</a>
+                            <a href="?page={{ num }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if per_page %}&per_page={{ per_page }}{% endif %}{% if active_tab %}&tab={{ active_tab }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">{{ num }}</a>
                             {% endif %}
                             {% endfor %}
 
                                 {% if list_pengajuan.has_next %}
-                                <a href="?page={{ list_pengajuan.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if per_page %}&per_page={{ per_page }}{% endif %}"
+                                <a href="?page={{ list_pengajuan.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if per_page %}&per_page={{ per_page }}{% endif %}{% if active_tab %}&tab={{ active_tab }}{% endif %}"
                                     class="page-btn"
                                     style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">
                                     <i class="fa-solid fa-chevron-right"></i>
@@ -617,13 +661,6 @@
                     }, 500);
                 });
 
-                // Maintain focus and cursor position at the end of input after reload
-                if (searchInput.value.length > 0) {
-                    const val = searchInput.value;
-                    searchInput.value = '';
-                    searchInput.focus();
-                    searchInput.value = val;
-                }
             }
         });
     </script>
