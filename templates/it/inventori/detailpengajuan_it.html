@@ -476,48 +476,12 @@
                         <i class="fa-solid fa-circle-check"></i> Isi Detail Laptop Pengajuan
                     </button>
                 </a>
-                <button class="btn-action btn-reject" type="button" onclick="showRejectModal()">
-                    <i class="fa-solid fa-circle-xmark"></i> Tolak Pengajuan
-                </button>
             </div>
             {% endif %}
 
         </div>
     </div>
 
-    <!-- Modal Rejection Box -->
-    <div id="rejectModal" class="modal-overlay">
-        <div class="modal-box">
-            <div class="modal-icon-container danger">
-                <div class="modal-icon-inner danger">!</div>
-            </div>
-            <h3 class="modal-title danger">Konfirmasi Tolak Pengajuan</h3>
-
-            <form method="POST" action="{% url 'detailpengajuan_it' %}?id={{ pengajuan.id_pengajuan }}" style="width: 100%;">
-                {% csrf_token %}
-                <input type="hidden" name="action" value="ditolak">
-                <div class="modal-reason-group">
-                    <label>Alasan Penolakan</label>
-                    <textarea name="alasan_penolakan" class="modal-textarea" required
-                        placeholder="Urgensi tidak sesuai dengan permintaan"></textarea>
-                </div>
-                <div class="modal-buttons">
-                    <button type="submit" class="modal-btn confirm">Konfirmasi</button>
-                    <button type="button" class="modal-btn cancel" onclick="closeRejectModal()">Batal</button>
-                </div>
-            </form>
-        </div>
     </div>
-
-    <script>
-        function showRejectModal() {
-            document.getElementById("rejectModal").classList.add("active");
-        }
-
-        function closeRejectModal() {
-            document.getElementById("rejectModal").classList.remove("active");
-        }
-    </script>
 </body>
-
 </html>

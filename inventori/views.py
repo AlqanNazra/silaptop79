@@ -137,15 +137,28 @@ def pengajuan_page_view(request):
         belum_disetujui_list = []
         sedang_berlangsung_list = []
         riwayat_selesai_list = []
+        
+        total_menunggu = 0
+        total_disetujui = 0
+        total_ditolak = 0
 
         for p in semua_pengajuan:
             p.user_nama = users_dict.get(p.id_user, f"User {p.id_user}")
             
             p_loans = peminjaman_map.get(p.id_pengajuan, [])
             is_approved = p.status and p.status.lower() in ['disetujui', 'approved']
+            is_rejected = p.status and p.status.lower() in ['ditolak', 'rejected']
+            is_pending = not is_approved and not is_rejected
+            
+            if is_pending:
+                total_menunggu += 1
+            if is_approved:
+                total_disetujui += 1
+            if is_rejected:
+                total_ditolak += 1
             
             # Jika ditolak, langsung hilang (tidak dimasukkan ke list manapun)
-            if p.status and p.status.lower() in ['ditolak', 'rejected']:
+            if is_rejected:
                 continue
 
             if not is_approved:
@@ -223,13 +236,17 @@ def pengajuan_page_view(request):
 
         context = {
             'list_pengajuan': page_obj,
-            'total_pengajuan': total,
+            'total_pengajuan': len(semua_pengajuan),
+            'total_menunggu': total_menunggu,
+            'total_disetujui': total_disetujui,
+            'total_ditolak': total_ditolak,
             'total_belum_disetujui': total_belum_disetujui,
             'total_sedang_berlangsung': total_sedang_berlangsung,
             'total_riwayat_selesai': total_riwayat_selesai,
             'search_query': search_query,
             'status_filter': status_filter,
             'per_page': per_page,
+            'active_tab': active_tab,
         }
     except Exception as e:
         messages.error(request, f'Gagal memuat data pengajuan: {str(e)}')

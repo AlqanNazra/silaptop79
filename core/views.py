@@ -289,14 +289,27 @@ def pengajuanlaptop_it_view(request):
         belum_disetujui_list = []
         sedang_berlangsung_list = []
         riwayat_selesai_list = []
+        
+        total_menunggu = 0
+        total_disetujui = 0
+        total_ditolak = 0
 
         for p in semua_pengajuan:
             p.user_nama = users_dict.get(p.id_user, f"User {p.id_user}")
             p_loans = peminjaman_map.get(p.id_pengajuan, [])
             is_approved = p.status and p.status.lower() in ['disetujui', 'approved']
+            is_rejected = p.status and p.status.lower() in ['ditolak', 'rejected']
+            is_pending = not is_approved and not is_rejected
+            
+            if is_pending:
+                total_menunggu += 1
+            if is_approved:
+                total_disetujui += 1
+            if is_rejected:
+                total_ditolak += 1
             
             # Jika ditolak, langsung hilang (tidak dimasukkan ke list manapun)
-            if p.status and p.status.lower() in ['ditolak', 'rejected']:
+            if is_rejected:
                 continue
 
             # Calculate if urgent (due date <= 7 days)
@@ -308,33 +321,33 @@ def pengajuanlaptop_it_view(request):
 
             if not is_approved:
                 belum_disetujui_list.append(p)
-                p.status_it = 'configuring'
+                p.status_display = 'menunggu'
                 total_dikonfigurasi += 1
             else:
                 has_ready = (not p_loans) or any(l.status.lower() == 'ready' for l in p_loans)
                 if has_ready:
-                    # Jika belum diambil oleh talent, hold dulu di belum_disetujui_list dengan status 'ready'
+                    # Jika belum diambil oleh talent, hold dulu di belum_disetujui_list dengan status 'belum diambil'
                     belum_disetujui_list.append(p)
-                    p.status_it = 'ready'
+                    p.status_display = 'belum diambil'
                     total_siap_proses += 1
                 else:
                     has_completed = any(l.status.lower() == 'selesai' for l in p_loans)
                     if has_completed:
                         riwayat_selesai_list.append(p)
-                        p.status_it = 'selesai'
+                        p.status_display = 'selesai'
                         total_selesai += 1
                     else:
                         sedang_berlangsung_list.append(p)
                         has_returned = any(l.status.lower() == 'dikembalikan' for l in p_loans)
                         if has_returned:
-                            p.status_it = 'dikembalikan'
+                            p.status_display = 'dikembalikan'
                         else:
-                            p.status_it = 'dipinjam'
+                            p.status_display = 'dipinjam'
         
         total_belum_disetujui = len(belum_disetujui_list)
         total_sedang_berlangsung = len(sedang_berlangsung_list)
         total_riwayat_selesai = len(riwayat_selesai_list)
-        total_pengajuan = total_belum_disetujui + total_sedang_berlangsung + total_riwayat_selesai
+        total_pengajuan = len(semua_pengajuan)
 
         # Select target list based on active tab
         if active_tab == 'sedang_berlangsung':
@@ -386,6 +399,9 @@ def pengajuanlaptop_it_view(request):
         context = {
             'list_pengajuan': page_obj,
             'total_pengajuan': total_pengajuan,
+            'total_menunggu': total_menunggu,
+            'total_disetujui': total_disetujui,
+            'total_ditolak': total_ditolak,
             'total_belum_disetujui': total_belum_disetujui,
             'total_sedang_berlangsung': total_sedang_berlangsung,
             'total_riwayat_selesai': total_riwayat_selesai,
@@ -444,21 +460,10 @@ def detailpengajuan_it_view(request):
         pm_obj = Peminjaman.objects.filter(id_pengajuan=id_pengajuan).select_related('id_laptop_inventori').first()
         pengajuan.laptop_dipakai = pm_obj.id_laptop_inventori if pm_obj else None
 
+        # IT does not have approve or reject actions.
         if request.method == 'POST':
-            action = request.POST.get('action')
-            if action in ['disetujui', 'ditolak']:
-                id_user = request.user.id_user if hasattr(request.user, 'id_user') else None
-                
-                db_status = 'approved' if action == 'disetujui' else 'rejected'
-                
-                dto = PengajuanDTO(
-                    id_pengajuan=id_pengajuan,
-                    status=db_status,
-                    approved_by=id_user
-                )
-                service.service_approve_pengajuan(dto)
-                messages.success(request, f'Pengajuan berhasil di-{action}.')
-                return redirect('pengajuanlaptop_it')
+            # Future actions that IT might need could be placed here.
+            pass
 
         context = {
             'pengajuan': pengajuan,
@@ -3775,6 +3780,11 @@ def _generate_id_user():
 def manajemenuser_hc_view(request):
     """Halaman list semua pengguna dengan fitur search & filter."""
     from inventori.models import User
+    from django.db.models import Q
+    from django.core.paginator import Paginator
+
+    search_query = request.GET.get('q', '').strip()
+    role_filter  = request.GET.get('role', '').strip()
 
     list_user = User.objects.all().order_by('id_user')
     total_user = list_user.count()
@@ -3782,12 +3792,36 @@ def manajemenuser_hc_view(request):
     total_it = list_user.filter(role='IT').count()
     total_talent = list_user.filter(role='Talent').count()
 
+    if search_query:
+        list_user = list_user.filter(
+            Q(nama__icontains=search_query) |
+            Q(username__icontains=search_query) |
+            Q(email__icontains=search_query) |
+            Q(id_user__icontains=search_query)
+        )
+    if role_filter:
+        list_user = list_user.filter(role__iexact=role_filter)
+
+    try:
+        per_page = int(request.GET.get('per_page', 10))
+        if per_page not in [10, 15, 25]:
+            per_page = 10
+    except ValueError:
+        per_page = 10
+
+    paginator = Paginator(list_user, per_page)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
     context = {
-        'list_user': list_user,
+        'list_user': page_obj,
         'total_user': total_user,
         'total_hc': total_hc,
         'total_it': total_it,
         'total_talent': total_talent,
+        'search_query': search_query,
+        'role_filter': role_filter,
+        'per_page': per_page,
     }
     return render(request, 'hc/user/manajemenuser_hc.html', context)
 

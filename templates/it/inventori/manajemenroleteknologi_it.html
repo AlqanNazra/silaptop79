@@ -833,7 +833,7 @@
 
                     <!-- Pagination -->
                     {% if role_list.paginator.count > 0 %}
-                    <div class="pagination-container" style="display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-top: 1px solid #f1f5f9;">
+                    <div class="pagination-container-new" style="display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-top: 1px solid #f1f5f9;">
                         <span class="pagination-text" style="font-size: 13px; color: #64748b;">Menampilkan {{ role_list.start_index }} - {{ role_list.end_index }} dari {{ role_list.paginator.count }} role</span>
                         <div class="pagination-controls" style="display: flex; gap: 6px; align-items: center;">
                             <div class="per-page-selector" style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: #64748b; margin-right: 12px;">
@@ -963,7 +963,7 @@
 
                     <!-- Pagination -->
                     {% if teknologi_list.paginator.count > 0 %}
-                    <div class="pagination-container" style="display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-top: 1px solid #f1f5f9;">
+                    <div class="pagination-container-new" style="display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-top: 1px solid #f1f5f9;">
                         <span class="pagination-text" style="font-size: 13px; color: #64748b;">Menampilkan {{ teknologi_list.start_index }} - {{ teknologi_list.end_index }} dari {{ teknologi_list.paginator.count }} teknologi</span>
                         <div class="pagination-controls" style="display: flex; gap: 6px; align-items: center;">
                             <div class="per-page-selector" style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: #64748b; margin-right: 12px;">
@@ -1186,6 +1186,36 @@
     </div>
 </div>
 
+    <!-- Modal Hapus Role -->
+    <div class="modal-overlay" id="deleteRoleModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center;">
+        <div class="modal-box" style="background: white; border-radius: 12px; width: 100%; max-width: 400px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.1); display: flex; flex-direction: column; align-items: center; padding: 32px 24px; position: relative;">
+            <div style="width: 56px; height: 56px; border-radius: 50%; background: #fee2e2; color: #dc2626; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 16px;">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h3 style="margin: 0 0 8px 0; font-size: 18px; font-weight: 700; color: #0f172a; text-align: center;">Hapus Role?</h3>
+            <p style="margin: 0 0 24px 0; font-size: 14px; color: #475569; text-align: center; line-height: 1.5;">Apakah Anda yakin ingin menghapus role <span id="deleteRoleName" style="font-weight: 600; color: #0f172a;"></span>? Data yang telah dihapus tidak dapat dikembalikan.</p>
+            <div style="display: flex; gap: 12px; width: 100%;">
+                <button type="button" onclick="closeDeleteRoleModal()" style="flex: 1; padding: 10px; background: white; border: 1px solid #cbd5e1; border-radius: 8px; color: #475569; font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.2s;">Batal</button>
+                <a id="confirmDeleteRoleBtn" href="#" style="flex: 1; padding: 10px; background: #dc2626; border: 1px solid #dc2626; border-radius: 8px; color: white; font-weight: 600; font-size: 14px; text-decoration: none; display: flex; align-items: center; justify-content: center; transition: all 0.2s;">Hapus</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Hapus Teknologi -->
+    <div class="modal-overlay" id="deleteTeknologiModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center;">
+        <div class="modal-box" style="background: white; border-radius: 12px; width: 100%; max-width: 400px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.1); display: flex; flex-direction: column; align-items: center; padding: 32px 24px; position: relative;">
+            <div style="width: 56px; height: 56px; border-radius: 50%; background: #fee2e2; color: #dc2626; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 16px;">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h3 style="margin: 0 0 8px 0; font-size: 18px; font-weight: 700; color: #0f172a; text-align: center;">Hapus Teknologi?</h3>
+            <p style="margin: 0 0 24px 0; font-size: 14px; color: #475569; text-align: center; line-height: 1.5;">Apakah Anda yakin ingin menghapus teknologi <span id="deleteTeknologiName" style="font-weight: 600; color: #0f172a;"></span>? Data yang telah dihapus tidak dapat dikembalikan.</p>
+            <div style="display: flex; gap: 12px; width: 100%;">
+                <button type="button" onclick="closeDeleteTeknologiModal()" style="flex: 1; padding: 10px; background: white; border: 1px solid #cbd5e1; border-radius: 8px; color: #475569; font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.2s;">Batal</button>
+                <a id="confirmDeleteTeknologiBtn" href="#" style="flex: 1; padding: 10px; background: #dc2626; border: 1px solid #dc2626; border-radius: 8px; color: white; font-weight: 600; font-size: 14px; text-decoration: none; display: flex; align-items: center; justify-content: center; transition: all 0.2s;">Hapus</a>
+            </div>
+        </div>
+    </div>
+
 <script>
     document
         .getElementById("processorSelect")
@@ -1281,16 +1311,36 @@
 
     // Deletion confirmation
     function openDeleteRole(id, nama) {
-        if (confirm('Apakah Anda yakin ingin menghapus role "' + nama + '"?')) {
-            window.location = '/it/hapus-role/' + id + '/';
-        }
+        document.getElementById('deleteRoleName').innerText = '"' + nama + '"';
+        document.getElementById('confirmDeleteRoleBtn').href = '/it/hapus-role/' + id + '/';
+        document.getElementById('deleteRoleModal').style.display = 'flex';
+    }
+
+    function closeDeleteRoleModal() {
+        document.getElementById('deleteRoleModal').style.display = 'none';
     }
 
     function openDeleteTeknologi(id, nama) {
-        if (confirm('Apakah Anda yakin ingin menghapus teknologi "' + nama + '"?')) {
-            window.location = '/it/hapus-teknologi/' + id + '/';
-        }
+        document.getElementById('deleteTeknologiName').innerText = '"' + nama + '"';
+        document.getElementById('confirmDeleteTeknologiBtn').href = '/it/hapus-teknologi/' + id + '/';
+        document.getElementById('deleteTeknologiModal').style.display = 'flex';
     }
+
+    function closeDeleteTeknologiModal() {
+        document.getElementById('deleteTeknologiModal').style.display = 'none';
+    }
+
+    // Close modals when clicking outside
+    document.addEventListener('click', function(e) {
+        const roleModal = document.getElementById('deleteRoleModal');
+        const tekModal = document.getElementById('deleteTeknologiModal');
+        if (e.target === roleModal) {
+            closeDeleteRoleModal();
+        }
+        if (e.target === tekModal) {
+            closeDeleteTeknologiModal();
+        }
+    });
 
 
 function openEditRoleModal(roleId){
