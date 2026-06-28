@@ -198,6 +198,9 @@ def manajementalent_hc_view(request):
 def pengajuanlaptop_it_view(request):
     search_query = request.GET.get('q', '').strip()
     status_filter = request.GET.get('status', '').strip()
+    start_date_filter = request.GET.get('start_date', '').strip()
+    end_date_filter = request.GET.get('end_date', '').strip()
+    bulan_filter = request.GET.get('bulan', '').strip()
     active_tab = request.GET.get('tab', 'belum_disetujui').strip().lower()
 
     try:
@@ -328,6 +331,36 @@ def pengajuanlaptop_it_view(request):
                 if getattr(p, 'status', '').lower() in allowed_statuses
             ]
 
+        if start_date_filter:
+            try:
+                sd = datetime.datetime.strptime(start_date_filter, '%Y-%m-%d').date()
+                filtered_pengajuan = [
+                    p for p in filtered_pengajuan
+                    if p.tanggal_pengajuan and (
+                        p.tanggal_pengajuan.date() if isinstance(p.tanggal_pengajuan, datetime.datetime) else p.tanggal_pengajuan
+                    ) >= sd
+                ]
+            except ValueError:
+                pass
+
+        if end_date_filter:
+            try:
+                ed = datetime.datetime.strptime(end_date_filter, '%Y-%m-%d').date()
+                filtered_pengajuan = [
+                    p for p in filtered_pengajuan
+                    if p.tanggal_pengajuan and (
+                        p.tanggal_pengajuan.date() if isinstance(p.tanggal_pengajuan, datetime.datetime) else p.tanggal_pengajuan
+                    ) <= ed
+                ]
+            except ValueError:
+                pass
+
+        if bulan_filter:
+            filtered_pengajuan = [
+                p for p in filtered_pengajuan
+                if p.bulan and str(p.bulan).startswith(bulan_filter)
+            ]
+
         try:
             per_page = int(request.GET.get('per_page', 10))
             if per_page not in [10, 15, 25]:
@@ -355,6 +388,9 @@ def pengajuanlaptop_it_view(request):
             'total_mendesak': total_mendesak,
             'search_query': search_query,
             'status_filter': status_filter,
+            'start_date_filter': start_date_filter,
+            'end_date_filter': end_date_filter,
+            'bulan_filter': bulan_filter,
             'per_page': per_page,
         }
     except Exception as e:
@@ -438,12 +474,18 @@ def tambahlaptop_it_view(request):
                     except ValueError:
                         pass
 
+            raw_kondisi = str(request.POST.get('kondisi', 'baik')).lower()
+            clean_kondisi = 'rusak' if 'rusak' in raw_kondisi else 'baik'
+            clean_status = request.POST.get('status', 'tersedia')
+            if clean_kondisi == 'rusak':
+                clean_status = 'rusak'
+
             dto = LaptopInventoriDTO(
                 nama_laptop=request.POST.get('nama_laptop'),
                 model=request.POST.get('model'),
                 os=request.POST.get('os'),
-                kondisi=request.POST.get('kondisi', 'baik'),
-                status=request.POST.get('status', 'tersedia'),
+                kondisi=clean_kondisi,
+                status=clean_status,
                 lokasi=request.POST.get('lokasi'),
                 id_processor=request.POST.get('id_processor') or None,
                 id_ram=request.POST.get('id_ram') or None,
@@ -497,8 +539,11 @@ def detaillaptop_it_view(request, id_laptop):
                 lokasi = request.POST.get('lokasi')
 
                 if kondisi:
-                    update_service.update_kondisi(id_laptop, kondisi)
-                if status:
+                    kondisi_clean = 'rusak' if 'rusak' in str(kondisi).lower() else 'baik'
+                    update_service.update_kondisi(id_laptop, kondisi_clean)
+                    if kondisi_clean == 'rusak':
+                        update_service.update_status(id_laptop, 'rusak', lokasi)
+                elif status:
                     update_service.update_status(id_laptop, status, lokasi)
 
                 messages.success(request, 'Data laptop berhasil diperbarui.')
@@ -515,12 +560,18 @@ def detaillaptop_it_view(request, id_laptop):
         p.user_nama = p.id_user.nama if p.id_user else '-'
         p.user_role = p.id_user.role if p.id_user else '-'
 
+    peminjam_aktif = Peminjaman.objects.filter(
+        id_laptop_inventori_id=id_laptop,
+        status__in=['dipinjam', 'aktif']
+    ).select_related('id_user').first()
+
     context = {
         'laptop': laptop,
         'processors': processors,
         'rams': rams,
         'storages': storages,
         'riwayat_peminjaman': riwayat_peminjaman,
+        'peminjam_aktif': peminjam_aktif,
     }
     return render(request, 'it/inventori/detaillaptop_it.html', context)
 
@@ -1200,7 +1251,7 @@ def notifikasi_hc_view(request):
     
     # 1. Notifikasi pengajuan menunggu persetujuan
     try:
-        menunggu_list = Pengajuan.objects.filter(status='menunggu').select_related('id_user').order_by('bulan')
+        menunggu_list = Pengajuan.objects.filter(status__in=['menunggu', 'pending']).select_related('id_user').order_by('-tanggal_pengajuan')
         for p in menunggu_list:
             tgl_target = p.bulan if p.bulan else today
             diff_days = (tgl_target - today).days
@@ -1213,7 +1264,7 @@ def notifikasi_hc_view(request):
                 urgency_tag = 'Mendesak'
             else:
                 urgency_class = 'info'
-                urgency_tag = 'Segera Disiapkan'
+                urgency_tag = 'Pengajuan Masuk'
                 
             if diff_days < 0:
                 time_str = f"Lewat {abs(diff_days)} hari"
@@ -1765,8 +1816,12 @@ def editdatalaptop_it_view(request, id_laptop):
                 raise ValueError("Laptop sedang aktif dipinjam dan tidak dapat diubah statusnya.")
 
             if kondisi:
-                update_service.update_kondisi(id_laptop, kondisi)
-            if status:
+                kondisi_clean = 'rusak' if 'rusak' in str(kondisi).lower() else 'baik'
+                update_service.update_kondisi(id_laptop, kondisi_clean)
+                if kondisi_clean == 'rusak':
+                    status = 'rusak'
+                    update_service.update_status(id_laptop, 'rusak', lokasi)
+            if status and kondisi != 'rusak':
                 update_service.update_status(id_laptop, status, lokasi)
 
             # Update spesifikasi
@@ -1779,7 +1834,7 @@ def editdatalaptop_it_view(request, id_laptop):
                     nama_laptop=laptop.nama_laptop,
                     model=laptop.model,
                     os=laptop.os,
-                    kondisi=kondisi or laptop.kondisi,
+                    kondisi='rusak' if kondisi and 'rusak' in str(kondisi).lower() else (laptop.kondisi if not kondisi else 'baik'),
                     status=status or laptop.status,
                     lokasi=lokasi or laptop.lokasi,
                     id_processor=id_processor,
@@ -2099,7 +2154,7 @@ def notifikasi_it_view(request):
     total_pengajuan_menunggu = 0
     
     try:
-        menunggu_list = Pengajuan.objects.filter(status='menunggu').select_related('id_user').order_by('bulan')
+        menunggu_list = Pengajuan.objects.filter(status__in=['menunggu', 'pending']).select_related('id_user').order_by('-tanggal_pengajuan')
         total_pengajuan_menunggu = menunggu_list.count()
         for p in menunggu_list:
             tgl_target = p.bulan if p.bulan else today
@@ -2113,7 +2168,7 @@ def notifikasi_it_view(request):
                 urgency_tag = 'Mendesak'
             else:
                 urgency_class = 'info'
-                urgency_tag = 'Segera Disiapkan'
+                urgency_tag = 'Pengajuan Masuk'
                 
             if diff_days < 0:
                 time_str = f"Lewat {abs(diff_days)} hari"
@@ -2179,13 +2234,26 @@ def notifikasi_it_view(request):
 
 # Procurement management views for IT
 def manajemenpengadaan_it_view(request):
-    search_query = request.GET.get('q', '')
+    search_query = request.GET.get('q', '').strip()
+    processor_filter = request.GET.get('processor', '').strip()
+    ram_filter = request.GET.get('ram', '').strip()
+    storage_filter = request.GET.get('storage', '').strip()
+    min_layar = request.GET.get('min_layar', '').strip()
+    max_layar = request.GET.get('max_layar', '').strip()
+    min_baterai = request.GET.get('min_baterai', '').strip()
+    max_baterai = request.GET.get('max_baterai', '').strip()
+    min_harga = request.GET.get('min_harga', '').strip()
+    max_harga = request.GET.get('max_harga', '').strip()
     
     conn = get_connection()
     try:
         repo = LaptopPengadaanRepository(conn)
         raw_list = repo.ambil_laptop_pengadaan()
         
+        all_processors = sorted(list(set(item.get('nama_processor') for item in raw_list if item.get('nama_processor'))))
+        all_ram = sorted(list(set(int(item.get('ram_kapasitas')) for item in raw_list if item.get('ram_kapasitas'))))
+        all_storage = sorted(list(set(int(item.get('storage_kapasitas')) for item in raw_list if item.get('storage_kapasitas'))))
+
         if search_query:
             raw_list = [
                 item for item in raw_list
@@ -2193,6 +2261,65 @@ def manajemenpengadaan_it_view(request):
                     search_query.lower() in item.get("manufacturer", "").lower() or
                     search_query.lower() in item.get("nama_processor", "").lower())
             ]
+
+        if processor_filter:
+            raw_list = [item for item in raw_list if item.get("nama_processor") == processor_filter]
+
+        if ram_filter:
+            try:
+                rf_int = int(ram_filter)
+                raw_list = [item for item in raw_list if int(item.get("ram_kapasitas", 0) or 0) == rf_int]
+            except ValueError:
+                pass
+
+        if storage_filter:
+            try:
+                sf_int = int(storage_filter)
+                raw_list = [item for item in raw_list if int(item.get("storage_kapasitas", 0) or 0) == sf_int]
+            except ValueError:
+                pass
+
+        if min_layar:
+            try:
+                ml = float(min_layar)
+                raw_list = [item for item in raw_list if float(item.get("ukuran_layar", 0) or 0) >= ml]
+            except ValueError:
+                pass
+
+        if max_layar:
+            try:
+                xl = float(max_layar)
+                raw_list = [item for item in raw_list if float(item.get("ukuran_layar", 0) or 0) <= xl]
+            except ValueError:
+                pass
+
+        if min_baterai:
+            try:
+                mb = float(min_baterai)
+                raw_list = [item for item in raw_list if float(item.get("baterai", 0) or 0) >= mb]
+            except ValueError:
+                pass
+
+        if max_baterai:
+            try:
+                xb = float(max_baterai)
+                raw_list = [item for item in raw_list if float(item.get("baterai", 0) or 0) <= xb]
+            except ValueError:
+                pass
+
+        if min_harga:
+            try:
+                mh = float(min_harga)
+                raw_list = [item for item in raw_list if float(item.get("harga", 0) or 0) >= mh]
+            except ValueError:
+                pass
+
+        if max_harga:
+            try:
+                xh = float(max_harga)
+                raw_list = [item for item in raw_list if float(item.get("harga", 0) or 0) <= xh]
+            except ValueError:
+                pass
         
         try:
             per_page = int(request.GET.get('per_page', 10))
@@ -2209,6 +2336,18 @@ def manajemenpengadaan_it_view(request):
         context = {
             'pengadaan_list': page_obj,
             'search_query': search_query,
+            'processor_filter': processor_filter,
+            'ram_filter': ram_filter,
+            'storage_filter': storage_filter,
+            'min_layar': min_layar,
+            'max_layar': max_layar,
+            'min_baterai': min_baterai,
+            'max_baterai': max_baterai,
+            'min_harga': min_harga,
+            'max_harga': max_harga,
+            'all_processors': all_processors,
+            'all_ram': all_ram,
+            'all_storage': all_storage,
             'total': len(raw_list),
             'per_page': per_page,
         }

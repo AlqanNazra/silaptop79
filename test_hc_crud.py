@@ -86,15 +86,16 @@ def run_test():
     print("\nTesting Detail Laptop UPDATE POST...")
     response = client.post(detail_url, {
         'action': 'update',
-        'kondisi': 'rusak_ringan',
-        'status': 'perbaikan',
-        'lokasi': 'Gudang Bandung'
+        'kondisi': 'rusak',
+        'status': 'tersedia',
+        'lokasi': 'Head Office',
+        'id_processor': proc.id_processor,
+        'id_ram': ram.id_ram,
+        'id_storage': st.id_storage,
     })
-    assert response.status_code in [200, 302], f"Expected redirect or 200, got {response.status_code}"
-    
-    # Verify changes
+    assert response.status_code == 302
     new_laptop.refresh_from_db()
-    assert new_laptop.kondisi == 'rusak_ringan', f"Expected kondisi 'rusak_ringan', got {new_laptop.kondisi}"
+    assert new_laptop.kondisi == 'rusak', f"Expected kondisi 'rusak', got {new_laptop.kondisi}"
     assert new_laptop.status == 'perbaikan', f"Expected status 'perbaikan', got {new_laptop.status}"
     print("Laptop status and kondisi successfully updated in database!")
 

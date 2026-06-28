@@ -104,7 +104,7 @@ def run_tests():
     # 5. Edit Laptop IT
     print("Testing Edit Laptop POST...")
     edit_data = {
-        'kondisi': 'rusak_ringan',
+        'kondisi': 'rusak',
         'status': 'dipinjam',
         'lokasi': 'Branch B',
         'id_processor': proc.id_processor,
@@ -115,7 +115,7 @@ def run_tests():
     assert response.status_code == 302, f"Edit Laptop POST failed: {response.status_code}"
     
     new_laptop.refresh_from_db()
-    assert new_laptop.kondisi == 'rusak_ringan', f"Kondisi not updated: {new_laptop.kondisi}"
+    assert new_laptop.kondisi == 'rusak', f"Kondisi not updated: {new_laptop.kondisi}"
     assert new_laptop.status == 'dipinjam', f"Status not updated: {new_laptop.status}"
     assert new_laptop.lokasi == 'Branch B', f"Lokasi not updated: {new_laptop.lokasi}"
     print("Edit Laptop POST OK.")

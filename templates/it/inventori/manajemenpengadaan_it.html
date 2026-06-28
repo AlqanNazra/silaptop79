@@ -169,6 +169,28 @@
             box-shadow: 0 0 0 3px rgba(11, 87, 198, 0.1);
         }
 
+        .btn-reset-action {
+            padding: 12px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            background: #f1f5f9;
+            color: #475569;
+            border: 1px solid #cbd5e1;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-reset-action:hover {
+            background: #cbd5e1 !important;
+            color: #0f172a !important;
+            border-color: #94a3b8 !important;
+        }
+
         .btn-primary {
             background-color: #0b57c6;
             color: white;
@@ -448,12 +470,27 @@
                 <!-- Top Actions -->
                 <form id="filter-form" method="GET" action="" class="top-actions" style="margin-bottom: 24px; display: flex; gap: 16px; align-items: center; justify-content: space-between; width: 100%;">
                     {% if per_page %}<input type="hidden" name="per_page" value="{{ per_page }}">{% endif %}
+                    {% if processor_filter %}<input type="hidden" name="processor" value="{{ processor_filter }}">{% endif %}
+                    {% if ram_filter %}<input type="hidden" name="ram" value="{{ ram_filter }}">{% endif %}
+                    {% if storage_filter %}<input type="hidden" name="storage" value="{{ storage_filter }}">{% endif %}
+                    {% if min_layar %}<input type="hidden" name="min_layar" value="{{ min_layar }}">{% endif %}
+                    {% if max_layar %}<input type="hidden" name="max_layar" value="{{ max_layar }}">{% endif %}
+                    {% if min_baterai %}<input type="hidden" name="min_baterai" value="{{ min_baterai }}">{% endif %}
+                    {% if max_baterai %}<input type="hidden" name="max_baterai" value="{{ max_baterai }}">{% endif %}
+                    {% if min_harga %}<input type="hidden" name="min_harga" value="{{ min_harga }}">{% endif %}
+                    {% if max_harga %}<input type="hidden" name="max_harga" value="{{ max_harga }}">{% endif %}
                     <div class="search-box" style="flex: 1; max-width: 500px; display: flex; gap: 8px;">
                         <input type="text" id="search-input" name="q" placeholder="Cari Item..." value="{{ search_query }}" style="width: 100%; padding: 12px 16px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: 'Inter', sans-serif; background: #ffffff;">
                     </div>
                     
                     <div style="display: flex; gap: 12px; align-items: center;">
-                        <a href="?" class="btn-secondary" style="padding: 12px 20px; border-radius: 8px; text-decoration: none; background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; font-size: 14px; font-weight: 600; font-family: 'Inter', sans-serif;">Reset</a>
+                        <button type="button" onclick="openFilterModal()" class="btn-filter-action" style="padding: 10px 18px; background: white; color: #0b57c6; border: 1px solid #0b57c6; border-radius: 8px; font-size: 14px; font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s;">
+                            <i class="fa-solid fa-filter"></i> Filter
+                            {% if processor_filter or ram_filter or storage_filter or min_layar or max_layar or min_baterai or max_baterai or min_harga or max_harga %}
+                            <span style="background: #0b57c6; color: white; border-radius: 50%; width: 8px; height: 8px; display: inline-block;"></span>
+                            {% endif %}
+                        </button>
+                        <a href="?" class="btn-reset-action"><i class="fa-solid fa-rotate-left"></i> Reset</a>
                     </div>
                     <a href="{% url 'tambah_pengadaan_it' %}" class="btn-primary" style="background-color: #0b57c6; color: white; padding: 12px 20px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
                         <i class="fa-solid fa-plus"></i> Tambah Pengadaan
@@ -556,7 +593,96 @@
                 }
             }
         });
+
+        function openFilterModal() {
+            document.getElementById("filterModal").style.display = "flex";
+        }
+        function closeFilterModal() {
+            document.getElementById("filterModal").style.display = "none";
+        }
     </script>
+
+    <!-- Modal Pemilihan Filter Pengadaan -->
+    <div id="filterModal" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 9999; justify-content: center; align-items: center;">
+        <div class="modal-box" style="background: white; padding: 28px; border-radius: 16px; max-width: 520px; width: 90%; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); text-align: left;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px;">
+                <h3 style="margin: 0; font-size: 18px; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 10px;">
+                    <i class="fa-solid fa-filter" style="color: #0b57c6;"></i> Filter Data Pengadaan
+                </h3>
+                <button type="button" onclick="closeFilterModal()" style="background: none; border: none; font-size: 20px; color: #64748b; cursor: pointer;">&times;</button>
+            </div>
+            
+            <form method="GET" action="">
+                {% if search_query %}<input type="hidden" name="q" value="{{ search_query }}">{% endif %}
+                {% if per_page %}<input type="hidden" name="per_page" value="{{ per_page }}">{% endif %}
+                
+                <div style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px;">
+                    <div>
+                        <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Processor</label>
+                        <select name="processor" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; color: #334155; background: white;">
+                            <option value="">Semua Processor</option>
+                            {% for p in all_processors %}
+                            <option value="{{ p }}" {% if processor_filter == p %}selected{% endif %}>{{ p }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <div>
+                            <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">RAM</label>
+                            <select name="ram" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; color: #334155; background: white;">
+                                <option value="">Semua RAM</option>
+                                {% for r in all_ram %}
+                                <option value="{{ r }}" {% if ram_filter == r|stringformat:"i" %}selected{% endif %}>{{ r }} GB</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Storage</label>
+                            <select name="storage" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; color: #334155; background: white;">
+                                <option value="">Semua Storage</option>
+                                {% for s in all_storage %}
+                                <option value="{{ s }}" {% if storage_filter == s|stringformat:"i" %}selected{% endif %}>{{ s }} GB</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Range Ukuran Layar (inch)</label>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <input type="number" step="0.1" name="min_layar" placeholder="Min (cth: 13)" value="{{ min_layar|default:'' }}" style="flex: 1; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; color: #334155;">
+                            <span style="font-size: 13px; color: #64748b; font-weight: 600;">s/d</span>
+                            <input type="number" step="0.1" name="max_layar" placeholder="Max (cth: 17)" value="{{ max_layar|default:'' }}" style="flex: 1; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; color: #334155;">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Range Baterai (kWh)</label>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <input type="number" step="1" name="min_baterai" placeholder="Min Baterai" value="{{ min_baterai|default:'' }}" style="flex: 1; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; color: #334155;">
+                            <span style="font-size: 13px; color: #64748b; font-weight: 600;">s/d</span>
+                            <input type="number" step="1" name="max_baterai" placeholder="Max Baterai" value="{{ max_baterai|default:'' }}" style="flex: 1; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; color: #334155;">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Range Harga (Rp)</label>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <input type="number" step="100000" name="min_harga" placeholder="Harga Min" value="{{ min_harga|default:'' }}" style="flex: 1; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; color: #334155;">
+                            <span style="font-size: 13px; color: #64748b; font-weight: 600;">s/d</span>
+                            <input type="number" step="100000" name="max_harga" placeholder="Harga Max" value="{{ max_harga|default:'' }}" style="flex: 1; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; color: #334155;">
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid #f1f5f9; padding-top: 16px;">
+                    <button type="button" onclick="closeFilterModal()" style="padding: 10px 20px; background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer;">Batal</button>
+                    <button type="submit" style="padding: 10px 20px; background: #0b57c6; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer;">Terapkan Filter</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </body>
 
 </html>

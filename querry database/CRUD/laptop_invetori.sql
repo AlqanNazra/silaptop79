@@ -41,6 +41,13 @@ CREATE OR REPLACE FUNCTION tambah_laptop_inventori(
 )
 RETURNS VOID AS $$
 BEGIN
+    IF LOWER(f_kondisi) LIKE '%rusak%' THEN
+        f_status := 'rusak';
+        f_kondisi := 'rusak';
+    ELSE
+        f_kondisi := 'baik';
+    END IF;
+
     INSERT INTO inventori_laptopinventori (
         id_laptop_inventori,
         no_inventori,

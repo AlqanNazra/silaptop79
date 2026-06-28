@@ -2,14 +2,17 @@ import psycopg2
 
 def get_connection():
     try:
-        return psycopg2.connect(
+        conn = psycopg2.connect(
             host="127.0.0.1",
+            port="5433",
             database="TA",
             user="postgres",
-            password="alqan"
+            password="190105"
         )
-        conn.autocommit = False  # pakai transaction
+
+        conn.autocommit = False
         print("✅ CONNECTED TO DB")
+
         return conn
 
     except Exception as e:

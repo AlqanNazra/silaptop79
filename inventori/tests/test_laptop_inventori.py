@@ -12,7 +12,7 @@ class TestLaptopInventori(TransactionTestCase):
         cls.conn = psycopg2.connect(
             dbname = "TA",
             user = "postgres",
-            password = "alqan",
+            password = "190105",
             host = "127.0.0.1"
         )
         return super().setUpClass()

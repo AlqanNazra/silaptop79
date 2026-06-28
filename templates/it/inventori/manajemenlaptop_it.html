@@ -95,6 +95,50 @@
             box-shadow: 0 0 0 3px rgba(11, 87, 198, 0.1);
         }
 
+        .btn-filter-action {
+            padding: 12px 20px;
+            border-radius: 8px;
+            background: #ffffff;
+            color: #0b57c6;
+            border: 1px solid #0b57c6;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+
+        .btn-filter-action:hover {
+            background: #0b57c6 !important;
+            color: #ffffff !important;
+        }
+
+        .btn-reset-action {
+            padding: 12px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            background: #f1f5f9;
+            color: #475569;
+            border: 1px solid #cbd5e1;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-reset-action:hover {
+            background: #cbd5e1 !important;
+            color: #0f172a !important;
+            border-color: #94a3b8 !important;
+        }
+
         .btn-primary {
             background-color: #0b57c6;
             color: white;
@@ -338,12 +382,11 @@
                 </div>
                 
                 <div style="display: flex; gap: 12px; align-items: center;">
-                    <button type="button" onclick="openFilterModal()" class="btn-secondary"
-                        style="padding: 12px 20px; border-radius: 8px; background: #ffffff; color: #0b57c6; border: 1px solid #0b57c6; font-size: 14px; font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;">
+                    <button type="button" onclick="openFilterModal()" class="btn-filter-action">
                         <i class="fa-solid fa-filter"></i> Filter Aset {% if status_filter or ram_filter or storage_filter %}<span style="background:#0b57c6; color:white; border-radius:50%; width:8px; height:8px; display:inline-block;"></span>{% endif %}
                     </button>
                     
-                    <a href="?" class="btn-secondary" style="padding: 12px 20px; border-radius: 8px; text-decoration: none; background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; font-size: 14px; font-weight: 600; font-family: 'Inter', sans-serif;">Reset</a>
+                    <a href="?" class="btn-reset-action"><i class="fa-solid fa-rotate-left"></i> Reset</a>
                 </div>
                 <a href="{% url 'tambahlaptop_it' %}" class="btn-primary"
                     style="text-decoration: none; text-align: center; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border-radius: 8px; padding: 12px 20px; font-weight: 600; font-family: 'Inter', sans-serif; background: #0b57c6; color: white; border: none;">
@@ -524,7 +567,7 @@
                 </div>
 
                 <div style="display: flex; gap: 12px; justify-content: flex-end;">
-                    <a href="?" style="padding: 10px 16px; border: 1px solid #cbd5e1; background: white; color: #475569; border-radius: 8px; font-weight: 600; font-size: 14px; text-decoration: none; text-align: center;">Reset Filter</a>
+                    <a href="?" class="btn-reset-action" style="padding: 10px 16px;">Reset Filter</a>
                     <button type="submit" style="padding: 10px 20px; background: #0b57c6; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer;">Terapkan Filter</button>
                 </div>
             </form>

@@ -67,8 +67,7 @@ class LaptopInventori(models.Model):
         max_length=50,
         choices=[
             ('baik', 'Baik'),
-            ('rusak ringan', 'Rusak Ringan'),
-            ('rusak berat', 'Rusak Berat'),
+            ('rusak', 'Rusak'),
         ]
     )
 
@@ -92,11 +91,12 @@ class LaptopInventori(models.Model):
 
     def save(self, *args, **kwargs):
         if self.kondisi:
-            self.kondisi = str(self.kondisi).replace('_', ' ').strip().lower()
-            if self.kondisi == 'rusak':
-                self.kondisi = 'rusak ringan'
-            if self.kondisi in ['rusak ringan', 'rusak berat']:
+            clean_k = str(self.kondisi).replace('_', ' ').strip().lower()
+            if 'rusak' in clean_k:
+                self.kondisi = 'rusak'
                 self.status = 'rusak'
+            else:
+                self.kondisi = 'baik'
         if self.status:
             self.status = str(self.status).strip().lower()
         super().save(*args, **kwargs)

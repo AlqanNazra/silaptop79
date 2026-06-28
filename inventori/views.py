@@ -109,6 +109,9 @@ def pengajuan_page_view(request):
     """
     search_query = request.GET.get('q', '').strip()
     status_filter = request.GET.get('status', '').strip()
+    start_date_filter = request.GET.get('start_date', '').strip()
+    end_date_filter = request.GET.get('end_date', '').strip()
+    bulan_filter = request.GET.get('bulan', '').strip()
     active_tab = request.GET.get('tab', 'belum_disetujui').strip().lower()
 
     try:
@@ -221,6 +224,37 @@ def pengajuan_page_view(request):
                 if getattr(p, 'status', '').lower() in allowed_statuses
             ]
 
+        import datetime
+        if start_date_filter:
+            try:
+                sd = datetime.datetime.strptime(start_date_filter, '%Y-%m-%d').date()
+                filtered_pengajuan = [
+                    p for p in filtered_pengajuan
+                    if p.tanggal_pengajuan and (
+                        p.tanggal_pengajuan.date() if isinstance(p.tanggal_pengajuan, datetime.datetime) else p.tanggal_pengajuan
+                    ) >= sd
+                ]
+            except ValueError:
+                pass
+
+        if end_date_filter:
+            try:
+                ed = datetime.datetime.strptime(end_date_filter, '%Y-%m-%d').date()
+                filtered_pengajuan = [
+                    p for p in filtered_pengajuan
+                    if p.tanggal_pengajuan and (
+                        p.tanggal_pengajuan.date() if isinstance(p.tanggal_pengajuan, datetime.datetime) else p.tanggal_pengajuan
+                    ) <= ed
+                ]
+            except ValueError:
+                pass
+
+        if bulan_filter:
+            filtered_pengajuan = [
+                p for p in filtered_pengajuan
+                if p.bulan and str(p.bulan).startswith(bulan_filter)
+            ]
+
         # Pagination
         try:
             per_page = int(request.GET.get('per_page', 10))
@@ -245,6 +279,9 @@ def pengajuan_page_view(request):
             'total_riwayat_selesai': total_riwayat_selesai,
             'search_query': search_query,
             'status_filter': status_filter,
+            'start_date_filter': start_date_filter,
+            'end_date_filter': end_date_filter,
+            'bulan_filter': bulan_filter,
             'per_page': per_page,
             'active_tab': active_tab,
         }
@@ -288,12 +325,18 @@ def tambah_laptop_page(request):
                     except ValueError:
                         pass
 
+            raw_kondisi = str(request.POST.get('kondisi', 'baik')).lower()
+            clean_kondisi = 'rusak' if 'rusak' in raw_kondisi else 'baik'
+            clean_status = request.POST.get('status', 'tersedia')
+            if clean_kondisi == 'rusak':
+                clean_status = 'rusak'
+
             dto = LaptopInventoriDTO(
                 nama_laptop=request.POST.get('nama_laptop'),
                 model=request.POST.get('model'),
                 os=request.POST.get('os'),
-                kondisi=request.POST.get('kondisi', 'baik'),
-                status=request.POST.get('status', 'tersedia'),
+                kondisi=clean_kondisi,
+                status=clean_status,
                 lokasi=request.POST.get('lokasi'),
                 id_processor=request.POST.get('id_processor') or None,
                 id_ram=request.POST.get('id_ram') or None,
@@ -376,12 +419,18 @@ def detail_laptop_page(request, id_laptop):
         p.user_nama = p.id_user.nama if p.id_user else '-'
         p.user_role = p.id_user.role if p.id_user else '-'
 
+    peminjam_aktif = Peminjaman.objects.filter(
+        id_laptop_inventori_id=id_laptop,
+        status__in=['dipinjam', 'aktif']
+    ).select_related('id_user').first()
+
     context = {
         'laptop': laptop,
         'processors': processors,
         'rams': rams,
         'storages': storages,
         'riwayat_peminjaman': riwayat_peminjaman,
+        'peminjam_aktif': peminjam_aktif,
     }
     return render(request, 'hc/inventori/detaillaptop_hc.html', context)
 
@@ -696,8 +745,12 @@ def editdatalaptop_hc_view(request, id_laptop):
                 raise ValueError("Laptop sedang aktif dipinjam dan tidak dapat diubah statusnya.")
 
             if kondisi:
-                update_service.update_kondisi(id_laptop, kondisi)
-            if status:
+                kondisi_clean = 'rusak' if 'rusak' in str(kondisi).lower() else 'baik'
+                update_service.update_kondisi(id_laptop, kondisi_clean)
+                if kondisi_clean == 'rusak':
+                    status = 'rusak'
+                    update_service.update_status(id_laptop, 'rusak', lokasi)
+            if status and kondisi != 'rusak':
                 update_service.update_status(id_laptop, status, lokasi)
 
             # Update spesifikasi
@@ -710,7 +763,7 @@ def editdatalaptop_hc_view(request, id_laptop):
                     nama_laptop=laptop.nama_laptop,
                     model=laptop.model,
                     os=laptop.os,
-                    kondisi=kondisi or laptop.kondisi,
+                    kondisi='rusak' if kondisi and 'rusak' in str(kondisi).lower() else (laptop.kondisi if not kondisi else 'baik'),
                     status=status or laptop.status,
                     lokasi=lokasi or laptop.lokasi,
                     id_processor=id_processor,
