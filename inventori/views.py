@@ -325,6 +325,20 @@ def tambah_laptop_page(request):
                     except ValueError:
                         pass
 
+            raw_baterai = request.POST.get('baterai')
+            baterai_val = None
+            if raw_baterai:
+                match = re.search(r'\d+(?:\.\d+)?', str(raw_baterai))
+                if match:
+                    try:
+                        baterai_val = float(match.group(0))
+                    except ValueError:
+                        pass
+
+            if not all([request.POST.get('nama_laptop'), request.POST.get('model'), request.POST.get('os'), request.POST.get('lokasi'), request.POST.get('id_processor'), request.POST.get('id_ram'), request.POST.get('id_storage'), layar_val, baterai_val]):
+                messages.error(request, 'Gagal menambahkan laptop: Semua kolom wajib diisi!')
+                return render(request, 'hc/inventori/tambahlaptop_hc.html', {'processors': processors, 'rams': rams, 'storages': storages})
+
             raw_kondisi = str(request.POST.get('kondisi', 'baik')).lower()
             clean_kondisi = 'rusak' if 'rusak' in raw_kondisi else 'baik'
             clean_status = request.POST.get('status', 'tersedia')
@@ -342,7 +356,7 @@ def tambah_laptop_page(request):
                 id_ram=request.POST.get('id_ram') or None,
                 id_storage=request.POST.get('id_storage') or None,
                 ukuran_layar=layar_val,
-                baterai=request.POST.get('baterai') or None,
+                baterai=baterai_val,
             )
             service = CreateLaptopInventoriService()
             service.execute(dto)

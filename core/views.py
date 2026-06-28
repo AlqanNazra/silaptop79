@@ -474,6 +474,20 @@ def tambahlaptop_it_view(request):
                     except ValueError:
                         pass
 
+            raw_baterai = request.POST.get('baterai')
+            baterai_val = None
+            if raw_baterai:
+                match = re.search(r'\d+(?:\.\d+)?', str(raw_baterai))
+                if match:
+                    try:
+                        baterai_val = float(match.group(0))
+                    except ValueError:
+                        pass
+
+            if not all([request.POST.get('nama_laptop'), request.POST.get('model'), request.POST.get('os'), request.POST.get('lokasi'), request.POST.get('id_processor'), request.POST.get('id_ram'), request.POST.get('id_storage'), layar_val, baterai_val]):
+                messages.error(request, 'Gagal menambahkan laptop: Semua kolom wajib diisi!')
+                return render(request, 'it/inventori/tambahlaptop_it.html', {'processors': processors, 'rams': rams, 'storages': storages})
+
             raw_kondisi = str(request.POST.get('kondisi', 'baik')).lower()
             clean_kondisi = 'rusak' if 'rusak' in raw_kondisi else 'baik'
             clean_status = request.POST.get('status', 'tersedia')
@@ -491,6 +505,7 @@ def tambahlaptop_it_view(request):
                 id_ram=request.POST.get('id_ram') or None,
                 id_storage=request.POST.get('id_storage') or None,
                 ukuran_layar=layar_val,
+                baterai=baterai_val,
             )
             service = CreateLaptopInventoriService()
             service.execute(dto)
@@ -2455,17 +2470,27 @@ def tambahpengadaan_it_view(request):
     if request.method == 'POST':
         conn = get_connection()
         try:
-            repo = LaptopPengadaanRepository(conn)
             nama_laptop = request.POST.get('nama_laptop')
-            harga = int(request.POST.get('harga', 0))
             gpu = request.POST.get('gpu')
-            ukuran_layar = float(request.POST.get('ukuran_layar') or 0.0)
-            baterai = float(request.POST.get('baterai') or 0.0)
-            berat = float(request.POST.get('berat') or 0.0)
-            
-            id_processor = request.POST.get('id_processor') or None
-            id_ram = request.POST.get('id_ram') or None
-            id_storage = request.POST.get('id_storage') or None
+            id_processor = request.POST.get('id_processor')
+            id_ram = request.POST.get('id_ram')
+            id_storage = request.POST.get('id_storage')
+            raw_layar = request.POST.get('ukuran_layar')
+            raw_baterai = request.POST.get('baterai')
+            raw_berat = request.POST.get('berat')
+            raw_harga = request.POST.get('harga')
+
+            if not all([nama_laptop, gpu, id_processor, id_ram, id_storage, raw_layar, raw_baterai, raw_berat, raw_harga]):
+                messages.error(request, 'Gagal menambahkan laptop pengadaan: Semua kolom wajib diisi!')
+                processors = Processor.objects.all()
+                rams = RAM.objects.all()
+                storages = Storage.objects.all()
+                return render(request, 'it/inventori/tambahpengadaan_it.html', {'processors': processors, 'rams': rams, 'storages': storages})
+
+            harga = int(raw_harga or 0)
+            ukuran_layar = float(raw_layar or 0.0)
+            baterai = float(raw_baterai or 0.0)
+            berat = float(raw_berat or 0.0)
             
             from dss.repositories.dto.dto_laptop_pengadaan import LaptopPengadaanDTO
             dto = LaptopPengadaanDTO(
