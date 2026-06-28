@@ -118,7 +118,63 @@ def dashboard_hc_view(request):
     }
     return render(request, 'hc/dashboard/dashboard_hc.html', context)
 def manajemenlaptop_hc_view(request):
-    return render(request, 'hc/inventori/manajemenlaptop_hc.html')
+    conn = get_connection()
+    repo = LaptopInventoriRepository(conn)
+    page = request.GET.get("page", 1)
+    per_page = int(request.GET.get("per_page", 10))
+    search_query = request.GET.get("q", "").strip()
+    status_filter = request.GET.get("status", "")
+    ram_filter = request.GET.get("ram", "")
+    storage_filter = request.GET.get("storage", "")
+    laptops = repo.ambil_laptop()
+    if search_query:
+        keyword = search_query.lower()
+        laptops = [
+            l for l in laptops
+            if keyword in str(l.get("nama_laptop", "")).lower()
+            or keyword in str(l.get("model", "")).lower()
+            or keyword in str(l.get("no_inventori", "")).lower()
+        ]
+    # ==========================
+    # Filter
+    # ==========================
+    if status_filter:
+        laptops = [l for l in laptops
+            if str(l.get("status", "")).lower() == status_filter.lower()
+        ]
+    if ram_filter:
+        laptops = [
+            l for l in laptops
+            if str(l.get("kapasitas_ram")) == ram_filter
+        ]
+    if storage_filter:
+        laptops = [
+            l for l in laptops
+            if str(l.get("kapasitas_storage")) == storage_filter
+        ]
+    total = len(laptops)
+    paginator = Paginator(laptops, per_page)
+    laptops = paginator.get_page(page)
+    print("----------------")
+    print("TOTAL :", total)
+    print("NUM PAGE :", paginator.num_pages)
+    print("CURRENT :", laptops.number)
+    print("HAS NEXT :", laptops.has_next())
+    print("HAS PREVIOUS :", laptops.has_previous())
+    print("----------------")
+    return render(
+        request,
+        "hc/inventori/manajemenlaptop_hc.html",
+        {
+            "laptops": laptops,
+            "total": total,
+            "per_page": per_page,
+            "search_query": search_query,
+            "status_filter": status_filter,
+            "ram_filter": ram_filter,
+            "storage_filter": storage_filter,
+        },
+    )
 
 def manajementalent_hc_view(request):
     import random
