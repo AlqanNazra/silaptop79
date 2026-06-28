@@ -317,6 +317,7 @@ class ServiceSwara:
                 )
             )
             if hasil["status"] != "success":
+                print("ERROR SWARA:", hasil)
                 raise Exception(
                     hasil["message"]
                 )

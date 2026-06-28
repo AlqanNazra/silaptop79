@@ -122,8 +122,8 @@ SELECT
     r.id_role,
     r.nama_role,
     r.min_ram,
-	r.nama_processor,
     r.min_storage,
+    r.nama_processor,
     r.min_processor_score
 FROM inventori_role r
 ORDER BY r.nama_role;

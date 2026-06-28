@@ -168,6 +168,11 @@
             color: #2563EB;
         }
 
+        .tag.pengembalian {
+            background: #F3E8FF;
+            color: #7C3AED;
+        }
+
         .notif-time {
             font-size: 13px;
             color: #94A3B8;
@@ -194,6 +199,7 @@
     {% include 'it/components/sidebar.html' with active_page='pengajuan_laptop' %}
 
     <div class="main-dashboard-content">
+        {% include 'components/messages_popup.html' %}
 
         <a href="{% url 'pengajuanlaptop_it' %}" class="back-link">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -211,9 +217,15 @@
         <div class="notif-list">
             {% if notifications %}
                 {% for notif in notifications %}
-                <div class="notif-card {{ notif.urgency_class }}">
+                <div class="notif-card {{ notif.urgency_class }} {% if notif.tipe == 'pengembalian' %}pengembalian{% endif %}">
                     <div class="notif-icon">
-                        {% if notif.urgency_class == 'urgent' %}
+                        {% if notif.tipe == 'pengembalian' %}
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                            <polyline points="16 17 21 12 16 7"></polyline>
+                            <line x1="21" y1="12" x2="9" y2="12"></line>
+                        </svg>
+                        {% elif notif.urgency_class == 'urgent' %}
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                             stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="12" cy="12" r="10"></circle>
@@ -236,21 +248,45 @@
                         {% endif %}
                     </div>
                     <div class="notif-body">
-                        <div class="notif-title">Pengajuan #{{ notif.id_pengajuan }} — {{ notif.user_nama }}</div>
-                        <div class="notif-desc">
-                            Membutuhkan laptop untuk posisi <strong>{{ notif.kebutuhan_role }}</strong> di {{ notif.perusahaan }}.
-                            Tanggal mulai kerja: <strong>{{ notif.bulan }}</strong>. Waktu tersisa tinggal sedikit dan laptop belum disiapkan.
-                            {% if notif.keterangan %}
-                            <br><small style="color: #64748b; font-style: italic;">"{{ notif.keterangan }}"</small>
-                            {% endif %}
-                        </div>
-                        <div class="notif-meta">
-                            <span class="tag {{ notif.urgency_class }}">{{ notif.urgency_tag }}</span>
-                            {% if notif.tanggal_pengajuan %}
-                            <span>Diajukan pada {{ notif.tanggal_pengajuan }}</span>
-                            {% endif %}
-                            <a href="{% url 'detailpengajuan_it' %}?id={{ notif.id_pengajuan }}" style="margin-left: auto; color: #0284c7; font-weight: 600; text-decoration: none; font-size: 13px;">Tinjau Detail &rarr;</a>
-                        </div>
+                        {% if notif.tipe == 'pengembalian' %}
+                            <div class="notif-title">Pengembalian Laptop — {{ notif.user_nama }}</div>
+                            <div class="notif-desc">
+                                <strong>{{ notif.laptop_nama }}</strong> telah dikembalikan oleh <strong>{{ notif.user_nama }}</strong>
+                                pada <strong>{{ notif.tanggal_kembali }}</strong>. Silakan verifikasi fisik laptop dan terima pengembalian.
+                                {% if notif.keterangan and notif.keterangan != '-' %}
+                                <br><small style="color:#64748b; font-style:italic;">Catatan: "{{ notif.keterangan }}"</small>
+                                {% endif %}
+                            </div>
+                            <div class="notif-meta" style="display:flex; align-items:center; justify-content:space-between; margin-top:10px;">
+                                <div style="display:flex; gap:8px; align-items:center;">
+                                    <span class="tag pengembalian">{{ notif.urgency_tag }}</span>
+                                    <span>Dikembalikan {{ notif.time_str }}</span>
+                                </div>
+                                <form method="POST" action="{% url 'konfirmasi_pengembalian_it' %}" style="margin:0;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="id_peminjaman" value="{{ notif.id_peminjaman }}">
+                                    <button type="submit" style="padding:6px 16px; background:#10b981; color:white; border:none; border-radius:6px; font-weight:600; cursor:pointer; font-size:13px; display:flex; align-items:center; gap:6px; box-shadow:0 2px 4px rgba(16,185,129,0.2);">
+                                        <i class="fa-solid fa-check"></i> Konfirmasi Terima (Accept)
+                                    </button>
+                                </form>
+                            </div>
+                        {% else %}
+                            <div class="notif-title">Pengajuan #{{ notif.id_pengajuan }} — {{ notif.user_nama }}</div>
+                            <div class="notif-desc">
+                                Membutuhkan laptop untuk posisi <strong>{{ notif.kebutuhan_role }}</strong> di {{ notif.perusahaan }}.
+                                Tanggal mulai kerja: <strong>{{ notif.bulan }}</strong>. Waktu tersisa tinggal sedikit dan laptop belum disiapkan.
+                                {% if notif.keterangan %}
+                                <br><small style="color: #64748b; font-style: italic;">"{{ notif.keterangan }}"</small>
+                                {% endif %}
+                            </div>
+                            <div class="notif-meta">
+                                <span class="tag {{ notif.urgency_class }}">{{ notif.urgency_tag }}</span>
+                                {% if notif.tanggal_pengajuan %}
+                                <span>Diajukan pada {{ notif.tanggal_pengajuan }}</span>
+                                {% endif %}
+                                <a href="{% url 'detailpengajuan_it' %}?id={{ notif.id_pengajuan }}" style="margin-left: auto; color: #0284c7; font-weight: 600; text-decoration: none; font-size: 13px;">Tinjau Detail &rarr;</a>
+                            </div>
+                        {% endif %}
                     </div>
                     <div class="notif-time">{{ notif.time_str }}</div>
                 </div>

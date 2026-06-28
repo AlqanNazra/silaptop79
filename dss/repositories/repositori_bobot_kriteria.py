@@ -7,7 +7,7 @@ from .interface.interface_bobot_kriteria import IBobotKriteriaRepositoryImpl
 class BobotKriteriaRepository(IBobotKriteriaRepositoryImpl):
 
     def __init__(self, conn):
-        self.conn = conn
+        self.conn = conn if conn is not None else connection
 
     def _get_dict_cursor(self):
         try:
@@ -148,7 +148,7 @@ class BobotKriteriaRepository(IBobotKriteriaRepositoryImpl):
 
             result = cur.fetchone()
 
-            self.conn.commit()
+            # self.conn.commit()
             # print("DB RESULT",result)
             return result[0]
 
@@ -187,13 +187,19 @@ class BobotKriteriaRepository(IBobotKriteriaRepositoryImpl):
             ORDER BY bk.nilai_bobot DESC
         """
 
-        with self._get_dict_cursor() as cur:
-            cur.execute(
-                query,
-                (id_role_teknologi,)
-            )
+        try:
+            with self._get_dict_cursor() as cur:
+                cur.execute(
+                    query,
+                    (id_role_teknologi,)
+                )
+                rows = cur.fetchall()
+                return self._format_result(cur, rows, fetch_all=True)
 
-            return cur.fetchall()
+        except Exception as e:
+            self.conn.rollback()
+            print("ERROR ambil_bobot_role_teknologi:", str(e))
+            return []
         
     def update_bobot_role_teknologi(
         self,

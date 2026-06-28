@@ -185,6 +185,7 @@
     {% include 'hc/components/sidebar.html' with active_page='pengajuan_laptop' %}
 
     <div class="main-dashboard-content">
+        {% include 'components/messages_popup.html' %}
 
         <a href="{% url 'pengajuanlaptop_hc' %}" class="back-link">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -250,17 +251,23 @@
                             <div class="notif-title">Pengembalian Laptop — {{ notif.user_nama }}</div>
                             <div class="notif-desc">
                                 <strong>{{ notif.laptop_nama }}</strong> telah dikembalikan oleh <strong>{{ notif.user_nama }}</strong>
-                                pada <strong>{{ notif.tanggal_kembali }}</strong>. Mohon konfirmasi penerimaan laptop ini.
+                                pada <strong>{{ notif.tanggal_kembali }}</strong>. Silakan verifikasi fisik laptop dan terima pengembalian.
                                 {% if notif.keterangan and notif.keterangan != '-' %}
                                 <br><small style="color:#64748b; font-style:italic;">Catatan: "{{ notif.keterangan }}"</small>
                                 {% endif %}
                             </div>
-                            <div class="notif-meta">
-                                <span class="tag pengembalian">{{ notif.urgency_tag }}</span>
-                                <span>Dikembalikan {{ notif.time_str }}</span>
-                                <a href="{% url 'riwayatpeminjamanlaptop_hc' %}" style="margin-left:auto; color:#7c3aed; font-weight:600; text-decoration:none; font-size:13px;">
-                                    Lihat Riwayat &rarr;
-                                </a>
+                            <div class="notif-meta" style="display:flex; align-items:center; justify-content:space-between; margin-top:10px;">
+                                <div style="display:flex; gap:8px; align-items:center;">
+                                    <span class="tag pengembalian">{{ notif.urgency_tag }}</span>
+                                    <span>Dikembalikan {{ notif.time_str }}</span>
+                                </div>
+                                <form method="POST" action="{% url 'konfirmasi_pengembalian_hc' %}" style="margin:0;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="id_peminjaman" value="{{ notif.id_peminjaman }}">
+                                    <button type="submit" style="padding:6px 16px; background:#10b981; color:white; border:none; border-radius:6px; font-weight:600; cursor:pointer; font-size:13px; display:flex; align-items:center; gap:6px; box-shadow:0 2px 4px rgba(16,185,129,0.2);">
+                                        <i class="fa-solid fa-check"></i> Konfirmasi Terima (Accept)
+                                    </button>
+                                </form>
                             </div>
                         {% elif notif.tipe == 'jatuh_tempo' %}
                             <div class="notif-title">Jatuh Tempo Peminjaman — {{ notif.user_nama }}</div>

@@ -328,19 +328,20 @@
             <!-- Top Actions -->
             <form id="filter-form" method="GET" action="" class="top-actions"
                 style="margin-bottom: 24px; width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 24px;">
+                {% if per_page %}<input type="hidden" name="per_page" value="{{ per_page }}">{% endif %}
+                {% if status_filter %}<input type="hidden" name="status" value="{{ status_filter }}">{% endif %}
+                {% if ram_filter %}<input type="hidden" name="ram" value="{{ ram_filter }}">{% endif %}
+                {% if storage_filter %}<input type="hidden" name="storage" value="{{ storage_filter }}">{% endif %}
                 <div class="search-box" style="flex: 1; max-width: 500px; display: flex; gap: 8px;">
                     <input type="text" id="search-input" name="q" value="{{ search_query }}" placeholder="Cari serial number, model, atau merk..."
                         style="width: 100%; padding: 12px 16px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: 'Inter', sans-serif; background: #ffffff;">
                 </div>
                 
                 <div style="display: flex; gap: 12px; align-items: center;">
-                    <select id="status-select" name="status"
-                        style="padding: 12px 16px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: 'Inter', sans-serif; font-weight: 500; color: #475569; background: white; cursor: pointer;">
-                        <option value="">Semua Status</option>
-                        <option value="tersedia" {% if status_filter == 'tersedia' %}selected{% endif %}>Tersedia</option>
-                        <option value="dipinjam" {% if status_filter == 'dipinjam' %}selected{% endif %}>Dipinjam</option>
-                        <option value="rusak" {% if status_filter == 'rusak' %}selected{% endif %}>Rusak</option>
-                    </select>
+                    <button type="button" onclick="openFilterModal()" class="btn-secondary"
+                        style="padding: 12px 20px; border-radius: 8px; background: #ffffff; color: #0b57c6; border: 1px solid #0b57c6; font-size: 14px; font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;">
+                        <i class="fa-solid fa-filter"></i> Filter Aset {% if status_filter or ram_filter or storage_filter %}<span style="background:#0b57c6; color:white; border-radius:50%; width:8px; height:8px; display:inline-block;"></span>{% endif %}
+                    </button>
                     
                     <a href="?" class="btn-secondary" style="padding: 12px 20px; border-radius: 8px; text-decoration: none; background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; font-size: 14px; font-weight: 600; font-family: 'Inter', sans-serif;">Reset</a>
                 </div>
@@ -366,7 +367,7 @@
                         {% for laptop in laptops %}
                         <tr>
                             <td class="col-no" style="font-weight: 600; color: #64748b; vertical-align: middle;">
-                                {{ forloop.counter0|add:laptops.start_index }}
+                                {{ laptops.start_index|add:forloop.counter0|stringformat:"02d" }}
                             </td>
                             <td>
                                 <div class="laptop-cell">
@@ -402,14 +403,14 @@
                     <div class="pagination-controls" style="display: flex; gap: 6px; align-items: center;">
                         <div class="per-page-selector" style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: #64748b; margin-right: 12px;">
                             <span>Tampilkan:</span>
-                            <select onchange="window.location.href = '?page=1&per_page=' + this.value + '{% if search_query %}&q={{ search_query|escapejs }}{% endif %}{% if status_filter %}&status={{ status_filter|escapejs }}{% endif %}';" style="padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; color: #334155; background-color: #ffffff; cursor: pointer;">
-                                <option value="10" {% if per_page == 10 %}selected{% endif %}>10</option>
-                                <option value="15" {% if per_page == 15 %}selected{% endif %}>15</option>
-                                <option value="25" {% if per_page == 25 %}selected{% endif %}>25</option>
+                            <select onchange="window.location.href = '?page=1&per_page=' + this.value + '{% if search_query %}&q={{ search_query|escapejs }}{% endif %}{% if status_filter %}&status={{ status_filter|escapejs }}{% endif %}{% if ram_filter %}&ram={{ ram_filter|escapejs }}{% endif %}{% if storage_filter %}&storage={{ storage_filter|escapejs }}{% endif %}';" style="padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; color: #334155; background-color: #ffffff; cursor: pointer;">
+                                <option value="10" {% if per_page == 10 or per_page == '10' %}selected{% endif %}>10</option>
+                                <option value="15" {% if per_page == 15 or per_page == '15' %}selected{% endif %}>15</option>
+                                <option value="25" {% if per_page == 25 or per_page == '25' %}selected{% endif %}>25</option>
                             </select>
                         </div>
                         {% if laptops.has_previous %}
-                            <a href="?page={{ laptops.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if per_page %}&per_page={{ per_page }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">
+                            <a href="?page={{ laptops.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if ram_filter %}&ram={{ ram_filter }}{% endif %}{% if storage_filter %}&storage={{ storage_filter }}{% endif %}{% if per_page %}&per_page={{ per_page }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">
                                 <i class="fa-solid fa-chevron-left"></i>
                             </a>
                         {% endif %}
@@ -418,12 +419,12 @@
                             {% if laptops.number == num %}
                                 <span class="page-btn active" style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; background: #0b57c6; color: white; font-weight: bold; font-size: 12px;">{{ num }}</span>
                             {% elif num > laptops.number|add:'-3' and num < laptops.number|add:'3' %}
-                                <a href="?page={{ num }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if per_page %}&per_page={{ per_page }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">{{ num }}</a>
+                                <a href="?page={{ num }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if ram_filter %}&ram={{ ram_filter }}{% endif %}{% if storage_filter %}&storage={{ storage_filter }}{% endif %}{% if per_page %}&per_page={{ per_page }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">{{ num }}</a>
                             {% endif %}
                         {% endfor %}
 
                         {% if laptops.has_next %}
-                            <a href="?page={{ laptops.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if per_page %}&per_page={{ per_page }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">
+                            <a href="?page={{ laptops.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if ram_filter %}&ram={{ ram_filter }}{% endif %}{% if storage_filter %}&storage={{ storage_filter }}{% endif %}{% if per_page %}&per_page={{ per_page }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">
                                 <i class="fa-solid fa-chevron-right"></i>
                             </a>
                         {% endif %}
@@ -465,7 +466,70 @@
                 }
             }
         });
+
+        function openFilterModal() {
+            document.getElementById("filterModal").style.display = "flex";
+        }
+        function closeFilterModal() {
+            document.getElementById("filterModal").style.display = "none";
+        }
     </script>
+
+    <!-- Modal Pemilihan Filter Laptop -->
+    <div id="filterModal" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 9999; justify-content: center; align-items: center;">
+        <div class="modal-box" style="background: white; padding: 28px; border-radius: 16px; max-width: 480px; width: 90%; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); text-align: left;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px;">
+                <h3 style="margin: 0; font-size: 18px; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 10px;">
+                    <i class="fa-solid fa-filter" style="color: #0b57c6;"></i> Pemilihan Filter Laptop
+                </h3>
+                <button type="button" onclick="closeFilterModal()" style="background: none; border: none; font-size: 20px; color: #64748b; cursor: pointer;">&times;</button>
+            </div>
+            
+            <form method="GET" action="">
+                {% if search_query %}<input type="hidden" name="q" value="{{ search_query }}">{% endif %}
+                {% if per_page %}<input type="hidden" name="per_page" value="{{ per_page }}">{% endif %}
+                
+                <div style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px;">
+                    <div>
+                        <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Filter Berdasarkan Status</label>
+                        <select name="status" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; color: #334155; background: white;">
+                            <option value="">Semua Status</option>
+                            <option value="tersedia" {% if status_filter == 'tersedia' %}selected{% endif %}>Tersedia</option>
+                            <option value="dipinjam" {% if status_filter == 'dipinjam' %}selected{% endif %}>Dipinjam</option>
+                            <option value="rusak" {% if status_filter == 'rusak' %}selected{% endif %}>Rusak</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Filter Berdasarkan RAM</label>
+                        <select name="ram" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; color: #334155; background: white;">
+                            <option value="">Semua RAM</option>
+                            <option value="4" {% if ram_filter == '4' %}selected{% endif %}>4 GB</option>
+                            <option value="8" {% if ram_filter == '8' %}selected{% endif %}>8 GB</option>
+                            <option value="16" {% if ram_filter == '16' %}selected{% endif %}>16 GB</option>
+                            <option value="32" {% if ram_filter == '32' %}selected{% endif %}>32 GB</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Filter Berdasarkan Storage</label>
+                        <select name="storage" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; color: #334155; background: white;">
+                            <option value="">Semua Storage</option>
+                            <option value="128" {% if storage_filter == '128' %}selected{% endif %}>128 GB</option>
+                            <option value="256" {% if storage_filter == '256' %}selected{% endif %}>256 GB</option>
+                            <option value="512" {% if storage_filter == '512' %}selected{% endif %}>512 GB</option>
+                            <option value="1024" {% if storage_filter == '1024' %}selected{% endif %}>1024 GB (1 TB)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                    <a href="?" style="padding: 10px 16px; border: 1px solid #cbd5e1; background: white; color: #475569; border-radius: 8px; font-weight: 600; font-size: 14px; text-decoration: none; text-align: center;">Reset Filter</a>
+                    <button type="submit" style="padding: 10px 20px; background: #0b57c6; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer;">Terapkan Filter</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </body>
 
 </html>

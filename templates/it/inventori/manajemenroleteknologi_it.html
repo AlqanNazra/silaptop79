@@ -836,8 +836,16 @@
                     <div class="pagination-container" style="display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-top: 1px solid #f1f5f9;">
                         <span class="pagination-text" style="font-size: 13px; color: #64748b;">Menampilkan {{ role_list.start_index }} - {{ role_list.end_index }} dari {{ role_list.paginator.count }} role</span>
                         <div class="pagination-controls" style="display: flex; gap: 6px; align-items: center;">
+                            <div class="per-page-selector" style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: #64748b; margin-right: 12px;">
+                                <span>Tampilkan:</span>
+                                <select onchange="window.location.href = '?page_role=1&tab=role&per_page=' + this.value + '{% if search_role %}&q_role={{ search_role|escapejs }}{% endif %}';" style="padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; color: #334155; background-color: #ffffff; cursor: pointer;">
+                                    <option value="10" {% if per_page == 10 or per_page == '10' %}selected{% endif %}>10</option>
+                                    <option value="15" {% if per_page == 15 or per_page == '15' %}selected{% endif %}>15</option>
+                                    <option value="25" {% if per_page == 25 or per_page == '25' %}selected{% endif %}>25</option>
+                                </select>
+                            </div>
                             {% if role_list.has_previous %}
-                                <a href="?page_role={{ role_list.previous_page_number }}&tab=role{% if search_role %}&q_role={{ search_role }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">
+                                <a href="?page_role={{ role_list.previous_page_number }}&tab=role{% if search_role %}&q_role={{ search_role }}{% endif %}{% if per_page %}&per_page={{ per_page }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">
                                     <i class="fa-solid fa-chevron-left"></i>
                                 </a>
                             {% endif %}
@@ -846,12 +854,12 @@
                                 {% if role_list.number == num %}
                                     <span class="page-btn active" style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; background: #0b57c6; color: white; font-weight: bold; font-size: 12px;">{{ num }}</span>
                                 {% elif num > role_list.number|add:'-3' and num < role_list.number|add:'3' %}
-                                    <a href="?page_role={{ num }}&tab=role{% if search_role %}&q_role={{ search_role }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">{{ num }}</a>
+                                    <a href="?page_role={{ num }}&tab=role{% if search_role %}&q_role={{ search_role }}{% endif %}{% if per_page %}&per_page={{ per_page }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">{{ num }}</a>
                                 {% endif %}
                             {% endfor %}
 
                             {% if role_list.has_next %}
-                                <a href="?page_role={{ role_list.next_page_number }}&tab=role{% if search_role %}&q_role={{ search_role }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">
+                                <a href="?page_role={{ role_list.next_page_number }}&tab=role{% if search_role %}&q_role={{ search_role }}{% endif %}{% if per_page %}&per_page={{ per_page }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">
                                     <i class="fa-solid fa-chevron-right"></i>
                                 </a>
                             {% endif %}
@@ -958,8 +966,16 @@
                     <div class="pagination-container" style="display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-top: 1px solid #f1f5f9;">
                         <span class="pagination-text" style="font-size: 13px; color: #64748b;">Menampilkan {{ teknologi_list.start_index }} - {{ teknologi_list.end_index }} dari {{ teknologi_list.paginator.count }} teknologi</span>
                         <div class="pagination-controls" style="display: flex; gap: 6px; align-items: center;">
+                            <div class="per-page-selector" style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: #64748b; margin-right: 12px;">
+                                <span>Tampilkan:</span>
+                                <select onchange="window.location.href = '?page_tech=1&tab=teknologi&per_page=' + this.value + '{% if search_tech %}&q_tech={{ search_tech|escapejs }}{% endif %}';" style="padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; color: #334155; background-color: #ffffff; cursor: pointer;">
+                                    <option value="10" {% if per_page == 10 or per_page == '10' %}selected{% endif %}>10</option>
+                                    <option value="15" {% if per_page == 15 or per_page == '15' %}selected{% endif %}>15</option>
+                                    <option value="25" {% if per_page == 25 or per_page == '25' %}selected{% endif %}>25</option>
+                                </select>
+                            </div>
                             {% if teknologi_list.has_previous %}
-                                <a href="?page_tech={{ teknologi_list.previous_page_number }}&tab=teknologi{% if search_tech %}&q_tech={{ search_tech }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">
+                                <a href="?page_tech={{ teknologi_list.previous_page_number }}&tab=teknologi{% if search_tech %}&q_tech={{ search_tech }}{% endif %}{% if per_page %}&per_page={{ per_page }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">
                                     <i class="fa-solid fa-chevron-left"></i>
                                 </a>
                             {% endif %}
@@ -968,12 +984,12 @@
                                 {% if teknologi_list.number == num %}
                                     <span class="page-btn active" style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; background: #0b57c6; color: white; font-weight: bold; font-size: 12px;">{{ num }}</span>
                                 {% elif num > teknologi_list.number|add:'-3' and num < teknologi_list.number|add:'3' %}
-                                    <a href="?page_tech={{ num }}&tab=teknologi{% if search_tech %}&q_tech={{ search_tech }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">{{ num }}</a>
+                                    <a href="?page_tech={{ num }}&tab=teknologi{% if search_tech %}&q_tech={{ search_tech }}{% endif %}{% if per_page %}&per_page={{ per_page }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">{{ num }}</a>
                                 {% endif %}
                             {% endfor %}
 
                             {% if teknologi_list.has_next %}
-                                <a href="?page_tech={{ teknologi_list.next_page_number }}&tab=teknologi{% if search_tech %}&q_tech={{ search_tech }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">
+                                <a href="?page_tech={{ teknologi_list.next_page_number }}&tab=teknologi{% if search_tech %}&q_tech={{ search_tech }}{% endif %}{% if per_page %}&per_page={{ per_page }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">
                                     <i class="fa-solid fa-chevron-right"></i>
                                 </a>
                             {% endif %}

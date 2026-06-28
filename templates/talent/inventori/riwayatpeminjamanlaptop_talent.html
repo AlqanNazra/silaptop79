@@ -493,6 +493,7 @@
             <!-- Search and Filter Form -->
             <div style="margin-bottom: 24px;">
                 <form method="GET" action="" style="display: flex; gap: 12px; width: 100%;">
+                    {% if per_page %}<input type="hidden" name="per_page" value="{{ per_page }}">{% endif %}
                     <input type="text" name="q" placeholder="Cari nama laptop, no seri, atau ID..." value="{{ search_query }}" style="flex: 1; padding: 12px 16px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px;">
                     <select name="status" style="padding: 12px 16px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background: white;">
                         <option value="">Semua Status</option>
@@ -596,31 +597,34 @@
                     </table>
                 </div>
 
-                <div class="pagination-row" style="display: flex; justify-content: space-between; align-items: center; padding: 20px 32px; border-top: 1px solid #F1F5F9;">
+                <div class="pagination-container" style="display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-top: 1px solid #f1f5f9;">
                     <span class="pagination-text">Menampilkan {{ riwayat_list.start_index }} - {{ riwayat_list.end_index }} dari {{ total_peminjaman }} riwayat</span>
-                    <div class="pagination-buttons" style="display: flex; gap: 6px; align-items: center;">
-                        <select onchange="window.location.href = '?page=1&per_page=' + this.value + '{% if search_query %}&q={{ search_query|escapejs }}{% endif %}{% if status_filter %}&status={{ status_filter|escapejs }}{% endif %}';" style="padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; color: #334155; background-color: #ffffff; cursor: pointer; margin-right: 6px;">
-                            <option value="10" {% if per_page == 10 %}selected{% endif %}>10</option>
-                                <option value="15" {% if per_page == 15 %}selected{% endif %}>15</option>
-                                <option value="25" {% if per_page == 25 %}selected{% endif %}>25</option>
-                        </select>
+                    <div class="pagination-controls" style="display: flex; gap: 6px; align-items: center;">
+                        <div class="per-page-selector" style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: #64748b; margin-right: 12px;">
+                            <span>Tampilkan:</span>
+                            <select onchange="window.location.href = '?page=1&per_page=' + this.value + '{% if search_query %}&q={{ search_query|escapejs }}{% endif %}{% if status_filter %}&status={{ status_filter|escapejs }}{% endif %}';" style="padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; color: #334155; background-color: #ffffff; cursor: pointer;">
+                                <option value="10" {% if per_page == 10 or per_page == '10' %}selected{% endif %}>10</option>
+                                <option value="15" {% if per_page == 15 or per_page == '15' %}selected{% endif %}>15</option>
+                                <option value="25" {% if per_page == 25 or per_page == '25' %}selected{% endif %}>25</option>
+                            </select>
+                        </div>
 
                         {% if riwayat_list.has_previous %}
-                            <a href="?page={{ riwayat_list.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if per_page %}&per_page={{ per_page }}{% endif %}" class="btn-pagination" style="text-decoration: none; display: flex; align-items: center; justify-content: center;">
+                            <a href="?page={{ riwayat_list.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if per_page %}&per_page={{ per_page }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">
                                 <i class="fa-solid fa-chevron-left"></i>
                             </a>
                         {% endif %}
                         
                         {% for num in riwayat_list.paginator.page_range %}
                             {% if riwayat_list.number == num %}
-                                <span class="btn-pagination active" style="display: flex; align-items: center; justify-content: center;">{{ num }}</span>
+                                <span class="page-btn active" style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; background: #0b57c6; color: white; font-weight: bold; font-size: 12px;">{{ num }}</span>
                             {% elif num > riwayat_list.number|add:'-3' and num < riwayat_list.number|add:'3' %}
-                                <a href="?page={{ num }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if per_page %}&per_page={{ per_page }}{% endif %}" class="btn-pagination" style="text-decoration: none; display: flex; align-items: center; justify-content: center;">{{ num }}</a>
+                                <a href="?page={{ num }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if per_page %}&per_page={{ per_page }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">{{ num }}</a>
                             {% endif %}
                         {% endfor %}
 
                         {% if riwayat_list.has_next %}
-                            <a href="?page={{ riwayat_list.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if per_page %}&per_page={{ per_page }}{% endif %}" class="btn-pagination" style="text-decoration: none; display: flex; align-items: center; justify-content: center;">
+                            <a href="?page={{ riwayat_list.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if per_page %}&per_page={{ per_page }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">
                                 <i class="fa-solid fa-chevron-right"></i>
                             </a>
                         {% endif %}

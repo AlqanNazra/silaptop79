@@ -85,8 +85,17 @@ class AggregationService:
                 #     "SWARA:",
                 #     item["nilai_swara"]
                 # )
-                nama = item["nama_kriteria"]
-                nilai = item["nilai_swara"]
+
+                nama = item[
+                    "nama_kriteria"
+                ]
+
+                nilai = item.get("nilai_swara")
+                if nilai is None:
+                    nilai = item.get("nilai_bobot")
+                if nilai is None:
+                    nilai = 0.0
+
                 if nama not in hasil:
                     hasil[nama] = 0
                     counter[nama] = 0

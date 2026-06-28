@@ -416,7 +416,7 @@
             <a href="{% url 'editdatalaptop_it' laptop.id_laptop_inventori %}" class="btn-blue-action" style="flex: 1;">
                 <i class="fa-solid fa-pen"></i> Edit Data
             </a>
-            <a href="{% url 'riwayatpeminjamanlaptop_it' %}?laptop_id={{ laptop.id_laptop_inventori }}" class="btn-grey-action" style="flex: 1;">
+            <a href="{% url 'riwayatpeminjamanlaptop_it' laptop.id_laptop_inventori %}" class="btn-grey-action" style="flex: 1;">
                 <i class="fa-solid fa-clock-rotate-left"></i> Riwayat Peminjaman
             </a>
             <button type="button" class="btn-grey-action" style="color: #dc2626; flex: 1;" onclick="showDeleteModal()">

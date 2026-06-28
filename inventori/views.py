@@ -56,11 +56,11 @@ def manajemen_laptop_page(request):
     storage_filter = request.GET.get('storage', '').strip()
 
     try:
-        per_page = int(request.GET.get('per_page', 15))
-        if per_page not in [5, 10, 15, 25, 50]:
-            per_page = 15
+        per_page = int(request.GET.get('per_page', 10))
+        if per_page not in [10, 15, 25]:
+            per_page = 10
     except ValueError:
-        per_page = 15
+        per_page = 10
 
     laptops = LaptopInventori.objects.select_related('id_processor', 'id_ram', 'id_storage').all()
 
@@ -209,8 +209,15 @@ def pengajuan_page_view(request):
             ]
 
         # Pagination
+        try:
+            per_page = int(request.GET.get('per_page', 10))
+            if per_page not in [10, 15, 25]:
+                per_page = 10
+        except ValueError:
+            per_page = 10
+
         from django.core.paginator import Paginator
-        paginator = Paginator(filtered_pengajuan, 5)
+        paginator = Paginator(filtered_pengajuan, per_page)
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
 
@@ -222,6 +229,7 @@ def pengajuan_page_view(request):
             'total_riwayat_selesai': total_riwayat_selesai,
             'search_query': search_query,
             'status_filter': status_filter,
+            'per_page': per_page,
         }
     except Exception as e:
         messages.error(request, f'Gagal memuat data pengajuan: {str(e)}')
@@ -342,11 +350,21 @@ def detail_laptop_page(request, id_laptop):
             except Exception as e:
                 messages.error(request, f'Gagal update: {str(e)}')
 
+    from inventori.models import Peminjaman
+    riwayat_peminjaman = Peminjaman.objects.filter(
+        id_laptop_inventori_id=id_laptop
+    ).select_related('id_user', 'id_pengajuan').order_by('-tanggal_pinjam')
+    
+    for p in riwayat_peminjaman:
+        p.user_nama = p.id_user.nama if p.id_user else '-'
+        p.user_role = p.id_user.role if p.id_user else '-'
+
     context = {
         'laptop': laptop,
         'processors': processors,
         'rams': rams,
         'storages': storages,
+        'riwayat_peminjaman': riwayat_peminjaman,
     }
     return render(request, 'hc/inventori/detaillaptop_hc.html', context)
 
@@ -375,14 +393,15 @@ def detailpengajuan_hc_view(request):
         role_obj = Role.objects.filter(nama_role__iexact=pengajuan.kebutuhan_role).first()
         id_role = role_obj.id_role if role_obj else ""
 
+        from inventori.models import Peminjaman
+        pm_obj = Peminjaman.objects.filter(id_pengajuan=id_pengajuan).select_related('id_laptop_inventori').first()
+        pengajuan.laptop_dipakai = pm_obj.id_laptop_inventori if pm_obj else None
+
         if request.method == 'POST':
             action = request.POST.get('action')
             if action in ['disetujui', 'ditolak']:
                 from inventori.dto.dto_pengajuan import PengajuanDTO
-                # Get user ID safely
                 id_user = request.user.id_user if hasattr(request.user, 'id_user') else None
-                
-                # Map action to English status for DB compatibility
                 db_status = 'approved' if action == 'disetujui' else 'rejected'
                 
                 dto = PengajuanDTO(
@@ -391,6 +410,15 @@ def detailpengajuan_hc_view(request):
                     approved_by=id_user
                 )
                 service.service_approve_pengajuan(dto)
+
+                if action == 'ditolak':
+                    alasan = request.POST.get('alasan_penolakan') or 'Tidak memenuhi syarat'
+                    from inventori.models import Pengajuan as PengajuanModel
+                    p_obj = PengajuanModel.objects.filter(id_pengajuan=id_pengajuan).first()
+                    if p_obj:
+                        p_obj.keterangan = f"Ditolak: {alasan}"
+                        p_obj.save()
+
                 messages.success(request, f'Pengajuan berhasil di-{action}.')
                 return redirect('pengajuanlaptop_hc')
 
@@ -525,13 +553,13 @@ def setujui_pengajuan_hc_view(request):
     }
     return render(request, 'hc/inventori/setujuipengajuan_hc.html', context)
 
-def riwayatpeminjamanlaptop_hc_view(request):
+def riwayatpeminjamanlaptop_hc_view(request, id_laptop=None):
     from inventori.services.service_peminjaman import PeminjamanService
     from inventori.models import User, LaptopInventori
     
     search_query = request.GET.get('q', '').strip()
     status_filter = request.GET.get('status', '').strip()
-    laptop_id = request.GET.get('laptop_id', '').strip()
+    laptop_id = id_laptop or request.GET.get('laptop_id', '').strip()
 
     try:
         service = PeminjamanService()
@@ -581,7 +609,8 @@ def riwayatpeminjamanlaptop_hc_view(request):
         # Apply filters
         filtered_p = sorted_p
         if laptop_id:
-            filtered_p = [p for p in filtered_p if str(p.id_laptop_inventori) == laptop_id]
+            target_lid = str(laptop_id).strip().lower()
+            filtered_p = [p for p in filtered_p if str(getattr(p, 'id_laptop_inventori', '')).strip().lower() == target_lid]
             total_peminjaman = len(filtered_p)
             if filtered_p:
                 peminjam_terakhir = filtered_p[0].user_nama
@@ -604,8 +633,15 @@ def riwayatpeminjamanlaptop_hc_view(request):
             ]
 
         # Pagination
+        try:
+            per_page = int(request.GET.get('per_page', 10))
+            if per_page not in [10, 15, 25]:
+                per_page = 10
+        except ValueError:
+            per_page = 10
+
         from django.core.paginator import Paginator
-        paginator = Paginator(filtered_p, 999999)
+        paginator = Paginator(filtered_p, per_page)
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
 
@@ -616,6 +652,7 @@ def riwayatpeminjamanlaptop_hc_view(request):
             'search_query': search_query,
             'status_filter': status_filter,
             'laptop_id': laptop_id,
+            'per_page': per_page,
         }
         return render(request, 'hc/inventori/riwayatpeminjamanlaptop_hc.html', context)
     except Exception as e:
@@ -1047,3 +1084,66 @@ def tambahlaptop_hc_view(request):
         "ram": data_ram,
         "storage": data_storage
     })
+
+def assign_laptop_hc_view(request):
+    from inventori.models import Pengajuan, LaptopInventori, Peminjaman, User as InvUser
+    from inventori.services.service_pengajuan import PengajuanService
+    from inventori.dto.dto_pengajuan import PengajuanDTO
+    from inventori.dto.dto_peminjaman import PeminjamanDTO
+    import datetime, time
+
+    laptop_id = request.GET.get('laptop_id') or request.POST.get('laptop_id') or request.GET.get('id_laptop')
+    pengajuan_id = request.GET.get('id_pengajuan') or request.POST.get('id_pengajuan') or request.session.get('id_pengajuan')
+
+    if not laptop_id:
+        messages.error(request, 'Laptop belum dipilih.')
+        return redirect('hasilrekomendasi_hc')
+
+    if not pengajuan_id:
+        messages.error(request, 'Silakan pilih pengajuan / user terlebih dahulu.')
+        return redirect('hasilrekomendasi_hc')
+
+    try:
+        service = PengajuanService()
+        pengajuan = service.service_cari_pengajuan_by_id(pengajuan_id)
+        if not pengajuan:
+            messages.error(request, 'Data pengajuan tidak ditemukan.')
+            return redirect('hasilrekomendasi_hc')
+
+        id_user_hc = request.user.id_user if (hasattr(request.user, 'id_user') and request.user.id_user) else 'USR-001'
+        dto_peng = PengajuanDTO(
+            id_pengajuan=pengajuan_id,
+            status='approved',
+            approved_by=id_user_hc
+        )
+
+        id_peminjaman = f"PMJ-{int(time.time())}"
+        dto_pem = PeminjamanDTO(
+            id_peminjaman=id_peminjaman,
+            id_pengajuan=pengajuan_id,
+            id_user=pengajuan.id_user,
+            id_laptop_inventori=laptop_id,
+            tanggal_pinjam=datetime.date.today().strftime('%Y-%m-%d'),
+            status='dipinjam',
+            keterangan='Assign laptop dari hasil rekomendasi DSS'
+        )
+
+        service.service_approve_dan_pinjam(dto_peng, dto_pem)
+
+        peminjaman = Peminjaman.objects.filter(id_pengajuan=pengajuan_id).first()
+        if peminjaman:
+            peminjaman.status = 'ready'
+            peminjaman.save()
+
+        user_obj = InvUser.objects.filter(id_user=pengajuan.id_user).first()
+        user_nama = user_obj.nama if user_obj else pengajuan.id_user
+
+        messages.success(request, f'Laptop {laptop_id} berhasil di-assign ke {user_nama} (Pengajuan {pengajuan_id})!')
+        if 'id_pengajuan' in request.session:
+            del request.session['id_pengajuan']
+        return redirect('pengajuanlaptop_hc')
+
+    except Exception as e:
+        messages.error(request, f'Gagal melakukan assign laptop: {str(e)}')
+        return redirect('hasilrekomendasi_hc')
+

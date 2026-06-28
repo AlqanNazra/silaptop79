@@ -368,20 +368,22 @@
         </div>
 
         <!-- Top Actions -->
-        <div class="top-actions">
+        <form method="GET" action="" class="top-actions">
+            {% if per_page %}<input type="hidden" name="per_page" value="{{ per_page }}">{% endif %}
             <div class="search-box">
                 <span class="search-icon">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                 </span>
-                <input type="text" id="searchInput" placeholder="Cari nama atau ID pengguna..." oninput="filterTable()">
+                <input type="text" name="q" value="{{ search_query }}" placeholder="Cari nama atau ID pengguna...">
             </div>
-            <select class="filter-select" id="roleFilter" onchange="filterTable()">
+            <select class="filter-select" name="role" onchange="this.form.submit()">
                 <option value="">Semua Role</option>
-                <option value="HC">Human Capital</option>
-                <option value="IT">IT Infrastructure</option>
-                <option value="Talent">Talent</option>
+                <option value="HC" {% if role_filter == 'HC' %}selected{% endif %}>Human Capital</option>
+                <option value="IT" {% if role_filter == 'IT' %}selected{% endif %}>IT Infrastructure</option>
+                <option value="Talent" {% if role_filter == 'Talent' %}selected{% endif %}>Talent</option>
             </select>
-        </div>
+            <button type="submit" style="display:none;"></button>
+        </form>
 
         <!-- Table Card -->
         <div class="table-card">
@@ -398,8 +400,8 @@
                 </thead>
                 <tbody>
                     {% for user in list_user %}
-                    <tr data-name="{{ user.nama|lower }}" data-id="{{ user.id_user|lower }}" data-role="{{ user.role }}" data-dept="{{ user.departemen }}">
-                        <td style="font-weight:600; color:#64748B;">{{ forloop.counter|stringformat:"02d" }}</td>
+                    <tr>
+                        <td style="font-weight:600; color:#64748B;">{{ list_user.start_index|add:forloop.counter0|stringformat:"02d" }}</td>
                         <td>
                             <div class="user-cell">
                                 <div class="user-avatar-sm {% if user.role == 'HC' %}avatar-hc{% elif user.role == 'IT' %}avatar-it{% elif user.role == 'Talent' %}avatar-talent{% else %}avatar-other{% endif %}">
@@ -463,10 +465,36 @@
                 </tbody>
             </table>
 
-            <div class="pagination-container">
-                <span class="pagination-text">Menampilkan <span id="showCount">0</span> dari {{ total_user }} pengguna</span>
-                <div class="pagination-controls" id="paginationControls">
-                    <!-- Dynamic Pagination -->
+            <div class="pagination-container" style="display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-top: 1px solid #f1f5f9;">
+                <span class="pagination-text">Menampilkan {{ list_user.start_index }} - {{ list_user.end_index }} dari {{ total_user }} pengguna</span>
+                <div class="pagination-controls" style="display: flex; gap: 6px; align-items: center;">
+                    <div class="per-page-selector" style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: #64748b; margin-right: 12px;">
+                        <span>Tampilkan:</span>
+                        <select onchange="window.location.href = '?page=1&per_page=' + this.value + '{% if search_query %}&q={{ search_query|escapejs }}{% endif %}{% if role_filter %}&role={{ role_filter|escapejs }}{% endif %}';" style="padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; color: #334155; background-color: #ffffff; cursor: pointer;">
+                            <option value="10" {% if per_page == 10 or per_page == '10' %}selected{% endif %}>10</option>
+                            <option value="15" {% if per_page == 15 or per_page == '15' %}selected{% endif %}>15</option>
+                            <option value="25" {% if per_page == 25 or per_page == '25' %}selected{% endif %}>25</option>
+                        </select>
+                    </div>
+                    {% if list_user.has_previous %}
+                        <a href="?page={{ list_user.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if role_filter %}&role={{ role_filter }}{% endif %}{% if per_page %}&per_page={{ per_page }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">
+                            <i class="fa-solid fa-chevron-left"></i>
+                        </a>
+                    {% endif %}
+                    
+                    {% for num in list_user.paginator.page_range %}
+                        {% if list_user.number == num %}
+                            <span class="page-btn active" style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; background: #0b57c6; color: white; font-weight: bold; font-size: 12px;">{{ num }}</span>
+                        {% elif num > list_user.number|add:'-3' and num < list_user.number|add:'3' %}
+                            <a href="?page={{ num }}{% if search_query %}&q={{ search_query }}{% endif %}{% if role_filter %}&role={{ role_filter }}{% endif %}{% if per_page %}&per_page={{ per_page }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">{{ num }}</a>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if list_user.has_next %}
+                        <a href="?page={{ list_user.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if role_filter %}&role={{ role_filter }}{% endif %}{% if per_page %}&per_page={{ per_page }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </a>
+                    {% endif %}
                 </div>
             </div>
         </div>
