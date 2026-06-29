@@ -3093,14 +3093,13 @@ def detailrekomendasiscrapping_talent_view(request):
 def login_redirect_view(request):
     if not request.user.is_authenticated:
         return redirect('login')
-    role = getattr(request.user, 'role', '').upper()
-    if role == 'HC':
+    role = str(getattr(request.user, 'role', '')).upper()
+    if 'HC' in role:
         return redirect('dashboard_hc')
-    elif role == 'IT':
+    elif 'IT' in role:
         return redirect('dashboard_it')
-    elif role in ('TALENT', 'EMPLOYEE'):
+    else:
         return redirect('dashboard_talent')
-    return redirect('dashboard_hc')
 
 def home_view(request):
     return login_redirect_view(request)
