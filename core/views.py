@@ -3363,11 +3363,11 @@ def tambah_teknologi_it_view(request):
     return redirect("manajemenroleteknologi_it")
 
 def tambah_role_it_view(request):
-    from django.shortcuts import redirect
+    from django.shortcuts import redirect, render
     from django.contrib import messages
     import uuid
     import traceback
-    from  inventori.repositories.repositori_role_teknologi import RoleTeknologiRepository
+    from inventori.repositories.repositori_role_teknologi import RoleTeknologiRepository
     conn = get_connection()
     role_repo = RoleRepository(conn)
     repo_bobot = BobotKriteriaRepository(conn)
@@ -3386,7 +3386,7 @@ def tambah_role_it_view(request):
             nama_role = request.POST.get("nama_role", "").strip()
             if Role.objects.filter(nama_role__iexact=nama_role).exists():
                 messages.error(request, f"Role dengan nama '{nama_role}' sudah ada.")
-                return redirect("manajemenroleteknologi_it")
+                return redirect("tambah_role_it")
 
             # ==========================
             # CREATE ROLE
@@ -3421,12 +3421,12 @@ def tambah_role_it_view(request):
                 id_role_teknologi = (role_teknologi_service.tambah(dto_role_teknologi))
                 list_role_teknologi.append(id_role_teknologi)
                 
-                processor = request.POST.get(f"processor_weight_{teknologi_id}")
-                ram = request.POST.get(f"ram_weight_{teknologi_id}")
-                storage = request.POST.get(f"storage_weight_{teknologi_id}")
-                berat = request.POST.get(f"berat_weight_{teknologi_id}")
-                layar = request.POST.get(f"layar_weight_{teknologi_id}")
-                baterai = request.POST.get(f"baterai_weight_{teknologi_id}")
+                processor_w = request.POST.get(f"processor_weight_{teknologi_id}")
+                ram_w = request.POST.get(f"ram_weight_{teknologi_id}")
+                storage_w = request.POST.get(f"storage_weight_{teknologi_id}")
+                berat_w = request.POST.get(f"berat_weight_{teknologi_id}")
+                layar_w = request.POST.get(f"layar_weight_{teknologi_id}")
+                baterai_w = request.POST.get(f"baterai_weight_{teknologi_id}")
                 # ----------------------
                 # LIST BOBOT
                 # ----------------------
@@ -3434,27 +3434,27 @@ def tambah_role_it_view(request):
                 list_bobot = [
                     {
                         "id_kriteria":KRITERIA_MAPPING["processor"],
-                        "nilai_bobot":float(processor or 0)
+                        "nilai_bobot":float(processor_w or 0)
                     },
                     {
                         "id_kriteria":KRITERIA_MAPPING["ram"],
-                        "nilai_bobot":float(ram or 0)
+                        "nilai_bobot":float(ram_w or 0)
                     },
                     {
                         "id_kriteria":KRITERIA_MAPPING["storage"],
-                        "nilai_bobot":float(storage or 0)
+                        "nilai_bobot":float(storage_w or 0)
                     },
                     {
                         "id_kriteria":KRITERIA_MAPPING["berat"],
-                        "nilai_bobot":float(berat or 0)
+                        "nilai_bobot":float(berat_w or 0)
                     },
                     {
                         "id_kriteria":KRITERIA_MAPPING["layar"],
-                        "nilai_bobot":float(layar or 0)
+                        "nilai_bobot":float(layar_w or 0)
                     },
                     {
                         "id_kriteria":KRITERIA_MAPPING["baterai"],
-                        "nilai_bobot":float(baterai or 0)
+                        "nilai_bobot":float(baterai_w or 0)
                     }
                 ]
                 # ----------------------
@@ -3484,14 +3484,21 @@ def tambah_role_it_view(request):
             if (hasil_swara["status"]!="success"):
                 raise Exception(hasil_swara["message"])
             messages.success(request,"Role berhasil ditambahkan.")
+            return redirect("manajemenroleteknologi_it")
         except Exception as e:
             traceback.print_exc()
             print("\nERROR:",str(e))
             messages.error(request,str(e))
+            return redirect("tambah_role_it")
 
-    return redirect(
-        "manajemenroleteknologi_it"
-    )
+    # GET Request: render the template
+    processor_service = ReadProcessorService()
+    processor_list = processor_service.ambil_processor_dropdown()
+    teknologi_list = Teknologi.objects.all().order_by('nama_teknologi')
+    return render(request, "it/inventori/tambahrole_it.html", {
+        "processor_list": processor_list,
+        "teknologi_list": teknologi_list,
+    })
 
 def hapus_role_it_view(request,id_role):
     conn = get_connection()
