@@ -1,0 +1,511 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tambah Role Baru - SiLaptop79</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1.1">
+    
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            min-height: 100vh;
+            background-color: #f8fafc;
+        }
+
+        .dashboard-wrapper {
+            display: flex;
+            width: 100%;
+        }
+
+        .main-dashboard-content {
+            flex: 1;
+            margin-left: 260px;
+            padding: 40px 60px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            color: #64748b;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 24px;
+            transition: color 0.2s;
+            width: fit-content;
+        }
+
+        .back-link:hover {
+            color: #0b57c6;
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 800;
+            color: #1e293b;
+            margin-top: 0;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .page-subtitle {
+            font-size: 14px;
+            color: #64748b;
+            margin-bottom: 32px;
+            max-width: 620px;
+            line-height: 1.6;
+        }
+
+        .card {
+            background: #ffffff;
+            border-radius: 16px;
+            border: 1px solid #f1f5f9;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+            overflow: hidden;
+            padding: 28px;
+            box-sizing: border-box;
+            max-width: 800px;
+            width: 100%;
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-top: 0;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-title-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-title i {
+            color: #0b57c6;
+        }
+
+        /* Form Styles */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .form-grid.two-cols {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            background-color: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            color: #334155;
+            transition: all 0.2s;
+            box-sizing: border-box;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #0b57c6;
+            box-shadow: 0 0 0 3px rgba(11, 87, 198, 0.1);
+        }
+
+        /* Checkbox badges */
+        .tech-checkboxes {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 14px;
+            background-color: #f8fafc;
+        }
+
+        .tech-checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            color: #475569;
+            user-select: none;
+            transition: all 0.2s;
+        }
+
+        .tech-checkbox-item:hover {
+            border-color: #0b57c6;
+            background-color: rgba(11, 87, 198, 0.02);
+        }
+
+        .tech-checkbox-item input {
+            margin: 0;
+            cursor: pointer;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            background-color: #0b57c6;
+            color: white;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s;
+            box-shadow: 0 4px 12px rgba(11, 87, 198, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 24px;
+        }
+
+        .btn-submit:hover {
+            background-color: #09459e;
+        }
+
+        .validation-error {
+            display: none;
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 8px;
+            background: #fef2f2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+            font-size: 13px;
+        }
+
+        /* Bobot Kriteria Card Styling */
+        .role-bobot-container {
+            margin-top: 24px;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .role-bobot-container h4 {
+            font-size: 14px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-top: 0;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .role-bobot-container h4 i {
+            color: #0b57c6;
+        }
+
+        .role-bobot-container h5 {
+            font-size: 12px;
+            font-weight: 500;
+            color: #64748b;
+            margin-top: 0;
+            margin-bottom: 16px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .form-row:last-child {
+            margin-bottom: 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="dashboard-wrapper">
+    <!-- Load Sidebar -->
+    {% include 'it/components/sidebar.html' with active_page='manajemen_role_teknologi' %}
+
+    <!-- Main Dashboard Content -->
+    <div class="main-dashboard-content">
+        <a href="{% url 'manajemenroleteknologi_it' %}?tab=role" class="back-link">
+            <i class="fa-solid fa-arrow-left"></i> Kembali ke Daftar Role
+        </a>
+
+        <h1 class="page-title">Tambah Role Baru</h1>
+        <p class="page-subtitle">Atur spesifikasi hardware minimum untuk tiap role talent serta kelola bobot kriteria untuk teknologi pendukung.</p>
+
+        {% include 'components/messages_popup.html' %}
+
+        <!-- Add Role Form Card -->
+        <div class="card">
+            <h3 class="card-title">
+                <span class="card-title-left">
+                    <i class="fa-solid fa-plus-circle"></i> Tambah Role Baru
+                </span>
+            </h3>
+            
+            <form id="addRoleForm" method="POST" action="{% url 'tambah_role_it' %}">
+                {% csrf_token %}
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Nama Role</label>
+                        <input type="text" name="nama_role" class="form-control" placeholder="Contoh: Frontend Developer" required>
+                    </div>
+                </div>
+
+                <div class="form-grid two-cols">
+                    <div class="form-group">
+                        <label>Min RAM (GB)</label>
+                        <input type="number" name="min_ram" class="form-control" placeholder="8" min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Min Storage (GB)</label>
+                        <input type="number" name="min_storage" class="form-control" placeholder="256" min="1" required>
+                    </div>
+                </div>
+
+                <div class="form-grid" style="margin-bottom:24px;">
+                    <div class="form-group">
+                        <label>Minimum Processor</label>
+                        <select name="id_processor" id="processorSelect" class="form-control" required>
+                            <option value="">-- Pilih Processor --</option>
+                            {% for processor in processor_list %}
+                            <option value="{{ processor.id_processor }}" data-score="{{ processor.processor_score }}">
+                                {{ processor.nama_processor }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <input type="hidden" id="processorScore" name="min_processor_score" required>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom:24px;">
+                    <label>Teknologi Pendukung</label>
+                    <div class="tech-checkboxes">
+                        {% for teknologi in teknologi_list %}
+                        <label class="tech-checkbox-item">
+                            <input
+                                type="checkbox"
+                                class="teknologi-checkbox"
+                                name="teknologi"
+                                value="{{ teknologi.id_teknologi }}"
+                                data-nama="{{ teknologi.nama_teknologi }}">
+                            {{ teknologi.nama_teknologi }}
+                        </label>
+                        {% empty %}
+                        <span style="color:#94a3b8;">Belum ada teknologi terdaftar</span>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div id="teknologi-weight-container"></div>
+
+                <div id="roleValidationError" class="validation-error"></div>
+
+                <button type="submit" class="btn-submit">
+                    <i class="fa-solid fa-save"></i> Simpan Role
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Set processor score when a processor is selected
+    document.getElementById("processorSelect").addEventListener("change", function(){
+        const score = this.options[this.selectedIndex].dataset.score;
+        document.getElementById("processorScore").value = score || "";
+    });
+
+    // Form submission validation
+    document.getElementById("addRoleForm").addEventListener("submit", function(e){
+        const checkboxes = document.querySelectorAll('.teknologi-checkbox:checked');
+        const errorBox = document.getElementById("roleValidationError");
+
+        if (checkboxes.length === 0) {
+            e.preventDefault();
+            errorBox.style.display = "block";
+            errorBox.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> Role harus memiliki minimal 1 teknologi.';
+            window.scrollTo({ top: errorBox.offsetTop - 100, behavior: 'smooth' });
+            return false;
+        }
+
+        errorBox.style.display = "none";
+    });
+
+    // Helper to generate bobot/weight form fields
+    function createBobotForm(teknologiId, teknologiNama) {
+        return `
+            <div class="role-bobot-container teknologi-weight-card"
+                id="weight-${teknologiId}">
+
+                <h4>
+                    <i class="fa-solid fa-laptop-code"></i>
+                    ${teknologiNama}
+                </h4>
+
+                <h5>
+                    Tentukan urutan kepentingan kriteria laptop untuk teknologi ini
+                </h5>
+
+                <input type="hidden"
+                    name="teknologi_selected[]"
+                    value="${teknologiId}">
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Processor</label>
+                        <input
+                            type="number"
+                            name="processor_weight_${teknologiId}"
+                            min="1"
+                            max="6"
+                            value="3"
+                            class="form-control"
+                            required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>RAM</label>
+                        <input
+                            type="number"
+                            name="ram_weight_${teknologiId}"
+                            min="1"
+                            max="6"
+                            value="3"
+                            class="form-control"
+                            required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Storage</label>
+                        <input
+                            type="number"
+                            name="storage_weight_${teknologiId}"
+                            min="1"
+                            max="6"
+                            value="3"
+                            class="form-control"
+                            required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Berat</label>
+                        <input
+                            type="number"
+                            name="berat_weight_${teknologiId}"
+                            min="1"
+                            max="6"
+                            value="3"
+                            class="form-control"
+                            required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Ukuran Layar</label>
+                        <input
+                            type="number"
+                            name="layar_weight_${teknologiId}"
+                            min="1"
+                            max="6"
+                            value="3"
+                            class="form-control"
+                            required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Daya Baterai</label>
+                        <input
+                            type="number"
+                            name="baterai_weight_${teknologiId}"
+                            min="1"
+                            max="6"
+                            value="3"
+                            class="form-control"
+                            required>
+                    </div>
+                </div>
+
+            </div>
+        `;
+    }
+
+    // Handle checkbox change to dynamically insert or remove weights form section
+    document.addEventListener('DOMContentLoaded', function() {
+        const container = document.getElementById('teknologi-weight-container');
+        const checkboxes = document.querySelectorAll('.teknologi-checkbox');
+
+        checkboxes.forEach(cb => {
+            cb.addEventListener('change', function() {
+                const id = this.value;
+                const nama = this.dataset.nama;
+                const existing = document.getElementById(`weight-${id}`);
+
+                if (this.checked) {
+                    if (!existing) {
+                        container.insertAdjacentHTML('beforeend', createBobotForm(id, nama));
+                    }
+                } else {
+                    if (existing) {
+                        existing.remove();
+                    }
+                }
+            });
+        });
+    });
+</script>
+
+</body>
+</html>
