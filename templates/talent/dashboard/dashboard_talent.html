@@ -609,6 +609,10 @@
                                         <span style="background: #dcfce7; color: #15803d; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
                                             <i class="fa-solid fa-circle-check"></i> Disetujui
                                         </span>
+                                        {% elif p.status|lower == 'selesai' %}
+                                        <span style="background: #eff6ff; color: #1e40af; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
+                                            <i class="fa-solid fa-circle-check"></i> Selesai
+                                        </span>
                                         {% elif p.status|lower == 'rejected' or p.status|lower == 'ditolak' %}
                                         <span style="background: #fee2e2; color: #dc2626; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
                                             <i class="fa-solid fa-circle-xmark"></i> Ditolak
@@ -622,10 +626,10 @@
                                     <td style="padding: 16px;">
                                         {% if p.status|lower == 'rejected' or p.status|lower == 'ditolak' %}
                                         <div style="background: #fff5f5; border: 1px solid #fecaca; padding: 8px 12px; border-radius: 8px; color: #991b1b; font-size: 12px;">
-                                            <strong>Alasan:</strong> {{ p.keterangan|default:"Alasan tidak dicantumkan." }}
+                                            <strong>Alasan:</strong> {{ p.keterangan|default:"Alasan tidak dicantumkan."|truncatechars:25 }}
                                         </div>
                                         {% else %}
-                                        <span style="color: #94a3b8; font-size: 13px;">{{ p.keterangan|default:"-" }}</span>
+                                        <span style="color: #94a3b8; font-size: 13px;">{{ p.keterangan|default:"-"|truncatechars:25 }}</span>
                                         {% endif %}
                                     </td>
                                     <td style="padding: 16px; text-align: center;">

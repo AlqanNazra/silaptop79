@@ -244,7 +244,7 @@ def pengajuanlaptop_it_view(request):
         for p in semua_pengajuan:
             p.user_nama = users_dict.get(p.id_user, f"User {p.id_user}")
             p_loans = peminjaman_map.get(p.id_pengajuan, [])
-            is_approved = p.status and p.status.lower() in ['disetujui', 'approved']
+            is_approved = p.status and p.status.lower() in ['disetujui', 'approved', 'selesai']
             is_rejected = p.status and p.status.lower() in ['ditolak', 'rejected']
             is_pending = not is_approved and not is_rejected
             
@@ -271,18 +271,18 @@ def pengajuanlaptop_it_view(request):
                 p.status_display = 'menunggu'
                 total_dikonfigurasi += 1
             else:
-                has_ready = (not p_loans) or any(l.status.lower() == 'ready' for l in p_loans)
-                if has_ready:
-                    # Jika belum diambil oleh talent, hold dulu di belum_disetujui_list dengan status 'belum diambil'
-                    belum_disetujui_list.append(p)
-                    p.status_display = 'belum diambil'
-                    total_siap_proses += 1
+                has_completed = (p.status.lower() == 'selesai') or any(l.status.lower() == 'selesai' for l in p_loans)
+                if has_completed:
+                    riwayat_selesai_list.append(p)
+                    p.status_display = 'selesai'
+                    total_selesai += 1
                 else:
-                    has_completed = any(l.status.lower() == 'selesai' for l in p_loans)
-                    if has_completed:
-                        riwayat_selesai_list.append(p)
-                        p.status_display = 'selesai'
-                        total_selesai += 1
+                    has_ready = (not p_loans) or any(l.status.lower() == 'ready' for l in p_loans)
+                    if has_ready:
+                        # Jika belum diambil oleh talent, hold dulu di belum_disetujui_list dengan status 'belum diambil'
+                        belum_disetujui_list.append(p)
+                        p.status_display = 'belum diambil'
+                        total_siap_proses += 1
                     else:
                         sedang_berlangsung_list.append(p)
                         has_returned = any(l.status.lower() == 'dikembalikan' for l in p_loans)
@@ -593,6 +593,8 @@ def detaillaptop_it_view(request, id_laptop):
 def riwayatpeminjamanlaptop_it_view(request, id_laptop=None):
     search_query = request.GET.get('q', '').strip()
     status_filter = request.GET.get('status', '').strip()
+    start_date_filter = request.GET.get('start_date', '').strip()
+    end_date_filter = request.GET.get('end_date', '').strip()
     laptop_id = id_laptop or request.GET.get('laptop_id', '').strip()
 
     try:
@@ -612,33 +614,84 @@ def riwayatpeminjamanlaptop_it_view(request, id_laptop=None):
             pm.id_peminjaman: pm for pm in PeminjamanModel.objects.all()
         }
         
+        # Fetch rejected pengajuan and merge into riwayat_list
+        from inventori.models import Pengajuan
+        rejected_pengajuan = Pengajuan.objects.filter(status__in=['ditolak', 'rejected'])
+        
+        class MockPeminjaman:
+            def __init__(self, p_obj, users_dict, users_role_dict):
+                self.id_peminjaman = p_obj.id_pengajuan
+                self.id_pengajuan = p_obj
+                self.id_user = p_obj.id_user_id
+                self.id_laptop_inventori = "-"
+                self.tanggal_pinjam = p_obj.tanggal_pengajuan.date() if p_obj.tanggal_pengajuan else None
+                self.tanggal_kembali = None
+                self.status = "ditolak"
+                self.keterangan = p_obj.keterangan
+                
+                self.user_nama = users_dict.get(p_obj.id_user_id, str(p_obj.id_user))
+                self.user_role = users_role_dict.get(p_obj.id_user_id, "-")
+                self.laptop_nama = "Pengajuan Ditolak"
+                self.no_inventori = "-"
+                self.durasi_hari = None
+                self.tanggal_jatuh_tempo = None
+                self.sisa_hari = None
+                self.kebutuhan_role = p_obj.kebutuhan_role
+                self.kebutuhan_requirement = p_obj.kebutuhan_requirement
+                self.perusahaan = p_obj.perusahaan
+
+        for rp in rejected_pengajuan:
+            riwayat_list.append(MockPeminjaman(rp, users_dict, users_role_dict))
+        
         for p in riwayat_list:
-            p.user_nama = users_dict.get(p.id_user, p.id_user)
-            p.user_role = users_role_dict.get(p.id_user, "-")
-            p.laptop_nama = laptops_dict.get(p.id_laptop_inventori, p.id_laptop_inventori)
+            if not hasattr(p, 'user_nama'):
+                p.user_nama = users_dict.get(p.id_user, p.id_user)
+            if not hasattr(p, 'user_role'):
+                p.user_role = users_role_dict.get(p.id_user, "-")
+            if not hasattr(p, 'laptop_nama'):
+                p.laptop_nama = laptops_dict.get(p.id_laptop_inventori, p.id_laptop_inventori)
+            
+            # Fetch details from Pengajuan model if real peminjaman
+            if not hasattr(p, 'kebutuhan_role'):
+                try:
+                    db_p = db_peminjaman_map_it.get(p.id_peminjaman)
+                    if db_p and db_p.id_pengajuan:
+                        p.kebutuhan_role = db_p.id_pengajuan.kebutuhan_role
+                        p.kebutuhan_requirement = db_p.id_pengajuan.kebutuhan_requirement
+                        p.perusahaan = db_p.id_pengajuan.perusahaan
+                    else:
+                        p.kebutuhan_role = "-"
+                        p.kebutuhan_requirement = "-"
+                        p.perusahaan = "-"
+                except Exception:
+                    p.kebutuhan_role = "-"
+                    p.kebutuhan_requirement = "-"
+                    p.perusahaan = "-"
             # Kalkulasi durasi peminjaman (TC-TRX-16)
-            if p.tanggal_pinjam:
-                if p.tanggal_kembali:
-                    p.durasi_hari = (p.tanggal_kembali - p.tanggal_pinjam).days
+            if not hasattr(p, 'durasi_hari') or p.durasi_hari is None or p.durasi_hari == 0:
+                if p.tanggal_pinjam:
+                    if p.tanggal_kembali:
+                        p.durasi_hari = (p.tanggal_kembali - p.tanggal_pinjam).days
+                    else:
+                        p.durasi_hari = (today_it - p.tanggal_pinjam).days
                 else:
-                    p.durasi_hari = (today_it - p.tanggal_pinjam).days
-            else:
-                p.durasi_hari = 0
+                    p.durasi_hari = 0
             # Sisa hari menuju jatuh tempo (TC-TRX-17) - ambil dari DB
-            db_p = db_peminjaman_map_it.get(p.id_peminjaman)
-            p.tanggal_jatuh_tempo = db_p.tanggal_jatuh_tempo if db_p else None
-            if p.tanggal_jatuh_tempo:
-                p.sisa_hari = (p.tanggal_jatuh_tempo - today_it).days
-            else:
-                p.sisa_hari = None
+            if not hasattr(p, 'tanggal_jatuh_tempo') or p.tanggal_jatuh_tempo is None:
+                db_p = db_peminjaman_map_it.get(p.id_peminjaman)
+                p.tanggal_jatuh_tempo = db_p.tanggal_jatuh_tempo if db_p else None
+                if p.tanggal_jatuh_tempo:
+                    p.sisa_hari = (p.tanggal_jatuh_tempo - today_it).days
+                else:
+                    p.sisa_hari = None
             
         total_peminjaman = len(riwayat_list)
         peminjam_terakhir = "-"
         
-        sorted_p = sorted(riwayat_list, key=lambda x: str(x.tanggal_pinjam) if x.tanggal_pinjam else "", reverse=True)
+        sorted_p = sorted(riwayat_list, key=lambda x: x.tanggal_pinjam if x.tanggal_pinjam else _dt.date.min, reverse=True)
         if sorted_p:
             peminjam_terakhir = sorted_p[0].user_nama
-
+ 
         # Filter by laptop_id if present
         filtered_p = sorted_p
         if laptop_id:
@@ -649,7 +702,7 @@ def riwayatpeminjamanlaptop_it_view(request, id_laptop=None):
                 peminjam_terakhir = filtered_p[0].user_nama
             else:
                 peminjam_terakhir = "-"
-
+ 
         # Filter search
         if search_query:
             q_lower = search_query.lower()
@@ -659,37 +712,66 @@ def riwayatpeminjamanlaptop_it_view(request, id_laptop=None):
                    q_lower in getattr(p, 'laptop_nama', '').lower() or
                    q_lower in str(getattr(p, 'id_peminjaman', '')).lower()
             ]
-
+ 
         # Filter status
         if status_filter:
             status_lower = status_filter.lower()
+            if status_lower == 'dipinjam':
+                allowed = ['dipinjam', 'aktif', 'ready', 'siap_diambil']
+            elif status_lower in ['selesai', 'kembali']:
+                allowed = ['selesai', 'dikembalikan']
+            else:
+                allowed = [status_lower]
             filtered_p = [
                 p for p in filtered_p
-                if getattr(p, 'status', '').lower() == status_lower
+                if getattr(p, 'status', '').lower() in allowed
             ]
 
+        if start_date_filter:
+            try:
+                sd = _dt.datetime.strptime(start_date_filter, '%Y-%m-%d').date()
+                filtered_p = [
+                    p for p in filtered_p
+                    if p.tanggal_pinjam and p.tanggal_pinjam >= sd
+                ]
+            except ValueError:
+                pass
+
+        if end_date_filter:
+            try:
+                ed = _dt.datetime.strptime(end_date_filter, '%Y-%m-%d').date()
+                filtered_p = [
+                    p for p in filtered_p
+                    if p.tanggal_pinjam and p.tanggal_pinjam <= ed
+                ]
+            except ValueError:
+                pass
+ 
         try:
             per_page = int(request.GET.get('per_page', 10))
             if per_page not in [10, 15, 25]:
                 per_page = 10
         except ValueError:
             per_page = 10
-
+ 
         from django.core.paginator import Paginator
         paginator = Paginator(filtered_p, per_page)
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
-            
+             
         context = {
             'list_peminjaman': page_obj,
             'total_peminjaman': total_peminjaman,
             'peminjam_terakhir': peminjam_terakhir,
             'search_query': search_query,
             'status_filter': status_filter,
+            'start_date_filter': start_date_filter,
+            'end_date_filter': end_date_filter,
             'laptop_id': laptop_id,
             'per_page': per_page,
         }
     except Exception as e:
+        import traceback; traceback.print_exc()
         messages.error(request, f'Gagal memuat riwayat: {str(e)}')
         context = {
             'list_peminjaman': [],
@@ -697,6 +779,8 @@ def riwayatpeminjamanlaptop_it_view(request, id_laptop=None):
             'peminjam_terakhir': "-",
             'search_query': search_query,
             'status_filter': status_filter,
+            'start_date_filter': start_date_filter,
+            'end_date_filter': end_date_filter,
             'laptop_id': laptop_id,
         }
     return render(request, 'it/inventori/riwayatpeminjamanlaptop_it.html', context)
@@ -2657,6 +2741,18 @@ def pengajuanlaptop_talent_view(request):
             else:
                 id_user = 'USR_0021'
 
+        # Check active borrow to restrict page access
+        from inventori.services.service_peminjaman import PeminjamanService
+        p_service = PeminjamanService()
+        all_peminjaman = p_service.service_ambil_semua_peminjaman()
+        has_active_borrow = any(
+            str(p.id_user) == str(id_user) and p.status and p.status.lower() in ['dipinjam', 'aktif']
+            for p in all_peminjaman
+        )
+        if has_active_borrow:
+            messages.error(request, 'Akses Ditolak: Anda tidak dapat mengakses halaman pengajuan karena masih memiliki perangkat aktif yang dipinjam.')
+            return redirect('dashboard_talent')
+
         from inventori.models import User, Proyek, ProjectRole, Role, RoleTeknologi
         user_obj = None
         if id_user:
@@ -2690,9 +2786,14 @@ def pengajuanlaptop_talent_view(request):
                 str(p.id_user) == str(id_user) and p.status and p.status.lower() in ['dipinjam', 'aktif']
                 for p in all_peminjaman
             )
+            
+            jenis_pengajuan = request.POST.get('jenis_pengajuan', 'peminjaman_baru')
             if has_active_borrow:
-                messages.error(request, 'Gagal mengajukan: Anda masih meminjam laptop aktif.')
-                return redirect('pengajuanlaptop_talent')
+                if jenis_pengajuan == 'peminjaman_baru':
+                    messages.error(request, 'Gagal mengajukan Peminjaman Baru: Anda masih memiliki perangkat aktif.')
+                    return redirect('pengajuanlaptop_talent')
+                else:
+                    keterangan_full = f"[Penggantian] {keterangan_full}"
 
             proyek_id = request.POST.get('proyek') or None
             
@@ -2787,6 +2888,14 @@ def pengajuanlaptop_talent_view(request):
         from datetime import datetime
         today_str = datetime.now().strftime('%Y-%m-%d')
 
+        from inventori.services.service_peminjaman import PeminjamanService
+        p_service = PeminjamanService()
+        all_peminjaman = p_service.service_ambil_semua_peminjaman()
+        has_active_borrow = any(
+            str(p.id_user) == str(id_user) and p.status and p.status.lower() in ['dipinjam', 'aktif']
+            for p in all_peminjaman
+        )
+
         context = {
             'list_pengajuan': page_obj,
             'total_pengajuan': len(semua_pengajuan),
@@ -2796,6 +2905,7 @@ def pengajuanlaptop_talent_view(request):
             'projects': projects,
             'project_roles_map': project_roles_map,
             'role_technologies_map': role_technologies_map,
+            'has_active_borrow': has_active_borrow,
         }
 
         return render(
@@ -2855,6 +2965,8 @@ def detaillaptop_talent_view(request):
 def riwayatpeminjamanlaptop_talent_view(request):
     search_query = request.GET.get('q', '')
     status_filter = request.GET.get('status', '')
+    start_date_filter = request.GET.get('start_date', '').strip()
+    end_date_filter = request.GET.get('end_date', '').strip()
 
     try:
         per_page = int(request.GET.get('per_page', 10))
@@ -2882,24 +2994,73 @@ def riwayatpeminjamanlaptop_talent_view(request):
         total_aktif = sum(1 for r in riwayat_list if r.status and r.status.lower() in ['dipinjam', 'aktif'])
         total_selesai = sum(1 for r in riwayat_list if r.status and r.status.lower() in ['selesai', 'dikembalikan'])
         
+        # Fetch rejected pengajuan and merge into riwayat_list
+        from inventori.models import Pengajuan
+        rejected_pengajuan = Pengajuan.objects.filter(status__in=['ditolak', 'rejected'])
+        if id_user:
+            rejected_pengajuan = rejected_pengajuan.filter(id_user=id_user)
+            
+        class MockPeminjaman:
+            def __init__(self, p_obj):
+                self.id_peminjaman = p_obj.id_pengajuan
+                self.id_pengajuan = p_obj
+                self.id_user = p_obj.id_user_id
+                self.id_laptop_inventori = "-"
+                self.tanggal_pinjam = p_obj.tanggal_pengajuan.date() if p_obj.tanggal_pengajuan else None
+                self.tanggal_kembali = None
+                self.status = "ditolak"
+                self.keterangan = p_obj.keterangan
+                
+                self.nama_laptop = "Pengajuan Ditolak"
+                self.no_inventori = "-"
+                self.durasi_hari = 0
+                self.tanggal_jatuh_tempo = None
+                self.sisa_hari = None
+                self.kebutuhan_role = p_obj.kebutuhan_role
+                self.kebutuhan_requirement = p_obj.kebutuhan_requirement
+                self.perusahaan = p_obj.perusahaan
+
+        for rp in rejected_pengajuan:
+            riwayat_list.append(MockPeminjaman(rp))
+        
         # Populate laptop details for each peminjaman
+        from inventori.models import Peminjaman as PeminjamanModel
         for p in riwayat_list:
-            laptop = LaptopInventori.objects.filter(id_laptop_inventori=p.id_laptop_inventori).first()
-            if laptop:
-                p.nama_laptop = laptop.nama_laptop
-                p.no_inventori = laptop.no_inventori
-            else:
-                p.nama_laptop = "Unknown Laptop"
-                p.no_inventori = p.id_laptop_inventori
+            if not hasattr(p, 'nama_laptop'):
+                laptop = LaptopInventori.objects.filter(id_laptop_inventori=p.id_laptop_inventori).first()
+                if laptop:
+                    p.nama_laptop = laptop.nama_laptop
+                    p.no_inventori = laptop.no_inventori
+                else:
+                    p.nama_laptop = "Unknown Laptop"
+                    p.no_inventori = p.id_laptop_inventori
+            
+            # Fetch details from Pengajuan model if real peminjaman
+            if not hasattr(p, 'kebutuhan_role'):
+                try:
+                    db_p = PeminjamanModel.objects.select_related('id_pengajuan').get(id_peminjaman=p.id_peminjaman)
+                    if db_p and db_p.id_pengajuan:
+                        p.kebutuhan_role = db_p.id_pengajuan.kebutuhan_role
+                        p.kebutuhan_requirement = db_p.id_pengajuan.kebutuhan_requirement
+                        p.perusahaan = db_p.id_pengajuan.perusahaan
+                    else:
+                        p.kebutuhan_role = "-"
+                        p.kebutuhan_requirement = "-"
+                        p.perusahaan = "-"
+                except Exception:
+                    p.kebutuhan_role = "-"
+                    p.kebutuhan_requirement = "-"
+                    p.perusahaan = "-"
                 
             from datetime import date
-            if p.tanggal_pinjam:
-                if p.tanggal_kembali:
-                    p.durasi_hari = (p.tanggal_kembali - p.tanggal_pinjam).days
+            if not hasattr(p, 'durasi_hari') or p.durasi_hari is None or p.durasi_hari == 0:
+                if p.tanggal_pinjam:
+                    if p.tanggal_kembali:
+                        p.durasi_hari = (p.tanggal_kembali - p.tanggal_pinjam).days
+                    else:
+                        p.durasi_hari = (date.today() - p.tanggal_pinjam).days
                 else:
-                    p.durasi_hari = (date.today() - p.tanggal_pinjam).days
-            else:
-                p.durasi_hari = 0
+                    p.durasi_hari = 0
 
         active_peminjaman = next((r for r in riwayat_list if r.status and r.status.lower() in ['dipinjam', 'aktif']), None)
         active_laptop = None
@@ -2918,6 +3079,10 @@ def riwayatpeminjamanlaptop_talent_view(request):
             except Exception:
                 pass
 
+        # Sort by tanggal_pinjam desc
+        from datetime import date as _date
+        riwayat_list = sorted(riwayat_list, key=lambda x: x.tanggal_pinjam if x.tanggal_pinjam else _date.min, reverse=True)
+
         # Filter search
         if search_query:
             q_lower = search_query.lower()
@@ -2931,10 +3096,39 @@ def riwayatpeminjamanlaptop_talent_view(request):
         # Filter status
         if status_filter:
             status_lower = status_filter.lower()
+            if status_lower == 'dipinjam':
+                allowed = ['dipinjam', 'aktif', 'ready', 'siap_diambil']
+            elif status_lower in ['selesai', 'kembali', 'dikembalikan']:
+                allowed = ['selesai', 'dikembalikan']
+            else:
+                allowed = [status_lower]
             riwayat_list = [
                 p for p in riwayat_list
-                if getattr(p, 'status', '').lower() == status_lower
+                if getattr(p, 'status', '').lower() in allowed
             ]
+
+        # Filter periode
+        if start_date_filter:
+            try:
+                from datetime import datetime as dt
+                sd = dt.strptime(start_date_filter, '%Y-%m-%d').date()
+                riwayat_list = [
+                    p for p in riwayat_list
+                    if p.tanggal_pinjam and p.tanggal_pinjam >= sd
+                ]
+            except ValueError:
+                pass
+
+        if end_date_filter:
+            try:
+                from datetime import datetime as dt
+                ed = dt.strptime(end_date_filter, '%Y-%m-%d').date()
+                riwayat_list = [
+                    p for p in riwayat_list
+                    if p.tanggal_pinjam and p.tanggal_pinjam <= ed
+                ]
+            except ValueError:
+                pass
 
         try:
             per_page = int(request.GET.get('per_page', 10))
@@ -2959,6 +3153,8 @@ def riwayatpeminjamanlaptop_talent_view(request):
             'active_sisa_hari': active_sisa_hari,
             'search_query': search_query,
             'status_filter': status_filter,
+            'start_date_filter': start_date_filter,
+            'end_date_filter': end_date_filter,
             'per_page': per_page,
         }
     except Exception as e:

@@ -429,9 +429,15 @@
                     <!-- Jenis Pengajuan -->
                     <div class="form-group" style="margin-bottom: 28px;">
                         <label>Jenis Pengajuan</label>
+                        <input type="hidden" name="jenis_pengajuan" id="jenis_pengajuan" value="{% if has_active_borrow %}penggantian{% else %}peminjaman_baru{% endif %}">
                         <div class="jenis-toggle">
-                            <button class="jenis-btn active" onclick="setJenis(this)">Peminjaman Baru</button>
-                            <button class="jenis-btn" onclick="setJenis(this)">Penggantian</button>
+                            <button type="button" class="jenis-btn {% if not has_active_borrow %}active{% else %}disabled{% endif %}" 
+                                    {% if has_active_borrow %}style="pointer-events: none; opacity: 0.5; cursor: not-allowed;" disabled{% else %}onclick="setJenis('peminjaman_baru', this)"{% endif %}>
+                                Peminjaman Baru
+                            </button>
+                            <button type="button" class="jenis-btn {% if has_active_borrow %}active{% endif %}" onclick="setJenis('penggantian', this)">
+                                Penggantian
+                            </button>
                         </div>
                     </div>
 
@@ -498,7 +504,8 @@
             }
         }
 
-        function setJenis(el) {
+        function setJenis(val, el) {
+            document.getElementById('jenis_pengajuan').value = val;
             document.querySelectorAll('.jenis-btn').forEach(b => b.classList.remove('active'));
             el.classList.add('active');
         }

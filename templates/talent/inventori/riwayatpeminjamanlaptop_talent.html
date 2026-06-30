@@ -346,8 +346,8 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            background-color: #F1F5F9;
-            color: #334155;
+            background-color: #0b57c6;
+            color: #ffffff;
             padding: 8px 16px;
             border-radius: 8px;
             font-size: 12px;
@@ -359,7 +359,7 @@
         }
 
         .btn-table-action:hover {
-            background-color: #E2E8F0;
+            background-color: #09449c;
         }
 
         /* Pagination & Footer Row */
@@ -494,13 +494,20 @@
             <div style="margin-bottom: 24px;">
                 <form method="GET" action="" style="display: flex; gap: 12px; width: 100%;">
                     {% if per_page %}<input type="hidden" name="per_page" value="{{ per_page }}">{% endif %}
-                    <input type="text" name="q" placeholder="Cari nama laptop, no seri, atau ID..." value="{{ search_query }}" style="flex: 1; padding: 12px 16px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px;">
-                    <select name="status" style="padding: 12px 16px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background: white;">
+                    <input type="text" name="q" placeholder="Cari nama laptop, no seri, atau ID..." value="{{ search_query }}" onchange="this.form.submit()" style="flex: 1; padding: 12px 16px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px;">
+                    <select name="status" onchange="this.form.submit()" style="padding: 12px 16px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background: white;">
                         <option value="">Semua Status</option>
                         <option value="dipinjam" {% if status_filter == 'dipinjam' %}selected{% endif %}>Dipinjam</option>
                         <option value="selesai" {% if status_filter == 'selesai' %}selected{% endif %}>Selesai</option>
                         <option value="dikembalikan" {% if status_filter == 'dikembalikan' %}selected{% endif %}>Dikembalikan</option>
+                        <option value="ditolak" {% if status_filter == 'ditolak' %}selected{% endif %}>Ditolak</option>
                     </select>
+                    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                        <span style="font-size: 13px; font-weight: 600; color: #475569;">Periode:</span>
+                        <input type="date" name="start_date" value="{{ start_date_filter|default:'' }}" onchange="this.form.submit()" style="padding: 12px 16px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; color: #475569; background: white;">
+                        <span style="font-size: 13px; font-weight: 600; color: #475569;">s/d</span>
+                        <input type="date" name="end_date" value="{{ end_date_filter|default:'' }}" onchange="this.form.submit()" style="padding: 12px 16px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; color: #475569; background: white;">
+                    </div>
                     <button type="submit" style="background-color: #0b57c6; color: white; padding: 12px 24px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">Cari</button>
                 </form>
             </div>
@@ -527,10 +534,10 @@
                         </thead>
                         <tbody>
                             {% for p in riwayat_list %}
-                            <tr>
+                            <tr {% if p.status|lower == 'ditolak' or p.status|lower == 'rejected' %}style="background-color: #fff5f5;"{% endif %}>
                                 <td>
                                     <div class="laptop-cell">
-                                        <div class="laptop-icon-sm">
+                                        <div class="laptop-icon-sm" {% if p.status|lower == 'ditolak' or p.status|lower == 'rejected' %}style="background-color: #fee2e2; color: #dc2626;"{% endif %}>
                                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                                 <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
                                                 <line x1="8" y1="21" x2="16" y2="21"></line>
@@ -538,22 +545,45 @@
                                             </svg>
                                         </div>
                                         <div>
-                                            <span class="laptop-name-text">{{ p.nama_laptop }}</span>
-                                            <span class="laptop-id-text">No Seri: {{ p.no_inventori }}</span>
+                                            {% if p.status|lower == 'ditolak' or p.status|lower == 'rejected' %}
+                                                <span class="laptop-name-text" style="color: #dc2626;">{{ p.nama_laptop }}</span>
+                                                <span class="laptop-id-text" style="color: #64748b;">Role: {{ p.kebutuhan_role }}</span>
+                                                <span class="laptop-id-text" style="color: #64748b; font-size: 11px;">Spec: {{ p.kebutuhan_requirement }}</span>
+                                            {% else %}
+                                                <span class="laptop-name-text">{{ p.nama_laptop }}</span>
+                                                <span class="laptop-id-text">No Seri: {{ p.no_inventori }}</span>
+                                            {% endif %}
                                         </div>
                                     </div>
                                 </td>
                                 <td>
-                                    <span class="periode-main-text">{{ p.tanggal_pinjam|date:"d M Y" }} - {% if p.tanggal_kembali %}{{ p.tanggal_kembali|date:"d M Y" }}{% else %}Sekarang{% endif %}</span>
-                                    <span class="periode-sub-text">Ket: {{ p.keterangan|default:"-" }}</span>
+                                    {% if p.status|lower == 'ditolak' or p.status|lower == 'rejected' %}
+                                        <span class="periode-main-text" style="color: #dc2626; font-weight: bold;">Diajukan: {{ p.tanggal_pinjam|date:"d M Y" }}</span>
+                                        <span class="periode-sub-text" style="color: #b91c1c; font-size: 11px; background: #fee2e2; padding: 4px 8px; border-radius: 4px; display: inline-block; margin-top: 4px; font-weight: 500;">Alasan: {{ p.keterangan|default:"-"|truncatechars:20 }}</span>
+                                    {% elif p.status|lower == 'selesai' %}
+                                        <span class="periode-main-text">{{ p.tanggal_pinjam|date:"d M Y" }}</span>
+                                        <span class="periode-sub-text" style="color: #16a34a; font-weight: bold;">Selesai: {{ p.tanggal_kembali|date:"d M Y"|default:"-" }}</span>
+                                    {% else %}
+                                        <span class="periode-main-text">{{ p.tanggal_pinjam|date:"d M Y" }} - {% if p.tanggal_kembali %}{{ p.tanggal_kembali|date:"d M Y" }}{% else %}Sekarang{% endif %}</span>
+                                        <span class="periode-sub-text">Ket: {{ p.keterangan|default:"-"|truncatechars:25 }}</span>
+                                    {% endif %}
                                 </td>
                                 <td>
-                                    <span class="durasi-text">{{ p.durasi_hari }} Hari</span>
+                                    {% if p.status|lower == 'ditolak' or p.status|lower == 'rejected' %}
+                                        <span class="durasi-text">-</span>
+                                    {% else %}
+                                        <span class="durasi-text">{{ p.durasi_hari }} Hari</span>
+                                    {% endif %}
                                 </td>
                                 <td>
-                                    {% if p.status == 'selesai' or p.status == 'dikembalikan' %}
-                                    <span class="badge-dikembalikan">
-                                        <span class="dot"></span>
+                                    {% if p.status == 'selesai' %}
+                                    <span class="badge-dikembalikan" style="background-color: #D1FAE5; color: #065F46; border-color: #A7F3D0;">
+                                        <span class="dot" style="background-color: #10B981;"></span>
+                                        SELESAI
+                                    </span>
+                                    {% elif p.status == 'dikembalikan' %}
+                                    <span class="badge-dikembalikan" style="background-color: #FEF3C7; color: #92400E; border-color: #FDE68A;">
+                                        <span class="dot" style="background-color: #F59E0B;"></span>
                                         DIKEMBALIKAN
                                     </span>
                                     {% elif p.status == 'dipinjam' or p.status == 'aktif' %}
@@ -565,6 +595,11 @@
                                     <span class="badge-dikembalikan" style="background-color: #FEF3C7; color: #B45309;">
                                         <span class="dot" style="background-color: #F59E0B;"></span>
                                         SIAP DIAMBIL
+                                    </span>
+                                    {% elif p.status == 'ditolak' or p.status == 'rejected' %}
+                                    <span class="badge-dikembalikan" style="background-color: #FEE2E2; color: #DC2626; border-color: #FECACA;">
+                                        <span class="dot" style="background-color: #EF4444;"></span>
+                                        DITOLAK
                                     </span>
                                     {% else %}
                                     <span class="badge-dikembalikan" style="background-color: #FEE2E2; color: #991B1B;">
@@ -582,9 +617,23 @@
                                             <button type="submit" class="btn-table-action" style="background-color: #10B981; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: all 0.2s;">Terima Laptop</button>
                                         </form>
                                         {% endif %}
+                                        {% if p.status|lower == 'ditolak' or p.status|lower == 'rejected' or p.status|lower == 'selesai' %}
+                                        <button class="btn-table-action" onclick="showHistoryDetail(
+                                            '{{ p.status|title }}',
+                                            '{{ p.nama_laptop|escapejs }}',
+                                            '{{ p.no_inventori|escapejs }}',
+                                            '{{ p.tanggal_pinjam|date:"d M Y"|default:"-" }}',
+                                            '{{ p.tanggal_kembali|date:"d M Y"|default:"-" }}',
+                                            '{{ p.kebutuhan_role|escapejs }}',
+                                            '{{ p.kebutuhan_requirement|escapejs }}',
+                                            '{{ p.perusahaan|escapejs }}',
+                                            '{{ p.keterangan|default:"-"|escapejs }}'
+                                        )">Detail</button>
+                                        {% else %}
                                         <a href="{% url 'detaillaptop_talent' %}" style="text-decoration:none;">
                                             <button class="btn-table-action">Detail</button>
                                         </a>
+                                        {% endif %}
                                     </div>
                                 </td>
                             </tr>
@@ -634,6 +683,57 @@
 
         </div><!-- End Main Content -->
     </div><!-- End Wrapper -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+    function showHistoryDetail(status, laptopName, noSeri, tanggalPinjam, tanggalKembali, role, requirement, perusahaan, keterangan) {
+        let title = '';
+        let htmlContent = '';
+        let icon = 'info';
+        
+        if (status.toLowerCase() === 'ditolak') {
+            title = '<span style="color:#ef4444; font-weight:700;">Detail Pengajuan Ditolak</span>';
+            icon = 'error';
+            htmlContent = `
+                <div style="text-align: left; font-family: 'Inter', sans-serif; font-size: 14px; line-height: 1.6; color: #475569;">
+                    <div style="background: #fef2f2; border-left: 4px solid #ef4444; padding: 12px 16px; border-radius: 6px; margin-bottom: 20px;">
+                        <strong style="color: #991b1b; display: block; margin-bottom: 4px;">Alasan Penolakan:</strong>
+                        <span style="color: #dc2626; font-weight: 600;">${keterangan || '-'}</span>
+                    </div>
+                    <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                        <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 10px 0; font-weight: 600; color: #1e293b; width: 35%;">Kebutuhan Role</td><td style="padding: 10px 0; color: #475569;">${role}</td></tr>
+                        <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 10px 0; font-weight: 600; color: #1e293b;">Spesifikasi</td><td style="padding: 10px 0; color: #475569;">${requirement}</td></tr>
+                        <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 10px 0; font-weight: 600; color: #1e293b;">Perusahaan</td><td style="padding: 10px 0; color: #475569;">${perusahaan}</td></tr>
+                        <tr><td style="padding: 10px 0; font-weight: 600; color: #1e293b;">Tanggal Pengajuan</td><td style="padding: 10px 0; color: #475569;">${tanggalPinjam}</td></tr>
+                    </table>
+                </div>
+            `;
+        } else {
+            title = '<span style="color:#10b981; font-weight:700;">Detail Peminjaman Selesai</span>';
+            icon = 'success';
+            htmlContent = `
+                <div style="text-align: left; font-family: 'Inter', sans-serif; font-size: 14px; line-height: 1.6; color: #475569;">
+                    <div style="background: #f0fdf4; border-left: 4px solid #10b981; padding: 12px 16px; border-radius: 6px; margin-bottom: 20px;">
+                        <strong style="color: #166534; display: block; margin-bottom: 4px;">Informasi Aset:</strong>
+                        <span style="color: #14532d; font-weight: 600;">${laptopName} (No Seri: ${noSeri})</span>
+                    </div>
+                    <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                        <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 10px 0; font-weight: 600; color: #1e293b; width: 35%;">Tanggal Pinjam</td><td style="padding: 10px 0; color: #475569;">${tanggalPinjam}</td></tr>
+                        <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 10px 0; font-weight: 600; color: #1e293b;">Tanggal Kembali</td><td style="padding: 10px 0; color: #475569;">${tanggalKembali || '-'}</td></tr>
+                        <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 10px 0; font-weight: 600; color: #1e293b;">Kebutuhan Role</td><td style="padding: 10px 0; color: #475569;">${role}</td></tr>
+                        <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 10px 0; font-weight: 600; color: #1e293b;">Keterangan</td><td style="padding: 10px 0; color: #475569;">${keterangan || '-'}</td></tr>
+                    </table>
+                </div>
+            `;
+        }
+    
+        Swal.fire({
+            title: title,
+            html: htmlContent,
+            icon: icon,
+            confirmButtonText: 'Tutup',
+            confirmButtonColor: '#0b57c6'
+        });
+    }
+    </script>
 </body>
-
 </html>

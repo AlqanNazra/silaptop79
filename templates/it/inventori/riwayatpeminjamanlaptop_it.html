@@ -390,13 +390,20 @@
         <div style="margin-bottom: 24px;">
             <form method="GET" action="" style="display: flex; gap: 12px; width: 100%;">
                 {% if per_page %}<input type="hidden" name="per_page" value="{{ per_page }}">{% endif %}
-                <input type="text" name="q" placeholder="Cari nama peminjam, laptop, atau ID..." value="{{ search_query }}" style="flex: 1; padding: 12px 16px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px;">
-                <select name="status" style="padding: 12px 16px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background: white;">
+                <input type="text" name="q" placeholder="Cari nama peminjam, laptop, atau ID..." value="{{ search_query }}" onchange="this.form.submit()" style="flex: 1; padding: 12px 16px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px;">
+                <select name="status" onchange="this.form.submit()" style="padding: 12px 16px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background: white;">
                     <option value="">Semua Status Peminjaman</option>
                     <option value="dipinjam" {% if status_filter == 'dipinjam' %}selected{% endif %}>Dipinjam</option>
                     <option value="kembali" {% if status_filter == 'kembali' %}selected{% endif %}>Kembali</option>
                     <option value="selesai" {% if status_filter == 'selesai' %}selected{% endif %}>Selesai</option>
+                    <option value="ditolak" {% if status_filter == 'ditolak' %}selected{% endif %}>Ditolak</option>
                 </select>
+                <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                    <span style="font-size: 13px; font-weight: 600; color: #475569;">Periode:</span>
+                    <input type="date" name="start_date" value="{{ start_date_filter|default:'' }}" onchange="this.form.submit()" style="padding: 12px 16px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; color: #475569; background: white;">
+                    <span style="font-size: 13px; font-weight: 600; color: #475569;">s/d</span>
+                    <input type="date" name="end_date" value="{{ end_date_filter|default:'' }}" onchange="this.form.submit()" style="padding: 12px 16px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; color: #475569; background: white;">
+                </div>
                 <button type="submit" style="background-color: #0b57c6; color: white; padding: 12px 24px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">Cari</button>
             </form>
         </div>
@@ -415,11 +422,12 @@
                         <th>Durasi</th>
                         <th>Jatuh Tempo</th>
                         <th>Status</th>
+                        <th>Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for p in list_peminjaman %}
-                    <tr>
+                    <tr {% if p.status|lower == 'ditolak' or p.status|lower == 'rejected' %}style="background-color: #fff5f5;"{% endif %}>
                         <td>
                             <div class="user-cell">
                                 <div class="avatar">{{ p.user_nama|slice:":2"|upper }}</div>
@@ -429,26 +437,52 @@
                                 </div>
                             </div>
                         </td>
-                        <td>{{ p.laptop_nama }}</td>
-                        <td>{{ p.tanggal_pinjam|date:"d M Y"|default:"-" }}</td>
                         <td>
-                            {% if p.durasi_hari is not None %}
-                                <span style="font-weight:600; color:#0f172a;">{{ p.durasi_hari }} hari</span>
+                            {% if p.status|lower == 'ditolak' or p.status|lower == 'rejected' %}
+                                <span style="color: #dc2626; font-weight: 700; display: block;">{{ p.laptop_nama }}</span>
+                                <small style="color: #64748b; display: block; font-size: 11px; margin-top: 2px;">Role: {{ p.kebutuhan_role }}</small>
+                                <small style="color: #64748b; display: block; font-size: 11px;">Spec: {{ p.kebutuhan_requirement }}</small>
                             {% else %}
-                                -
+                                {{ p.laptop_nama }}
                             {% endif %}
                         </td>
                         <td>
-                            {% if p.sisa_hari is not None %}
-                                {% if p.sisa_hari < 0 %}
-                                <span style="color:#dc2626; font-weight:700;">Lewat {{ p.sisa_hari|stringformat:"d"|slice:"1:" }} hari</span>
-                                {% elif p.sisa_hari <= 3 %}
-                                <span style="color:#f59e0b; font-weight:700;">{{ p.sisa_hari }} hari lagi</span>
-                                {% else %}
-                                <span style="color:#15803d;">{{ p.sisa_hari }} hari lagi</span>
-                                {% endif %}
+                            {% if p.status|lower == 'ditolak' or p.status|lower == 'rejected' %}
+                                <span style="color: #dc2626; font-weight: 600; display: block;">Diajukan: {{ p.tanggal_pinjam|date:"d M Y" }}</span>
+                                <span style="color: #b91c1c; font-size: 11px; background: #fee2e2; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 4px; font-weight: 500;">Alasan: {{ p.keterangan|default:"-"|truncatechars:20 }}</span>
+                            {% elif p.status|lower == 'selesai' %}
+                                <span style="display: block; font-weight: 500;">{{ p.tanggal_pinjam|date:"d M Y" }}</span>
+                                <small style="color: #16a34a; font-weight: 600; display: block; font-size: 11px; margin-top: 2px;">Selesai: {{ p.tanggal_kembali|date:"d M Y"|default:"-" }}</small>
                             {% else %}
+                                {{ p.tanggal_pinjam|date:"d M Y"|default:"-" }}
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if p.status|lower == 'ditolak' or p.status|lower == 'rejected' %}
+                                -
+                            {% else %}
+                                {% if p.durasi_hari is not None %}
+                                    <span style="font-weight:600; color:#0f172a;">{{ p.durasi_hari }} hari</span>
+                                {% else %}
+                                    -
+                                {% endif %}
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if p.status|lower == 'ditolak' or p.status|lower == 'rejected' %}
                                 <span style="color:#94a3b8;">-</span>
+                            {% else %}
+                                {% if p.sisa_hari is not None %}
+                                    {% if p.sisa_hari < 0 %}
+                                    <span style="color:#dc2626; font-weight:700;">Lewat {{ p.sisa_hari|stringformat:"d"|slice:"1:" }} hari</span>
+                                    {% elif p.sisa_hari <= 3 %}
+                                    <span style="color:#f59e0b; font-weight:700;">{{ p.sisa_hari }} hari lagi</span>
+                                    {% else %}
+                                    <span style="color:#15803d;">{{ p.sisa_hari }} hari lagi</span>
+                                    {% endif %}
+                                {% else %}
+                                    <span style="color:#94a3b8;">-</span>
+                                {% endif %}
                             {% endif %}
                         </td>
                         <td>
@@ -458,14 +492,29 @@
                             <span class="status-pill status-dipinjam"><span class="dot"></span>{{ p.status|title }}</span>
                             {% elif p.status|lower == 'dikembalikan' %}
                             <span class="status-pill status-warning"><span class="dot"></span>Menunggu Konfirmasi</span>
+                            {% elif p.status|lower == 'ditolak' or p.status|lower == 'rejected' %}
+                            <span class="status-pill" style="background-color: #fee2e2; color: #dc2626; border: 1px solid #fecaca;"><span class="dot" style="background-color: #ef4444;"></span>Ditolak</span>
                             {% else %}
                             <span class="status-pill status-warning"><span class="dot"></span>{{ p.status|title }}</span>
                             {% endif %}
                         </td>
+                        <td>
+                            <button class="btn-table-action" onclick="showHistoryDetail(
+                                '{{ p.status|title }}',
+                                '{{ p.laptop_nama|escapejs }}',
+                                '{{ p.no_inventori|escapejs }}',
+                                '{{ p.tanggal_pinjam|date:"d M Y"|default:"-" }}',
+                                '{{ p.tanggal_kembali|date:"d M Y"|default:"-" }}',
+                                '{{ p.kebutuhan_role|escapejs }}',
+                                '{{ p.kebutuhan_requirement|escapejs }}',
+                                '{{ p.perusahaan|escapejs }}',
+                                '{{ p.keterangan|default:"-"|escapejs }}'
+                            )" style="padding: 6px 12px; background: #0b57c6; color: white; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s;">Detail</button>
+                        </td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="6" style="text-align: center; color: #94a3b8; padding: 30px;">Tidak ada riwayat peminjaman.</td>
+                        <td colspan="7" style="text-align: center; color: #94a3b8; padding: 30px;">Tidak ada riwayat peminjaman.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -506,6 +555,57 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+    function showHistoryDetail(status, laptopName, noSeri, tanggalPinjam, tanggalKembali, role, requirement, perusahaan, keterangan) {
+        let title = '';
+        let htmlContent = '';
+        let icon = 'info';
+        
+        if (status.toLowerCase() === 'ditolak') {
+            title = '<span style="color:#ef4444; font-weight:700;">Detail Pengajuan Ditolak</span>';
+            icon = 'error';
+            htmlContent = `
+                <div style="text-align: left; font-family: 'Inter', sans-serif; font-size: 14px; line-height: 1.6; color: #475569;">
+                    <div style="background: #fef2f2; border-left: 4px solid #ef4444; padding: 12px 16px; border-radius: 6px; margin-bottom: 20px;">
+                        <strong style="color: #991b1b; display: block; margin-bottom: 4px;">Alasan Penolakan:</strong>
+                        <span style="color: #dc2626; font-weight: 600;">${keterangan || '-'}</span>
+                    </div>
+                    <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                        <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 10px 0; font-weight: 600; color: #1e293b; width: 35%;">Kebutuhan Role</td><td style="padding: 10px 0; color: #475569;">${role}</td></tr>
+                        <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 10px 0; font-weight: 600; color: #1e293b;">Spesifikasi</td><td style="padding: 10px 0; color: #475569;">${requirement}</td></tr>
+                        <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 10px 0; font-weight: 600; color: #1e293b;">Perusahaan</td><td style="padding: 10px 0; color: #475569;">${perusahaan}</td></tr>
+                        <tr><td style="padding: 10px 0; font-weight: 600; color: #1e293b;">Tanggal Pengajuan</td><td style="padding: 10px 0; color: #475569;">${tanggalPinjam}</td></tr>
+                    </table>
+                </div>
+            `;
+        } else {
+            title = '<span style="color:#10b981; font-weight:700;">Detail Peminjaman Selesai atau Aktif</span>';
+            icon = 'info';
+            htmlContent = `
+                <div style="text-align: left; font-family: 'Inter', sans-serif; font-size: 14px; line-height: 1.6; color: #475569;">
+                    <div style="background: #f0fdf4; border-left: 4px solid #10b981; padding: 12px 16px; border-radius: 6px; margin-bottom: 20px;">
+                        <strong style="color: #166534; display: block; margin-bottom: 4px;">Informasi Aset:</strong>
+                        <span style="color: #14532d; font-weight: 600;">${laptopName} (No Seri: ${noSeri})</span>
+                    </div>
+                    <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                        <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 10px 0; font-weight: 600; color: #1e293b; width: 35%;">Tanggal Pinjam</td><td style="padding: 10px 0; color: #475569;">${tanggalPinjam}</td></tr>
+                        <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 10px 0; font-weight: 600; color: #1e293b;">Tanggal Kembali</td><td style="padding: 10px 0; color: #475569;">${tanggalKembali || '-'}</td></tr>
+                        <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 10px 0; font-weight: 600; color: #1e293b;">Kebutuhan Role</td><td style="padding: 10px 0; color: #475569;">${role}</td></tr>
+                        <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 10px 0; font-weight: 600; color: #1e293b;">Keterangan</td><td style="padding: 10px 0; color: #475569;">${keterangan || '-'}</td></tr>
+                    </table>
+                </div>
+            `;
+        }
+    
+        Swal.fire({
+            title: title,
+            html: htmlContent,
+            icon: icon,
+            confirmButtonText: 'Tutup',
+            confirmButtonColor: '#0b57c6'
+        });
+    }
+    </script>
 </body>
-
 </html>

@@ -604,11 +604,6 @@
                         <i class="fa-solid fa-laptop-medical"></i> Sedang Berlangsung
                         <span style="background: {% if active_tab == 'sedang_berlangsung' %}#dbeafe{% else %}#e2e8f0{% endif %}; color: {% if active_tab == 'sedang_berlangsung' %}#0b57c6{% else %}#475569{% endif %}; padding: 2px 8px; border-radius: 9999px; font-size: 11px; font-weight: bold;">{{ total_sedang_berlangsung }}</span>
                     </a>
-                    <a href="?tab=riwayat_selesai{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}"
-                        style="padding: 12px 16px; font-size: 14px; font-weight: 600; text-decoration: none; color: {% if active_tab == 'riwayat_selesai' %}#0b57c6{% else %}#64748b{% endif %}; border-bottom: 3px solid {% if active_tab == 'riwayat_selesai' %}#0b57c6{% else %}transparent{% endif %}; transition: all 0.2s; display: flex; align-items: center; gap: 8px;">
-                        <i class="fa-solid fa-circle-check"></i> Riwayat Selesai
-                        <span style="background: {% if active_tab == 'riwayat_selesai' %}#dbeafe{% else %}#e2e8f0{% endif %}; color: {% if active_tab == 'riwayat_selesai' %}#0b57c6{% else %}#475569{% endif %}; padding: 2px 8px; border-radius: 9999px; font-size: 11px; font-weight: bold;">{{ total_riwayat_selesai }}</span>
-                    </a>
                 </div>
 
                 <div class="table-header"

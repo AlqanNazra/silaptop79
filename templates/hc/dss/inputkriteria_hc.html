@@ -383,342 +383,305 @@
     <div class="dashboard-wrapper">
         <!-- Load Sidebar -> highlight "Input Kriteria" -->
         {% include 'hc/components/sidebar.html' with active_page='input_kriteria' %}
-    <div class="main-dashboard-content">
-        <h1 class="page-title">Konfigurasi Parameter SAW</h1>
-        <p class="page-subtitle">
-            Pilih Project dan Role Teknologi untuk memuat konfigurasi DSS.
-            Nilai kriteria dan bobot dapat disesuaikan untuk simulasi rekomendasi
-            tanpa mengubah data master sistem.
-        </p>
-        <form method="POST" id="mainForm">
-            {% csrf_token %}
-            <input
-                type="hidden"
-                name="jenis_rekomendasi"
-                id="jenisRekomendasi"
-                value="inventori">
+        <div class="main-dashboard-content">
+            <h1 class="page-title">Konfigurasi Parameter SAW</h1>
+            <p class="page-subtitle">
+                Pilih Project dan Role Teknologi untuk memuat konfigurasi DSS.
+                Nilai kriteria dan bobot dapat disesuaikan untuk simulasi rekomendasi
+                tanpa mengubah data master sistem.
+            </p>
+            <form method="POST" id="mainForm">
+                {% csrf_token %}
+                <input type="hidden" name="jenis_rekomendasi" id="jenisRekomendasi" value="inventori">
 
-            <!-- ================================= -->
-            <!-- PILIHAN SUMBER DATA -->
-            <!-- ================================= -->
+                <!-- ================================= -->
+                <!-- PILIHAN SUMBER DATA -->
+                <!-- ================================= -->
 
-            <div class="card">
+                <div class="card">
 
-                <div class="section-header">
-                    <div class="icon-box">
-                        <i class="fa-solid fa-laptop"></i>
-                    </div>
-                    <h3>Pilihan Sumber Laptop</h3>
-                </div>
-
-                <div style="display:flex; gap:12px; margin-top:12px;">
-
-                    <button
-                        type="button"
-                        id="btnInventori"
-                        class="btn btn-primary">
-                        Inventori
-                    </button>
-
-                    <button
-                        type="button"
-                        id="btnPengadaan"
-                        class="btn btn-secondary">
-                        Pengadaan
-                    </button>
-
-                </div>
-
-            </div>
-
-            <!-- ================================= -->
-            <!-- SECTION A -->
-            <!-- ================================= -->
-
-            <div class="card">
-
-                <div class="section-header">
-                    <div class="icon-box">
-                        <i class="fa-solid fa-user-tie"></i>
+                    <div class="section-header">
+                        <div class="icon-box">
+                            <i class="fa-solid fa-laptop"></i>
+                        </div>
+                        <h3>Pilihan Sumber Laptop</h3>
                     </div>
 
-                    <h3>Section A: Pemilihan Role</h3>
-                </div>
+                    <div style="display:flex; gap:12px; margin-top:12px;">
 
-                <div class="grid-2-cols">
+                        <button type="button" id="btnInventori" class="btn btn-primary">
+                            Inventori
+                        </button>
 
-                    <div class="form-group">
-
-                        <label>Project</label>
-
-                        <select
-                            class="form-control"
-                            name="id_proyek"
-                            id="projectSelect">
-
-                            <option value="">
-                                Pilih Project
-                            </option>
-
-                            {% for project in projects %}
-                            <option
-                                value="{{ project.id_proyek }}"
-                                {% if selected_project|stringformat:"s" == project.id_proyek|stringformat:"s" %}
-                                selected
-                                {% endif %}
-                            >
-                                {{ project.nama_proyek }}
-                            </option>
-                            {% endfor %}
-
-                        </select>
+                        <button type="button" id="btnPengadaan" class="btn btn-secondary">
+                            Pengadaan
+                        </button>
 
                     </div>
 
-                    <div class="form-group">
+                </div>
 
-                        <label>Role</label>
+                <!-- ================================= -->
+                <!-- SECTION A -->
+                <!-- ================================= -->
+
+                <div class="card">
+
+                    <div class="section-header">
+                        <div class="icon-box">
+                            <i class="fa-solid fa-user-tie"></i>
+                        </div>
+
+                        <h3>Section A: Pemilihan Role</h3>
+                    </div>
+
+                    <div class="grid-2-cols">
+
+                        <div class="form-group">
+
+                            <label>Project</label>
+
+                            <select class="form-control" name="id_proyek" id="projectSelect">
+
+                                <option value="">
+                                    Pilih Project
+                                </option>
+
+                                {% for project in projects %}
+                                <option value="{{ project.id_proyek }}" {% if
+                                    selected_project|stringformat:"s"==project.id_proyek|stringformat:"s" %} selected {%
+                                    endif %}>
+                                    {{ project.nama_proyek }}
+                                </option>
+                                {% endfor %}
+
+                            </select>
+
+                        </div>
+
+                        <div class="form-group">
+
+                            <label>Role</label>
 
                             <select class="form-control" name="id_role" id="roleSelect">
                                 <option value="">
                                     Pilih Role
                                 </option>
                             </select>
-                    </div>
-                </div>
-
-                <div class="info-alert">
-                    <i class="fa-solid fa-circle-info"></i>
-                    <p>
-                        Setelah role dipilih, sistem akan memuat konfigurasi
-                        requirement minimum dan bobot DSS berdasarkan role.
-                        Nilai dapat diubah untuk simulasi tanpa mengubah
-                        data master sistem.
-                    </p>
-                </div>
-
-            </div>
-
-            <!-- ================================= -->
-            <!-- SECTION B -->
-            <!-- ================================= -->
-
-            <div class="card">
-
-                <div class="section-header">
-                    <div class="icon-box">
-                        <i class="fa-solid fa-microchip"></i>
+                        </div>
                     </div>
 
-                    <h3>Section B: Minimum Requirement</h3>
+                    <div class="info-alert">
+                        <i class="fa-solid fa-circle-info"></i>
+                        <p>
+                            Setelah role dipilih, sistem akan memuat konfigurasi
+                            requirement minimum dan bobot DSS berdasarkan role.
+                            Nilai dapat diubah untuk simulasi tanpa mengubah
+                            data master sistem.
+                        </p>
+                    </div>
+
                 </div>
 
-                <div class="grid-3-cols">
-                    <div class="form-group">
-                        <label>Minimum Processor</label>
-                        <select
-                            id="minProcessor"
-                            name="id_processor"
-                            class="form-control">
-                            <option value="">
-                                -- Pilih Processor --
-                            </option>
-                            {% for processor in processor_list %}
-                                <option
-                                    value="{{ processor.id_processor }}"
+                <!-- ================================= -->
+                <!-- SECTION B -->
+                <!-- ================================= -->
+
+                <div class="card">
+
+                    <div class="section-header">
+                        <div class="icon-box">
+                            <i class="fa-solid fa-microchip"></i>
+                        </div>
+
+                        <h3>Section B: Minimum Requirement</h3>
+                    </div>
+
+                    <div class="grid-3-cols">
+                        <div class="form-group">
+                            <label>Minimum Processor</label>
+                            <select id="minProcessor" name="id_processor" class="form-control">
+                                <option value="">
+                                    -- Pilih Processor --
+                                </option>
+                                {% for processor in processor_list %}
+                                <option value="{{ processor.id_processor }}"
                                     data-score="{{ processor.processor_score }}"
-                                    data-name="{{ processor.nama_processor }}"
-                                    {% if processor.processor_score == role_requirement.min_processor_score %}
-                                        selected
-                                    {% endif %}
-                                >
+                                    data-name="{{ processor.nama_processor }}" {% if
+                                    processor.processor_score==role_requirement.min_processor_score %} selected {% endif
+                                    %}>
                                     {{ processor.nama_processor }}
                                 </option>
-                            {% endfor %}
-                        </select>
-                        <input type="hidden" id="minProcessorScore" name="min_processor_score"
-                            value="{{ role_requirement.min_processor_score|default:'' }}">
-                    </div>
-                    <div class="form-group">
-                        <label>Minimum RAM (GB)</label>
-                            <input type="number" name="min_ram" class="form-control" id="minRam" value="{{ role_requirement.min_ram|default:'' }}">
-                    </div>
+                                {% endfor %}
+                            </select>
+                            <input type="hidden" id="minProcessorScore" name="min_processor_score"
+                                value="{{ role_requirement.min_processor_score|default:'' }}">
+                        </div>
+                        <div class="form-group">
+                            <label>Minimum RAM (GB)</label>
+                            <input type="number" name="min_ram" class="form-control" id="minRam"
+                                value="{{ role_requirement.min_ram|default:'' }}">
+                        </div>
 
-                    <div class="form-group">
+                        <div class="form-group">
 
-                        <label>Minimum Storage (GB)</label>
+                            <label>Minimum Storage (GB)</label>
 
-                        <input
-                            type="number"
-                            name="min_storage"
-                            class="form-control"
-                            id="minStorage"
-                            value="{{ role_requirement.min_storage|default:'' }}">
+                            <input type="number" name="min_storage" class="form-control" id="minStorage"
+                                value="{{ role_requirement.min_storage|default:'' }}">
 
-                    </div>
+                        </div>
 
-                    <!-- HANYA UNTUK PENGADAAN -->
+                        <!-- HANYA UNTUK PENGADAAN -->
 
-                    <div
-                        class="form-group"
-                        id="minimumHargaContainer"
-                        style="display:none;">
-                        <label>Minimum Harga (Rp)</label>
-                        <input type="number" name="min_harga" id="minHarga" class="form-control" 
-                        min="0" disabled placeholder="Contoh: 10000000">
+                        <div class="form-group" id="minimumHargaContainer" style="display:none;">
+                            <label>Minimum Harga (Rp)</label>
+                            <input type="number" name="min_harga" id="minHarga" class="form-control" min="0" disabled
+                                placeholder="Contoh: 10000000">
+                        </div>
+
                     </div>
 
                 </div>
-
-            </div>
-            <!-- ================================= -->
-            <!-- SECTION C -->
-            <!-- ================================= -->
-            {% comment %} <div class="card">
-                <div class="section-header">
-                    <div class="icon-box">
-                        <i class="fa-solid fa-scale-balanced"></i>
-                    </div>
-                    <h3>Section C: Bobot Kriteria Teknologi</h3>
-                </div>
-
-                <div id="bobotTeknologiContainer">
-
-                    <div class="empty-state">
-                        <i class="fa-solid fa-circle-info"></i>
-                        Pilih proyek dan role terlebih dahulu
+                <!-- ================================= -->
+                <!-- SECTION C -->
+                <!-- ================================= -->
+                {% comment %} <div class="card">
+                    <div class="section-header">
+                        <div class="icon-box">
+                            <i class="fa-solid fa-scale-balanced"></i>
+                        </div>
+                        <h3>Section C: Bobot Kriteria Teknologi</h3>
                     </div>
 
+                    <div id="bobotTeknologiContainer">
+
+                        <div class="empty-state">
+                            <i class="fa-solid fa-circle-info"></i>
+                            Pilih proyek dan role terlebih dahulu
+                        </div>
+
+                    </div>
+                </div> {% endcomment %}
+
+                <!-- ================================= -->
+                <!-- SUMMARY -->
+                <!-- ================================= -->
+
+                <div class="summary-box">
+
+                    <div class="title">
+                        Ringkasan DSS
+                    </div>
+
+                    <ul>
+
+                        <li>
+                            <i class="fa-solid fa-circle dot-blue"></i>
+                            Benefit → Semakin besar semakin baik
+                        </li>
+
+                        <li>
+                            <i class="fa-solid fa-circle dot-cyan"></i>
+                            Cost → Semakin kecil semakin baik
+                        </li>
+
+                        <li>
+                            <i class="fa-solid fa-circle dot-blue"></i>
+                            Nilai dapat dimodifikasi untuk simulasi SAW
+                        </li>
+
+                    </ul>
+
                 </div>
-            </div> {% endcomment %}
 
-            <!-- ================================= -->
-            <!-- SUMMARY -->
-            <!-- ================================= -->
+                <!-- SECTION C TETAP SAMA -->
+                <!-- Tempelkan seluruh Section C milikmu di sini -->
 
-            <div class="summary-box">
+                <div style="margin-top:32px">
 
-                <div class="title">
-                    Ringkasan DSS
+                    <button type="submit" name="action" value="hitung" class="btn btn-secondary">
+                        Hitung Rekomendasi
+                    </button>
+
+                    <button type="button" id="btnDefaultRole" class="btn btn-secondary">
+
+                        Gunakan Bobot Default Role
+
+                    </button>
+                    {% comment %}
+                    <button type="reset" class="btn btn-link">
+
+                        Reset
+
+                    </button> {% endcomment %}
+
                 </div>
 
-                <ul>
+            </form>
+            {{ role_teknologi_data|json_script:"roleTeknologiData" }}
 
-                    <li>
-                        <i class="fa-solid fa-circle dot-blue"></i>
-                        Benefit → Semakin besar semakin baik
-                    </li>
-
-                    <li>
-                        <i class="fa-solid fa-circle dot-cyan"></i>
-                        Cost → Semakin kecil semakin baik
-                    </li>
-
-                    <li>
-                        <i class="fa-solid fa-circle dot-blue"></i>
-                        Nilai dapat dimodifikasi untuk simulasi SAW
-                    </li>
-
-                </ul>
-
-            </div>
-
-            <!-- SECTION C TETAP SAMA -->
-            <!-- Tempelkan seluruh Section C milikmu di sini -->
-
-            <div style="margin-top:32px">
-
-                <button
-                    type="submit"
-                    name="action"
-                    value="hitung"
-                    class="btn btn-secondary">
-                    Hitung Rekomendasi
-                </button>
-
-                <button
-                    type="button"
-                    id="btnDefaultRole"
-                    class="btn btn-secondary">
-
-                    Gunakan Bobot Default Role
-
-                </button>
-                {% comment %} 
-                <button
-                    type="reset"
-                    class="btn btn-link">
-
-                    Reset
-
-                </button> {% endcomment %}
-
-            </div>
-
-        </form>
-        {{ role_teknologi_data|json_script:"roleTeknologiData" }}
+        </div>
 
     </div>
 
-</div>
+    {{ project_role_mapping|json_script:"project-role-data" }}
 
-{{ project_role_mapping|json_script:"project-role-data" }}
+    <script>
+        const projectRoleData =
+            JSON.parse(
+                document.getElementById(
+                    "project-role-data"
+                ).textContent
+            );
+        const roleTeknologiData =
+            JSON.parse(
+                document.getElementById(
+                    "roleTeknologiData"
+                ).textContent || "[]"
+            );
+        const projectSelect = document.getElementById("projectSelect");
+        const roleSelect = document.getElementById("roleSelect");
+        const container = document.getElementById("bobotTeknologiContainer");
 
-<script>
-const projectRoleData =
-    JSON.parse(
-        document.getElementById(
-            "project-role-data"
-        ).textContent
-    );
-const roleTeknologiData =
-    JSON.parse(
-        document.getElementById(
-            "roleTeknologiData"
-        ).textContent || "[]"
-    );
-const projectSelect = document.getElementById("projectSelect");
-const roleSelect = document.getElementById("roleSelect");
-const container = document.getElementById("bobotTeknologiContainer");
-
-function renderBobotTeknologi() {
-        if (!container) {
-        return;
-    }
+        function renderBobotTeknologi() {
+            if (!container) {
+                return;
+            }
 
 
-    const roleId =
-        roleSelect.value;
+            const roleId =
+                roleSelect.value;
 
-    const teknologiList =
-        roleTeknologiData.filter(
-            item =>
-                item.id_role  == roleId
-        );
+            const teknologiList =
+                roleTeknologiData.filter(
+                    item =>
+                        item.id_role == roleId
+                );
 
-    if (
-        teknologiList.length === 0
-    ) {
+            if (
+                teknologiList.length === 0
+            ) {
 
-        container.innerHTML = `
+                container.innerHTML = `
             <div class="empty-state">
                 Tidak ada teknologi
             </div>
         `;
 
-        return;
-    }
+                return;
+            }
 
-    let html = "";
+            let html = "";
 
-    teknologiList.forEach(
-        (item,index) => {
+            teknologiList.forEach(
+                (item, index) => {
 
-            html += `
+                    html += `
             <div class="technology-card">
 
                 <h4>
-                    Teknologi ${index+1}
+                    Teknologi ${index + 1}
                     :
                     ${item.teknologi}
                 </h4>
@@ -795,463 +758,491 @@ function renderBobotTeknologi() {
 
             </div>
             `;
-        }
-    );
-
-    container.innerHTML = html;
-}
-
-function filterRoleByProject() {
-
-    const projectId =
-        projectSelect.value;
-
-    const currentSelectedRole =
-        "{{ selected_role|default:'' }}";
-
-    roleSelect.innerHTML =
-        '<option value="">Pilih Role</option>';
-
-    const roles =
-        projectRoleData.filter(
-            item =>
-                item.id_proyek === projectId
-        );
-    
-    console.log("PROJECT =", projectId);
-    console.log("ROLES FILTER =", roles);
-    console.log("ROLE SELECT =", roleSelect);
-
-    roles.forEach(role => {
-
-        const option =
-            document.createElement(
-                "option"
+                }
             );
 
-        option.value =
-            role.id_role;
-
-        option.textContent =
-            role.nama;
-
-        if (
-            role.id_role ===
-            "{{ selected_role_teknologi|default:'' }}"
-        ){
-            option.selected = true;
+            container.innerHTML = html;
         }
 
-        roleSelect.appendChild(
-            option
-        );
-    });
-}
+        function filterRoleByProject() {
 
-function loadRoleData() {
+            const projectId =
+                projectSelect.value;
 
-    const projectId =
-        projectSelect.value;
+            const currentSelectedRole =
+                "{{ selected_role|default:'' }}";
 
-    const roleId =
-        roleSelect.value;
+            roleSelect.innerHTML =
+                '<option value="">Pilih Role</option>';
 
-    const jenis =
-        document.getElementById(
-            "jenisRekomendasi"
-        ).value;
+            const roles =
+                projectRoleData.filter(
+                    item =>
+                        item.id_proyek === projectId
+                );
 
-    if(projectId && roleId){
+            console.log("PROJECT =", projectId);
+            console.log("ROLES FILTER =", roles);
+            console.log("ROLE SELECT =", roleSelect);
 
-        const url =
-            `${window.location.pathname}?id_proyek=${projectId}&id_role=${roleId}&jenis=${jenis}`;
+            roles.forEach(role => {
 
-        window.location.href =
-            url;
-    }
-}
-const processorSelect =
-    document.getElementById("minProcessor");
+                const option =
+                    document.createElement(
+                        "option"
+                    );
 
-const processorScore =
-    document.getElementById("minProcessorScore");
+                option.value =
+                    role.id_role;
 
-function updateProcessorScore() {
+                option.textContent =
+                    role.nama;
 
-    const selectedOption =
-        processorSelect.options[
-            processorSelect.selectedIndex
-        ];
+                if (
+                    role.id_role ===
+                    "{{ selected_role_teknologi|default:'' }}"
+                ) {
+                    option.selected = true;
+                }
 
-    processorScore.value =
-        selectedOption.dataset.score || "";
-}
-
-if (processorSelect) {
-
-    processorSelect.addEventListener(
-        "change",
-        updateProcessorScore
-    );
-
-    updateProcessorScore();
-}
-
-projectSelect.addEventListener(
-    "change",
-    filterRoleByProject
-);
-
-roleSelect.addEventListener(
-    "change",
-    loadRoleData
-);
-
-document.addEventListener(
-    "DOMContentLoaded",
-    function() {
-
-        const defaultRoleData = {
-
-        minProcessor:
-            document.getElementById(
-                "minProcessor"
-            ).value,
-
-        minRam:
-            document.getElementById(
-                "minRam"
-            ).value,
-
-        minStorage:
-            document.getElementById(
-                "minStorage"
-            ).value,
-
-        minHarga:
-            document.getElementById(
-                "minHarga"
-            ) ?
-            document.getElementById(
-                "minHarga"
-            ).value
-            : "",
-
-        bobotProcessor:
-            document.getElementById("bobotProcessor")?.value || "",
-
-        bobotRam:
-            document.getElementById("bobotRam")?.value || "",
-
-        bobotStorage:
-            document.getElementById("bobotStorage")?.value || "",
-
-        bobotBerat:
-            document.getElementById("bobotBerat")?.value || "",
-
-        bobotLayar:
-            document.getElementById("bobotLayar")?.value || "",
-
-        bobotBaterai:
-            document.getElementById("bobotBaterai")?.value || "",        
-    };
-    filterRoleByProject();
-
-    if (
-    document.getElementById(
-        "bobotTeknologiContainer"
-        )
-    ){
-        renderBobotTeknologi();
-    }
-
-    const btnDefaultRole =
-    document.getElementById(
-        "btnDefaultRole"
-    );
-if(btnDefaultRole){
-    btnDefaultRole.addEventListener(
-        "click",
-        function(){
-
-            document.getElementById(
-                "minProcessor"
-            ).value =
-                defaultRoleData.minProcessor;
-            updateProcessorScore();
-            document.getElementById(
-                "minRam"
-            ).value =
-                defaultRoleData.minRam;
-
-            document.getElementById(
-                "minStorage"
-            ).value =
-                defaultRoleData.minStorage;
-
-            if(
-                document.getElementById(
-                    "minHarga"
-                )
-            ){
-                document.getElementById(
-                    "minHarga"
-                ).value =
-                    defaultRoleData.minHarga;
-            }
-
-            document.getElementById(
-                "bobotProcessor"
-            ).value =
-                defaultRoleData.bobotProcessor;
-
-            document.getElementById(
-                "bobotRam"
-            ).value =
-                defaultRoleData.bobotRam;
-
-            document.getElementById(
-                "bobotStorage"
-            ).value =
-                defaultRoleData.bobotStorage;
-
-            document.getElementById(
-                "bobotBerat"
-            ).value =
-                defaultRoleData.bobotBerat;
-
-            document.getElementById(
-                "bobotLayar"
-            ).value =
-                defaultRoleData.bobotLayar;
-
-            document.getElementById(
-                "bobotBaterai"
-            ).value =
-                defaultRoleData.bobotBaterai;
-
-            Swal.fire({
-                icon: "success",
-                title: "Berhasil",
-                text:
-                    "Konfigurasi dikembalikan ke default role"
+                roleSelect.appendChild(
+                    option
+                );
             });
-
         }
-    );
-}
 
-        const btnInventori =
-            document.getElementById(
-                "btnInventori"
+        function loadRoleData() {
+
+            const projectId =
+                projectSelect.value;
+
+            const roleId =
+                roleSelect.value;
+
+            const jenis =
+                document.getElementById(
+                    "jenisRekomendasi"
+                ).value;
+
+            if (projectId && roleId) {
+
+                const url =
+                    `${window.location.pathname}?id_proyek=${projectId}&id_role=${roleId}&jenis=${jenis}`;
+
+                window.location.href =
+                    url;
+            }
+        }
+        const processorSelect =
+            document.getElementById("minProcessor");
+
+        const processorScore =
+            document.getElementById("minProcessorScore");
+
+        function updateProcessorScore() {
+
+            const selectedOption =
+                processorSelect.options[
+                processorSelect.selectedIndex
+                ];
+
+            processorScore.value =
+                selectedOption.dataset.score || "";
+        }
+
+        if (processorSelect) {
+
+            processorSelect.addEventListener(
+                "change",
+                updateProcessorScore
             );
 
-        const btnPengadaan =
-            document.getElementById(
-                "btnPengadaan"
-            );
-
-        const jenisInput =
-            document.getElementById(
-                "jenisRekomendasi"
-            );
-
-        const hargaContainer =
-            document.getElementById(
-                "minimumHargaContainer"
-            );
-
-        const minHarga =
-            document.getElementById(
-                "minHarga"
-            );
-
-        function setInventori() {
-        console.log("MODE INVENTORI");
-        jenisInput.value = "inventori";
-        if (hargaContainer) {
-            hargaContainer.style.display = "none";
+            updateProcessorScore();
         }
-        if (minHarga) {
-            minHarga.disabled = true;
-            minHarga.value = "";
-        }
-        btnInventori.classList.remove("btn-secondary");
-        btnInventori.classList.add("btn-primary");
-        btnPengadaan.classList.remove("btn-primary");
-        btnPengadaan.classList.add("btn-secondary");
-    }
 
-
-    function setPengadaan() {
-        console.log("MODE PENGADAAN");
-        jenisInput.value = "pengadaan";
-        if (hargaContainer) {
-            hargaContainer.style.display = "block";
-        }
-        if (minHarga) {
-            minHarga.disabled = false;
-        }
-        btnPengadaan.classList.remove("btn-secondary");
-        btnPengadaan.classList.add("btn-primary");
-        btnInventori.classList.remove("btn-primary");
-        btnInventori.classList.add("btn-secondary");
-    }
-    console.log("btnInventori =", btnInventori);
-    console.log("btnPengadaan =", btnPengadaan);
-    console.log("jenisInput =", jenisInput);
-    console.log("hargaContainer =", hargaContainer);
-    console.log("minHarga =", minHarga);
-
-        btnInventori.addEventListener(
-            "click",
-            setInventori
+        projectSelect.addEventListener(
+            "change",
+            filterRoleByProject
         );
 
-        btnPengadaan.addEventListener(
-            "click",
-            setPengadaan
+        roleSelect.addEventListener(
+            "change",
+            loadRoleData
         );
 
-        filterRoleByProject();
+        document.addEventListener(
+            "DOMContentLoaded",
+            function () {
 
-        const currentJenis =
-            new URLSearchParams(
-                window.location.search
-            ).get("jenis");
+                const defaultRoleData = {
 
-        if(currentJenis === "pengadaan"){
-            setPengadaan();
-        }
-        else{
-            setInventori();
-        }
+                    minProcessor:
+                        document.getElementById(
+                            "minProcessor"
+                        ).value,
 
-    }
-);
+                    minRam:
+                        document.getElementById(
+                            "minRam"
+                        ).value,
 
-</script>
-{% if warning_dss %}
-<script>
+                    minStorage:
+                        document.getElementById(
+                            "minStorage"
+                        ).value,
 
-document.addEventListener(
-    "DOMContentLoaded",
-    function(){
+                    minHarga:
+                        document.getElementById(
+                            "minHarga"
+                        ) ?
+                            document.getElementById(
+                                "minHarga"
+                            ).value
+                            : "",
 
-        Swal.fire({
+                    bobotProcessor:
+                        document.getElementById("bobotProcessor")?.value || "",
 
-            icon: "warning",
+                    bobotRam:
+                        document.getElementById("bobotRam")?.value || "",
 
-            title:
-                "Tidak Ada Laptop Sesuai Role",
+                    bobotStorage:
+                        document.getElementById("bobotStorage")?.value || "",
 
-            text:
-                "{{ warning_dss|escapejs }}",
+                    bobotBerat:
+                        document.getElementById("bobotBerat")?.value || "",
 
-            confirmButtonText:
-                "Lihat Alternatif"
+                    bobotLayar:
+                        document.getElementById("bobotLayar")?.value || "",
 
-        });
+                    bobotBaterai:
+                        document.getElementById("bobotBaterai")?.value || "",
+                };
+                filterRoleByProject();
 
-    }
-);
-console.log("PROJECT ROLE DATA",projectRoleData);
-console.log("PROJECT",projectId);
-console.log(
-    "ROLES",
-    roles
-);
-</script>
-{% endif %}
+                if (
+                    document.getElementById(
+                        "bobotTeknologiContainer"
+                    )
+                ) {
+                    renderBobotTeknologi();
+                }
 
-<!-- DSS Loading Progress Modal Overlay -->
-<div id="dssLoadingModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(6px); z-index: 99999; justify-content: center; align-items: center;">
-    <div style="background: white; padding: 36px 32px; border-radius: 20px; max-width: 460px; width: 90%; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); text-align: center; font-family: 'Inter', system-ui, -apple-system, sans-serif; animation: popIn 0.25s ease-out;">
-        
-        <!-- Animated Icon Container -->
-        <div style="position: relative; width: 80px; height: 80px; margin: 0 auto 24px;">
-            <div style="position: absolute; inset: 0; border-radius: 50%; border: 4px solid #e2e8f0; border-top-color: #0b57c6; animation: spin 1s linear infinite;"></div>
-            <div style="position: absolute; inset: 10px; background: #eff6ff; color: #0b57c6; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px;">
-                <i class="fa-solid fa-calculator"></i>
+                const btnDefaultRole =
+                    document.getElementById(
+                        "btnDefaultRole"
+                    );
+                if (btnDefaultRole) {
+                    btnDefaultRole.addEventListener(
+                        "click",
+                        function () {
+
+                            document.getElementById(
+                                "minProcessor"
+                            ).value =
+                                defaultRoleData.minProcessor;
+                            updateProcessorScore();
+                            document.getElementById(
+                                "minRam"
+                            ).value =
+                                defaultRoleData.minRam;
+
+                            document.getElementById(
+                                "minStorage"
+                            ).value =
+                                defaultRoleData.minStorage;
+
+                            if (
+                                document.getElementById(
+                                    "minHarga"
+                                )
+                            ) {
+                                document.getElementById(
+                                    "minHarga"
+                                ).value =
+                                    defaultRoleData.minHarga;
+                            }
+
+                            document.getElementById(
+                                "bobotProcessor"
+                            ).value =
+                                defaultRoleData.bobotProcessor;
+
+                            document.getElementById(
+                                "bobotRam"
+                            ).value =
+                                defaultRoleData.bobotRam;
+
+                            document.getElementById(
+                                "bobotStorage"
+                            ).value =
+                                defaultRoleData.bobotStorage;
+
+                            document.getElementById(
+                                "bobotBerat"
+                            ).value =
+                                defaultRoleData.bobotBerat;
+
+                            document.getElementById(
+                                "bobotLayar"
+                            ).value =
+                                defaultRoleData.bobotLayar;
+
+                            document.getElementById(
+                                "bobotBaterai"
+                            ).value =
+                                defaultRoleData.bobotBaterai;
+
+                            Swal.fire({
+                                icon: "success",
+                                title: "Berhasil",
+                                text:
+                                    "Konfigurasi dikembalikan ke default role"
+                            });
+
+                        }
+                    );
+                }
+
+                const btnInventori =
+                    document.getElementById(
+                        "btnInventori"
+                    );
+
+                const btnPengadaan =
+                    document.getElementById(
+                        "btnPengadaan"
+                    );
+
+                const jenisInput =
+                    document.getElementById(
+                        "jenisRekomendasi"
+                    );
+
+                const hargaContainer =
+                    document.getElementById(
+                        "minimumHargaContainer"
+                    );
+
+                const minHarga =
+                    document.getElementById(
+                        "minHarga"
+                    );
+
+                function setInventori() {
+                    console.log("MODE INVENTORI");
+                    jenisInput.value = "inventori";
+                    if (hargaContainer) {
+                        hargaContainer.style.display = "none";
+                    }
+                    if (minHarga) {
+                        minHarga.disabled = true;
+                        minHarga.value = "";
+                    }
+                    btnInventori.classList.remove("btn-secondary");
+                    btnInventori.classList.add("btn-primary");
+                    btnPengadaan.classList.remove("btn-primary");
+                    btnPengadaan.classList.add("btn-secondary");
+                }
+
+
+                function setPengadaan() {
+                    console.log("MODE PENGADAAN");
+                    jenisInput.value = "pengadaan";
+                    if (hargaContainer) {
+                        hargaContainer.style.display = "block";
+                    }
+                    if (minHarga) {
+                        minHarga.disabled = false;
+                    }
+                    btnPengadaan.classList.remove("btn-secondary");
+                    btnPengadaan.classList.add("btn-primary");
+                    btnInventori.classList.remove("btn-primary");
+                    btnInventori.classList.add("btn-secondary");
+                }
+                console.log("btnInventori =", btnInventori);
+                console.log("btnPengadaan =", btnPengadaan);
+                console.log("jenisInput =", jenisInput);
+                console.log("hargaContainer =", hargaContainer);
+                console.log("minHarga =", minHarga);
+
+                btnInventori.addEventListener(
+                    "click",
+                    setInventori
+                );
+
+                btnPengadaan.addEventListener(
+                    "click",
+                    setPengadaan
+                );
+
+                filterRoleByProject();
+
+                const currentJenis =
+                    new URLSearchParams(
+                        window.location.search
+                    ).get("jenis");
+
+                if (currentJenis === "pengadaan") {
+                    setPengadaan();
+                }
+                else {
+                    setInventori();
+                }
+
+            }
+        );
+
+    </script>
+    {% if warning_dss %}
+    <script>
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            function () {
+
+                Swal.fire({
+
+                    icon: "warning",
+
+                    title:
+                        "Tidak Ada Laptop Sesuai Role",
+
+                    text:
+                        "{{ warning_dss|escapejs }}",
+
+                    confirmButtonText:
+                        "Lihat Alternatif"
+
+                });
+
+            }
+        );
+        console.log("PROJECT ROLE DATA", projectRoleData);
+        console.log("PROJECT", projectId);
+        console.log(
+            "ROLES",
+            roles
+        );
+    </script>
+    {% endif %}
+
+    <!-- DSS Loading Progress Modal Overlay -->
+    <div id="dssLoadingModal"
+        style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(6px); z-index: 99999; justify-content: center; align-items: center;">
+        <div
+            style="background: white; padding: 36px 32px; border-radius: 20px; max-width: 460px; width: 90%; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); text-align: center; font-family: 'Inter', system-ui, -apple-system, sans-serif; animation: popIn 0.25s ease-out;">
+
+            <!-- Animated Icon Container -->
+            <div style="position: relative; width: 80px; height: 80px; margin: 0 auto 24px;">
+                <div
+                    style="position: absolute; inset: 0; border-radius: 50%; border: 4px solid #e2e8f0; border-top-color: #0b57c6; animation: spin 1s linear infinite;">
+                </div>
+                <div
+                    style="position: absolute; inset: 10px; background: #eff6ff; color: #0b57c6; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px;">
+                    <i class="fa-solid fa-calculator"></i>
+                </div>
+            </div>
+
+            <h3 style="margin: 0 0 8px; font-size: 20px; font-weight: 700; color: #1e293b;">Memproses Rekomendasi DSS
+            </h3>
+            <p id="dssStatusText"
+                style="margin: 0 0 24px; font-size: 14px; color: #64748b; font-weight: 500; min-height: 42px; display: flex; align-items: center; justify-content: center; line-height: 1.5;">
+                Menyiapkan data kriteria dan alternatif laptop...
+            </p>
+
+            <!-- Progress Bar Container -->
+            <div
+                style="width: 100%; background: #f1f5f9; height: 10px; border-radius: 20px; overflow: hidden; margin-bottom: 12px;">
+                <div id="dssProgressBar"
+                    style="width: 5%; height: 100%; background: linear-gradient(90deg, #0b57c6, #2563eb); border-radius: 20px; transition: width 0.3s ease;">
+                </div>
+            </div>
+
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #94a3b8; font-weight: 600;">
+                <span>Sistem DSS (SWARA + SAW)</span>
+                <span id="dssProgressPercent">5%</span>
             </div>
         </div>
-
-        <h3 style="margin: 0 0 8px; font-size: 20px; font-weight: 700; color: #1e293b;">Memproses Rekomendasi DSS</h3>
-        <p id="dssStatusText" style="margin: 0 0 24px; font-size: 14px; color: #64748b; font-weight: 500; min-height: 42px; display: flex; align-items: center; justify-content: center; line-height: 1.5;">
-            Menyiapkan data kriteria dan alternatif laptop...
-        </p>
-
-        <!-- Progress Bar Container -->
-        <div style="width: 100%; background: #f1f5f9; height: 10px; border-radius: 20px; overflow: hidden; margin-bottom: 12px;">
-            <div id="dssProgressBar" style="width: 5%; height: 100%; background: linear-gradient(90deg, #0b57c6, #2563eb); border-radius: 20px; transition: width 0.3s ease;"></div>
-        </div>
-
-        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #94a3b8; font-weight: 600;">
-            <span>Sistem DSS (SWARA + SAW)</span>
-            <span id="dssProgressPercent">5%</span>
-        </div>
     </div>
-</div>
 
-<style>
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-@keyframes popIn {
-    0% { opacity: 0; transform: scale(0.9); }
-    100% { opacity: 1; transform: scale(1); }
-}
-</style>
-
-<script>
-function startDSSLoading() {
-    const modal = document.getElementById("dssLoadingModal");
-    const progressBar = document.getElementById("dssProgressBar");
-    const progressPercent = document.getElementById("dssProgressPercent");
-    const statusText = document.getElementById("dssStatusText");
-
-    if (!modal) return;
-    modal.style.display = "flex";
-
-    const steps = [
-        { pct: 20, text: "Memuat data alternatif & kriteria laptop..." },
-        { pct: 45, text: "Menghitung pembobotan kriteria SWARA..." },
-        { pct: 70, text: "Melakukan normalisasi matriks SAW..." },
-        { pct: 88, text: "Menghitung skor akhir & merangking laptop..." },
-        { pct: 98, text: "Menyusun halaman hasil rekomendasi..." }
-    ];
-
-    let stepIdx = 0;
-    let currentPct = 5;
-
-    const interval = setInterval(function() {
-        if (stepIdx < steps.length) {
-            const target = steps[stepIdx];
-            if (currentPct < target.pct) {
-                currentPct += Math.floor(Math.random() * 4) + 3;
-                if (currentPct > target.pct) currentPct = target.pct;
-            } else {
-                statusText.innerText = target.text;
-                stepIdx++;
+    <style>
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
             }
-        } else {
-            if (currentPct < 99) currentPct += 1;
-        }
-        progressBar.style.width = currentPct + "%";
-        progressPercent.innerText = currentPct + "%";
-    }, 100);
-}
 
-document.addEventListener("DOMContentLoaded", function() {
-    const mainForm = document.getElementById("mainForm");
-    if (mainForm) {
-        mainForm.addEventListener("submit", function(e) {
-            startDSSLoading();
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes popIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+    </style>
+
+    <script>
+        function startDSSLoading() {
+            const modal = document.getElementById("dssLoadingModal");
+            const progressBar = document.getElementById("dssProgressBar");
+            const progressPercent = document.getElementById("dssProgressPercent");
+            const statusText = document.getElementById("dssStatusText");
+
+            if (!modal) return;
+            modal.style.display = "flex";
+
+            const steps = [
+                { pct: 20, text: "Memuat data alternatif & kriteria laptop..." },
+                { pct: 45, text: "Menghitung pembobotan kriteria SWARA..." },
+                { pct: 70, text: "Melakukan normalisasi matriks SAW..." },
+                { pct: 88, text: "Menghitung skor akhir & merangking laptop..." },
+                { pct: 98, text: "Menyusun halaman hasil rekomendasi..." }
+            ];
+
+            let stepIdx = 0;
+            let currentPct = 5;
+
+            const interval = setInterval(function () {
+                if (stepIdx < steps.length) {
+                    const target = steps[stepIdx];
+                    if (currentPct < target.pct) {
+                        currentPct += Math.floor(Math.random() * 4) + 3;
+                        if (currentPct > target.pct) currentPct = target.pct;
+                    } else {
+                        statusText.innerText = target.text;
+                        stepIdx++;
+                    }
+                } else {
+                    if (currentPct < 99) currentPct += 1;
+                }
+                progressBar.style.width = currentPct + "%";
+                progressPercent.innerText = currentPct + "%";
+            }, 100);
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const mainForm = document.getElementById("mainForm");
+            if (mainForm) {
+                mainForm.addEventListener("submit", function (e) {
+                    startDSSLoading();
+                });
+            }
         });
-    }
-});
-</script>
+    </script>
 
 </body>
+
+</html>
+</body>
+
 </html>

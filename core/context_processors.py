@@ -17,12 +17,25 @@ def notification_counts(request):
         p_kembali_it = Peminjaman.objects.filter(status='dikembalikan').count()
         total_it = p_menunggu_it + p_kembali_it
 
+        has_active_borrow = False
+        if request.user.is_authenticated:
+            id_user = getattr(request.user, 'id_user', None)
+            if not id_user:
+                id_user = getattr(request.user, 'username', None)
+            if id_user:
+                has_active_borrow = Peminjaman.objects.filter(
+                    id_user=id_user,
+                    status__in=['dipinjam', 'aktif']
+                ).exists()
+
         return {
             'total_notifikasi_hc': total_hc,
             'total_notifikasi_it': total_it,
+            'has_active_borrow': has_active_borrow,
         }
     except Exception:
         return {
             'total_notifikasi_hc': 0,
             'total_notifikasi_it': 0,
+            'has_active_borrow': False,
         }

@@ -149,7 +149,7 @@ def pengajuan_page_view(request):
             p.user_nama = users_dict.get(p.id_user, f"User {p.id_user}")
             
             p_loans = peminjaman_map.get(p.id_pengajuan, [])
-            is_approved = p.status and p.status.lower() in ['disetujui', 'approved']
+            is_approved = p.status and p.status.lower() in ['disetujui', 'approved', 'selesai']
             is_rejected = p.status and p.status.lower() in ['ditolak', 'rejected']
             is_pending = not is_approved and not is_rejected
             
@@ -168,16 +168,16 @@ def pengajuan_page_view(request):
                 belum_disetujui_list.append(p)
                 p.status_display = 'menunggu'
             else:
-                has_ready = any(l.status.lower() == 'ready' for l in p_loans)
-                if has_ready:
-                    # Jika belum diambil oleh talent, hold dulu di belum_disetujui_list dengan status 'belum diambil'
-                    belum_disetujui_list.append(p)
-                    p.status_display = 'belum diambil'
+                has_completed = (p.status.lower() == 'selesai') or any(l.status.lower() == 'selesai' for l in p_loans)
+                if has_completed:
+                    riwayat_selesai_list.append(p)
+                    p.status_display = 'selesai'
                 else:
-                    has_completed = any(l.status.lower() == 'selesai' for l in p_loans)
-                    if has_completed:
-                        riwayat_selesai_list.append(p)
-                        p.status_display = 'selesai'
+                    has_ready = any(l.status.lower() == 'ready' for l in p_loans)
+                    if has_ready:
+                        # Jika belum diambil oleh talent, hold dulu di belum_disetujui_list dengan status 'belum diambil'
+                        belum_disetujui_list.append(p)
+                        p.status_display = 'belum diambil'
                     else:
                         sedang_berlangsung_list.append(p)
                         has_returned = any(l.status.lower() == 'dikembalikan' for l in p_loans)
@@ -639,6 +639,9 @@ def riwayatpeminjamanlaptop_hc_view(request, id_laptop=None):
     
     search_query = request.GET.get('q', '').strip()
     status_filter = request.GET.get('status', '').strip()
+    start_date_filter = request.GET.get('start_date', '').strip()
+    end_date_filter = request.GET.get('end_date', '').strip()
+    periode_filter = request.GET.get('periode', '').strip()
     laptop_id = id_laptop or request.GET.get('laptop_id', '').strip()
 
     try:
@@ -658,31 +661,83 @@ def riwayatpeminjamanlaptop_hc_view(request, id_laptop=None):
             pm.id_peminjaman: pm for pm in PeminjamanModel.objects.all()
         }
         
+        # Fetch rejected pengajuan and merge into list_peminjaman
+        from inventori.models import Pengajuan
+        rejected_pengajuan = Pengajuan.objects.filter(status__in=['ditolak', 'rejected'])
+        
+        class MockPeminjaman:
+            def __init__(self, p_obj, users_dict, users_role_dict):
+                self.id_peminjaman = p_obj.id_pengajuan
+                self.id_pengajuan = p_obj
+                self.id_user = p_obj.id_user_id
+                self.id_laptop_inventori = "-"
+                self.tanggal_pinjam = p_obj.tanggal_pengajuan.date() if p_obj.tanggal_pengajuan else None
+                self.tanggal_kembali = None
+                self.status = "ditolak"
+                self.keterangan = p_obj.keterangan
+                
+                self.user_nama = users_dict.get(p_obj.id_user_id, str(p_obj.id_user))
+                self.user_role = users_role_dict.get(p_obj.id_user_id, "-")
+                self.laptop_nama = "Pengajuan Ditolak"
+                self.no_inventori = "-"
+                self.durasi_hari = None
+                self.tanggal_jatuh_tempo = None
+                self.sisa_hari = None
+                self.kebutuhan_role = p_obj.kebutuhan_role
+                self.kebutuhan_requirement = p_obj.kebutuhan_requirement
+                self.perusahaan = p_obj.perusahaan
+
+        for rp in rejected_pengajuan:
+            list_peminjaman.append(MockPeminjaman(rp, users_dict, users_role_dict))
+        
         for p in list_peminjaman:
-            p.user_nama = users_dict.get(p.id_user, p.id_user)
-            p.user_role = users_role_dict.get(p.id_user, "-")
-            p.laptop_nama = laptops_dict.get(p.id_laptop_inventori, p.id_laptop_inventori)
+            if not hasattr(p, 'user_nama'):
+                p.user_nama = users_dict.get(p.id_user, p.id_user)
+            if not hasattr(p, 'user_role'):
+                p.user_role = users_role_dict.get(p.id_user, "-")
+            if not hasattr(p, 'laptop_nama'):
+                p.laptop_nama = laptops_dict.get(p.id_laptop_inventori, p.id_laptop_inventori)
+            
+            # Fetch details from Pengajuan model if real peminjaman
+            if not hasattr(p, 'kebutuhan_role'):
+                try:
+                    db_p = db_peminjaman_map.get(p.id_peminjaman)
+                    if db_p and db_p.id_pengajuan:
+                        p.kebutuhan_role = db_p.id_pengajuan.kebutuhan_role
+                        p.kebutuhan_requirement = db_p.id_pengajuan.kebutuhan_requirement
+                        p.perusahaan = db_p.id_pengajuan.perusahaan
+                    else:
+                        p.kebutuhan_role = "-"
+                        p.kebutuhan_requirement = "-"
+                        p.perusahaan = "-"
+                except Exception:
+                    p.kebutuhan_role = "-"
+                    p.kebutuhan_requirement = "-"
+                    p.perusahaan = "-"
+
             # Kalkulasi durasi (TC-TRX-16)
-            if p.tanggal_pinjam:
-                if p.tanggal_kembali:
-                    p.durasi_hari = (p.tanggal_kembali - p.tanggal_pinjam).days
+            if not hasattr(p, 'durasi_hari') or p.durasi_hari is None:
+                if p.tanggal_pinjam:
+                    if p.tanggal_kembali:
+                        p.durasi_hari = (p.tanggal_kembali - p.tanggal_pinjam).days
+                    else:
+                        p.durasi_hari = (today_hc - p.tanggal_pinjam).days
                 else:
-                    p.durasi_hari = (today_hc - p.tanggal_pinjam).days
-            else:
-                p.durasi_hari = None
+                    p.durasi_hari = None
             # Ambil jatuh tempo dari DB dan hitung sisa (TC-TRX-17)
-            db_p = db_peminjaman_map.get(p.id_peminjaman)
-            p.tanggal_jatuh_tempo = db_p.tanggal_jatuh_tempo if db_p else None
-            if p.tanggal_jatuh_tempo:
-                p.sisa_hari = (p.tanggal_jatuh_tempo - today_hc).days
-            else:
-                p.sisa_hari = None
+            if not hasattr(p, 'tanggal_jatuh_tempo') or p.tanggal_jatuh_tempo is None:
+                db_p = db_peminjaman_map.get(p.id_peminjaman)
+                p.tanggal_jatuh_tempo = db_p.tanggal_jatuh_tempo if db_p else None
+                if p.tanggal_jatuh_tempo:
+                    p.sisa_hari = (p.tanggal_jatuh_tempo - today_hc).days
+                else:
+                    p.sisa_hari = None
             
         total_peminjaman = len(list_peminjaman)
         peminjam_terakhir = "-"
         
         # Sort by tanggal_pinjam desc
-        sorted_p = sorted(list_peminjaman, key=lambda x: str(x.tanggal_pinjam) if x.tanggal_pinjam else "", reverse=True)
+        sorted_p = sorted(list_peminjaman, key=lambda x: x.tanggal_pinjam if x.tanggal_pinjam else _dt.date.min, reverse=True)
         if sorted_p:
             peminjam_terakhir = sorted_p[0].user_nama
             
@@ -707,9 +762,44 @@ def riwayatpeminjamanlaptop_hc_view(request, id_laptop=None):
             ]
 
         if status_filter:
+            status_lower = status_filter.lower()
+            if status_lower == 'dipinjam':
+                allowed = ['dipinjam', 'aktif', 'ready', 'siap_diambil']
+            elif status_lower in ['selesai', 'kembali']:
+                allowed = ['selesai', 'dikembalikan']
+            else:
+                allowed = [status_lower]
             filtered_p = [
                 p for p in filtered_p
-                if getattr(p, 'status', '').lower() == status_filter.lower()
+                if getattr(p, 'status', '').lower() in allowed
+            ]
+
+        if start_date_filter:
+            try:
+                sd = _dt.datetime.strptime(start_date_filter, '%Y-%m-%d').date()
+                filtered_p = [
+                    p for p in filtered_p
+                    if p.tanggal_pinjam and p.tanggal_pinjam >= sd
+                ]
+            except ValueError:
+                pass
+
+        if end_date_filter:
+            try:
+                ed = _dt.datetime.strptime(end_date_filter, '%Y-%m-%d').date()
+                filtered_p = [
+                    p for p in filtered_p
+                    if p.tanggal_pinjam and p.tanggal_pinjam <= ed
+                ]
+            except ValueError:
+                pass
+
+        if periode_filter and periode_filter.isdigit():
+            days_ago = int(periode_filter)
+            cutoff_date = today_hc - _dt.timedelta(days=days_ago)
+            filtered_p = [
+                p for p in filtered_p
+                if p.tanggal_pinjam and p.tanggal_pinjam >= cutoff_date
             ]
 
         # Pagination
@@ -731,6 +821,9 @@ def riwayatpeminjamanlaptop_hc_view(request, id_laptop=None):
             'peminjam_terakhir': peminjam_terakhir,
             'search_query': search_query,
             'status_filter': status_filter,
+            'start_date_filter': start_date_filter,
+            'end_date_filter': end_date_filter,
+            'periode_filter': periode_filter,
             'laptop_id': laptop_id,
             'per_page': per_page,
         }
