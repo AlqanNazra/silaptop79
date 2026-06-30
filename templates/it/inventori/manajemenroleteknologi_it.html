@@ -264,12 +264,12 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            background: #ffffff;
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
-            padding: 8px 12px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 20px;
+            padding: 8px 16px;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 13px;
             font-weight: 600;
             color: #475569;
             user-select: none;
@@ -282,8 +282,13 @@
         }
 
         .tech-checkbox-item input {
-            margin: 0;
-            cursor: pointer;
+            display: none;
+        }
+
+        .tech-checkbox-item.checked {
+            background-color: #eff6ff;
+            border-color: #0b57c6;
+            color: #0b57c6;
         }
 
         .btn-submit {
@@ -528,8 +533,8 @@
             overflow-y: auto;
         }
         #edit_bobot_container{
-            max-height: 300px;
-            overflow-y: auto;
+            max-height: none;
+            overflow-y: visible;
         }
         #editRoleModal .modal-box{
             max-width: 1000px;
@@ -539,8 +544,8 @@
         }
 
         #edit_bobot_container{
-            max-height: 300px;
-            overflow-y: auto;
+            max-height: none;
+            overflow-y: visible;
         }
 
         #edit_swara_container{
@@ -620,6 +625,263 @@
             height:32px;
             border-radius:50%;
             cursor:pointer;
+        }
+
+        /* Collapsible SWARA Card Styles */
+        .teknologi-swara-card.collapsed .swara-tech-layout {
+            display: none !important;
+        }
+        .teknologi-swara-card.collapsed .toggle-chevron {
+            transform: rotate(-90deg);
+        }
+        .teknologi-swara-card.collapsed h3 {
+            border-bottom: none !important;
+            margin-bottom: 0 !important;
+            padding-bottom: 0 !important;
+        }
+
+        /* SWARA Specific Styles for Edit Modal */
+        .kriteria-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .kriteria-item {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 16px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .kriteria-item:hover {
+            border-color: #cbd5e1;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+        }
+
+        .kriteria-item.dragging {
+            opacity: 0.5;
+            background: #f8fafc;
+        }
+
+        .kriteria-header-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .drag-handle {
+            color: #94a3b8;
+            cursor: grab;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            padding: 4px;
+            user-select: none;
+        }
+        
+        .drag-handle:active {
+            cursor: grabbing;
+        }
+
+        .kriteria-number {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #f1f5f9;
+            color: #475569;
+            font-size: 13px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .kriteria-item:first-child .kriteria-number {
+            background: #0b57c6;
+            color: #ffffff;
+        }
+
+        .kriteria-details {
+            flex: 1;
+        }
+
+        .kriteria-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: #1e293b;
+            display: block;
+        }
+
+        .kriteria-desc {
+            font-size: 11px;
+            color: #64748b;
+        }
+
+        .benchmark-badge {
+            background-color: #d1fae5;
+            color: #065f46;
+            padding: 3px 8px;
+            border-radius: 20px;
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .relation-text {
+            font-size: 11px;
+            color: #64748b;
+            margin-left: auto;
+        }
+
+        .relation-text strong {
+            color: #0b57c6;
+        }
+
+        .order-buttons {
+            display: flex;
+            gap: 4px;
+            margin-left: 8px;
+        }
+
+        .order-btn {
+            background: #f1f5f9;
+            color: #475569;
+            border: none;
+            border-radius: 4px;
+            width: 24px;
+            height: 24px;
+            font-size: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .order-btn:hover {
+            background: #e2e8f0;
+            color: #1e293b;
+        }
+
+        .slider-section {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 12px 16px;
+            border: 1px solid #edf2f7;
+        }
+
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        .slider-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: #475569;
+            text-transform: uppercase;
+        }
+
+        .slider-value {
+            font-size: 14px;
+            font-weight: 700;
+            color: #0b57c6;
+        }
+
+        .swara-slider {
+            width: 100%;
+            height: 6px;
+            background: #cbd5e1;
+            border-radius: 5px;
+            outline: none;
+            -webkit-appearance: none;
+            margin: 8px 0 4px 0;
+        }
+
+        .swara-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #0b57c6;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        .swara-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .slider-markers {
+            display: flex;
+            justify-content: space-between;
+            padding: 0 2px;
+            margin-top: 4px;
+        }
+
+        .slider-marker-label {
+            font-size: 9px;
+            font-weight: 600;
+            color: #94a3b8;
+        }
+
+        .live-weight-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .live-weight-table th {
+            text-align: left;
+            padding: 10px 12px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #64748b;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .live-weight-table td {
+            padding: 12px;
+            font-size: 13px;
+            color: #334155;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .live-weight-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .live-weight-table td.weight-cell {
+            font-weight: 700;
+            color: #0b57c6;
+            text-align: right;
+        }
+
+        .accuracy-row {
+            background-color: #f8fafc;
+            border-top: 2px solid #e2e8f0;
+        }
+
+        .accuracy-row td {
+            font-weight: 700;
+            color: #0f172a;
+            padding: 14px 12px;
+        }
+
+        .accuracy-val {
+            text-align: right;
+            color: #0b57c6;
+            font-weight: 800;
         }
     </style>
 </head>
@@ -726,16 +988,9 @@
                             </td>
                             <td align="center">
                                 <div class="action-btns">
-                                    <button class="btn-action btn-edit" type="button"
-                                        onclick="openEditRoleModal(
-                                            '{{ role.id_role }}',
-                                            '{{ role.nama_role }}',
-                                            '{{ role.min_ram }}',
-                                            '{{ role.min_storage }}',
-                                            '{{ role.min_processor_score }}'
-                                        )">
-                                        <i class="fa-solid fa-pen"></i> Edit
-                                    </button>
+                                     <a class="btn-action btn-edit" style="text-decoration:none;" href="{% url 'edit_role_it' role.id_role %}">
+                                         <i class="fa-solid fa-pen"></i> Edit
+                                     </a>
                                     <button type="button" class="btn-action btn-delete"
                                         onclick="openDeleteRole('{{ role.id_role }}','{{ role.nama_role }}')">
                                         <i class="fa-solid fa-trash-can"></i> Hapus
@@ -922,155 +1177,7 @@
     </div>
 </div>
 
-<!-- Modal: Edit Role -->
-<div class="modal-overlay" id="editRoleModal">
-    <div class="modal-box" style=" max-width: width:95 max-height:90vh; overflow-y:auto;">
 
-        <h3 class="modal-title">
-            <i class="fa-solid fa-user-gear"></i>
-            Edit Kebutuhan Role
-        </h3>
-
-        <form id="editRoleForm" method="POST">
-
-            {% csrf_token %}
-
-            <div class="form-grid">
-
-                <div class="form-group">
-                    <label>Nama Role</label>
-
-                    <input
-                        type="text"
-                        name="nama_role"
-                        id="edit_nama_role"
-                        class="form-control"
-                        required>
-                </div>
-
-                <div class="form-group">
-                    <label>Minimum RAM (GB)</label>
-
-                    <input
-                        type="number"
-                        name="min_ram"
-                        id="edit_min_ram"
-                        class="form-control"
-                        required>
-                </div>
-
-                <div class="form-group">
-                    <label>Minimum Storage (GB)</label>
-
-                    <input
-                        type="number"
-                        name="min_storage"
-                        id="edit_min_storage"
-                        class="form-control"
-                        required>
-                </div>
-
-                <div class="form-group">
-                    <label>Min CPU Benchmark Score</label>
-
-                    <input
-                        type="number"
-                        name="min_processor_score"
-                        id="edit_min_processor_score"
-                        class="form-control"
-                        required>
-                </div>
-
-            </div>
-
-            <!-- Teknologi -->
-            <hr style="margin:20px 0;">
-
-            <h4>
-                <i class="fa-solid fa-microchip"></i>
-                Teknologi Pendukung
-            </h4>
-            <div id="edit_teknologi_container"></div>
-            <div style="margin-top:15px;">
-                <button type="button" id="btnTambahTeknologi" class="modal-btn modal-btn-save">
-                    <i class="fa-solid fa-plus"></i>
-                    Tambah Teknologi
-                </button>
-            </div>
-            <div id="teknologiModal" class="modal-overlay">
-                <div class="teknologi-modal-box">
-                    <div class="teknologi-modal-header">
-                            <h3>
-                                <i class="fa-solid fa-microchip"></i>
-                                Pilih Teknologi
-                            </h3>
-                            <button type="button" id="closeTeknologiModal" class="btn-close-modal">
-                                <i class="fa-solid fa-xmark"></i>
-                            </button>
-                        </div>
-                        <input type="text" id="searchTeknologi" class="form-control" placeholder="Cari teknologi...">
-                        <div id="teknologiList" class="teknologi-list">   
-                    </div>
-                </div>
-            </div>
-            <!-- Bobot -->
-            <hr style="margin:20px 0;">
-
-            <h4>
-                <i class="fa-solid fa-sliders"></i>
-                Bobot Kriteria
-            </h4>
-
-            <div
-                id="edit_bobot_container">
-
-            </div>
-
-            <!-- SWARA -->
-            <hr style="margin:20px 0;">
-
-            <h4>
-                <i class="fa-solid fa-chart-line"></i>
-                Hasil SWARA
-            </h4>
-
-            <div
-                id="edit_swara_container">
-                <div
-                    style="
-                    padding:12px;
-                    background:#f8fafc;
-                    border-radius:8px;">
-                    Belum ada hasil SWARA
-                </div>
-            </div>
-            <div id="roleValidationError"
-                style="
-                    display:none;
-                    margin-top:10px;
-                    padding:12px;
-                    border-radius:8px;
-                    background:#fef2f2;
-                    color:#dc2626;
-                    border:1px solid #fecaca;
-                "
-            ></div>
-            <div class="modal-actions">
-                <button
-                    type="button"
-                    class="modal-btn modal-btn-cancel"
-                    onclick="closeEditRoleModal()">
-                    Batal
-                </button>
-                <button
-                    type="submit"
-                    class="modal-btn modal-btn-save">
-                    Simpan Perubahan
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
 
 {% comment %} <div id="edit_teknologi_container"> </div>
 <div style=" margin-top:15px;">
@@ -1155,7 +1262,7 @@
 
                 const teknologiList =
                     document.querySelectorAll(
-                        '#edit_teknologi_container input[name="teknologi_ids[]"]'
+                        '#edit_tech_checkboxes input[name="teknologi_ids[]"]:checked'
                     );
 
                 const errorBox =
@@ -1261,588 +1368,7 @@
     });
 
 
-function openEditRoleModal(roleId){
 
-    fetch(`/it/edit-role/${roleId}/`)
-    .then(response => response.json())
-    .then(data => {
-
-        console.log(data);
-        window.allTeknologi =
-            data.all_teknologi || [];
-
-        console.log(
-            "ALL TEKNOLOGI",
-            window.allTeknologi
-        );
-
-        // =====================
-        // DATA ROLE
-        // =====================     
-
-        document.getElementById(
-            'edit_nama_role'
-        ).value = data.nama_role;
-
-        document.getElementById(
-            'edit_min_ram'
-        ).value = data.min_ram;
-
-        document.getElementById(
-            'edit_min_storage'
-        ).value = data.min_storage;
-
-        document.getElementById(
-            'edit_min_processor_score'
-        ).value = data.min_processor_score;
-
-        // =====================
-        // FORM ACTION
-        // =====================
-
-        document.getElementById(
-            "editRoleForm"
-        ).action =
-        `/it/edit-role/${roleId}/`;
-
-        // =====================
-        // TEKNOLOGI
-        // =====================
-
-        const teknologiContainer =
-        document.getElementById(
-            'edit_teknologi_container'
-        );
-
-        {% comment %} teknologiContainer.innerHTML = '';
-
-        data.teknologi.forEach(t => {
-
-            teknologiContainer.innerHTML += `
-                <label class="tech-checkbox-item">
-
-                    <input
-                        type="checkbox"
-                        checked
-                        name="teknologi"
-                        value="${t.id_teknologi}">
-
-                    ${t.nama_teknologi}
-
-                </label>
-            `;
-        }); {% endcomment %}
-
-        let html = '';
-
-        data.teknologi.forEach(
-            function(tech){
-
-                html += `
-                    <div
-                        class="tech-item"
-                        data-id="${tech.id_teknologi}"
-                    >
-
-                        <span>
-                            ${tech.nama_teknologi}
-                        </span>
-
-                        <button
-                            type="button"
-                            class="btn-remove-tech"
-                        >
-                            <i class="fa-solid fa-trash"></i>
-                        </button>
-
-                        <input
-                            type="hidden"
-                            name="teknologi_ids[]"
-                            value="${tech.id_teknologi}"
-                        >
-
-                    </div>
-                `;
-            }
-        );
-
-        document.getElementById(
-            "edit_teknologi_container"
-        ).innerHTML = html;
-        document
-        .getElementById("btnTambahTeknologi")
-        .addEventListener(
-            "click",
-            function(){
-                let html = '';
-
-                allTeknologi.forEach(function(t){
-                    html += `
-                        <div
-                            class="teknologi-option"
-                            data-id="${t.id_teknologi}"
-                            data-nama="${t.nama_teknologi}"
-                        >
-                            ${t.nama_teknologi}
-                        </div>
-                    `;
-                });
-                console.log(window.allTeknologi);
-                document.getElementById(
-                    "teknologiList"
-                ).innerHTML = html;
-                document
-                .querySelectorAll(".teknologi-option")
-                .forEach(function(item){
-
-                    item.addEventListener(
-                        "click",
-                        function(){
-
-                            const id =
-                                this.dataset.id;
-
-                            const nama =
-                                this.dataset.nama;
-
-                            // cek duplikat
-                            if(
-                                document.querySelector(
-                                    `.tech-item[data-id="${id}"]`
-                                )
-                            ){
-                                alert(
-                                    "Teknologi sudah ditambahkan"
-                                );
-                                return;
-                            }
-
-                            document
-                            .getElementById(
-                                "edit_teknologi_container"
-                            )
-                            .insertAdjacentHTML(
-                                "beforeend",
-                                `
-                                <div
-                                    class="tech-item"
-                                    data-id="${id}"
-                                >
-
-                                    <span>
-                                        ${nama}
-                                    </span>
-
-                                    <button
-                                        type="button"
-                                        class="btn-remove-tech"
-                                    >
-                                        <i class="fa-solid fa-trash"></i>
-                                    </button>
-
-                                    <input
-                                        type="hidden"
-                                        name="teknologi_ids[]"
-                                        value="${id}"
-                                    >
-
-                                </div>
-                                `
-                            );
-
-                            document.getElementById(
-                                "teknologiModal"
-                            ).style.display = "none";
-
-                        }
-                    );
-
-                });
-
-                document.getElementById(
-                    "teknologiModal"
-                ).style.display = "flex";
-
-            }
-        );
-
-        document.addEventListener(
-            "click",
-            function(e){
-
-                const btn =
-                    e.target.closest(
-                        ".btn-remove-tech"
-                    );
-
-                if(btn){
-
-                    btn.closest(
-                        ".tech-item"
-                    ).remove();
-
-                }
-
-            }
-        );
-        document
-        .getElementById(
-            "searchTeknologi"
-        )
-        .addEventListener(
-            "keyup",
-            function(){
-
-                const keyword =
-                    this.value.toLowerCase();
-
-                document
-                .querySelectorAll(
-                    ".teknologi-option"
-                )
-                .forEach(function(item){
-
-                    item.style.display =
-                        item.textContent
-                            .toLowerCase()
-                            .includes(keyword)
-                        ? "block"
-                        : "none";
-
-                });
-
-            }
-        );
-
-        // =====================
-        // BOBOT
-        // =====================
-
-        const bobotContainer =
-        document.getElementById(
-            'edit_bobot_container'
-        );
-
-        bobotContainer.innerHTML = '';
-
-        data.teknologi.forEach(t => {
-
-            bobotContainer.innerHTML +=
-            createEditBobotForm(
-                t.id_teknologi,
-                t.nama_teknologi
-            );
-
-        });
-
-        data.teknologi.forEach(t => {
-
-            t.bobot.forEach(b => {
-
-                const nama =
-                String(
-                    b[2]
-                ).toLowerCase();
-
-                const input =
-                document.querySelector(
-                    `[name="${nama}_weight_${t.id_teknologi}"]`
-                );
-
-                if(input){
-
-                    input.value = b[3];
-
-                }
-
-            });
-
-        });
-
-        // =====================
-        // SWARA
-        // =====================
-
-        const swaraContainer =
-        document.getElementById(
-            'edit_swara_container'
-        );
-
-        swaraContainer.innerHTML = '';
-
-        data.teknologi.forEach(t => {
-
-            let html = `
-                <div
-                    class="swara-card"
-                    style="
-                        margin-bottom:15px;
-                        padding:15px;
-                        background:#f8fafc;
-                        border-radius:10px;
-                    ">
-
-                    <h5>
-                        ${t.nama_teknologi}
-                    </h5>
-
-                    <table
-                        style="
-                            width:100%;
-                            margin-top:10px;
-                        ">
-                        <thead>
-                            <tr>
-                                <th>Kriteria</th>
-                                <th>Bobot SWARA</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-            `;
-
-            t.bobot.forEach(b => {
-
-                html += `
-                    <tr>
-
-                        <td>
-                            ${b[2]}
-                        </td>
-
-                        <td>
-                            ${b[4]}
-                        </td>
-
-                    </tr>
-                `;
-
-            });
-
-            html += `
-                        </tbody>
-                    </table>
-                </div>
-            `;
-
-            swaraContainer.innerHTML += html;
-
-        });
-
-        // =====================
-        // TAMPILKAN MODAL
-        // =====================
-
-        document.getElementById(
-            "editRoleModal"
-        ).classList.add(
-            "active"
-        );
-
-    })
-
-    .catch(error => {
-
-        console.error(
-            "Gagal load role:",
-            error
-        );
-
-    });
-
-}
-
-    function createBobotForm(teknologiId, teknologiNama) {
-
-        return `
-            <div class="role-bobot-container teknologi-weight-card"
-                id="weight-${teknologiId}"
-                style="margin-top:20px;">
-
-                <h4>
-                    <i class="fa-solid fa-laptop-code"></i>
-                    ${teknologiNama}
-                </h4>
-
-                <h5>
-                    Tentukan urutan kepentingan kriteria laptop untuk teknologi ini
-                </h5>
-
-                <input type="hidden"
-                    name="teknologi_selected[]"
-                    value="${teknologiId}">
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Processor</label>
-                        <input
-                            type="number"
-                            name="processor_weight_${teknologiId}"
-                            min="1"
-                            max="6"
-                            value="3"
-                            class="form-control">
-                    </div>
-
-                    <div class="form-group">
-                        <label>RAM</label>
-                        <input
-                            type="number"
-                            name="ram_weight_${teknologiId}"
-                            min="1"
-                            max="6"
-                            value="3"
-                            class="form-control">
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Storage</label>
-                        <input
-                            type="number"
-                            name="storage_weight_${teknologiId}"
-                            min="1"
-                            max="6"
-                            value="3"
-                            class="form-control">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Berat</label>
-                        <input
-                            type="number"
-                            name="berat_weight_${teknologiId}"
-                            min="1"
-                            max="6"
-                            value="3"
-                            class="form-control">
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Ukuran Layar</label>
-                        <input
-                            type="number"
-                            name="layar_weight_${teknologiId}"
-                            min="1"
-                            max="6"
-                            value="3"
-                            class="form-control">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Daya Baterai</label>
-                        <input
-                            type="number"
-                            name="baterai_weight_${teknologiId}"
-                            min="1"
-                            max="6"
-                            value="3"
-                            class="form-control">
-                    </div>
-                </div>
-
-            </div>
-        `;
-    }
-
-    function createEditBobotForm(
-        teknologiId,
-        teknologiNama
-    ) {
-
-        return `
-
-        <div
-            class="role-bobot-container"
-            id="edit-weight-${teknologiId}">
-
-            <h5>
-                ${teknologiNama}
-            </h5>
-
-            <div class="form-row">
-
-                <div class="form-group">
-                    <label>Processor</label>
-
-                    <input
-                        type="number"
-                        min="1"
-                        max="6"
-                        name="processor_weight_${teknologiId}"
-                        class="form-control">
-                </div>
-
-                <div class="form-group">
-                    <label>RAM</label>
-
-                    <input
-                        type="number"
-                        min="1"
-                        max="6"
-                        name="ram_weight_${teknologiId}"
-                        class="form-control">
-                </div>
-
-            </div>
-
-            <div class="form-row">
-
-                <div class="form-group">
-                    <label>Storage</label>
-
-                    <input
-                        type="number"
-                        min="1"
-                        max="6"
-                        name="storage_weight_${teknologiId}"
-                        class="form-control">
-                </div>
-
-                <div class="form-group">
-                    <label>Berat</label>
-
-                    <input
-                        type="number"
-                        min="1"
-                        max="6"
-                        name="berat_weight_${teknologiId}"
-                        class="form-control">
-                </div>
-
-            </div>
-
-            <div class="form-row">
-
-                <div class="form-group">
-                    <label>Layar</label>
-
-                    <input
-                        type="number"
-                        min="1"
-                        max="6"
-                        name="layar_weight_${teknologiId}"
-                        class="form-control">
-                </div>
-
-                <div class="form-group">
-                    <label>Baterai</label>
-
-                    <input
-                        type="number"
-                        min="1"
-                        max="6"
-                        name="baterai_weight_${teknologiId}"
-                        class="form-control">
-                </div>
-
-            </div>
-
-        </div>
-        `;
-    }
 
     document.addEventListener('DOMContentLoaded', function() {
 

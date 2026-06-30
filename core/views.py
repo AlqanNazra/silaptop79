@@ -3899,44 +3899,68 @@ def hapus_teknologi_it_view(request,id_teknologi):
     return redirect("manajemenroleteknologi_it")
 
 def edit_role_it_view(request, id_role):
+    from inventori.models import RoleTeknologi, Teknologi
     conn = get_connection()
     role = get_object_or_404(Role,id_role=id_role)
-    teknologi_repo = (TeknologiRepository(connection))
-    teknologi_service = (TeknologiService(teknologi_repo,connection))
+    teknologi_repo = (TeknologiRepository(conn))
+    teknologi_service = (TeknologiService(teknologi_repo,conn))
     repo_bobot = (BobotKriteriaRepository(conn))
     all_teknologi = (teknologi_service.ambil_semua())
     if request.method == "GET":
-        print("ROLE =", role.id_role)
+        from inventori.services.processor.read import ReadProcessorService
+        import json
+        
+        processor_service = ReadProcessorService()
+        processor_list = processor_service.ambil_processor_dropdown()
+        
         role_teknologi_list = (
             RoleTeknologi.objects
             .filter(role=role)
             .select_related("teknologi")
         )
+        
         data_teknologi = []
-        repo_bobot = (BobotKriteriaRepository(connection))
+        role_tech_ids = []
         for rt in role_teknologi_list:
-            bobot_list = (repo_bobot.ambil_bobot_role_teknologi(rt.id_role_teknologi))
-            print("ROLE TEK:",rt.id_role_teknologi)
-            print("BOBOT:",bobot_list)
+            bobot_list = repo_bobot.ambil_bobot_role_teknologi(rt.id_role_teknologi)
+            serialized_bobot = []
+            for b in bobot_list:
+                if isinstance(b, dict):
+                    serialized_bobot.append(b)
+                else:
+                    serialized_bobot.append({
+                        "id_bobot": b[0],
+                        "id_kriteria": b[1],
+                        "nama_kriteria": b[2],
+                        "nilai_bobot": float(b[3]),
+                        "nilai_swara": float(b[4]) if b[4] is not None else None
+                    })
+            
             data_teknologi.append({
-                "id_role_teknologi":rt.id_role_teknologi,
-                "id_teknologi":rt.teknologi.id_teknologi,
-                "nama_teknologi":rt.teknologi.nama_teknologi,
-                "bobot":bobot_list
+                "id_role_teknologi": rt.id_role_teknologi,
+                "id_teknologi": rt.teknologi.id_teknologi,
+                "nama_teknologi": rt.teknologi.nama_teknologi,
+                "bobot": serialized_bobot
             })
-            print(data_teknologi)
-        # ==========================
-        # UPDATE BOBOT KRITERIA
-        # ==========================
-        return JsonResponse({
-            "id_role": role.id_role,
-            "nama_role": role.nama_role,
-            "min_ram": role.min_ram,
-            "min_storage": role.min_storage,
-            "min_processor_score": role.min_processor_score,
-            "teknologi": data_teknologi,
-            "all_teknologi":all_teknologi
-        })
+            role_tech_ids.append(rt.teknologi.id_teknologi)
+            
+        all_tek_serialized = []
+        for t in all_teknologi:
+            all_tek_serialized.append({
+                "id_teknologi": t["id_teknologi"],
+                "nama_teknologi": t["nama_teknologi"]
+            })
+            
+        context = {
+            "role": role,
+            "role_teknologi_json": json.dumps(data_teknologi),
+            "all_teknologi_json": json.dumps(all_tek_serialized),
+            "all_teknologi": all_teknologi,
+            "role_tech_ids": role_tech_ids,
+            "processor_list": processor_list,
+        }
+        return render(request, "it/inventori/editrole_it.html", context)
+        
     if request.method == "POST":
         try:
             with transaction.atomic():
@@ -3948,7 +3972,8 @@ def edit_role_it_view(request, id_role):
                 role.min_storage = int(request.POST.get("min_storage",0))
                 role.min_processor_score = int(request.POST.get("min_processor_score",0))
                 role.save()
-                role_teknologi_repo = (RoleTeknologiRepository(connection))
+                
+                role_teknologi_repo = (RoleTeknologiRepository(conn))
                 role_teknologi_lama = role_teknologi_repo.get_by_role( role.id_role)
                 teknologi_baru = {
                     x.strip()
@@ -3968,25 +3993,14 @@ def edit_role_it_view(request, id_role):
                 }
                 teknologi_dihapus = (teknologi_lama- teknologi_baru)
                 teknologi_ditambah = (teknologi_baru- teknologi_lama)
-                teknologi_ids = request.POST.getlist("teknologi_ids[]")
-                print("TEKNOLOGI IDS")
-                print(teknologi_ids)
+                
                 for id_teknologi in teknologi_dihapus:
                     relasi = (role_teknologi_repo.get_relasi(role.id_role,id_teknologi))
                     if relasi:
                         id_role_teknologi = relasi[0]
                         repo_bobot.hapus_by_role_teknologi(id_role_teknologi)
                         role_teknologi_repo.hapus(id_role_teknologi)
-                for id_teknologi in teknologi_ditambah:
-                    role_teknologi_repo.tambah(
-                        RoleTeknologiDTO(
-                            id_role=role.id_role,
-                            id_teknologi=id_teknologi
-                        ))
-                # ==========================
-                # UPDATE BOBOT
-                # ==========================
-                repo_bobot = (BobotKriteriaRepository(connection))
+                        
                 KRITERIA_MAPPING = {
                     "processor":"KRIT_0001",
                     "ram":"KRIT_0002",
@@ -3995,6 +4009,29 @@ def edit_role_it_view(request, id_role):
                     "layar":"KRIT_0005",
                     "baterai":"KRIT_0006"
                 }
+                
+                service_bobot = ServiceBobotKriteria(conn)
+                for id_teknologi in teknologi_ditambah:
+                    new_id_role_tech = role_teknologi_repo.tambah(
+                        RoleTeknologiDTO(
+                            id_role=role.id_role,
+                            id_teknologi=id_teknologi
+                        ))
+                    
+                    list_bobot = []
+                    for (nama_kriteria, id_kriteria) in KRITERIA_MAPPING.items():
+                        field_name = f"{nama_kriteria}_weight_{id_teknologi}"
+                        nilai_bobot = request.POST.get(field_name)
+                        list_bobot.append({
+                            "id_kriteria": id_kriteria,
+                            "nilai_bobot": float(nilai_bobot) if nilai_bobot else 3.0
+                        })
+                    service_bobot.input_bobot_role_teknologi(new_id_role_tech, list_bobot)
+                        
+                # ==========================
+                # UPDATE BOBOT
+                # ==========================
+                repo_bobot = (BobotKriteriaRepository(conn))
                 role_teknologi_list = (RoleTeknologi.objects.filter(role=role))
                 for role_teknologi in (role_teknologi_list):
                     for (nama_kriteria,id_kriteria) in (KRITERIA_MAPPING.items()):
@@ -4009,6 +4046,7 @@ def edit_role_it_view(request, id_role):
                                 )
                             )
                             repo_bobot.update_bobot_role_teknologi(dto)
+                            
                 # Recalculate SWARA weights
                 from dss.services.service_swara import ServiceSwara
                 service_swara = ServiceSwara(conn)
@@ -4021,12 +4059,8 @@ def edit_role_it_view(request, id_role):
         except Exception as e:
             import traceback
             traceback.print_exc()
-            return JsonResponse(
-                {
-                    "error": str(e)
-                },
-                status=500
-            )
+            messages.error(request, str(e))
+            return redirect("edit_role_it", id_role=role.id_role)
         return redirect("manajemenroleteknologi_it")
     
 def edit_teknologi_it_view(

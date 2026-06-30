@@ -148,7 +148,7 @@ class BobotKriteriaRepository(IBobotKriteriaRepositoryImpl):
 
             result = cur.fetchone()
 
-            # self.conn.commit()
+            self.conn.commit()
             # print("DB RESULT",result)
             return result[0]
 
