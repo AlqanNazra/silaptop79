@@ -4002,6 +4002,14 @@ def edit_role_it_view(request, id_role):
                                 )
                             )
                             repo_bobot.update_bobot_role_teknologi(dto)
+                # Recalculate SWARA weights
+                from dss.services.service_swara import ServiceSwara
+                service_swara = ServiceSwara(conn)
+                for role_teknologi in role_teknologi_list:
+                    print("PROSES SWARA EDIT:", role_teknologi.id_role_teknologi)
+                    hasil_swara = service_swara.proses_swara_role_teknologi(role_teknologi.id_role_teknologi)
+                    if hasil_swara["status"] != "success":
+                        raise Exception(hasil_swara["message"])
             messages.success(request,"Role berhasil diperbarui.")
         except Exception as e:
             import traceback
