@@ -571,10 +571,10 @@
                             <option value="skor_desc" {% if sort_by == "skor_desc" %}selected{% endif %}>
                                 Skor SAW (Tertinggi)
                             </option>
-                            <option value="skor_asc" {% if sort_by == "skor_asc" %}selected{% endif %}>
+                            <option value="skor_asc" {% if sort_by=="skor_asc" %}selected{% endif %}>
                                 Skor SAW (Terendah)
                             </option>
-                            <option value="harga_asc" {% if sort_by == "harga_asc" %}selected{% endif %}>
+                            <option value="harga_asc" {% if sort_by=="harga_asc" %}selected{% endif %}>
                                 Harga (Termurah)
                             </option>
                         </select>
@@ -619,13 +619,14 @@
                             {% if jenis_rekomendasi == "pengadaan" %}
                             <td>Rp {{ item.detail.harga|floatformat:0 }}</td>
                             {% endif %}
-                            <td><span class="score-val {% if forloop.counter == 1 %}high{% endif %}">{{ item.skor|floatformat:3 }}</span></td>
+                            <td><span class="score-val {% if forloop.counter == 1 %}high{% endif %}">{{
+                                    item.skor|floatformat:3 }}</span></td>
                             <td style="display:flex; gap:8px;">
                                 <a href="{% url 'detailrekomendasi_hc' %}?id={{ item.id }}&jenis={{ jenis_rekomendasi }}"
                                     class="btn-detail">
                                     Detail
                                 </a>
-                                <button type="button" class="btn-assign" onclick="triggerAssignModal('{{ item.id }}', '{{ item.detail.nama|escapejs }}', '{% url 'assign_laptop_hc' %}?laptop_id={{ item.id }}{% if selected_pengajuan_id %}&id_pengajuan={{ selected_pengajuan_id }}{% endif %}')">
+                                <a href="{% url 'pengajuanlaptop_laptop' item.id %}" class="btn-assign">
                                     Assign
                                 </button>
                             </td>
@@ -748,7 +749,7 @@
                                 <a href="{% url 'detailrekomendasi_hc' %}?id={{ item.id }}&jenis={{ jenis_rekomendasi }}"
                                     class="btn-detail">
                                     Detail</a>
-                                <button type="button" class="btn-assign" onclick="triggerAssignModal('{{ item.id }}', '{{ item.detail.nama|escapejs }}', '{% url 'assign_laptop_hc' %}?laptop_id={{ item.id }}{% if selected_pengajuan_id %}&id_pengajuan={{ selected_pengajuan_id }}{% endif %}')">
+                                <a href="{% url 'pengajuanlaptop_laptop' item.id %}" class="btn-assign">
                                     Assign
                                 </button>
                             </td>

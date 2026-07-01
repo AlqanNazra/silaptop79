@@ -394,7 +394,7 @@
 
                 <a href="{% url 'tambahlaptop_hc' %}" class="btn-add"
                     style="background-color: #0b57c6; color: white; padding: 12px 20px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
-                    <i class="fa-solid fa-plus"></i> Tambah Laptop
+                    <i class="fa-solid fa-plus"></i> Tambah Laptop  NIGER
                 </a>
             </form>
 
@@ -415,7 +415,7 @@
                         {% for laptop in laptops %}
                         <tr>
                             <td class="col-no" style="font-weight: 600; color: #64748b; vertical-align: middle;">
-                                {{ laptops.start_index|add:forloop.counter0|stringformat:"02d" }}
+                                {{ forloop.counter0|add:laptops.start_index }}
                             </td>
                             <td>
                                 <div class="laptop-cell">
@@ -451,15 +451,18 @@
 
                 <div class="pagination-container-new"
                     style="display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-top: 1px solid #f1f5f9;">
-                    <span class="pagination-text">Menampilkan {{ laptops.start_index }} - {{ laptops.end_index }} dari
-                        {{ total }} aset</span>
+                    <span class="pagination-text">Menampilkan
+                        {{ laptops.start_index }}
+                        -
+                        {{ laptops.end_index }}
+                        dari
+                        {{ laptops.paginator.count }}
+                        aset</span>
                     <div class="pagination-controls" style="display: flex; gap: 6px; align-items: center;">
                         <div class="per-page-selector"
                             style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: #64748b; margin-right: 12px;">
                             <span>Tampilkan:</span>
-                            <select
-                                onchange="window.location.href = '?page=1&per_page=' + this.value + '{% if search_query %}&q={{ search_query|escapejs }}{% endif %}{% if status_filter %}&status={{ status_filter|escapejs }}{% endif %}{% if ram_filter %}&ram={{ ram_filter|escapejs }}{% endif %}{% if storage_filter %}&storage={{ storage_filter|escapejs }}{% endif %}';"
-                                style="padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; color: #334155; background-color: #ffffff; cursor: pointer;">
+                                <select id="per-page-select">
                                 <option value="10" {% if per_page == 10 or per_page == '10' %}selected{% endif %}>10
                                 </option>
                                 <option value="15" {% if per_page == 15 or per_page == '15' %}selected{% endif %}>15
@@ -469,7 +472,7 @@
                             </select>
                         </div>
                         {% if laptops.has_previous %}
-                        <a href="?page={{ laptops.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if ram_filter %}&ram={{ ram_filter }}{% endif %}{% if storage_filter %}&storage={{ storage_filter }}{% endif %}{% if per_page %}&per_page={{ per_page }}{% endif %}"
+                        <a href="{{ request.path }}?page={{ laptops.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if ram_filter %}&ram={{ ram_filter }}{% endif %}{% if storage_filter %}&storage={{ storage_filter }}{% endif %}{% if per_page %}&per_page={{ per_page }}{% endif %}"
                             class="page-btn"
                             style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">
                             <i class="fa-solid fa-chevron-left"></i>
@@ -480,12 +483,12 @@
                         {% if laptops.number == num %}
                         <span class="page-btn active" style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; background: #0b57c6; color: white; font-weight: bold; font-size: 12px;">{{ num }}</span>
                         {% elif num > laptops.number|add:'-3' and num < laptops.number|add:'3' %}
-                        <a href="?page={{ num }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if ram_filter %}&ram={{ ram_filter }}{% endif %}{% if storage_filter %}&storage={{ storage_filter }}{% endif %}{% if per_page %}&per_page={{ per_page }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">{{ num }}</a>
+                        <a href="{{ request.path }}?page={{ num }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}{% if status_filter %}&status={{ status_filter|urlencode }}{% endif %}{% if ram_filter %}&ram={{ ram_filter|urlencode }}{% endif %}{% if storage_filter %}&storage={{ storage_filter|urlencode }}{% endif %}&per_page={{ per_page }}"</a>
                         {% endif %}
                         {% endfor %}
 
                             {% if laptops.has_next %}
-                            <a href="?page={{ laptops.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if ram_filter %}&ram={{ ram_filter }}{% endif %}{% if storage_filter %}&storage={{ storage_filter }}{% endif %}{% if per_page %}&per_page={{ per_page }}{% endif %}"
+                            <a href="{{ request.path }}?page={{ laptops.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if ram_filter %}&ram={{ ram_filter }}{% endif %}{% if storage_filter %}&storage={{ storage_filter }}{% endif %}{% if per_page %}&per_page={{ per_page }}{% endif %}"
                                 class="page-btn"
                                 style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">
                                 <i class="fa-solid fa-chevron-right"></i>
@@ -500,6 +503,13 @@
     </div> <!-- End Wrapper -->
 
     <script>
+        document.getElementById("per-page-select").addEventListener("change", function () {
+            const params = new URLSearchParams(window.location.search);
+            params.set("page",1);
+            params.set("per_page",this.value);
+            window.location.href =
+                window.location.pathname + "?" + params.toString();
+        });
         document.addEventListener("DOMContentLoaded", function () {
             const filterForm = document.getElementById("filter-form");
             const searchInput = document.getElementById("search-input");
@@ -570,7 +580,7 @@
                         <label
                             style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Filter
                             Berdasarkan Status</label>
-                        <select name="status"
+                        <select id="status-select" name="status"
                             style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; color: #334155; background: white;">
                             <option value="">Semua Status</option>
                             <option value="tersedia" {% if status_filter == 'tersedia' %}selected{% endif %}>Tersedia</option>
@@ -581,9 +591,10 @@
 
                     <div>
                         <label
-                            style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Filter
-                            Berdasarkan RAM</label>
-                        <select name="ram"
+                            style="display: block; font-size:13px; font-weight:600; color:#475569; margin-bottom:6px;">
+                            Filter Berdasarkan RAM
+                        </label>
+                        <select id="ram-select" name="ram"
                             style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; color: #334155; background: white;">
                             <option value="">Semua RAM</option>
                             <option value="4" {% if ram_filter == '4' %}selected{% endif %}>4 GB</option>
@@ -597,7 +608,7 @@
                         <label
                             style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Filter
                             Berdasarkan Storage</label>
-                        <select name="storage"
+                        <select id="storage-select" name="storage"
                             style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; color: #334155; background: white;">
                             <option value="">Semua Storage</option>
                             <option value="128" {% if storage_filter == '128' %}selected{% endif %}>128 GB</option>

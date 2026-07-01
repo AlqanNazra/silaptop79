@@ -40,7 +40,7 @@
             </li>
 
             <li>
-                <a href="{% url 'manajemen_laptop_hc' %}"
+                <a href="{% url 'manajemen_laptop_hc' %}{% if request.GET.urlencode %}?{{ request.GET.urlencode }}{% endif %}"
                     class="menu-item {% if request.resolver_match.url_name == 'manajemen_laptop_hc' or request.resolver_match.url_name == 'tambahlaptop_hc' or request.resolver_match.url_name == 'detaillaptop_hc' or request.resolver_match.url_name == 'editdatalaptop_hc' or request.resolver_match.url_name == 'riwayatpeminjamanlaptop_hc' %}active{% endif %}">
 
                     <svg class="menu-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"

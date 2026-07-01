@@ -18,7 +18,7 @@ class ProcessorRepository(IProcessorRepository):
             return cur.fetchall()
 
     def ambil_processor_by_id(self, id_processor):
-        with self.conn.cursor() as cur:
+        with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute("SELECT * FROM ambil_processor_by_id(%s)", (id_processor,))
             return cur.fetchone()
 

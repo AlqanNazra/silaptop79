@@ -6,6 +6,7 @@ from core.decorators import hc_required, it_required, talent_required
 from core.views import (
     # HC Views
     dashboard_hc_view,
+    manajemenlaptop_hc_view,
     edit_role_it_view,
     edit_teknologi_it_view,
     hapus_role_it_view,
@@ -72,7 +73,6 @@ from core.views import (
     profile_view,
 )
 from inventori.views import (
-    manajemen_laptop_page as manajemenlaptop_hc_view,
     pengajuan_page_view as pengajuanlaptop_hc_view,
     detailpengajuan_hc_view,
     setujui_pengajuan_hc_view,
