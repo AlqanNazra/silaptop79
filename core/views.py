@@ -1,3 +1,5 @@
+from inventori.dto import dto_pengajuan
+from inventori.dto import dto_pengajuan
 import datetime
 import json
 import traceback
@@ -29,6 +31,8 @@ from inventori.repositories.repositori_teknologi import TeknologiRepository
 from inventori.services.service_projectrole import ProjectRoleService
 from inventori.services.service_proyek import ProyekService
 from inventori.services.service_teknologi import TeknologiService
+from inventori.services.service_pengajuan import PengajuanService
+
 from .db import get_connection
 from inventori.repositories.repositori_projectrole import ProjectRoleRepository
 from inventori.services.service_projectrole import ProjectRoleService
@@ -785,21 +789,35 @@ def riwayatpeminjamanlaptop_it_view(request, id_laptop=None):
         }
     return render(request, 'it/inventori/riwayatpeminjamanlaptop_it.html', context)
 
-def editdatalaptop_hc_view(request):
-    return render(request, 'hc/inventori/editdatalaptop_hc.html')
-
 def inputkriteria_hc_view(request):
     conn = get_connection()
-    selected_project = (request.GET.get("id_proyek")or request.POST.get("id_proyek"))
-    selected_role  = (request.GET.get("id_role")or request.POST.get("id_role"))
+    selected_project = (request.GET.get("id_proyek") or request.POST.get("id_proyek"))
+    selected_role  = (request.GET.get("id_role") or request.POST.get("id_role"))
     id_pengajuan = (request.GET.get("id_pengajuan") or request.POST.get("id_pengajuan") or request.session.get("id_pengajuan"))
+    pengajuan = None
+
     if id_pengajuan:
         request.session["id_pengajuan"] = id_pengajuan
+        try:
+            pengajuan = PengajuanService().service_cari_pengajuan_by_id(id_pengajuan)
+        except Exception as e:
+            print("Error loading pengajuan:", e)
+
+        # Auto-fill project dan role dari pengajuan jika belum ada di request
+        if pengajuan:
+            if not selected_project and pengajuan.id_proyek:
+                selected_project = pengajuan.id_proyek
+            if not selected_role and pengajuan.kebutuhan_role:
+                from inventori.models import Role as RoleModel
+                role_obj = RoleModel.objects.filter(nama_role__iexact=pengajuan.kebutuhan_role.strip()).first()
+                if role_obj:
+                    selected_role = role_obj.id_role
+
     role_requirement = None
     bobot_role = None
     selected_role_teknologi = (
-    request.GET.get("id_role_teknologi")
-    or request.POST.get("id_role_teknologi"))
+        request.GET.get("id_role_teknologi")
+        or request.POST.get("id_role_teknologi"))
     processor_service = ReadProcessorService()
     processor_list = processor_service.ambil_processor()
     bobot_role = None
@@ -1011,7 +1029,23 @@ def inputkriteria_hc_view(request):
             import traceback
             # print(traceback.format_exc())
             messages.error(request,f"Gagal memproses DSS: {str(e)}")
-    projects = (Proyek.objects.all().order_by("nama_proyek"))
+    # projects = (Proyek.objects.all().order_by("nama_proyek"))
+    projects = Proyek.objects.none()
+
+    # if pengajuan and pengajuan.id_proyek:
+    #     projects = Proyek.objects.filter(
+    #         id_proyek=pengajuan.id_proyek
+    #     )
+
+    #     selected_project = pengajuan.id_proyek
+    if pengajuan and pengajuan.id_proyek:
+        projects = Proyek.objects.filter(
+            id_proyek=pengajuan.id_proyek
+        )
+
+        if not selected_project:
+            selected_project = pengajuan.id_proyek
+            
     role_teknologi = (
         RoleTeknologi.objects
         .select_related(
@@ -1024,20 +1058,34 @@ def inputkriteria_hc_view(request):
         )
     )
     project_role_mapping = []
-    for pr in ProjectRole.objects.select_related("proyek","role"):
+    for pr in ProjectRole.objects.select_related(
+        "proyek",
+        "role"
+    ).filter(
+        proyek_id=selected_project
+    ):
         project_role_mapping.append({
             "id_proyek": pr.proyek.id_proyek,
             "id_role": pr.role.id_role,
             "nama": pr.role.nama_role
         })
+
+    roles = ProjectRole.objects.select_related(
+        "role"
+    ).filter(
+        proyek_id=selected_project
+    )
     context = {
         "projects": projects,
+        "roles": roles,
         "role_teknologi": role_teknologi,
         "role_requirement": role_requirement,
         "processor_list": processor_list,
         "bobot_role": bobot_role,
         "selected_project": selected_project,
-        "selected_role_teknologi": selected_role,
+        # "selected_role_teknologi": selected_role,
+        "selected_role_teknologi": selected_role_teknologi,
+        "selected_role": selected_role, 
         "project_role_mapping":(project_role_mapping),
     }
     # print("="*50)
@@ -1552,14 +1600,34 @@ def manajemenlaptop_it_view(request):
 
 def inputkriteria_it_view(request):
     conn = connection
-    
-    selected_project = (request.GET.get("id_proyek")or request.POST.get("id_proyek"))
-    selected_role  = (request.GET.get("id_role")or request.POST.get("id_role"))
+
+    selected_project = (request.GET.get("id_proyek") or request.POST.get("id_proyek"))
+    selected_role  = (request.GET.get("id_role") or request.POST.get("id_role"))
+    id_pengajuan = (request.GET.get("id_pengajuan") or request.POST.get("id_pengajuan") or request.session.get("id_pengajuan"))
+    pengajuan = None
+
+    if id_pengajuan:
+        request.session["id_pengajuan"] = id_pengajuan
+        try:
+            pengajuan = PengajuanService().service_cari_pengajuan_by_id(id_pengajuan)
+        except Exception as e:
+            print("Error loading pengajuan IT:", e)
+
+        # Auto-fill project dan role dari pengajuan jika belum ada di request
+        if pengajuan:
+            if not selected_project and pengajuan.id_proyek:
+                selected_project = pengajuan.id_proyek
+            if not selected_role and pengajuan.kebutuhan_role:
+                from inventori.models import Role as RoleModel
+                role_obj = RoleModel.objects.filter(nama_role__iexact=pengajuan.kebutuhan_role.strip()).first()
+                if role_obj:
+                    selected_role = role_obj.id_role
+
     role_requirement = None
     bobot_role = None
     selected_role_teknologi = (
-    request.GET.get("id_role_teknologi")
-    or request.POST.get("id_role_teknologi"))
+        request.GET.get("id_role_teknologi")
+        or request.POST.get("id_role_teknologi"))
     processor_service = ReadProcessorService()
     processor_list = processor_service.ambil_processor()
     bobot_role = None
@@ -1794,7 +1862,12 @@ def inputkriteria_it_view(request):
             import traceback
             # print(traceback.format_exc())
             messages.error(request,f"Gagal memproses DSS: {str(e)}")
-    projects = (Proyek.objects.all().order_by("nama_proyek"))
+    if pengajuan and pengajuan.id_proyek:
+        projects = Proyek.objects.filter(id_proyek=pengajuan.id_proyek)
+        if not selected_project:
+            selected_project = pengajuan.id_proyek
+    else:
+        projects = Proyek.objects.all().order_by("nama_proyek")
 
     role_teknologi = (
         RoleTeknologi.objects
@@ -1809,7 +1882,7 @@ def inputkriteria_it_view(request):
     )
     project_role_mapping = []
 
-    for pr in ProjectRole.objects.select_related("proyek","role"):
+    for pr in ProjectRole.objects.select_related("proyek","role").filter(proyek_id=selected_project) if selected_project else ProjectRole.objects.select_related("proyek","role"):
         project_role_mapping.append({
             "id_proyek": pr.proyek.id_proyek,
             "id_role": pr.role.id_role,
@@ -1822,8 +1895,10 @@ def inputkriteria_it_view(request):
         "processor_list": processor_list,
         "bobot_role": bobot_role,
         "selected_project": selected_project,
+        "selected_role": selected_role,
         "selected_role_teknologi": selected_role,
-        "project_role_mapping":(project_role_mapping),
+        "project_role_mapping": project_role_mapping,
+        "id_pengajuan": id_pengajuan,
     }
     # print("="*50)
     # print("PROJECT ROLE MAPPING")
@@ -1910,6 +1985,8 @@ def editdatalaptop_it_view(request, id_laptop):
             kondisi = request.POST.get('kondisi')
             status = request.POST.get('status')
             lokasi = request.POST.get('lokasi')
+            baterai = request.POST.get('baterai')
+            ukuran_layar = request.POST.get('ukuran_layar')
 
             if laptop.status.lower() == 'dipinjam' and status and status.lower() != 'dipinjam':
                 raise ValueError("Laptop sedang aktif dipinjam dan tidak dapat diubah statusnya.")
@@ -1927,6 +2004,14 @@ def editdatalaptop_it_view(request, id_laptop):
             id_processor = request.POST.get('id_processor')
             id_ram = request.POST.get('id_ram')
             id_storage = request.POST.get('id_storage')
+
+            if baterai:
+                laptop.baterai = baterai
+                laptop.save()
+
+            if ukuran_layar:
+                laptop.ukuran_layar = ukuran_layar
+                laptop.save()
             
             if id_processor and id_ram and id_storage:
                 dto = LaptopInventoriDTO(
@@ -1939,7 +2024,9 @@ def editdatalaptop_it_view(request, id_laptop):
                     id_processor=id_processor,
                     id_ram=id_ram,
                     id_storage=id_storage,
-                    id_laptop_inventori=id_laptop
+                    id_laptop_inventori=id_laptop,
+                    baterai=baterai,
+                    ukuran_layar=ukuran_layar
                 )
                 update_service.update_spek(dto)
 

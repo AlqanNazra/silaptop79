@@ -847,6 +847,9 @@ def editdatalaptop_hc_view(request, id_laptop):
             kondisi = request.POST.get('kondisi')
             status = request.POST.get('status')
             lokasi = request.POST.get('lokasi')
+            baterai = request.POST.get('baterai')
+            ukuran_layar = request.POST.get('ukuran_layar')
+
 
             if laptop.status.lower() == 'dipinjam' and status and status.lower() != 'dipinjam':
                 raise ValueError("Laptop sedang aktif dipinjam dan tidak dapat diubah statusnya.")
@@ -864,19 +867,29 @@ def editdatalaptop_hc_view(request, id_laptop):
             id_processor = request.POST.get('id_processor')
             id_ram = request.POST.get('id_ram')
             id_storage = request.POST.get('id_storage')
+
+            if baterai:
+                laptop.baterai = baterai
+                laptop.save()
+
+            if ukuran_layar:
+                laptop.ukuran_layar = ukuran_layar
+                laptop.save()
             
             if id_processor and id_ram and id_storage:
                 dto = LaptopInventoriDTO(
                     nama_laptop=laptop.nama_laptop,
                     model=laptop.model,
-                    os=laptop.os,
+                    os=laptop.os,   
                     kondisi='rusak' if kondisi and 'rusak' in str(kondisi).lower() else (laptop.kondisi if not kondisi else 'baik'),
                     status=status or laptop.status,
                     lokasi=lokasi or laptop.lokasi,
                     id_processor=id_processor,
                     id_ram=id_ram,
                     id_storage=id_storage,
-                    id_laptop_inventori=id_laptop
+                    id_laptop_inventori=id_laptop,
+                    baterai=baterai,
+                    ukuran_layar=ukuran_layar
                 )
                 update_service.update_spek(dto)
 

@@ -438,36 +438,40 @@
                     <div class="grid-2-cols">
 
                         <div class="form-group">
-
                             <label>Project</label>
-
-                            <select class="form-control" name="id_proyek" id="projectSelect">
-
-                                <option value="">
-                                    Pilih Project
-                                </option>
-
+                            {% if id_pengajuan %}
+                            <input type="hidden" name="id_proyek" value="{{ selected_project }}">
+                            <select class="form-control" id="projectSelect" disabled>
                                 {% for project in projects %}
-                                <option value="{{ project.id_proyek }}" {% if
-                                    selected_project|stringformat:"s"==project.id_proyek|stringformat:"s" %} selected {%
-                                    endif %}>
+                                <option value="{{ project.id_proyek }}" {% if project.id_proyek == selected_project %} selected {% endif %}>
                                     {{ project.nama_proyek }}
                                 </option>
                                 {% endfor %}
-
                             </select>
-
+                            {% else %}
+                            <select class="form-control" name="id_proyek" id="projectSelect">
+                                <option value="">Pilih Project</option>
+                                {% for project in projects %}
+                                <option value="{{ project.id_proyek }}" {% if project.id_proyek == selected_project %} selected {% endif %}>
+                                    {{ project.nama_proyek }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            {% endif %}
                         </div>
 
                         <div class="form-group">
-
                             <label>Role</label>
-
-                            <select class="form-control" name="id_role" id="roleSelect">
-                                <option value="">
-                                    Pilih Role
-                                </option>
+                            {% if id_pengajuan %}
+                            <input type="hidden" name="id_role" value="{{ selected_role }}">
+                            <select class="form-control" id="roleSelect" disabled>
+                                {# Populated by JS #}
                             </select>
+                            {% else %}
+                            <select class="form-control" name="id_role" id="roleSelect">
+                                <option value="">Pilih Role</option>
+                            </select>
+                            {% endif %}
                         </div>
                     </div>
 
@@ -764,16 +768,23 @@
             container.innerHTML = html;
         }
 
-        function filterRoleByProject() {
+        // Flag: true ketika JS sedang auto-populate role (bukan user action)
+        let isAutoPopulating = false;
+
+        function filterRoleByProject(isAuto) {
 
             const projectId =
-                projectSelect.value;
+                projectSelect ? projectSelect.value : "";
 
             const currentSelectedRole =
                 "{{ selected_role|default:'' }}";
 
-            roleSelect.innerHTML =
-                '<option value="">Pilih Role</option>';
+            if (roleSelect) {
+                roleSelect.innerHTML =
+                    '<option value="">Pilih Role</option>';
+            }
+
+            if (!projectId || !roleSelect) return;
 
             const roles =
                 projectRoleData.filter(
@@ -783,41 +794,30 @@
 
             console.log("PROJECT =", projectId);
             console.log("ROLES FILTER =", roles);
-            console.log("ROLE SELECT =", roleSelect);
+            console.log("CURRENT ROLE =", currentSelectedRole);
 
+            isAutoPopulating = true;
             roles.forEach(role => {
-
-                const option =
-                    document.createElement(
-                        "option"
-                    );
-
-                option.value =
-                    role.id_role;
-
-                option.textContent =
-                    role.nama;
-
-                if (
-                    role.id_role ===
-                    "{{ selected_role_teknologi|default:'' }}"
-                ) {
+                const option = document.createElement("option");
+                option.value = role.id_role;
+                option.textContent = role.nama;
+                if (role.id_role === currentSelectedRole) {
                     option.selected = true;
                 }
-
-                roleSelect.appendChild(
-                    option
-                );
+                roleSelect.appendChild(option);
             });
+            isAutoPopulating = false;
         }
 
         function loadRoleData() {
+            // Jangan redirect jika sedang auto-populate
+            if (isAutoPopulating) return;
 
             const projectId =
-                projectSelect.value;
+                projectSelect ? projectSelect.value : "";
 
             const roleId =
-                roleSelect.value;
+                roleSelect ? roleSelect.value : "";
 
             const jenis =
                 document.getElementById(
@@ -825,12 +825,9 @@
                 ).value;
 
             if (projectId && roleId) {
-
                 const url =
                     `${window.location.pathname}?id_proyek=${projectId}&id_role=${roleId}&jenis=${jenis}`;
-
-                window.location.href =
-                    url;
+                window.location.href = url;
             }
         }
         const processorSelect =

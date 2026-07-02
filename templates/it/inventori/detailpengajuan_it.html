@@ -411,7 +411,7 @@
 
                 <div class="details-grid" style="grid-template-columns: repeat(3, 1fr); gap: 20px;">
                     <div class="detail-item">
-                        <label>Requested By</label>
+                        <label>Diajukan Oleh</label>
                         <div class="value-text">{{ pengajuan.id_user.nama|default:pengajuan.user_nama }}</div>
                         <div style="font-size: 12px; color: #94a3b8;">{{ pengajuan.perusahaan|default:"-" }}</div>
                     </div>
@@ -420,7 +420,7 @@
                         <div class="value-text">{{ pengajuan.proyek_nama|default:"-" }}</div>
                     </div>
                     <div class="detail-item">
-                        <label>Request Type / Role</label>
+                        <label>Jenis Permintaan / Role</label>
                         <div class="value-text">{{ pengajuan.kebutuhan_role|default:"-" }}</div>
                         <div style="font-size: 12px; color: #94a3b8;">Tanggal: {{ pengajuan.bulan|default:"-" }}</div>
                     </div>
@@ -471,7 +471,7 @@
 
             {% if pengajuan.status|lower == 'menunggu' or pengajuan.status|lower == 'pending' %}
             <div class="action-buttons-wrapper">
-                <a href="{% url 'inputkriteria_it' %}?id_proyek={{ id_proyek }}&id_role={{ id_role }}" style="flex: 1; text-decoration: none;">
+                <a href="{% url 'inputkriteria_it' %}?id_proyek={{ id_proyek }}&id_role={{ id_role }}&id_pengajuan={{ pengajuan.id_pengajuan }}" style="flex: 1; text-decoration: none;">
                     <button class="btn-action btn-approve" style="width: 100%;">
                         <i class="fa-solid fa-circle-check"></i> Isi Detail Laptop Pengajuan
                     </button>

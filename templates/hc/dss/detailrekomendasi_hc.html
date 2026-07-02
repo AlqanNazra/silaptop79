@@ -28,12 +28,11 @@
         .dashboard-wrapper {
             display: flex;
             width: 100%;
+            min-height: 100vh;
         }
 
         .main-content {
             flex: 1;
-            margin-left: 260px;
-            /* Lebar sidebar */
             padding: 30px 50px;
             min-height: 100vh;
             box-sizing: border-box;
@@ -92,14 +91,15 @@
         /* Grid Layout Sesuai Gambar */
         .content-grid {
             display: grid;
-            grid-template-columns: 1.5fr 1fr;
+            grid-template-columns: 1fr 1fr;
             gap: 30px;
+            width: 100%;
         }
 
         .card {
             background: #fff;
             border-radius: 20px;
-            padding: 30px;
+            padding: 24px;
             border: 1px solid #f1f5f9;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
             position: relative;
@@ -297,12 +297,20 @@
                     <div class="status-badge">
                         <i class="fa-solid fa-circle" style="font-size: 8px;"></i> TERSEDIA
                     </div>
-                    <img src="https://images.unsplash.com/photo-1517336714460-d1b16dd1c06d?q=80&w=1000&auto=format&fit=crop"
-                        class="laptop-img" alt="Laptop">
-                    <div class="laptop-info">
+                   <svg width="240" height="136" viewBox="0 0 240 136" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Laptop Screen Frame -->
+                        <rect x="20" y="10" width="200" height="110" rx="6" fill="#1e293b" />
+                        <!-- Inner Screen -->
+                        <rect x="25" y="15" width="190" height="100" rx="3" fill="#bfdbfe" />
+                        <!-- Base -->
+                        <path d="M10 120H230V124C230 127 226 129 220 129H20C14 129 10 127 10 124V120Z" fill="#0f172a" />
+                        <!-- Keyboard Area / Indent -->
+                        <rect x="25" y="121" width="190" height="2" rx="1" fill="#475569" />
+                        <!-- Screen Gloss/Reflect -->
+                        <path d="M35 15L120 115H100L35 35V15Z" fill="white" opacity="0.12" />
+                    </svg>
                         <h2>{{ detail.nama_laptop }}</h2>
                         <p>{{ detail.model }}</p>
-                    </div>
                 </div>
 
                 <div class="card">

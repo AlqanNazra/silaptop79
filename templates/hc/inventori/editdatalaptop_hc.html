@@ -322,12 +322,22 @@
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label>Operating System</label>
-                                <input type="text" value="{{ laptop.os }}" disabled>
+                                <label>Baterai</label>
+                                <input 
+                                    type="text" 
+                                    name="baterai"
+                                    value="{{ laptop.baterai|default:'' }}"
+                                    class="form-control"
+                                 >
                             </div>
                             <div class="form-group">
-                                <label>Screen Size (Inch)</label>
-                                <input type="text" value="{{ laptop.ukuran_layar|default:'-' }}" disabled>
+                                <label>Ukuran Layar (Inch)</label>
+                                <input 
+                                    type="text" 
+                                    name="ukuran_layar"
+                                    value="{{ laptop.ukuran_layar|default:'' }}"
+                                    class="form-control"
+                                 >
                             </div>
                         </div>
                     </div>
