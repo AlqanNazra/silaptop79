@@ -1,6 +1,7 @@
 from django.contrib.auth.backends import BaseBackend
 from django.contrib.auth.models import User as DjangoUser
 from inventori.models import User as CustomUser
+from core.crypto import decrypt_password
 
 class InventoriAuthBackend(BaseBackend):
     def authenticate(self, request, username=None, password=None, **kwargs):
@@ -14,7 +15,13 @@ class InventoriAuthBackend(BaseBackend):
                 nama=username
             ).first()
 
-            if custom_user and custom_user.password == password:
+            is_valid_password = False
+            if custom_user:
+                decrypted_pwd = decrypt_password(custom_user.password)
+                if (decrypted_pwd and decrypted_pwd == password) or (custom_user.password == password):
+                    is_valid_password = True
+
+            if is_valid_password:
                 # Get or create standard Django user
                 django_user, created = DjangoUser.objects.get_or_create(
                     username=custom_user.id_user,

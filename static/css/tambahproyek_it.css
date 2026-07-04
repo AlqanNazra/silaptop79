@@ -1,0 +1,337 @@
+body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            min-height: 100vh;
+            background-color: #f8fafc;
+        }
+
+        .dashboard-wrapper {
+            display: flex;
+            width: 100%;
+        }
+
+        .main-dashboard-content {
+            width: calc(100% - 260px);
+            margin-left: 260px;
+            padding: 40px 60px;
+            box-sizing: border-box;
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 800;
+            color: #1e293b;
+            margin-top: 0;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .page-subtitle {
+            font-size: 14px;
+            color: #64748b;
+            margin-bottom: 32px;
+            
+            line-height: 1.6;
+        }
+
+        /* Row Layout */
+        .row-container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 28px;
+            align-items: start;
+            margin-bottom: 32px;
+        }
+
+        /* Section Card Left */
+        .section-card {
+            background: #ffffff;
+            border-radius: 16px;
+            border: 1px solid #f1f5f9;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+            overflow: hidden;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 24px 28px;
+            border-bottom: 1px solid #f1f5f9;
+            background-color: #f8fafc;
+        }
+
+        .section-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: #0b57c6;
+            background-color: rgba(11, 87, 198, 0.08);
+            flex-shrink: 0;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1e293b;
+            margin: 0;
+        }
+
+        .section-body {
+            padding: 28px;
+        }
+
+        /* Form Layout */
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-row.full {
+            grid-template-columns: 1fr;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            background-color: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            color: #334155;
+            transition: all 0.2s;
+            box-sizing: border-box;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #0b57c6;
+            background-color: #ffffff;
+            box-shadow: 0 0 0 3px rgba(11, 87, 198, 0.1);
+        }
+
+        .form-control::placeholder {
+            color: #94a3b8;
+        }
+
+        /* Control Card Right */
+        .control-card {
+            background: #ffffff;
+            border-radius: 16px;
+            border: 1px solid #f1f5f9;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+            padding: 28px;
+            box-sizing: border-box;
+            position: sticky;
+            top: 40px;
+        }
+
+        .control-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-top: 0;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .control-title i {
+            color: #0b57c6;
+        }
+
+        .control-text {
+            font-size: 13px;
+            color: #64748b;
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+
+        .btn-submit {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            background-color: #0b57c6;
+            color: white;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 12px rgba(11, 87, 198, 0.15);
+        }
+
+        .btn-submit:hover {
+            background-color: #09459e;
+        }
+
+        .btn-cancel {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            padding: 13px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            background-color: #ffffff;
+            color: #64748b;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            box-sizing: border-box;
+        }
+
+        .btn-cancel:hover {
+            background-color: #f1f5f9;
+            color: #0f172a;
+        }
+
+        /* Role Dynamic Box */
+        .role-group-box {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            position: relative;
+            transition: border-color 0.2s;
+        }
+
+        .role-group-box:hover {
+            border-color: #cbd5e1;
+        }
+
+        .btn-remove-role {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: #ef4444;
+            cursor: pointer;
+            font-size: 15px;
+            padding: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            transition: all 0.2s;
+            background-color: #fee2e2;
+        }
+
+        .btn-remove-role:hover {
+            background-color: #fca5a5;
+            color: #7f1d1d;
+        }
+
+        .btn-add-role-dash {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 14px;
+            border: 2px dashed #cbd5e1;
+            border-radius: 8px;
+            background: none;
+            color: #0b57c6;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 8px;
+        }
+
+        .btn-add-role-dash:hover {
+            background-color: rgba(11, 87, 198, 0.04);
+            border-color: #0b57c6;
+        }
+
+        /* Technology Pill checkboxes style */
+        .tech-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+            padding: 12px;
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            min-height: 44px;
+            box-sizing: border-box;
+        }
+
+        .tech-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #f1f5f9;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #475569;
+            cursor: pointer;
+            border: 1px solid #e2e8f0;
+            user-select: none;
+        }
+
+        .tech-item input {
+            margin: 0;
+            cursor: pointer;
+        }
+
+        .role-bobot-container {
+            margin-top: 24px;
+            border-top: 1px solid #cbd5e1;
+            padding-top: 20px;
+        }
+
+        .role-bobot-container h4 {
+            margin: 0 0 16px 0;
+            font-size: 13px;
+            font-weight: 700;
+            color: #1e293b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .role-bobot-container h4 i {
+            color: #b45309;
+        }

@@ -22,6 +22,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-68e461gv0a9s&i4vs1fd%^z_xy^hu**#6m%u)cqmtf1h^*(5nl'
+PASSWORD_ENCRYPTION_KEY = b'WsTyhCaCVxH9iEb-quf8h0tqpUO56SuYXOpvyM9yIzk='
 
 DEBUG = True
 
@@ -88,10 +89,10 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'TA',
-        'USER': 'postgres',
+        'USER': 'dafffc',
         'PASSWORD': '190105',
-        'HOST': '127.0.0.1',
-        'PORT': '5433',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
 

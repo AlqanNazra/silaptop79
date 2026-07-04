@@ -1,0 +1,338 @@
+/* Reset Sidebar & Menu (Menghilangkan Titik-Titik) */
+        ul,
+        li {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        body {
+            background-color: #f8fafc;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            display: flex;
+        }
+
+        .main-content {
+            width: calc(100% - 260px);
+            margin-left: 260px;
+            padding: 30px 50px;
+        }
+
+        /* Perbaikan Top Navigation (Header Area) */
+        .top-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .breadcrumb {
+            font-size: 13px;
+            color: #64748b;
+            margin-bottom: 4px;
+        }
+
+        .breadcrumb span {
+            color: #0b57c6;
+            font-weight: 600;
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 800;
+            color: #1e293b;
+            margin: 0;
+        }
+
+        /* Styling Tombol Navigasi Kanan Atas */
+        .nav-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-nav {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.2s;
+        }
+
+        .btn-grey {
+            background: #e2e8f0;
+            color: #475569;
+        }
+
+        .btn-blue {
+            background: #0b57c6;
+            color: white;
+        }
+
+        /* Summary Cards */
+        .summary-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .summary-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            border: 1px solid #f1f5f9;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+        }
+
+        .icon-box {
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+            /* Menjadi lingkaran sesuai gambar */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .blue-icon {
+            background: #eff6ff;
+            color: #3b82f6;
+        }
+
+        .red-icon {
+            background: #fef2f2;
+            color: #ef4444;
+        }
+
+        .summary-info label {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .summary-info span {
+            font-size: 22px;
+            font-weight: 800;
+            color: #1e293b;
+        }
+
+        /* Table Section */
+        .table-card {
+            background: white;
+            border-radius: 16px;
+            border: 1px solid #f1f5f9;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+        }
+
+        .table-header {
+            padding: 20px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .table-header h2 {
+            font-size: 17px;
+            font-weight: 700;
+            margin: 0;
+            color: #1e293b;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-filter,
+        .btn-export {
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-filter {
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        .btn-export {
+            background: #075985;
+            color: white;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 16px 24px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+            background: #fafafa;
+        }
+
+        td {
+            padding: 14px 24px;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 13px;
+            color: #475569;
+        }
+
+        .user-cell {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #334155;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .user-name {
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .user-role {
+            font-size: 11px;
+            color: #94a3b8;
+        }
+
+        /* Status Pills (Data Laptop Standard) */
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        .status-pill .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+        .status-available, .status-selesai, .status-disetujui {
+            background-color: #dcfce7;
+            color: #16a34a;
+        }
+        .status-available .dot, .status-selesai .dot, .status-disetujui .dot {
+            background-color: #16a34a;
+        }
+        .status-dipinjam, .status-aktif {
+            background-color: #dbeafe;
+            color: #2563eb;
+        }
+        .status-dipinjam .dot, .status-aktif .dot {
+            background-color: #2563eb;
+        }
+        .status-warning, .status-dikembalikan, .status-menunggu, .status-ready, .status-belum_diambil {
+            background-color: #fef3c7;
+            color: #d97706;
+        }
+        .status-warning .dot, .status-dikembalikan .dot, .status-menunggu .dot, .status-ready .dot, .status-belum_diambil .dot {
+            background-color: #d97706;
+        }
+        .status-rusak, .status-ditolak, .status-rejected {
+            background-color: #fee2e2;
+            color: #dc2626;
+        }
+        .status-rusak .dot, .status-ditolak .dot, .status-rejected .dot {
+            background-color: #dc2626;
+        }
+
+        .badge {
+            padding: 5px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .badge-excellent {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .badge-good {
+            background: #f1f5f9;
+            color: #64748b;
+        }
+
+        .badge-scratch {
+            background: #fef2f2;
+            color: #ef4444;
+        }
+
+        .pagination {
+            padding: 15px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #64748b;
+            font-size: 12px;
+        }
+
+        .page-ctrl {
+            display: flex;
+            gap: 5px;
+        }
+
+        .page-num {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            border: 1.5px solid #e2e8f0;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .page-num:hover {
+            background-color: #f8fafc;
+            border-color: #cbd5e1;
+        }
+
+        .page-num.active {
+            background: #0b57c6;
+            color: white;
+            border-color: #0b57c6;
+        }

@@ -22,6 +22,7 @@ from core.views import (
     tambahuser_hc_view,
     edit_user_hc_view,
     hapus_user_hc_view,
+    decrypt_password_view,
 
     # IT Views
     dashboard_it_view,
@@ -120,9 +121,10 @@ urlpatterns = [
     path('hc/notifikasi/', hc_required(notifikasi_hc_view), name='notifikasi_hc'),
     path('hc/manajemen-talent/', hc_required(manajementalent_hc_view), name='manajementalent_hc'),
     path('hc/manajemen-user/', hc_required(manajemenuser_hc_view), name='manajemenuser_hc'),
-    path('hc/tambah-user/', hc_required(tambahuser_hc_view), name='tambahuser_hc'),
-    path('hc/edit-user/', hc_required(edit_user_hc_view), name='edit_user_hc'),
-    path('hc/hapus-user/', hc_required(hapus_user_hc_view), name='hapus_user_hc'),
+    path('hc/manajemen-user/tambah/', hc_required(tambahuser_hc_view), name='tambahuser_hc'),
+    path('hc/manajemen-user/edit/', hc_required(edit_user_hc_view), name='edit_user_hc'),
+    path('hc/manajemen-user/hapus/', hc_required(hapus_user_hc_view), name='hapus_user_hc'),
+    path('hc/user/decrypt-password/', hc_required(decrypt_password_view), name='decrypt_password_hc'),
 
     # ==========================================
     # INFORMATION TECHNOLOGY (IT) ROUTES

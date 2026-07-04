@@ -1,0 +1,351 @@
+body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .dashboard-wrapper {
+            display: block;
+            width: 100%;
+        }
+
+        .sidebar {
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.03);
+        }
+
+        .main-dashboard-content {
+            width: calc(100% - 260px);
+            margin-left: 260px;
+            padding: 40px 60px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+        }
+
+        /* Page Header */
+        .page-header h1 {
+            margin: 0 0 8px 0;
+            font-size: 26px;
+            font-weight: 700;
+            color: #0F172A;
+            letter-spacing: -0.5px;
+        }
+
+        .page-header p {
+            margin: 0;
+            font-size: 14px;
+            color: #64748B;
+        }
+
+        /* Stats Row */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
+
+        .stat-card {
+            background: #FFFFFF;
+            border-radius: 12px;
+            padding: 24px;
+            border: 1px solid #E2E8F0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+        }
+
+        .stat-card.blue::before {
+            background-color: #0284C7;
+        }
+
+        .stat-card.light-blue::before {
+            background-color: #3B82F6;
+        }
+
+        .stat-card.green::before {
+            background-color: #16A34A;
+        }
+
+        .stat-card.orange::before {
+            background-color: #EA580C;
+        }
+
+        .stat-card.red::before {
+            background-color: #DC2626;
+        }
+
+        .stat-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .stat-title {
+            font-size: 13px;
+            font-weight: 500;
+            color: #475569;
+        }
+
+        .stat-icon {
+            color: #94A3B8;
+        }
+
+        .stat-card.blue .stat-icon {
+            color: #0284C7;
+        }
+
+        .stat-card.light-blue .stat-icon {
+            color: #3B82F6;
+        }
+
+        .stat-card.green .stat-icon {
+            color: #16A34A;
+        }
+
+        .stat-card.orange .stat-icon {
+            color: #EA580C;
+        }
+
+        .stat-card.red .stat-icon {
+            color: #DC2626;
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: 700;
+            color: #0F172A;
+            margin-bottom: 8px;
+        }
+
+        .stat-subtitle {
+            font-size: 12px;
+            font-weight: 500;
+            color: #64748B;
+        }
+
+        /* Table Card */
+        .table-card {
+            background: #FFFFFF;
+            border-radius: 16px;
+            border: 1px solid #E2E8F0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .table-header {
+            padding: 24px 32px;
+            border-bottom: 1px solid #E2E8F0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-header h2 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+            color: #0F172A;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 16px 16px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #64748B;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid #E2E8F0;
+        }
+
+        td {
+            padding: 16px 16px;
+            font-size: 14px;
+            border-bottom: 1px solid #F1F5F9;
+            vertical-align: middle;
+        }
+
+        .applicant-cell {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .avatar-initials {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .avatar-initials.blue {
+            background-color: #DBEAFE;
+            color: #1E3A8A;
+        }
+
+        .applicant-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .applicant-name {
+            font-weight: 600;
+            color: #0F172A;
+        }
+
+        .applicant-email {
+            font-size: 12px;
+            color: #64748B;
+        }
+
+        .type-badge {
+            background-color: #F1F5F9;
+            color: #475569;
+            padding: 6px 16px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 16px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+
+        .status-badge.menunggu {
+            background-color: #EFF6FF;
+            color: #1D4ED8;
+        }
+
+        .status-badge.menunggu::before {
+            background-color: #3B82F6;
+        }
+
+        .status-badge.disetujui {
+            background-color: #F0FDF4;
+            color: #15803D;
+        }
+
+        .status-badge.disetujui::before {
+            background-color: #22C55E;
+        }
+
+        .status-badge.ready {
+            background-color: #FFF7ED;
+            color: #C2410C;
+        }
+
+        .status-badge.ready::before {
+            background-color: #EA580C;
+        }
+
+        .status-badge.ditolak {
+            background-color: #FEF2F2;
+            color: #B91C1C;
+        }
+
+        .status-badge.ditolak::before {
+            background-color: #EF4444;
+        }
+
+        /* Date column */
+        .date-col {
+            display: flex;
+            flex-direction: column;
+            color: #475569;
+            font-size: 13px;
+            gap: 4px;
+        }
+
+        .btn-detail {
+            display: inline-block;
+            padding: 7px 18px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #334155;
+            background: white;
+            text-decoration: none;
+            transition: all 0.15s;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .btn-detail:hover {
+            background-color: #f1f5f9;
+            border-color: #cbd5e1;
+            color: #0f172a;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn-stopwatch {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background-color: #FFFFFF;
+            border: 1px solid #E2E8F0;
+            color: #475569;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            text-decoration: none;
+        }
+
+        .btn-stopwatch:hover {
+            background-color: #F8FAFC;
+            border-color: #0b57c6;
+            color: #0b57c6;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px rgba(11, 87, 198, 0.1);
+        }
+
+        .btn-stopwatch i {
+            font-size: 18px;
+        }

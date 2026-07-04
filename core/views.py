@@ -4307,6 +4307,7 @@ def tambahuser_hc_view(request):
             return render(request, 'hc/user/tambahuser_hc.html', {'form_data': form_data})
 
         try:
+            from core.crypto import encrypt_password
             new_id = _generate_id_user()
             User.objects.create(
                 id_user=new_id,
@@ -4314,7 +4315,7 @@ def tambahuser_hc_view(request):
                 email=email,
                 role=role,
                 departemen=departemen,
-                password=password,
+                password=encrypt_password(password),
             )
             messages.success(request, f'Pengguna "{nama}" ({role}) berhasil ditambahkan dengan ID {new_id}.')
             return redirect('manajemenuser_hc')
@@ -4342,6 +4343,7 @@ def edit_user_hc_view(request):
             return redirect('manajemenuser_hc')
 
         try:
+            from core.crypto import encrypt_password
             user = User.objects.get(id_user=id_user)
             user.nama = nama
             user.email = email
@@ -4351,7 +4353,7 @@ def edit_user_hc_view(request):
                 if len(password) < 8:
                     messages.error(request, 'Password baru minimal 8 karakter.')
                     return redirect('manajemenuser_hc')
-                user.password = password
+                user.password = encrypt_password(password)
             user.save()
             messages.success(request, f'Data pengguna "{nama}" berhasil diperbarui.')
         except User.DoesNotExist:
@@ -4360,6 +4362,28 @@ def edit_user_hc_view(request):
             messages.error(request, f'Gagal mengubah data: {str(e)}')
 
     return redirect('manajemenuser_hc')
+
+from django.http import JsonResponse
+def decrypt_password_view(request):
+    """API Endpoint to decrypt user password for HC"""
+    if request.session.get('role') != 'HC':
+        return JsonResponse({'success': False, 'error': 'Unauthorized'}, status=403)
+        
+    id_user = request.GET.get('id_user')
+    if not id_user:
+        return JsonResponse({'success': False, 'error': 'ID User is required'}, status=400)
+        
+    from inventori.models import User
+    from core.crypto import decrypt_password
+    try:
+        user = User.objects.get(id_user=id_user)
+        decrypted = decrypt_password(user.password)
+        if decrypted:
+            return JsonResponse({'success': True, 'password': decrypted})
+        else:
+            return JsonResponse({'success': False, 'error': 'Failed to decrypt or plain-text password'})
+    except User.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'User not found'}, status=404)
 
 
 def hapus_user_hc_view(request):
