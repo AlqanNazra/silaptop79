@@ -83,7 +83,7 @@ class RoleRepository(IRoleRepository):
             cur.execute(
                 """
                 DELETE FROM dss_bobotkriteria
-                WHERE role IN (
+                WHERE id_role_teknologi IN (
                     SELECT
                         id_role_teknologi
                     FROM role_teknologi

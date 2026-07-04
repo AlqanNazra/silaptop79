@@ -31,7 +31,7 @@
         }
 
         .main-dashboard-content {
-            flex: 1;
+            width: calc(100% - 260px);
             margin-left: 260px;
             padding: 40px 60px;
             box-sizing: border-box;
@@ -349,6 +349,8 @@
 
         <!-- Main Content -->
         <div class="main-dashboard-content">
+            <!-- Flash Messages -->
+            {% include 'components/messages_popup.html' %}
             <!-- Page Header -->
             <div class="header-area">
                 <div class="page-header">

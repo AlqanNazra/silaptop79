@@ -608,6 +608,7 @@ def riwayatpeminjamanlaptop_it_view(request, id_laptop=None):
         users_dict = {u.id_user: u.nama for u in User.objects.all()}
         users_role_dict = {u.id_user: u.role for u in User.objects.all()}
         laptops_dict = {l.id_laptop_inventori: l.nama_laptop for l in LaptopInventori.objects.all()}
+        laptops_kondisi_dict = {l.id_laptop_inventori: l.kondisi for l in LaptopInventori.objects.all()}
         
         from inventori.models import Peminjaman as PeminjamanModel
         import datetime as _dt
@@ -637,6 +638,7 @@ def riwayatpeminjamanlaptop_it_view(request, id_laptop=None):
                 self.user_role = users_role_dict.get(p_obj.id_user_id, "-")
                 self.laptop_nama = "Pengajuan Ditolak"
                 self.no_inventori = "-"
+                self.laptop_kondisi = "-"
                 self.durasi_hari = None
                 self.tanggal_jatuh_tempo = None
                 self.sisa_hari = None
@@ -654,6 +656,8 @@ def riwayatpeminjamanlaptop_it_view(request, id_laptop=None):
                 p.user_role = users_role_dict.get(p.id_user, "-")
             if not hasattr(p, 'laptop_nama'):
                 p.laptop_nama = laptops_dict.get(p.id_laptop_inventori, p.id_laptop_inventori)
+            if not hasattr(p, 'laptop_kondisi'):
+                p.laptop_kondisi = laptops_kondisi_dict.get(p.id_laptop_inventori, "-")
             
             # Fetch details from Pengajuan model if real peminjaman
             if not hasattr(p, 'kebutuhan_role'):
@@ -1459,6 +1463,7 @@ def notifikasi_hc_view(request):
                 'id_peminjaman': pem.id_peminjaman,
                 'user_nama': u_nama,
                 'laptop_nama': laptop_nama,
+                'kondisi_laptop': pem.id_laptop_inventori.kondisi if hasattr(pem.id_laptop_inventori, 'kondisi') else '-',
                 'tanggal_kembali': tgl_kembali.strftime('%d %B %Y') if tgl_kembali and hasattr(tgl_kembali, 'strftime') else str(tgl_kembali or '-'),
                 'keterangan': pem.keterangan or '-',
                 'urgency_class': 'warning',
@@ -2403,6 +2408,7 @@ def notifikasi_it_view(request):
                 'id_peminjaman': pem.id_peminjaman,
                 'user_nama': u_nama,
                 'laptop_nama': laptop_nama,
+                'kondisi_laptop': pem.id_laptop_inventori.kondisi if hasattr(pem.id_laptop_inventori, 'kondisi') else '-',
                 'tanggal_kembali': tgl_kembali.strftime('%d %B %Y') if tgl_kembali and hasattr(tgl_kembali, 'strftime') else str(tgl_kembali or '-'),
                 'keterangan': pem.keterangan or '-',
                 'urgency_class': 'warning',
@@ -2641,6 +2647,7 @@ def tambahpengadaan_it_view(request):
     if request.method == 'POST':
         conn = get_connection()
         try:
+            repo = LaptopPengadaanRepository(conn)
             nama_laptop = request.POST.get('nama_laptop')
             gpu = request.POST.get('gpu')
             id_processor = request.POST.get('id_processor')
@@ -3100,6 +3107,7 @@ def riwayatpeminjamanlaptop_talent_view(request):
                 
                 self.nama_laptop = "Pengajuan Ditolak"
                 self.no_inventori = "-"
+                self.laptop_kondisi = "-"
                 self.durasi_hari = 0
                 self.tanggal_jatuh_tempo = None
                 self.sisa_hari = None
@@ -3118,9 +3126,11 @@ def riwayatpeminjamanlaptop_talent_view(request):
                 if laptop:
                     p.nama_laptop = laptop.nama_laptop
                     p.no_inventori = laptop.no_inventori
+                    p.laptop_kondisi = laptop.kondisi
                 else:
                     p.nama_laptop = "Unknown Laptop"
                     p.no_inventori = p.id_laptop_inventori
+                    p.laptop_kondisi = "-"
             
             # Fetch details from Pengajuan model if real peminjaman
             if not hasattr(p, 'kebutuhan_role'):

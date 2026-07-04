@@ -32,7 +32,7 @@
         }
 
         .main-content {
-            flex: 1;
+            width: calc(100% - 260px);
             margin-left: 260px;
             padding: 40px 48px;
             box-sizing: border-box;
@@ -418,14 +418,16 @@
         {% include 'talent/components/sidebar.html' with active_page='history_pengajuan' %}
 
         <div class="main-content">
-
-            <!-- Page Header -->
+            <div class="page-header">
+                <!-- Page Header -->
             <div class="page-top">
                 <h1>Riwayat Pengajuan Peminjaman Laptop</h1>
                 <a href="{% url 'dashboard_talent' %}" class="btn-back">
                     Kembali ke Dashboard
                 </a>
             </div>
+            </div>
+            <div class="content-padding">
 
             <!-- Flash Messages -->
             {% include 'components/messages_popup.html' %}
@@ -622,6 +624,7 @@
                                             '{{ p.status|title }}',
                                             '{{ p.nama_laptop|escapejs }}',
                                             '{{ p.no_inventori|escapejs }}',
+                                            '{{ p.laptop_kondisi|escapejs }}',
                                             '{{ p.tanggal_pinjam|date:"d M Y"|default:"-" }}',
                                             '{{ p.tanggal_kembali|date:"d M Y"|default:"-" }}',
                                             '{{ p.kebutuhan_role|escapejs }}',
@@ -685,7 +688,7 @@
     </div><!-- End Wrapper -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-    function showHistoryDetail(status, laptopName, noSeri, tanggalPinjam, tanggalKembali, role, requirement, perusahaan, keterangan) {
+    function showHistoryDetail(status, laptopName, noSeri, kondisi, tanggalPinjam, tanggalKembali, role, requirement, perusahaan, keterangan) {
         let title = '';
         let htmlContent = '';
         let icon = 'info';
@@ -710,6 +713,7 @@
         } else {
             title = '<span style="color:#10b981; font-weight:700;">Detail Peminjaman Selesai</span>';
             icon = 'success';
+            let kondisiHTML = (kondisi && kondisi !== '-') ? `<tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 10px 0; font-weight: 600; color: #1e293b;">Kondisi Terkini</td><td style="padding: 10px 0; color: ${kondisi.toLowerCase().includes('rusak') ? '#dc2626' : '#16a34a'}; font-weight: 600; text-transform: capitalize;">${kondisi}</td></tr>` : '';
             htmlContent = `
                 <div style="text-align: left; font-family: 'Inter', sans-serif; font-size: 14px; line-height: 1.6; color: #475569;">
                     <div style="background: #f0fdf4; border-left: 4px solid #10b981; padding: 12px 16px; border-radius: 6px; margin-bottom: 20px;">
@@ -720,6 +724,7 @@
                         <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 10px 0; font-weight: 600; color: #1e293b; width: 35%;">Tanggal Pinjam</td><td style="padding: 10px 0; color: #475569;">${tanggalPinjam}</td></tr>
                         <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 10px 0; font-weight: 600; color: #1e293b;">Tanggal Kembali</td><td style="padding: 10px 0; color: #475569;">${tanggalKembali || '-'}</td></tr>
                         <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 10px 0; font-weight: 600; color: #1e293b;">Kebutuhan Role</td><td style="padding: 10px 0; color: #475569;">${role}</td></tr>
+                        ${kondisiHTML}
                         <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 10px 0; font-weight: 600; color: #1e293b;">Keterangan</td><td style="padding: 10px 0; color: #475569;">${keterangan || '-'}</td></tr>
                     </table>
                 </div>

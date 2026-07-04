@@ -284,7 +284,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION update_spek_inventori(f_id_laptop_inventori VARCHAR,f_id_processor INTEGER,f_id_ram INTEGER,f_id_storage INTEGER)
+CREATE OR REPLACE FUNCTION update_spek_inventori(f_id_laptop_inventori VARCHAR,f_id_processor VARCHAR,f_id_ram VARCHAR,f_id_storage VARCHAR)
 RETURNS TEXT AS $$
 BEGIN
     UPDATE inventori_laptopinventori

@@ -97,9 +97,20 @@ BEGIN
         'Proyek tidak ditemukan';
     END IF;
 
+    -- Set id_proyek to NULL in inventori_pengajuan (ON DELETE SET NULL behavior)
+    UPDATE inventori_pengajuan
+    SET id_proyek = NULL
+    WHERE id_proyek = p_id_proyek;
+
+    -- Delete project-teknologi mappings
+    DELETE FROM inventori_project_teknologi
+    WHERE proyek_id = p_id_proyek;
+
+    -- Delete project-role mappings
     DELETE FROM inventori_project_role
     WHERE id_proyek = p_id_proyek;
 
+    -- Finally, delete the project
     DELETE FROM inventori_proyek
     WHERE id_proyek = p_id_proyek;
 

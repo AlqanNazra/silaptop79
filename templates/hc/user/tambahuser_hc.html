@@ -36,7 +36,7 @@
         }
 
         .main-dashboard-content {
-            flex: 1;
+            width: calc(100% - 260px);
             margin-left: 260px;
             padding: 40px 48px;
             box-sizing: border-box;
@@ -432,30 +432,7 @@
         <div class="main-dashboard-content">
 
             <!-- Flash Messages -->
-            {% if messages %}
-            <div class="flash-wrap">
-                {% for message in messages %}
-                <div
-                    class="flash {% if message.tags == 'success' %}flash-success{% elif message.tags == 'error' %}flash-error{% endif %}">
-                    {% if message.tags == 'success' %}
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                        <polyline points="22 4 12 14.01 9 11.01" />
-                    </svg>
-                    {% else %}
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10" />
-                        <line x1="15" y1="9" x2="9" y2="15" />
-                        <line x1="9" y1="9" x2="15" y2="15" />
-                    </svg>
-                    {% endif %}
-                    {{ message }}
-                </div>
-                {% endfor %}
-            </div>
-            {% endif %}
+            {% include 'components/messages_popup.html' %}
 
             <!-- Page Header -->
             <div class="page-header-row">

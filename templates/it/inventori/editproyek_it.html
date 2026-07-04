@@ -28,7 +28,7 @@
         }
 
         .main-dashboard-content {
-            flex: 1;
+            width: calc(100% - 260px);
             margin-left: 260px;
             padding: 40px 60px;
             box-sizing: border-box;
@@ -47,7 +47,7 @@
             font-size: 14px;
             color: #64748b;
             margin-bottom: 32px;
-            max-width: 620px;
+            
             line-height: 1.6;
         }
 
@@ -424,6 +424,8 @@
         {% include 'it/components/sidebar.html' with active_page='manajemen_proyek' %}
 
         <div class="main-dashboard-content">
+            <!-- Flash Messages -->
+            {% include 'components/messages_popup.html' %}
 
             <h1 class="page-title">Edit Proyek</h1>
             <p class="page-subtitle">Perbarui data proyek, role, dan teknologi yang terkait dengan proyek ini.</p>

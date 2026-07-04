@@ -92,8 +92,11 @@ class LaptopInventori(models.Model):
     def save(self, *args, **kwargs):
         if self.kondisi:
             clean_k = str(self.kondisi).replace('_', ' ').strip().lower()
-            if 'rusak' in clean_k:
-                self.kondisi = 'rusak'
+            if clean_k in ['rusak ringan', 'rusak berat']:
+                self.kondisi = clean_k
+                self.status = 'rusak'
+            elif 'rusak' in clean_k:
+                self.kondisi = 'rusak ringan'
                 self.status = 'rusak'
             else:
                 self.kondisi = 'baik'

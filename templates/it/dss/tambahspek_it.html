@@ -28,7 +28,7 @@
         }
 
         .main-dashboard-content {
-            flex: 1;
+            width: calc(100% - 260px);
             margin-left: 260px;
             padding: 40px 60px;
             box-sizing: border-box;
@@ -47,7 +47,7 @@
             font-size: 14px;
             color: #64748b;
             margin-bottom: 32px;
-            max-width: 620px;
+            
             line-height: 1.6;
         }
 
@@ -279,15 +279,7 @@
             <p class="page-subtitle">Silakan lengkapi formulir di bawah ini untuk menambahkan aset perangkat keras baru
                 ke dalam sistem inventaris digital Prism Logic.</p>
 
-            {% if messages %}
-            <div class="messages-container">
-                {% for message in messages %}
-                <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-danger{% endif %}">
-                    {{ message }}
-                </div>
-                {% endfor %}
-            </div>
-            {% endif %}
+            {% include 'components/messages_popup.html' %}
 
             <!-- ================= PROCESSOR ROW ================= -->
             <form action="{% url 'tambahspek_it' %}" method="POST">

@@ -36,7 +36,7 @@
         }
 
         .main-dashboard-content {
-            flex: 1;
+            width: calc(100% - 260px);
             margin-left: 260px;
             /* Offset fixed sidebar */
             display: flex;
@@ -409,18 +409,7 @@
         <div class="main-dashboard-content">
 
             <!-- Flash Messages -->
-            {% if messages %}
-            <div style="margin-bottom:20px; padding: 0 40px;">
-                {% for message in messages %}
-                <div style="padding:12px 20px; border-radius:8px; margin-bottom:8px; font-size:14px; font-weight:500;
-                    {% if message.tags == 'success' %}background:#dcfce7; color:#15803d; border:1px solid #bbf7d0;
-                    {% elif message.tags == 'error' %}background:#fee2e2; color:#dc2626; border:1px solid #fecaca;
-                    {% else %}background:#dbeafe; color:#2563eb; border:1px solid #bfdbfe;{% endif %}">
-                    {{ message }}
-                </div>
-                {% endfor %}
-            </div>
-            {% endif %}
+            {% include 'components/messages_popup.html' %}
 
             <!-- Content Area -->
             <div class="content-padding">

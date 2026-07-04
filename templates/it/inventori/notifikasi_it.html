@@ -21,7 +21,7 @@
         }
 
         .main-dashboard-content {
-            flex: 1;
+            width: calc(100% - 260px);
             margin-left: 260px;
             padding: 40px 60px;
             box-sizing: border-box;
@@ -253,6 +253,7 @@
                             <div class="notif-desc">
                                 <strong>{{ notif.laptop_nama }}</strong> telah dikembalikan oleh <strong>{{ notif.user_nama }}</strong>
                                 pada <strong>{{ notif.tanggal_kembali }}</strong>. Silakan verifikasi fisik laptop dan terima pengembalian.
+                                <br><small style="color:#64748b; font-weight:600;">Kondisi Dilaporkan: <span style="{% if 'rusak' in notif.kondisi_laptop %}color:#dc2626;{% else %}color:#16a34a;{% endif %}">{{ notif.kondisi_laptop|title }}</span></small>
                                 {% if notif.keterangan and notif.keterangan != '-' %}
                                 <br><small style="color:#64748b; font-style:italic;">Catatan: "{{ notif.keterangan }}"</small>
                                 {% endif %}

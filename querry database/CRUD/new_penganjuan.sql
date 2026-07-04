@@ -147,7 +147,7 @@ BEGIN
     SET
         status = f_status,
         tanggal_approval = CURRENT_TIMESTAMP,
-        id_approved_by = f_approved_by
+        approved_by = f_approved_by
     WHERE id_pengajuan = f_id_pengajuan;
     IF NOT FOUND THEN
         RAISE EXCEPTION
