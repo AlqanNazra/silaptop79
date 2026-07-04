@@ -4366,7 +4366,8 @@ def edit_user_hc_view(request):
 from django.http import JsonResponse
 def decrypt_password_view(request):
     """API Endpoint to decrypt user password for HC"""
-    if request.session.get('role') != 'HC':
+    user_role = str(getattr(request.user, 'role', '')).upper()
+    if 'HC' not in user_role and not getattr(request.user, 'is_superuser', False):
         return JsonResponse({'success': False, 'error': 'Unauthorized'}, status=403)
         
     id_user = request.GET.get('id_user')
@@ -4381,7 +4382,7 @@ def decrypt_password_view(request):
         if decrypted:
             return JsonResponse({'success': True, 'password': decrypted})
         else:
-            return JsonResponse({'success': False, 'error': 'Failed to decrypt or plain-text password'})
+            return JsonResponse({'success': True, 'password': user.password})
     except User.DoesNotExist:
         return JsonResponse({'success': False, 'error': 'User not found'}, status=404)
 
