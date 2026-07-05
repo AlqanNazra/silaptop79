@@ -165,6 +165,8 @@ class Servicesaw:
                     continue
                 tipe = map_tipe.get(key, "benefit")
                 nilai = item.get(key, 0)
+                if nilai is None:
+                    nilai = 0
 
                 if nilai == 0:
                     normal_item[key] = 0

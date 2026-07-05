@@ -46,6 +46,9 @@
         </p>
         <form method="POST" id="mainForm">
             {% csrf_token %}
+            {% if id_pengajuan %}
+            <input type="hidden" name="id_pengajuan" value="{{ id_pengajuan }}">
+            {% endif %}
             <input
                 type="hidden"
                 name="jenis_rekomendasi"
@@ -102,42 +105,40 @@
                 <div class="grid-2-cols">
 
                     <div class="form-group">
-
                         <label>Project</label>
-
-                        <select
-                            class="form-control"
-                            name="id_proyek"
-                            id="projectSelect">
-
-                            <option value="">
-                                Pilih Project
-                            </option>
-
+                        {% if id_pengajuan %}
+                        <input type="hidden" name="id_proyek" value="{{ selected_project }}">
+                        <select class="form-control" id="projectSelect" disabled style="background-color: #f1f5f9;">
                             {% for project in projects %}
-                            <option
-                                value="{{ project.id_proyek }}"
-                                {% if selected_project|stringformat:"s" == project.id_proyek|stringformat:"s" %}
-                                selected
-                                {% endif %}
-                            >
+                            <option value="{{ project.id_proyek }}" {% if selected_project|stringformat:"s" == project.id_proyek|stringformat:"s" %}selected{% endif %}>
                                 {{ project.nama_proyek }}
                             </option>
                             {% endfor %}
-
                         </select>
-
+                        {% else %}
+                        <select class="form-control" name="id_proyek" id="projectSelect">
+                            <option value="">Pilih Project</option>
+                            {% for project in projects %}
+                            <option value="{{ project.id_proyek }}" {% if selected_project|stringformat:"s" == project.id_proyek|stringformat:"s" %}selected{% endif %}>
+                                {{ project.nama_proyek }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        {% endif %}
                     </div>
 
                     <div class="form-group">
-
                         <label>Role</label>
-
-                            <select class="form-control" name="id_role" id="roleSelect">
-                                <option value="">
-                                    Pilih Role
-                                </option>
-                            </select>
+                        {% if id_pengajuan %}
+                        <input type="hidden" name="id_role" value="{{ selected_role }}">
+                        <select class="form-control" id="roleSelect" disabled style="background-color: #f1f5f9;">
+                            {# Populated by JS #}
+                        </select>
+                        {% else %}
+                        <select class="form-control" name="id_role" id="roleSelect">
+                            <option value="">Pilih Role</option>
+                        </select>
+                        {% endif %}
                     </div>
                 </div>
 
@@ -217,7 +218,7 @@
                         class="form-group"
                         id="minimumHargaContainer"
                         style="display:none;">
-                        <label>Minimum Harga (Rp)</label>
+                        <label>Maksimum Harga / Budget (Rp)</label>
                         <input type="number" name="min_harga" id="minHarga" class="form-control" 
                         min="0" disabled placeholder="Contoh: 10000000">
                     </div>

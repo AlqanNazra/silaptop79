@@ -1304,6 +1304,43 @@ def assign_laptop_hc_view(request):
             messages.error(request, 'Data pengajuan tidak ditemukan.')
             return redirect('hasilrekomendasi_hc')
 
+        jenis = request.GET.get('jenis') or request.session.get('jenis_rekomendasi', 'inventori')
+        if jenis == 'pengadaan':
+            from dss.models import LaptopPengadaan
+            from inventori.repositories.repositori_laptop_inventori import LaptopInventoriRepository
+            from core.db import get_connection
+
+            lp = LaptopPengadaan.objects.filter(id_laptop_pengadaan=laptop_id).first()
+            if not lp:
+                messages.error(request, 'Laptop pengadaan tidak ditemukan.')
+                return redirect('hasilrekomendasi_hc')
+
+            dto_laptop = LaptopInventoriDTO(
+                nama_laptop=lp.nama_laptop,
+                model=lp.nama_laptop,
+                os="Windows 11",
+                kondisi="baik",
+                status="tersedia",
+                lokasi="Gudang IT",
+                id_processor=lp.id_processor.id_processor if lp.id_processor else None,
+                id_ram=lp.id_ram.id_ram if lp.id_ram else None,
+                id_storage=lp.id_storage.id_storage if lp.id_storage else None,
+                ukuran_layar=lp.ukuran_layar,
+                baterai=lp.baterai,
+            )
+
+            conn_li = get_connection()
+            try:
+                repo_li = LaptopInventoriRepository(conn_li)
+                res_id = repo_li.tambah_laptop(dto_laptop)
+                conn_li.commit()
+                laptop_id = res_id
+            except Exception as ex:
+                conn_li.rollback()
+                raise ex
+            finally:
+                conn_li.close()
+
         id_user_hc = request.user.id_user if (hasattr(request.user, 'id_user') and request.user.id_user) else 'USR-001'
         dto_peng = PengajuanDTO(
             id_pengajuan=pengajuan_id,

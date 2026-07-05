@@ -989,7 +989,7 @@ def inputkriteria_hc_view(request):
                 filter_data = FilterPengadaanDTO(
                     min_ram_kapasitas=int(minimum_requirement.get("ram",0) or 0),
                     min_storage=int(minimum_requirement.get("storage",0) or 0),
-                    min_harga=int(minimum_requirement.get("min_harga",0) or 0),
+                    max_harga=int(minimum_requirement.get("min_harga",0) or 0),
                     processor_score=int(minimum_requirement.get("processor_score",0) or 0)
                 )
             service = Servicesaw(conn)
@@ -1034,21 +1034,14 @@ def inputkriteria_hc_view(request):
             # print(traceback.format_exc())
             messages.error(request,f"Gagal memproses DSS: {str(e)}")
     # projects = (Proyek.objects.all().order_by("nama_proyek"))
-    projects = Proyek.objects.none()
-
-    # if pengajuan and pengajuan.id_proyek:
-    #     projects = Proyek.objects.filter(
-    #         id_proyek=pengajuan.id_proyek
-    #     )
-
-    #     selected_project = pengajuan.id_proyek
     if pengajuan and pengajuan.id_proyek:
         projects = Proyek.objects.filter(
             id_proyek=pengajuan.id_proyek
         )
-
         if not selected_project:
             selected_project = pengajuan.id_proyek
+    else:
+        projects = Proyek.objects.all().order_by("nama_proyek")
             
     role_teknologi = (
         RoleTeknologi.objects
@@ -1065,9 +1058,7 @@ def inputkriteria_hc_view(request):
     for pr in ProjectRole.objects.select_related(
         "proyek",
         "role"
-    ).filter(
-        proyek_id=selected_project
-    ):
+    ).all():
         project_role_mapping.append({
             "id_proyek": pr.proyek.id_proyek,
             "id_role": pr.role.id_role,
@@ -1192,7 +1183,7 @@ def hasilrekomendasi_hc_view(request):
                 elif jenis_rekomendasi == "pengadaan":
                     pengadaan = repo_laptop_pengadaan.ambil_laptop_pengadaan_by_id(
                         item["id"]
-                    )
+                    ) or {}
                     print("=" * 50)
                     print("ID =", item["id"])
                     print("PENGADAAN =", pengadaan)
@@ -1604,7 +1595,7 @@ def manajemenlaptop_it_view(request):
 #     return render(request, 'it/inventori/editdatalaptop_it.html', context)
 
 def inputkriteria_it_view(request):
-    conn = connection
+    conn = get_connection()
 
     selected_project = (request.GET.get("id_proyek") or request.POST.get("id_proyek"))
     selected_role  = (request.GET.get("id_role") or request.POST.get("id_role"))
@@ -1818,7 +1809,7 @@ def inputkriteria_it_view(request):
                 filter_data = FilterPengadaanDTO(
                     min_ram_kapasitas=int(minimum_requirement.get("ram",0) or 0),
                     min_storage=int(minimum_requirement.get("storage",0) or 0),
-                    min_harga=int(minimum_requirement.get("min_harga",0) or 0),
+                    max_harga=int(minimum_requirement.get("min_harga",0) or 0),
                     processor_score=int(minimum_requirement.get("processor_score",0) or 0)
                 )
 
@@ -1861,6 +1852,9 @@ def inputkriteria_it_view(request):
                     "inventori"
                 )
             )
+            request.session["selected_role_teknologi"] = selected_role
+            request.session["minimum_requirement"] = minimum_requirement
+            request.session.modified = True
             warning_dss = request.session.get("warning_dss")
             return redirect("hasilrekomendasi_it")        
         except Exception as e:
@@ -1886,8 +1880,7 @@ def inputkriteria_it_view(request):
         )
     )
     project_role_mapping = []
-
-    for pr in ProjectRole.objects.select_related("proyek","role").filter(proyek_id=selected_project) if selected_project else ProjectRole.objects.select_related("proyek","role"):
+    for pr in ProjectRole.objects.select_related("proyek","role").all():
         project_role_mapping.append({
             "id_proyek": pr.proyek.id_proyek,
             "id_role": pr.role.id_role,
@@ -2149,7 +2142,7 @@ def hasilrekomendasi_it_view(request):
                 elif jenis_rekomendasi == "pengadaan":
                     pengadaan = repo_laptop_pengadaan.ambil_laptop_pengadaan_by_id(
                         item["id"]
-                    )
+                    ) or {}
                     # print("=" * 50)
                     # print("ID =", item["id"])
                     # print("PENGADAAN =", pengadaan)
