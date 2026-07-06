@@ -2106,13 +2106,13 @@ def hasilrekomendasi_it_view(request):
             for item in ranking_list:
                 if jenis_rekomendasi == "inventori":
 
-                    laptop = repo_laptop.ambil_spek_laptop(
-                        item["id"]
-                    )
+                    laptop = repo_laptop.ambil_spek_laptop(item["id"]) or {}
+                    from inventori.models import LaptopInventori
+                    laptop_obj = LaptopInventori.objects.filter(id_laptop_inventori=item["id"]).first()
+                    nama_laptop = (laptop_obj.nama_laptop if (laptop_obj and laptop_obj.nama_laptop) else None) or laptop.get("nama_laptop") or laptop.get("model") or item["id"]
 
                     item["detail"] = {
-
-                        "nama": item["id"],
+                        "nama": nama_laptop,
 
                         "processor":
                             f"{laptop.get('manufacturer', '')} "

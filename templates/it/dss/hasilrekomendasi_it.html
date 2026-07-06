@@ -374,167 +374,223 @@
                 .premium-swal-popup {
                     border-radius: 16px !important;
                     font-family: 'Inter', sans-serif !important;
-                    padding: 30px !important;
+                    padding: 25px !important;
+                    width: 460px !important;
                 }
                 .premium-swal-title {
-                    font-size: 20px !important;
+                    font-size: 18px !important;
                     font-weight: 700 !important;
                     color: #1e293b !important;
-                    margin-bottom: 8px !important;
+                    margin-bottom: 5px !important;
                 }
-                .premium-swal-input {
-                    border-radius: 8px !important;
-                    border: 1px solid #cbd5e1 !important;
-                    font-size: 14px !important;
-                    padding: 10px 12px !important;
-                    height: auto !important;
-                    color: #334155 !important;
-                    margin: 15px auto !important;
-                    width: 90% !important;
+                .print-options-grid {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 10px;
+                    margin-top: 15px;
+                    width: 100%;
                 }
-                .premium-swal-confirm {
-                    border-radius: 8px !important;
-                    font-size: 14px !important;
-                    font-weight: 600 !important;
-                    padding: 10px 24px !important;
-                    background-color: #0b57c6 !important;
+                .print-option-card {
+                    display: flex;
+                    align-items: center;
+                    gap: 15px;
+                    padding: 12px 16px;
+                    border: 1.5px solid #e2e8f0;
+                    border-radius: 10px;
+                    cursor: pointer;
+                    text-align: left;
+                    transition: all 0.2s ease;
+                    background: #ffffff;
+                }
+                .print-option-card:hover {
+                    border-color: #0b57c6;
+                    background-color: #f0f7ff;
+                    transform: translateY(-1px);
+                    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+                }
+                .print-option-icon {
+                    font-size: 22px;
+                    background: #f1f5f9;
+                    width: 40px;
+                    height: 40px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    border-radius: 8px;
+                    flex-shrink: 0;
+                }
+                .print-option-card:hover .print-option-icon {
+                    background: #e0f2fe;
+                }
+                .print-option-info {
+                    flex: 1;
+                }
+                .print-option-title {
+                    font-weight: 700;
+                    font-size: 13.5px;
+                    color: #1e293b;
+                    margin: 0 0 2px 0;
+                }
+                .print-option-desc {
+                    font-size: 11px;
+                    color: #64748b;
+                    margin: 0;
+                    line-height: 1.3;
                 }
                 .premium-swal-cancel {
                     border-radius: 8px !important;
-                    font-size: 14px !important;
+                    font-size: 13px !important;
                     font-weight: 600 !important;
-                    padding: 10px 24px !important;
+                    padding: 8px 20px !important;
                     background-color: #64748b !important;
+                    margin-top: 15px !important;
                 }
             `;
             document.head.appendChild(style);
         }
 
+        window._triggerPDFChoice = function(choice) {
+            Swal.close();
+            generatePDF(choice);
+        };
+
         Swal.fire({
             title: 'Cetak Laporan Rekomendasi',
-            html: '<p style="color: #64748b; font-size: 14px; margin: 0 0 10px 0;">Pilih data rekomendasi yang ingin diunduh sebagai PDF:</p>',
-            input: 'select',
-            inputOptions: {
-                'utama': '🏆 Rekomendasi Utama (Sesuai Role)',
-                'alternatif': '💡 Rekomendasi Alternatif',
-                'semua': '📄 Semua Hasil (Utama & Alternatif)'
-            },
-            inputPlaceholder: 'Pilih data yang ingin dicetak',
+            html: `
+                <p style="color: #64748b; font-size: 13px; margin: 0 0 10px 0;">Pilih salah satu komponen di bawah ini untuk mencetak dokumen PDF:</p>
+                <div class="print-options-grid">
+                    <div class="print-option-card" onclick="_triggerPDFChoice('utama')">
+                        <div class="print-option-icon">🏆</div>
+                        <div class="print-option-info">
+                            <h4 class="print-option-title">Rekomendasi Utama</h4>
+                            <p class="print-option-desc">Cetak laptop pilihan yang sesuai dengan spesifikasi minimum role.</p>
+                        </div>
+                    </div>
+                    <div class="print-option-card" onclick="_triggerPDFChoice('alternatif')">
+                        <div class="print-option-icon">💡</div>
+                        <div class="print-option-info">
+                            <h4 class="print-option-title">Rekomendasi Alternatif</h4>
+                            <p class="print-option-desc">Cetak daftar pilihan laptop alternatif lainnya di luar spesifikasi.</p>
+                        </div>
+                    </div>
+                    <div class="print-option-card" onclick="_triggerPDFChoice('semua')">
+                        <div class="print-option-icon">📄</div>
+                        <div class="print-option-info">
+                            <h4 class="print-option-title">Semua Hasil Rekomendasi</h4>
+                            <p class="print-option-desc">Cetak gabungan rekomendasi utama dan alternatif dalam satu laporan.</p>
+                        </div>
+                    </div>
+                </div>
+            `,
+            showConfirmButton: false,
             showCancelButton: true,
-            confirmButtonText: '<i class="fa-solid fa-file-pdf" style="margin-right: 6px;"></i> Cetak PDF',
             cancelButtonText: 'Batal',
             customClass: {
                 popup: 'premium-swal-popup',
                 title: 'premium-swal-title',
-                input: 'premium-swal-input',
-                confirmButton: 'premium-swal-confirm',
                 cancelButton: 'premium-swal-cancel'
-            },
-            inputValidator: (value) => {
-                return !value && 'Anda harus memilih salah satu pilihan!';
             }
-        }).then((result) => {
-            if (!result.isConfirmed || !result.value) return;
-            
-            const choice = result.value;
-            let filename = 'Laporan_Rekomendasi_Laptop.pdf';
-            const printWrapper = document.createElement('div');
-            printWrapper.style.padding = '15px';
-            printWrapper.style.fontFamily = 'Inter, sans-serif';
+        });
+    }
 
-            // Add report header
-            const reportHeader = document.createElement('div');
-            reportHeader.innerHTML = `
-                <div style="text-align: center; margin-bottom: 20px; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px;">
-                    <h1 style="font-size: 18px; font-weight: 800; color: #1e293b; margin: 0 0 4px 0;">LAPORAN HASIL REKOMENDASI LAPTOP (SAW)</h1>
-                    <p style="font-size: 11px; color: #64748b; margin: 0;">Sistem Informasi Pemilihan Laptop (SiLaptop79)</p>
-                    <p style="font-size: 10px; color: #94a3b8; margin: 4px 0 0 0;">Dicetak pada: ${new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
-                </div>
-            `;
-            printWrapper.appendChild(reportHeader);
+    function generatePDF(choice) {
+        let filename = 'Laporan_Rekomendasi_Laptop.pdf';
+        const printWrapper = document.createElement('div');
+        printWrapper.style.padding = '15px';
+        printWrapper.style.fontFamily = 'Inter, sans-serif';
 
-            const tables = document.querySelectorAll('.table-card');
-            
-            if (choice === 'utama') {
-                filename = 'Rekomendasi_Utama_Laptop_SAW.pdf';
-                if (tables.length > 0) {
-                    const clone = tables[0].cloneNode(true);
-                    clone.querySelectorAll('th:last-child, td:last-child').forEach(el => el.remove());
-                    clone.querySelectorAll('.pagination-container-new').forEach(el => el.remove());
-                    printWrapper.appendChild(clone);
-                }
-            } else if (choice === 'alternatif') {
-                filename = 'Rekomendasi_Alternatif_Laptop_SAW.pdf';
-                if (tables.length > 1) {
-                    const clone = tables[1].cloneNode(true);
-                    clone.querySelectorAll('th:last-child, td:last-child').forEach(el => el.remove());
-                    clone.querySelectorAll('.pagination-container-new').forEach(el => el.remove());
-                    printWrapper.appendChild(clone);
-                } else {
-                    Swal.fire('Info', 'Tabel data alternatif tidak ditemukan.', 'info');
-                    return;
-                }
-            } else if (choice === 'semua') {
-                filename = 'Semua_Rekomendasi_Laptop_SAW.pdf';
-                tables.forEach((table, index) => {
-                    const clone = table.cloneNode(true);
-                    clone.querySelectorAll('th:last-child, td:last-child').forEach(el => el.remove());
-                    clone.querySelectorAll('.pagination-container-new').forEach(el => el.remove());
-                    
-                    const title = document.createElement('h3');
-                    title.style.fontSize = '13px';
-                    title.style.marginTop = index > 0 ? '25px' : '0';
-                    title.style.marginBottom = '8px';
-                    title.style.color = '#1e293b';
-                    title.innerText = index === 0 ? 'Rekomendasi Utama (Sesuai Role)' : 'Rekomendasi Alternatif';
-                    
-                    printWrapper.appendChild(title);
-                    printWrapper.appendChild(clone);
-                });
+        // Add report header
+        const reportHeader = document.createElement('div');
+        reportHeader.innerHTML = `
+            <div style="text-align: center; margin-bottom: 20px; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px;">
+                <h1 style="font-size: 18px; font-weight: 800; color: #1e293b; margin: 0 0 4px 0;">LAPORAN HASIL REKOMENDASI LAPTOP (SAW)</h1>
+                <p style="font-size: 11px; color: #64748b; margin: 0;">Sistem Informasi Pemilihan Laptop (SiLaptop79)</p>
+                <p style="font-size: 10px; color: #94a3b8; margin: 4px 0 0 0;">Dicetak pada: ${new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+            </div>
+        `;
+        printWrapper.appendChild(reportHeader);
+
+        const tables = document.querySelectorAll('.table-card');
+        
+        if (choice === 'utama') {
+            filename = 'Rekomendasi_Utama_Laptop_SAW.pdf';
+            if (tables.length > 0) {
+                const clone = tables[0].cloneNode(true);
+                clone.querySelectorAll('th:last-child, td:last-child').forEach(el => el.remove());
+                clone.querySelectorAll('.pagination-container-new').forEach(el => el.remove());
+                printWrapper.appendChild(clone);
             }
+        } else if (choice === 'alternatif') {
+            filename = 'Rekomendasi_Alternatif_Laptop_SAW.pdf';
+            if (tables.length > 1) {
+                const clone = tables[1].cloneNode(true);
+                clone.querySelectorAll('th:last-child, td:last-child').forEach(el => el.remove());
+                clone.querySelectorAll('.pagination-container-new').forEach(el => el.remove());
+                printWrapper.appendChild(clone);
+            } else {
+                Swal.fire('Info', 'Tabel data alternatif tidak ditemukan.', 'info');
+                return;
+            }
+        } else if (choice === 'semua') {
+            filename = 'Semua_Rekomendasi_Laptop_SAW.pdf';
+            tables.forEach((table, index) => {
+                const clone = table.cloneNode(true);
+                clone.querySelectorAll('th:last-child, td:last-child').forEach(el => el.remove());
+                clone.querySelectorAll('.pagination-container-new').forEach(el => el.remove());
+                
+                const title = document.createElement('h3');
+                title.style.fontSize = '13px';
+                title.style.marginTop = index > 0 ? '25px' : '0';
+                title.style.marginBottom = '8px';
+                title.style.color = '#1e293b';
+                title.innerText = index === 0 ? 'Rekomendasi Utama (Sesuai Role)' : 'Rekomendasi Alternatif';
+                
+                printWrapper.appendChild(title);
+                printWrapper.appendChild(clone);
+            });
+        }
 
-            // Apply compact inline styling to all tables inside wrapper for portrait A4 fit
-            printWrapper.querySelectorAll('table').forEach(table => {
-                table.style.width = '100%';
-                table.style.borderCollapse = 'collapse';
-                table.style.fontSize = '9px';
-                table.style.marginTop = '10px';
-                table.style.marginBottom = '15px';
-            });
-            printWrapper.querySelectorAll('th, td').forEach(cell => {
-                cell.style.padding = '6px 8px';
-                cell.style.border = '1px solid #e2e8f0';
-                cell.style.textAlign = 'left';
-            });
-            printWrapper.querySelectorAll('th').forEach(header => {
-                header.style.backgroundColor = '#f8fafc';
-                header.style.color = '#475569';
-                header.style.fontWeight = '700';
-            });
+        // Apply compact inline styling to all tables inside wrapper for portrait A4 fit
+        printWrapper.querySelectorAll('table').forEach(table => {
+            table.style.width = '100%';
+            table.style.borderCollapse = 'collapse';
+            table.style.fontSize = '9px';
+            table.style.marginTop = '10px';
+            table.style.marginBottom = '15px';
+        });
+        printWrapper.querySelectorAll('th, td').forEach(cell => {
+            cell.style.padding = '6px 8px';
+            cell.style.border = '1px solid #e2e8f0';
+            cell.style.textAlign = 'left';
+        });
+        printWrapper.querySelectorAll('th').forEach(header => {
+            header.style.backgroundColor = '#f8fafc';
+            header.style.color = '#475569';
+            header.style.fontWeight = '700';
+        });
 
-            // Show loading
-            Swal.fire({
-                title: 'Sedang membuat PDF...',
-                html: 'Mohon tunggu sebentar.',
-                allowOutsideClick: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                }
-            });
+        // Show loading
+        Swal.fire({
+            title: 'Sedang membuat PDF...',
+            html: 'Mohon tunggu sebentar.',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
 
-            const opt = {
-                margin:       8,
-                filename:     filename,
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2 },
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
+        const opt = {
+            margin:       8,
+            filename:     filename,
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2 },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
 
-            html2pdf().set(opt).from(printWrapper).save().then(() => {
-                Swal.close();
-            }).catch((err) => {
-                Swal.fire('Error', 'Gagal mencetak PDF: ' + err, 'error');
-            });
+        html2pdf().set(opt).from(printWrapper).save().then(() => {
+            Swal.close();
+        }).catch((err) => {
+            Swal.fire('Error', 'Gagal mencetak PDF: ' + err, 'error');
         });
     }
 </script>
