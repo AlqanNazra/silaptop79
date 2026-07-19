@@ -29,6 +29,7 @@ body {
             margin-left: 260px;
             padding: 48px 60px;
             box-sizing: border-box;
+            max-width: none;
         }
 
         /* ============================

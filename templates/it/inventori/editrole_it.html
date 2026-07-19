@@ -82,20 +82,36 @@
                 </div>
 
                 <div class="form-group" style="margin-bottom:12px;">
+                    <label>Pilih Kategori Teknologi</label>
+                    <select id="categorySelect" class="form-control" onchange="showCategoryTech(this.value)" style="margin-bottom: 16px;">
+                        <option value="">-- Pilih Kategori --</option>
+                        {% regroup all_teknologi by kategori as kategori_list %}
+                        {% for kat in kategori_list %}
+                        <option value="cat-{{ forloop.counter }}">{{ kat.grouper|default:"Lainnya" }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group" style="margin-bottom:12px;">
                     <label>Teknologi Pendukung</label>
-                    <div class="tech-checkboxes">
-                        {% for teknologi in all_teknologi %}
-                        <label class="tech-checkbox-item {% if teknologi.id_teknologi in role_tech_ids %}checked{% endif %}" id="tech-badge-{{ teknologi.id_teknologi }}">
-                            <input
-                                type="checkbox"
-                                class="teknologi-checkbox"
-                                name="teknologi_ids[]"
-                                value="{{ teknologi.id_teknologi }}"
-                                data-nama="{{ teknologi.nama_teknologi }}"
-                                {% if teknologi.id_teknologi in role_tech_ids %}checked{% endif %}
-                                onchange="toggleTechBadge(this, '{{ teknologi.id_teknologi }}', '{{ teknologi.nama_teknologi }}')">
-                            {{ teknologi.nama_teknologi }}
-                        </label>
+                    <div class="tech-categories-container">
+                        {% regroup all_teknologi by kategori as kategori_list %}
+                        {% for kat in kategori_list %}
+                        <div id="cat-{{ forloop.counter }}" class="tech-category-content" style="display: none; padding: 16px; border: 1px solid #e2e8f0; border-radius: 8px; gap: 10px; flex-wrap: wrap; background: #ffffff;">
+                            {% for teknologi in kat.list %}
+                            <label class="tech-checkbox-item {% if teknologi.id_teknologi in role_tech_ids %}checked{% endif %}" id="tech-badge-{{ teknologi.id_teknologi }}">
+                                <input
+                                    type="checkbox"
+                                    class="teknologi-checkbox"
+                                    name="teknologi_ids[]"
+                                    value="{{ teknologi.id_teknologi }}"
+                                    data-nama="{{ teknologi.nama_teknologi }}"
+                                    {% if teknologi.id_teknologi in role_tech_ids %}checked{% endif %}
+                                    onchange="toggleTechBadge(this, '{{ teknologi.id_teknologi }}', '{{ teknologi.nama_teknologi }}')">
+                                {{ teknologi.nama_teknologi }}
+                            </label>
+                            {% endfor %}
+                        </div>
                         {% empty %}
                         <span style="color:#94a3b8;">Belum ada teknologi terdaftar</span>
                         {% endfor %}
@@ -146,6 +162,18 @@
         errorBox.style.display = "none";
     });
 
+    window.showCategoryTech = function(val) {
+        document.querySelectorAll('.tech-category-content').forEach(el => {
+            el.style.display = 'none';
+        });
+        if (val) {
+            const target = document.getElementById(val);
+            if (target) {
+                target.style.display = 'flex';
+            }
+        }
+    };
+
     // Global Toggle SWARA card collapse/expand
     window.toggleSwaraCard = function(header) {
         const card = header.closest('.teknologi-swara-card');
@@ -164,6 +192,20 @@
                 createBobotForm(t.id_teknologi, t.nama_teknologi)
             );
             populateCriteriaList(t);
+        });
+
+        // Auto-show category with checked technologies
+        let shown = false;
+        document.querySelectorAll('.tech-category-content').forEach(content => {
+            const checkedCheckboxes = content.querySelectorAll('.teknologi-checkbox:checked');
+            if (checkedCheckboxes.length > 0 && !shown) {
+                const selectEl = document.getElementById('categorySelect');
+                if (selectEl) {
+                    selectEl.value = content.id;
+                    content.style.display = 'flex';
+                    shown = true;
+                }
+            }
         });
     });
 
@@ -353,10 +395,48 @@
                 `}
             `;
             listEl.appendChild(item);
+            
+            if (index > 0) {
+                // Dynamically attach click listeners to markers
+                const markers = item.querySelectorAll('.slider-marker-label');
+                const slider = item.querySelector('.swara-slider');
+                const numInput = item.querySelector('.s-value-number-input');
+                
+                const markerVals = [0.0, 0.3, 0.6, 1.0];
+                markers.forEach((marker, idx) => {
+                    marker.style.cursor = 'pointer';
+                    marker.addEventListener('click', () => {
+                        const val = markerVals[idx];
+                        if (slider) slider.value = val;
+                        if (numInput) numInput.value = val.toFixed(2);
+                        highlightActiveMarker(item, val);
+                        calculateSwara(techId);
+                    });
+                });
+                
+                highlightActiveMarker(item, crit.s);
+            }
         });
         
         addDragAndDropHandlers(techId);
         rebuildUIAfterReorder(techId);
+    }
+
+    // Highlight active label penanda
+    function highlightActiveMarker(card, value) {
+        const labels = card.querySelectorAll('.slider-marker-label');
+        if (!labels.length) return;
+        labels.forEach(label => label.classList.remove('active'));
+        const floatVal = parseFloat(value);
+        if (floatVal === 0.0) {
+            labels[0].classList.add('active');
+        } else if (Math.abs(floatVal - 0.3) < 0.05) {
+            labels[1].classList.add('active');
+        } else if (Math.abs(floatVal - 0.6) < 0.05) {
+            labels[2].classList.add('active');
+        } else if (floatVal === 1.0) {
+            labels[3].classList.add('active');
+        }
     }
 
     // Slider interaction updates number input
@@ -366,6 +446,7 @@
         if (numInput) {
             numInput.value = parseFloat(slider.value).toFixed(2);
         }
+        highlightActiveMarker(card, slider.value);
         calculateSwara(techId);
     };
 
@@ -381,6 +462,7 @@
         if (slider) {
             slider.value = val;
         }
+        highlightActiveMarker(card, val);
         calculateSwara(techId);
     };
 

@@ -88,9 +88,24 @@ def manajemen_laptop_page(request):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
+    # Attach borrower name
+    from inventori.models import Peminjaman
+    active_loans = Peminjaman.objects.filter(status='dipinjam').select_related('id_user')
+    loan_map = {loan.id_laptop_inventori_id: loan.id_user.nama for loan in active_loans}
+    for laptop in page_obj:
+        laptop.peminjam = loan_map.get(laptop.id_laptop_inventori, "-")
+
+    # Calculate status counts
+    total_available = LaptopInventori.objects.filter(status__iexact='tersedia').count()
+    total_borrowed = LaptopInventori.objects.filter(status__iexact='dipinjam').count()
+    total_broken = LaptopInventori.objects.filter(status__in=['rusak', 'perbaikan', 'Broken', 'Perbaikan']).count()
+
     context = {
         'laptops': page_obj,
         'total': laptops.count(),
+        'total_available': total_available,
+        'total_borrowed': total_borrowed,
+        'total_broken': total_broken,
         'search_query': search_query,
         'status_filter': status_filter,
         'ram_filter': ram_filter,
@@ -360,6 +375,24 @@ def tambah_laptop_page(request):
             )
             service = CreateLaptopInventoriService()
             service.execute(dto)
+
+            # Handle image upload
+            gambar_file = request.FILES.get('gambar')
+            if gambar_file:
+                import base64
+                encoded_string = base64.b64encode(gambar_file.read()).decode('utf-8')
+                mime_type = gambar_file.content_type or 'image/png'
+                gambar_uri = f"data:{mime_type};base64,{encoded_string}"
+                
+                # Update newly created laptop
+                new_laptop = LaptopInventori.objects.filter(
+                    nama_laptop=request.POST.get('nama_laptop'),
+                    model=request.POST.get('model')
+                ).order_by('-id_laptop_inventori').first()
+                if new_laptop:
+                    new_laptop.gambar = gambar_uri
+                    new_laptop.save()
+
             messages.success(request, 'Laptop berhasil ditambahkan ke inventori!')
             return redirect('manajemen_laptop_hc')
         except Exception as e:
@@ -581,6 +614,28 @@ def setujui_pengajuan_hc_view(request):
                 if tanggal_jatuh_tempo:
                     peminjaman.tanggal_jatuh_tempo = tanggal_jatuh_tempo
                 peminjaman.save()
+
+            # Kirim Notifikasi Email
+            try:
+                from core.views import send_notification_email
+                from inventori.models import User, LaptopInventori
+                user_obj = User.objects.filter(id_user=pengajuan.id_user).first()
+                laptop_obj = LaptopInventori.objects.filter(id_laptop_inventori=laptop_id).first()
+                username = user_obj.username if user_obj else "Talent"
+                
+                subject = f"[SiLaptop79] Pengajuan Laptop DISETUJUI - {username}"
+                email_message = (
+                    f"Halo {username},\n\n"
+                    f"Pengajuan laptop Anda telah disetujui oleh HC.\n"
+                    f"Laptop yang dialokasikan: {laptop_obj.nama_laptop if laptop_obj else 'Unknown'}\n"
+                    f"Status: Siap Diambil / Ready\n"
+                    f"Detail Pengajuan ID: {pengajuan_id}\n\n"
+                    f"Silakan periksa detail pengajuan Anda di dashboard.\n\n"
+                    f"Salam,\nSiLaptop79 System"
+                )
+                send_notification_email(subject, email_message, to_email=user_obj.email if user_obj else None)
+            except Exception:
+                pass
 
             messages.success(request, 'Pengajuan berhasil disetujui dan laptop siap diambil oleh Talent.')
             return redirect('pengajuanlaptop_hc')
@@ -859,12 +914,12 @@ def editdatalaptop_hc_view(request, id_laptop):
                 raise ValueError("Laptop sedang aktif dipinjam dan tidak dapat diubah statusnya.")
 
             if kondisi:
-                kondisi_clean = 'rusak' if 'rusak' in str(kondisi).lower() else 'baik'
+                kondisi_clean = 'rusak ringan' if 'rusak' in str(kondisi).lower() else 'baik'
                 update_service.update_kondisi(id_laptop, kondisi_clean)
-                if kondisi_clean == 'rusak':
+                if 'rusak' in kondisi_clean:
                     status = 'rusak'
                     update_service.update_status(id_laptop, 'rusak', lokasi)
-            if status and kondisi != 'rusak':
+            if status and (not kondisi or 'rusak' not in kondisi_clean):
                 update_service.update_status(id_laptop, status, lokasi)
 
             # Update spesifikasi
@@ -896,6 +951,15 @@ def editdatalaptop_hc_view(request, id_laptop):
                     ukuran_layar=ukuran_layar
                 )
                 update_service.update_spek(dto)
+
+            # Handle image upload/update
+            gambar_file = request.FILES.get('gambar')
+            if gambar_file:
+                import base64
+                encoded_string = base64.b64encode(gambar_file.read()).decode('utf-8')
+                mime_type = gambar_file.content_type or 'image/png'
+                laptop.gambar = f"data:{mime_type};base64,{encoded_string}"
+                laptop.save()
 
             messages.success(request, 'Data laptop berhasil diperbarui.')
             return redirect('detaillaptop_hc', id_laptop=id_laptop)
@@ -1069,6 +1133,28 @@ def tambah_pengajuan_view(request):
             )
             service = PengajuanService()
             result = service.service_tambah_pengajuan(dto)
+
+            # Kirim Notifikasi Email
+            try:
+                from core.views import send_notification_email
+                from inventori.models import User
+                user_obj = User.objects.filter(id_user=dto.id_user).first()
+                username = user_obj.username if user_obj else "Talent"
+                subject = f"[SiLaptop79] Pengajuan Baru Masuk dari {username}"
+                email_message = (
+                    f"Halo Tim Approval,\n\n"
+                    f"Ada pengajuan laptop baru masuk dari user: {username}.\n"
+                    f"Role Pekerjaan: {dto.kebutuhan_role}\n"
+                    f"Proyek: {dto.id_proyek}\n"
+                    f"Spesifikasi: {dto.kebutuhan_requirement}\n"
+                    f"Keterangan: {dto.keterangan}\n\n"
+                    f"Silakan periksa dashboard untuk menyetujui/menolak pengajuan ini.\n\n"
+                    f"Salam,\nSiLaptop79 System"
+                )
+                send_notification_email(subject, email_message)
+            except Exception:
+                pass
+
             return JsonResponse({"message": result})
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)

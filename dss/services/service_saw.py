@@ -329,9 +329,17 @@ class Servicesaw:
 
         return list_alternatif
     def proses_saw_pipeline(self, list_alternatif, role):
+        if not list_alternatif:
+            return {
+                "preprocessing": [],
+                "normalisasi": [],
+                "hasil_saw": [],
+                "ranking": []
+            }
         data_pre = self.servisPD.preprocessing(list_alternatif)
         print("\n=== PREPROCESSING ===")
-        print(data_pre[0])
+        if data_pre:
+            print(data_pre[0])
         data_normalisasi = self.normalisasi_saw(data_pre)
         validator = ServiceValidatorSAW()
         validator.validate_normalisasi(data_normalisasi)
@@ -364,21 +372,21 @@ class Servicesaw:
 
         return id_hasil
     
-    def simpan_laptop_terpilih(self, ranking, id_dss, top_n=10):
+    def simpan_laptop_terpilih(self, ranking, id_dss, sumber_data, top_n=10):
         selected = ranking[:top_n]
 
         for item in selected:
             data = None
-            if "id_laptop_inventori" in item:
-                data = self.repoInventori.ambil_by_id(item["id_laptop_inventori"])
-            elif "id_laptop_pengadaan" in item:
-                data = self.repoPengadaan.ambil_by_id(item["id_laptop_pengadaan"])
+            if sumber_data == "inventori":
+                data = self.repoInventori.ambil_spek_laptop(item["id"])
+            elif sumber_data == "pengadaan":
+                data = self.repoPengadaan.ambil_laptop_pengadaan_by_id(item["id"])
             if not data:
                 continue
             self.repolaptopalternatif.tambah_laptop_alternatif(
                 LaptopAlternatifDTO(
-                    model_alternatif=data.get("model") or data.get("model_pengadaan"),
-                    brand_alternatif=data.get("brand") or data.get("brand_pengadaan"),
+                    model_alternatif=data.get("model") or data.get("nama_laptop") or "",
+                    brand_alternatif=data.get("manufacturer") or data.get("brand") or "",
                     id_dss=id_dss
                 )
             )
@@ -643,12 +651,14 @@ class Servicesaw:
                 self.simpan_laptop_terpilih(
                     ranking_role,
                     id_dss,
+                    sumber_data,
                     top_n=3
                 )
             else:
                 self.simpan_laptop_terpilih(
                     ranking_fallback,
                     id_dss,
+                    sumber_data,
                     top_n=3
                 )
             conn.commit()

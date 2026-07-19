@@ -16,7 +16,7 @@ class InventoriAuthBackend(BaseBackend):
             ).first()
 
             is_valid_password = False
-            if custom_user:
+            if custom_user and getattr(custom_user, 'is_active', True):
                 decrypted_pwd = decrypt_password(custom_user.password)
                 if (decrypted_pwd and decrypted_pwd == password) or (custom_user.password == password):
                     is_valid_password = True

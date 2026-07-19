@@ -17,6 +17,7 @@
             width: calc(100% - 260px);
             margin-left: 260px;
             padding: 30px 50px;
+            box-sizing: border-box;
         }
 
         /* Perbaikan Top Navigation (Header Area) */

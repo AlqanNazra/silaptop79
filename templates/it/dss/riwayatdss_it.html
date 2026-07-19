@@ -1,0 +1,174 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Riwayat DSS - SiLaptop79</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1.3">
+    
+    <style>
+        .riwayat-header {
+            margin-bottom: 24px;
+        }
+        .table-card {
+            background: #ffffff;
+            border-radius: 12px;
+            border: 1px solid #f1f5f9;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+            overflow: hidden;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+        th, td {
+            padding: 16px 24px;
+            font-size: 14px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        th {
+            background-color: #f8fafc;
+            font-weight: 700;
+            color: #475569;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 0.5px;
+        }
+        tr:hover {
+            background-color: #f8fafc;
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 9999px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .badge-inventori {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+        .badge-pengadaan {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+        .search-box {
+            display: flex;
+            align-items: center;
+            background: white;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 10px 16px;
+            width: 100%;
+            max-width: 400px;
+            margin-bottom: 24px;
+        }
+        .search-box input {
+            border: none;
+            outline: none;
+            width: 100%;
+            font-size: 14px;
+            margin-left: 8px;
+        }
+    </style>
+</head>
+
+<body>
+<div class="dashboard-wrapper">
+    {% include 'it/components/sidebar.html' with active_page='riwayat_dss' %}
+
+    <div class="main-dashboard-content" style="width: calc(100% - 260px); margin-left: 260px; box-sizing: border-box; padding: 40px;">
+        
+        <div class="riwayat-header">
+            <h1 class="page-title" style="font-size: 28px; font-weight: 800; color: #1e293b; margin: 0 0 8px 0;">Riwayat Perhitungan DSS</h1>
+            <p class="page-sub" style="font-size: 14px; color: #64748b; margin: 0;">Daftar seluruh riwayat sesi perhitungan rekomendasi laptop menggunakan metode SAW.</p>
+        </div>
+
+        <form method="GET" action="" class="search-box">
+            <i class="fa-solid fa-magnifying-glass" style="color: #64748b;"></i>
+            <input type="text" name="q" value="{{ q }}" placeholder="Cari berdasarkan role atau tipe...">
+        </form>
+
+        <div class="table-card">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 80px;">NO</th>
+                        <th>ID DSS</th>
+                        <th>TANGGAL & WAKTU</th>
+                        <th>PENGGUNA</th>
+                        <th>ROLE PEKERJAAN</th>
+                        <th>TIPE REKOMENDASI</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in riwayat_list %}
+                    <tr>
+                        <td style="font-weight: 600; color: #64748b;">{{ forloop.counter }}</td>
+                        <td style="font-weight: 700; color: #0b57c6;">{{ item.id_dss }}</td>
+                        <td>{{ item.created_at|date:"d M Y, H:i" }}</td>
+                        <td>
+                            <div style="font-weight: 600; color: #334155;">{{ item.id_user.nama }}</div>
+                            <div style="font-size: 12px; color: #64748b;">{{ item.id_user.email }}</div>
+                        </td>
+                        <td style="font-weight: 600; color: #475569;">{{ item.role_dss }}</td>
+                        <td>
+                            {% if item.jenis_dss == 'inventori' %}
+                            <span class="badge badge-inventori">Laptop Inventori</span>
+                            {% else %}
+                            <span class="badge badge-pengadaan">Laptop Pengadaan</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 40px; color: #94a3b8;">
+                            <i class="fa-regular fa-folder-open" style="font-size: 32px; margin-bottom: 12px; display: block;"></i>
+                            Belum ada riwayat perhitungan DSS.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            {% if riwayat_list.has_other_pages %}
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-top: 1px solid #f1f5f9;">
+                <span style="font-size: 13px; color: #64748b;">Menampilkan Halaman {{ riwayat_list.number }} dari {{ riwayat_list.paginator.num_pages }}</span>
+                <div style="display: flex; gap: 6px;">
+                    {% if riwayat_list.has_previous %}
+                    <a href="?page={{ riwayat_list.previous_page_number }}{% if q %}&q={{ q }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">
+                        <i class="fa-solid fa-chevron-left"></i>
+                    </a>
+                    {% endif %}
+                    
+                    {% for num in riwayat_list.paginator.page_range %}
+                        {% if riwayat_list.number == num %}
+                        <span style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; background: #0b57c6; color: white; font-weight: bold; font-size: 12px;">{{ num }}</span>
+                        {% elif num > riwayat_list.number|add:'-3' and num < riwayat_list.number|add:'3' %}
+                        <a href="?page={{ num }}{% if q %}&q={{ q }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">{{ num }}</a>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if riwayat_list.has_next %}
+                    <a href="?page={{ riwayat_list.next_page_number }}{% if q %}&q={{ q }}{% endif %}" class="page-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; font-size: 12px;">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+    </div>
+</div>
+</body>
+</html>

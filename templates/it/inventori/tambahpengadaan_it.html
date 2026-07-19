@@ -69,12 +69,18 @@
                         <div class="form-row">
                             <div class="form-group">
                                 <label>Processor</label>
-                                <select class="form-control" name="id_processor" required>
-                                    <option value="" disabled selected>Pilih Processor</option>
-                                    {% for proc in processors %}
-                                    <option value="{{ proc.id_processor }}">{{ proc.nama_processor }} ({{ proc.manufacturer }})</option>
-                                    {% endfor %}
-                                </select>
+                                <div class="searchable-select-container">
+                                    <input type="text" id="processor_search" class="form-control searchable-select-input" placeholder="Cari Processor..." autocomplete="off" required>
+                                    <input type="hidden" name="id_processor" id="processor_id_hidden" required>
+                                    <div id="processor_dropdown" class="searchable-select-dropdown">
+                                        <div class="searchable-option-item placeholder" data-id="">Pilih Processor</div>
+                                        {% for proc in processors %}
+                                        <div class="searchable-option-item" data-id="{{ proc.id_processor }}">
+                                            {{ proc.nama_processor }} ({{ proc.manufacturer }})
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
                             </div>
                             <div class="form-group">
                                 <label>RAM</label>
@@ -149,6 +155,89 @@
         </div>
     </div>
 
-</body>
+    <style>
+        .searchable-select-container {
+            position: relative;
+            width: 100%;
+        }
+        .searchable-select-dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            max-height: 220px;
+            overflow-y: auto;
+            z-index: 9999;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .searchable-option-item {
+            padding: 10px 14px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #334155;
+            transition: background-color 0.15s, color 0.15s;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .searchable-option-item:last-child {
+            border-bottom: none;
+        }
+        .searchable-option-item:hover {
+            background-color: #f1f5f9;
+            color: #0b57c6 !important;
+        }
+        .searchable-option-item.placeholder {
+            color: #94a3b8;
+        }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('processor_search');
+            const hiddenInput = document.getElementById('processor_id_hidden');
+            const dropdown = document.getElementById('processor_dropdown');
+            const items = dropdown.getElementsByClassName('searchable-option-item');
 
+            // Show dropdown on click
+            searchInput.addEventListener('click', function(e) {
+                e.stopPropagation();
+                dropdown.style.display = 'block';
+            });
+
+            // Close dropdown on click outside
+            document.addEventListener('click', function() {
+                dropdown.style.display = 'none';
+            });
+
+            // Filter items on input
+            searchInput.addEventListener('input', function() {
+                const filter = searchInput.value.toLowerCase();
+                for (let i = 0; i < items.length; i++) {
+                    const txt = items[i].textContent || items[i].innerText;
+                    if (txt.toLowerCase().indexOf(filter) > -1) {
+                        items[i].style.display = "";
+                    } else {
+                        items[i].style.display = "none";
+                    }
+                }
+                dropdown.style.display = 'block';
+            });
+
+            // Handle option selection
+            for (let i = 0; i < items.length; i++) {
+                items[i].addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const id = this.getAttribute('data-id');
+                    const text = this.textContent.trim();
+                    
+                    hiddenInput.value = id;
+                    searchInput.value = id ? text : "";
+                    dropdown.style.display = 'none';
+                });
+            }
+        });
+    </script>
+</body>
 </html>

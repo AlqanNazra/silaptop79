@@ -82,19 +82,35 @@
                 </div>
 
                 <div class="form-group" style="margin-bottom:12px;">
+                    <label>Pilih Kategori Teknologi</label>
+                    <select id="categorySelect" class="form-control" onchange="showCategoryTech(this.value)" style="margin-bottom: 16px;">
+                        <option value="">-- Pilih Kategori --</option>
+                        {% regroup teknologi_list by kategori as kategori_list %}
+                        {% for kat in kategori_list %}
+                        <option value="cat-{{ forloop.counter }}">{{ kat.grouper|default:"Lainnya" }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group" style="margin-bottom:12px;">
                     <label>Teknologi Pendukung</label>
-                    <div class="tech-checkboxes">
-                        {% for teknologi in teknologi_list %}
-                        <label class="tech-checkbox-item" id="tech-badge-{{ teknologi.id_teknologi }}">
-                            <input
-                                type="checkbox"
-                                class="teknologi-checkbox"
-                                name="teknologi"
-                                value="{{ teknologi.id_teknologi }}"
-                                data-nama="{{ teknologi.nama_teknologi }}"
-                                onchange="toggleTechBadge(this, '{{ teknologi.id_teknologi }}', '{{ teknologi.nama_teknologi }}')">
-                            {{ teknologi.nama_teknologi }}
-                        </label>
+                    <div class="tech-categories-container">
+                        {% regroup teknologi_list by kategori as kategori_list %}
+                        {% for kat in kategori_list %}
+                        <div id="cat-{{ forloop.counter }}" class="tech-category-content" style="display: none; padding: 16px; border: 1px solid #e2e8f0; border-radius: 8px; gap: 10px; flex-wrap: wrap; background: #ffffff;">
+                            {% for teknologi in kat.list %}
+                            <label class="tech-checkbox-item" id="tech-badge-{{ teknologi.id_teknologi }}">
+                                <input
+                                    type="checkbox"
+                                    class="teknologi-checkbox"
+                                    name="teknologi"
+                                    value="{{ teknologi.id_teknologi }}"
+                                    data-nama="{{ teknologi.nama_teknologi }}"
+                                    onchange="toggleTechBadge(this, '{{ teknologi.id_teknologi }}', '{{ teknologi.nama_teknologi }}')">
+                                {{ teknologi.nama_teknologi }}
+                            </label>
+                            {% endfor %}
+                        </div>
                         {% empty %}
                         <span style="color:#94a3b8;">Belum ada teknologi terdaftar</span>
                         {% endfor %}
@@ -130,6 +146,18 @@
         { id: 'layar', name: 'Ukuran Layar', desc: 'Visualisasi dan dimensi display', s: 0.25 },
         { id: 'baterai', name: 'Daya Baterai', desc: 'Ketahanan energi dan daya tahan baterai', s: 0.05 }
     ];
+
+    function showCategoryTech(val) {
+        document.querySelectorAll('.tech-category-content').forEach(el => {
+            el.style.display = 'none';
+        });
+        if (val) {
+            const target = document.getElementById(val);
+            if (target) {
+                target.style.display = 'flex';
+            }
+        }
+    }
 
     // Handle toggle tech checkbox badge status
     function toggleTechBadge(checkbox, id, nama) {
@@ -284,10 +312,48 @@
                 `}
             `;
             listEl.appendChild(item);
+            
+            if (index > 0) {
+                // Dynamically attach click listeners to markers
+                const markers = item.querySelectorAll('.slider-marker-label');
+                const slider = item.querySelector('.swara-slider');
+                const numInput = item.querySelector('.s-value-number-input');
+                
+                const markerVals = [0.0, 0.3, 0.6, 1.0];
+                markers.forEach((marker, idx) => {
+                    marker.style.cursor = 'pointer';
+                    marker.addEventListener('click', () => {
+                        const val = markerVals[idx];
+                        if (slider) slider.value = val;
+                        if (numInput) numInput.value = val.toFixed(2);
+                        highlightActiveMarker(item, val);
+                        calculateSwara(techId);
+                    });
+                });
+                
+                highlightActiveMarker(item, crit.s);
+            }
         });
         
         addDragAndDropHandlers(techId);
         rebuildUIAfterReorder(techId);
+    }
+
+    // Highlight active label penanda
+    function highlightActiveMarker(card, value) {
+        const labels = card.querySelectorAll('.slider-marker-label');
+        if (!labels.length) return;
+        labels.forEach(label => label.classList.remove('active'));
+        const floatVal = parseFloat(value);
+        if (floatVal === 0.0) {
+            labels[0].classList.add('active');
+        } else if (Math.abs(floatVal - 0.3) < 0.05) {
+            labels[1].classList.add('active');
+        } else if (Math.abs(floatVal - 0.6) < 0.05) {
+            labels[2].classList.add('active');
+        } else if (floatVal === 1.0) {
+            labels[3].classList.add('active');
+        }
     }
 
     // Slider interaction updates number input
@@ -297,6 +363,7 @@
         if (numInput) {
             numInput.value = parseFloat(slider.value).toFixed(2);
         }
+        highlightActiveMarker(card, slider.value);
         calculateSwara(techId);
     }
 
@@ -312,6 +379,7 @@
         if (slider) {
             slider.value = val;
         }
+        highlightActiveMarker(card, val);
         calculateSwara(techId);
     }
 

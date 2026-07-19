@@ -115,7 +115,7 @@ class Servicepreposesdata:
         for item in data_list[:5]:
             print(item)
         for item in data_list:
-            hasil.append({
+            entry = {
                 "id": item.get("id_laptop_inventori") or item.get("id_laptop_pengadaan"),
                 "processor": item.get("processor_score", 0),
                 "ram": item.get("ram_kapasitas", 0),
@@ -123,7 +123,10 @@ class Servicepreposesdata:
                 "berat": item.get("berat", 0),
                 "layar": item.get("ukuran_layar", 0),
                 "baterai": item.get("baterai", 0)
-            })
+            }
+            if item.get("id_laptop_pengadaan"):
+                entry["harga"] = item.get("harga", 0)
+            hasil.append(entry)
         return hasil
 
     def split_role_requirement(self,data_list,role_requirement):

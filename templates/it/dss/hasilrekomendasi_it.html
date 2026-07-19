@@ -144,9 +144,15 @@
                                 <span class="nama-laptop" style="margin-bottom:0;">{{ item.detail.nama }}</span>
                             </td>
                             <td>
+                                {% if jenis_rekomendasi == "pengadaan" %}
+                                <span class="source-badge source-external" style="background-color: #fef3c7; color: #d97706; padding: 4px 8px; border-radius: 9999px; font-size: 11px; font-weight: 700; text-transform: uppercase;">
+                                    <i class="fa-solid fa-globe"></i> External
+                                </span>
+                                {% else %}
                                 <span class="source-badge source-internal">
                                     <i class="fa-solid fa-building"></i> Internal
                                 </span>
+                                {% endif %}
                             </td>
                             <td>Processor Core: {{ item.detail.processor }}</td>
                             <td><span class="ram-badge">{{ item.detail.ram }}GB</span></td>
@@ -256,10 +262,16 @@
                             </td>
 
                             <td>
+                                {% if jenis_rekomendasi == "pengadaan" %}
+                                <span class="source-badge source-external" style="background-color: #fef3c7; color: #d97706; padding: 4px 8px; border-radius: 9999px; font-size: 11px; font-weight: 700; text-transform: uppercase;">
+                                    <i class="fa-solid fa-globe"></i> External
+                                </span>
+                                {% else %}
                                 <span class="source-badge source-internal">
                                     <i class="fa-solid fa-building"></i>
                                     Internal
                                 </span>
+                                {% endif %}
                             </td>
 
                             <td>

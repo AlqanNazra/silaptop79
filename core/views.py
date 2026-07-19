@@ -75,6 +75,45 @@ from django.core.paginator import Paginator
 
 
 
+def send_notification_email(subject, message, to_email=None):
+    from django.core.mail import send_mail
+    from django.conf import settings
+    from inventori.models import User as InvUser
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    recipients = set()
+    
+    if to_email:
+        if isinstance(to_email, list):
+            for email in to_email:
+                if email:
+                    recipients.add(email)
+        else:
+            recipients.add(to_email)
+    else:
+        recipients = set(['admin.hc@silaptop.com', 'manager.it@silaptop.com', 'it@laptop79.com', 'hc@laptop79.com'])
+        try:
+            admins = InvUser.objects.filter(role__in=['HC', 'IT'])
+            for admin in admins:
+                if admin.email:
+                    recipients.add(admin.email)
+        except Exception as e:
+            logger.error(f"Failed to fetch admin users: {e}")
+        
+    try:
+        send_mail(
+            subject=subject,
+            message=message,
+            from_email=getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@silaptop79.com'),
+            recipient_list=list(recipients),
+            fail_silently=False,
+        )
+    except Exception as e:
+        logger.error(f"Email notification failed: {e}")
+
+
+
 def dashboard_hc_view(request):
     try:
         total_laptop = LaptopInventori.objects.count()
@@ -513,6 +552,25 @@ def tambahlaptop_it_view(request):
             )
             service = CreateLaptopInventoriService()
             service.execute(dto)
+
+            # Handle image upload
+            gambar_file = request.FILES.get('gambar')
+            if gambar_file:
+                import base64
+                from inventori.models import LaptopInventori
+                encoded_string = base64.b64encode(gambar_file.read()).decode('utf-8')
+                mime_type = gambar_file.content_type or 'image/png'
+                gambar_uri = f"data:{mime_type};base64,{encoded_string}"
+                
+                # Update newly created laptop
+                new_laptop = LaptopInventori.objects.filter(
+                    nama_laptop=request.POST.get('nama_laptop'),
+                    model=request.POST.get('model')
+                ).order_by('-id_laptop_inventori').first()
+                if new_laptop:
+                    new_laptop.gambar = gambar_uri
+                    new_laptop.save()
+
             messages.success(request, 'Laptop berhasil ditambahkan ke inventori!')
             return redirect('manajemen_laptop_it')
         except Exception as e:
@@ -558,9 +616,9 @@ def detaillaptop_it_view(request, id_laptop):
                 lokasi = request.POST.get('lokasi')
 
                 if kondisi:
-                    kondisi_clean = 'rusak' if 'rusak' in str(kondisi).lower() else 'baik'
+                    kondisi_clean = 'rusak ringan' if 'rusak' in str(kondisi).lower() else 'baik'
                     update_service.update_kondisi(id_laptop, kondisi_clean)
-                    if kondisi_clean == 'rusak':
+                    if 'rusak' in kondisi_clean:
                         update_service.update_status(id_laptop, 'rusak', lokasi)
                 elif status:
                     update_service.update_status(id_laptop, status, lokasi)
@@ -976,12 +1034,16 @@ def inputkriteria_hc_view(request):
             # ==========================
             selected_role  = request.session.get("selected_role")
             minimum_requirement = request.session.get("minimum_requirement",{})
-            role_id = role.id_role
+            role_id = ""
+            if selected_role:
+                from inventori.models import Role as RoleModel
+                role_obj = RoleModel.objects.filter(id_role=selected_role).first()
+                if role_obj:
+                    role_id = role_obj.id_role
             if jenis_rekomendasi == "inventori":
                 filter_data = FilterInventoriDTO(
                     min_ram_kapasitas=int(minimum_requirement.get("ram",0) or 0),
                     min_storage=int(minimum_requirement.get("storage",0) or 0),
-                    processor_score=int(minimum_requirement.get("processor_score",0) or 0)
                 )
 
             else:
@@ -1233,10 +1295,14 @@ def hasilrekomendasi_hc_view(request):
         elif sort_by == "harga_asc" and jenis_rekomendasi == "pengadaan":
             ranking_sesuai.sort(key=lambda x: x["detail"].get("harga", 0))
         
-        paginator = Paginator(ranking_sesuai, 999999)  # Tampilkan 10 item per halaman
+        per_page = 10 if jenis_rekomendasi == "pengadaan" else 999999
+        if jenis_rekomendasi == "pengadaan":
+            ranking_sesuai = ranking_sesuai[:30]
+            ranking_alternatif = ranking_alternatif[:30]
+        paginator = Paginator(ranking_sesuai, per_page)
         page_number = request.GET.get('page')
         rangking_page = paginator.get_page(page_number)
-        alternatif_paginator = Paginator(ranking_alternatif, 999999)
+        alternatif_paginator = Paginator(ranking_alternatif, per_page)
         alternatif_page_number = request.GET.get('alternatif_page')
         ranking_alternatif = alternatif_paginator.get_page(alternatif_page_number)
 
@@ -1532,6 +1598,152 @@ def dashboard_it_view(request):
     return render(request, 'it/dashboard/dashboard_it.html', context)
 
 def manajemenlaptop_it_view(request):
+    if request.method == 'POST':
+        action_type = request.POST.get('action_type')
+        if action_type == 'import_excel':
+            import openpyxl
+            excel_file = request.FILES.get('excel_file')
+            if not excel_file:
+                messages.error(request, 'File excel tidak ditemukan')
+                return redirect('manajemen_laptop_it')
+                
+            try:
+                wb = openpyxl.load_workbook(excel_file)
+                sheet = wb.active
+                
+                # Get headers from first row
+                headers = [cell.value for cell in sheet[1]]
+                
+                required_cols = [
+                    'no_inventori', 'nama_laptop', 'model', 'os', 
+                    'kondisi', 'status', 'lokasi', 'id_processor', 'id_ram', 'id_storage'
+                ]
+                
+                # Check headers
+                col_indices = {}
+                for col in required_cols:
+                    if col in headers:
+                        col_indices[col] = headers.index(col)
+                    else:
+                        raise Exception(f"Kolom '{col}' tidak ditemukan di file Excel")
+                
+                # id_laptop_inventori, ukuran_layar, baterai are optional
+                has_id = 'id_laptop_inventori' in headers
+                if has_id:
+                    col_indices['id_laptop_inventori'] = headers.index('id_laptop_inventori')
+                    
+                has_layar = 'ukuran_layar' in headers
+                if has_layar:
+                    col_indices['ukuran_layar'] = headers.index('ukuran_layar')
+                    
+                has_baterai = 'baterai' in headers
+                if has_baterai:
+                    col_indices['baterai'] = headers.index('baterai')
+                
+                from inventori.models import LaptopInventori, Processor, RAM, Storage
+                from django.db import connection
+                
+                created_count = 0
+                for row in sheet.iter_rows(min_row=2, values_only=True):
+                    if not any(row):
+                        continue
+                    
+                    no_inv = row[col_indices['no_inventori']]
+                    nama_laptop = row[col_indices['nama_laptop']]
+                    if not no_inv or not nama_laptop:
+                        continue
+                    
+                    id_proc = row[col_indices['id_processor']]
+                    proc_mapping = {
+                        'PROS_0104': 'PROS_0186',
+                        'PROS_0107': 'PROS_0253',
+                        'PROS_0108': 'PROS_0021',
+                        'PROS_0110': 'PROS_0110',
+                        'PROS_0112': 'PROS_0110',
+                        'PROS_0121': 'PROS_0075',
+                        'PROS_0126': 'PROS_0076',
+                        'PROS_0162': 'PROS_0133',
+                        'PROS_0169': 'PROS_0120',
+                        'PROS_0170': 'PROS_0148'
+                    }
+                    if id_proc in proc_mapping:
+                        id_proc = proc_mapping[id_proc]
+                    
+                    id_ram = row[col_indices['id_ram']]
+                    id_storage = row[col_indices['id_storage']]
+                    
+                    # Resolve foreign key instances
+                    proc_obj = Processor.objects.filter(id_processor=id_proc).first()
+                    ram_obj = RAM.objects.filter(id_ram=id_ram).first()
+                    storage_obj = Storage.objects.filter(id_storage=id_storage).first()
+                    
+                    model = row[col_indices['model']] or ''
+                    os_val = row[col_indices['os']] or ''
+                    kondisi = row[col_indices['kondisi']] or 'baik'
+                    status = row[col_indices['status']] or 'tersedia'
+                    lokasi = row[col_indices['lokasi']] or ''
+                    
+                    layar = None
+                    if has_layar and row[col_indices['ukuran_layar']] is not None:
+                        val = str(row[col_indices['ukuran_layar']]).strip()
+                        if val:
+                            import re
+                            match = re.search(r'\d+(?:\.\d+)?', val)
+                            if match:
+                                try:
+                                    layar = float(match.group(0))
+                                except:
+                                    layar = None
+                            
+                    baterai = None
+                    if has_baterai and row[col_indices['baterai']] is not None:
+                        val = str(row[col_indices['baterai']]).strip()
+                        if val:
+                            import re
+                            match = re.search(r'\d+(?:\.\d+)?', val)
+                            if match:
+                                try:
+                                    baterai = float(match.group(0))
+                                except:
+                                    baterai = None
+                    
+                    # ID generation/selection
+                    id_laptop_inventori = None
+                    if has_id and row[col_indices['id_laptop_inventori']]:
+                        id_laptop_inventori = row[col_indices['id_laptop_inventori']]
+                    
+                    if not id_laptop_inventori:
+                        # Auto generate using Postgres function
+                        with connection.cursor() as cur:
+                            cur.execute("SELECT f_generate_id('LPT','inventori_laptopinventori','id_laptop_inventori');")
+                            id_laptop_inventori = cur.fetchone()[0]
+                            
+                    # Save using Django ORM
+                    LaptopInventori.objects.update_or_create(
+                        id_laptop_inventori=id_laptop_inventori,
+                        defaults={
+                            'no_inventori': no_inv,
+                            'nama_laptop': nama_laptop,
+                            'model': model,
+                            'os': os_val,
+                            'kondisi': kondisi,
+                            'status': status,
+                            'lokasi': lokasi,
+                            'id_processor': proc_obj,
+                            'id_ram': ram_obj,
+                            'id_storage': storage_obj,
+                            'ukuran_layar': layar,
+                            'baterai': baterai
+                        }
+                    )
+                    created_count += 1
+                
+                messages.success(request, f'Berhasil meng-import {created_count} Laptop Inventori dari Excel!')
+                return redirect('manajemen_laptop_it')
+            except Exception as e:
+                messages.error(request, f'Gagal meng-import Excel: {str(e)}')
+                return redirect('manajemen_laptop_it')
+
     search_query = request.GET.get('q', '')
     status_filter = request.GET.get('status', '')
     ram_filter = request.GET.get('ram', '').strip()
@@ -1571,9 +1783,24 @@ def manajemenlaptop_it_view(request):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
+    # Attach borrower name
+    from inventori.models import Peminjaman
+    active_loans = Peminjaman.objects.filter(status='dipinjam').select_related('id_user')
+    loan_map = {loan.id_laptop_inventori_id: loan.id_user.nama for loan in active_loans}
+    for laptop in page_obj:
+        laptop.peminjam = loan_map.get(laptop.id_laptop_inventori, "-")
+
+    # Calculate status counts
+    total_available = LaptopInventori.objects.filter(status__iexact='tersedia').count()
+    total_borrowed = LaptopInventori.objects.filter(status__iexact='dipinjam').count()
+    total_broken = LaptopInventori.objects.filter(status__in=['rusak', 'perbaikan', 'Broken', 'Perbaikan']).count()
+
     context = {
         'laptops': page_obj,
         'total': laptops.count(),
+        'total_available': total_available,
+        'total_borrowed': total_borrowed,
+        'total_broken': total_broken,
         'search_query': search_query,
         'status_filter': status_filter,
         'ram_filter': ram_filter,
@@ -1796,7 +2023,12 @@ def inputkriteria_it_view(request):
             # ==========================
             selected_role  = request.session.get("selected_role")
             minimum_requirement = request.session.get("minimum_requirement",{})
-            role_id = role.id_role
+            role_id = ""
+            if selected_role:
+                from inventori.models import Role as RoleModel
+                role_obj = RoleModel.objects.filter(id_role=selected_role).first()
+                if role_obj:
+                    role_id = role_obj.id_role
             if jenis_rekomendasi == "inventori":
                 filter_data = FilterInventoriDTO(
                     min_ram_kapasitas=int(minimum_requirement.get("ram",0) or 0),
@@ -1805,7 +2037,6 @@ def inputkriteria_it_view(request):
                 )
 
             else:
-
                 filter_data = FilterPengadaanDTO(
                     min_ram_kapasitas=int(minimum_requirement.get("ram",0) or 0),
                     min_storage=int(minimum_requirement.get("storage",0) or 0),
@@ -1990,12 +2221,12 @@ def editdatalaptop_it_view(request, id_laptop):
                 raise ValueError("Laptop sedang aktif dipinjam dan tidak dapat diubah statusnya.")
 
             if kondisi:
-                kondisi_clean = 'rusak' if 'rusak' in str(kondisi).lower() else 'baik'
+                kondisi_clean = 'rusak ringan' if 'rusak' in str(kondisi).lower() else 'baik'
                 update_service.update_kondisi(id_laptop, kondisi_clean)
-                if kondisi_clean == 'rusak':
+                if 'rusak' in kondisi_clean:
                     status = 'rusak'
                     update_service.update_status(id_laptop, 'rusak', lokasi)
-            if status and kondisi != 'rusak':
+            if status and (not kondisi or 'rusak' not in kondisi_clean):
                 update_service.update_status(id_laptop, status, lokasi)
 
             # Update spesifikasi
@@ -2027,6 +2258,15 @@ def editdatalaptop_it_view(request, id_laptop):
                     ukuran_layar=ukuran_layar
                 )
                 update_service.update_spek(dto)
+
+            # Handle image upload/update
+            gambar_file = request.FILES.get('gambar')
+            if gambar_file:
+                import base64
+                encoded_string = base64.b64encode(gambar_file.read()).decode('utf-8')
+                mime_type = gambar_file.content_type or 'image/png'
+                laptop.gambar = f"data:{mime_type};base64,{encoded_string}"
+                laptop.save()
 
             messages.success(request, 'Data laptop berhasil diperbarui.')
             return redirect('detaillaptop_it', id_laptop=id_laptop)
@@ -2188,10 +2428,14 @@ def hasilrekomendasi_it_view(request):
         elif sort_by == "harga_asc" and jenis_rekomendasi == "pengadaan":
             ranking_sesuai.sort(key=lambda x: x["detail"].get("harga", 0))
         
-        paginator = Paginator(ranking_sesuai, 999999)  # Tampilkan 10 item per halaman
+        per_page = 10 if jenis_rekomendasi == "pengadaan" else 999999
+        if jenis_rekomendasi == "pengadaan":
+            ranking_sesuai = ranking_sesuai[:30]
+            ranking_alternatif = ranking_alternatif[:30]
+        paginator = Paginator(ranking_sesuai, per_page)
         page_number = request.GET.get('page')
         rangking_page = paginator.get_page(page_number)
-        alternatif_paginator = Paginator(ranking_alternatif, 999999)
+        alternatif_paginator = Paginator(ranking_alternatif, per_page)
         alternatif_page_number = request.GET.get('alternatif_page')
         ranking_alternatif = alternatif_paginator.get_page(alternatif_page_number)
 
@@ -2419,6 +2663,126 @@ def notifikasi_it_view(request):
 
 # Procurement management views for IT
 def manajemenpengadaan_it_view(request):
+    if request.method == 'POST':
+        action_type = request.POST.get('action_type')
+        if action_type == 'import_excel':
+            import openpyxl
+            excel_file = request.FILES.get('excel_file')
+            if not excel_file:
+                messages.error(request, 'File excel tidak ditemukan')
+                return redirect('manajemen_pengadaan_it')
+                
+            try:
+                wb = openpyxl.load_workbook(excel_file)
+                sheet = wb.active
+                headers = [cell.value for cell in sheet[1]]
+                
+                required_cols = [
+                    'nama_laptop', 'harga', 'ukuran_layar', 'baterai', 'berat',
+                    'id_processor', 'id_ram', 'id_storage'
+                ]
+                
+                col_indices = {}
+                for col in required_cols:
+                    if col in headers:
+                        col_indices[col] = headers.index(col)
+                    else:
+                        raise Exception(f"Kolom '{col}' tidak ditemukan di file Excel")
+                
+                has_id = 'id_laptop_pengadaan' in headers
+                if has_id:
+                    col_indices['id_laptop_pengadaan'] = headers.index('id_laptop_pengadaan')
+                    
+                has_gpu = 'gpu' in headers
+                if has_gpu:
+                    col_indices['gpu'] = headers.index('gpu')
+                    
+                from dss.models import LaptopPengadaan
+                from inventori.models import Processor, RAM, Storage
+                from django.db import connection
+                
+                created_count = 0
+                for row in sheet.iter_rows(min_row=2, values_only=True):
+                    if not any(row):
+                        continue
+                        
+                    nama_laptop = row[col_indices['nama_laptop']]
+                    if not nama_laptop:
+                        continue
+                        
+                    id_proc = row[col_indices['id_processor']]
+                    proc_mapping = {
+                        'PROS_0104': 'PROS_0186',
+                        'PROS_0107': 'PROS_0253',
+                        'PROS_0108': 'PROS_0021',
+                        'PROS_0110': 'PROS_0110',
+                        'PROS_0112': 'PROS_0110',
+                        'PROS_0121': 'PROS_0075',
+                        'PROS_0126': 'PROS_0076',
+                        'PROS_0162': 'PROS_0133',
+                        'PROS_0169': 'PROS_0120',
+                        'PROS_0170': 'PROS_0148'
+                    }
+                    if id_proc in proc_mapping:
+                        id_proc = proc_mapping[id_proc]
+                        
+                    id_ram = row[col_indices['id_ram']]
+                    id_storage = row[col_indices['id_storage']]
+                    
+                    proc_obj = Processor.objects.filter(id_processor=id_proc).first()
+                    ram_obj = RAM.objects.filter(id_ram=id_ram).first()
+                    storage_obj = Storage.objects.filter(id_storage=id_storage).first()
+                    
+                    import re
+                    def parse_numeric(val, default=0.0):
+                        if val is None:
+                            return default
+                        s = str(val).strip()
+                        match = re.search(r'\d+(?:\.\d+)?', s)
+                        if match:
+                            try:
+                                return float(match.group(0))
+                            except:
+                                pass
+                        return default
+                        
+                    harga = int(parse_numeric(row[col_indices['harga']], 0.0))
+                    layar = parse_numeric(row[col_indices['ukuran_layar']], 0.0)
+                    baterai = parse_numeric(row[col_indices['baterai']], 0.0)
+                    berat = parse_numeric(row[col_indices['berat']], 0.0)
+                    gpu = row[col_indices['gpu']] if (has_gpu and row[col_indices['gpu']]) else ''
+                    
+                    id_laptop_pengadaan = None
+                    if has_id and row[col_indices['id_laptop_pengadaan']]:
+                        id_laptop_pengadaan = row[col_indices['id_laptop_pengadaan']]
+                        
+                    if not id_laptop_pengadaan:
+                        with connection.cursor() as cur:
+                            cur.execute("SELECT f_generate_id('LP','dss_laptoppengadaan','id_laptop_pengadaan');")
+                            id_laptop_pengadaan = cur.fetchone()[0]
+                            
+                    LaptopPengadaan.objects.update_or_create(
+                        id_laptop_pengadaan=id_laptop_pengadaan,
+                        defaults={
+                            'id_processor': proc_obj,
+                            'id_ram': ram_obj,
+                            'id_storage': storage_obj,
+                            'nama_laptop': nama_laptop,
+                            'harga': harga,
+                            'gpu': gpu,
+                            'ukuran_layar': layar,
+                            'baterai': baterai,
+                            'berat': berat
+                        }
+                    )
+                    created_count += 1
+                    
+                messages.success(request, f'Berhasil meng-import {created_count} Laptop Pengadaan dari Excel!')
+                return redirect('manajemen_pengadaan_it')
+            except Exception as e:
+                messages.error(request, f'Gagal meng-import Excel: {str(e)}')
+                return redirect('manajemen_pengadaan_it')
+
     search_query = request.GET.get('q', '').strip()
     processor_filter = request.GET.get('processor', '').strip()
     ram_filter = request.GET.get('ram', '').strip()
@@ -2904,6 +3268,25 @@ def pengajuanlaptop_talent_view(request):
             )
 
             service.service_tambah_pengajuan(dto)
+            
+            # Kirim Notifikasi Email
+            try:
+                username = request.user.username if request.user else "Talent"
+                subject = f"[SiLaptop79] Pengajuan Baru Masuk dari {username}"
+                email_message = (
+                    f"Halo Tim Approval,\n\n"
+                    f"Ada pengajuan laptop baru masuk dari user: {username}.\n"
+                    f"Role Pekerjaan: {role}\n"
+                    f"Proyek: {proyek_id}\n"
+                    f"Spesifikasi: {spesifikasi}\n"
+                    f"Keterangan: {keterangan_full}\n\n"
+                    f"Silakan periksa dashboard untuk menyetujui/menolak pengajuan ini.\n\n"
+                    f"Salam,\nSiLaptop79 System"
+                )
+                send_notification_email(subject, email_message)
+            except Exception:
+                pass
+
             messages.success(request, 'Pengajuan laptop berhasil dikirim dan sedang menunggu persetujuan.')
             return redirect('pengajuanlaptop_talent')
 
@@ -3322,6 +3705,24 @@ def pengembalianlaptop_talent_view(request):
                 if laptop:
                     laptop.kondisi = db_kondisi
                     laptop.save()
+                
+                # Kirim Notifikasi Email Pengembalian
+                try:
+                    username = request.user.username if request.user else "Talent"
+                    subject = f"[SiLaptop79] Pengembalian Laptop dari {username}"
+                    email_message = (
+                        f"Halo Tim Approval,\n\n"
+                        f"User {username} telah mengajukan pengembalian laptop.\n"
+                        f"Laptop: {laptop.nama_laptop if laptop else 'Unknown'}\n"
+                        f"Alasan: {alasan}\n"
+                        f"Kondisi Fisik saat Dikembalikan: {db_kondisi}\n"
+                        f"Catatan: {catatan}\n\n"
+                        f"Silakan periksa dashboard untuk konfirmasi pengembalian ini.\n\n"
+                        f"Salam,\nSiLaptop79 System"
+                    )
+                    send_notification_email(subject, email_message)
+                except Exception:
+                    pass
             
             messages.success(request, 'Pengembalian laptop berhasil disubmit. Menunggu konfirmasi HC.')
             return redirect('riwayatpeminjamanlaptop_talent')
@@ -3452,6 +3853,27 @@ def setujui_pengajuan_it_view(request):
             if peminjaman:
                 peminjaman.status = 'ready'
                 peminjaman.save()
+
+            # Kirim Notifikasi Email
+            try:
+                from inventori.models import User, LaptopInventori
+                user_obj = User.objects.filter(id_user=pengajuan.id_user).first()
+                laptop_obj = LaptopInventori.objects.filter(id_laptop_inventori=laptop_id).first()
+                username = user_obj.username if user_obj else "Talent"
+                
+                subject = f"[SiLaptop79] Pengajuan Laptop DISETUJUI - {username}"
+                email_message = (
+                    f"Halo {username},\n\n"
+                    f"Pengajuan laptop Anda telah disetujui oleh IT.\n"
+                    f"Laptop yang dialokasikan: {laptop_obj.nama_laptop if laptop_obj else 'Unknown'}\n"
+                    f"Status: Siap Diambil / Ready\n"
+                    f"Detail Pengajuan ID: {pengajuan_id}\n\n"
+                    f"Silakan periksa detail pengajuan Anda di dashboard.\n\n"
+                    f"Salam,\nSiLaptop79 System"
+                )
+                send_notification_email(subject, email_message, to_email=user_obj.email if user_obj else None)
+            except Exception:
+                pass
 
             messages.success(request, 'Pengajuan berhasil disetujui oleh IT dan laptop siap diambil oleh Talent.')
             return redirect('pengajuanlaptop_it')
@@ -3715,7 +4137,104 @@ def tambah_komponen_it_view(request):
     if request.method == 'POST':
         comp_type = request.POST.get('component_type')
         try:
-            if comp_type == 'processor':
+            if comp_type == 'import_excel_processor':
+                import openpyxl
+                excel_file = request.FILES.get('excel_file')
+                if not excel_file:
+                    messages.error(request, 'File Excel tidak ditemukan')
+                    return redirect('tambah_komponen_it')
+                
+                wb = openpyxl.load_workbook(excel_file)
+                sheet = wb.active
+                headers = [cell.value for cell in sheet[1]]
+                
+                required_cols = [
+                    'nama_processor', 'manufacturer', 'model', 
+                    'cores', 'threads', 'base_clock', 'max_clock', 'arsitektur'
+                ]
+                
+                col_indices = {}
+                for col in required_cols:
+                    if col in headers:
+                        col_indices[col] = headers.index(col)
+                    else:
+                        raise Exception(f"Kolom '{col}' tidak ditemukan di file Excel")
+                
+                has_id = 'id_processor' in headers
+                if has_id:
+                    col_indices['id_processor'] = headers.index('id_processor')
+                    
+                has_keterangan = 'keterangan' in headers
+                if has_keterangan:
+                    col_indices['keterangan'] = headers.index('keterangan')
+                
+                has_score = 'processor_score' in headers
+                if has_score:
+                    col_indices['processor_score'] = headers.index('processor_score')
+                
+                from django.db import connection
+                created_count = 0
+                for row in sheet.iter_rows(min_row=2, values_only=True):
+                    if not any(row):
+                        continue
+                    
+                    nama_proc = row[col_indices['nama_processor']]
+                    if not nama_proc:
+                        continue
+                        
+                    manufacturer = row[col_indices['manufacturer']] or ''
+                    model = row[col_indices['model']] or ''
+                    
+                    import re
+                    def parse_numeric(val, default=0.0):
+                        if val is None:
+                            return default
+                        s = str(val).strip()
+                        match = re.search(r'\d+(?:\.\d+)?', s)
+                        if match:
+                            try:
+                                return float(match.group(0))
+                            except:
+                                pass
+                        return default
+                    
+                    cores = int(parse_numeric(row[col_indices['cores']], 0.0))
+                    threads = int(parse_numeric(row[col_indices['threads']], 0.0))
+                    base_clock = parse_numeric(row[col_indices['base_clock']], 0.0)
+                    max_clock = parse_numeric(row[col_indices['max_clock']], 0.0)
+                    arsitektur = row[col_indices['arsitektur']] or ''
+                    keterangan = row[col_indices['keterangan']] if (has_keterangan and row[col_indices['keterangan']]) else ''
+                    score = int(parse_numeric(row[col_indices['processor_score']], 0.0)) if (has_score and row[col_indices['processor_score']] is not None) else 0
+                    
+                    id_processor = None
+                    if has_id and row[col_indices['id_processor']]:
+                        id_processor = row[col_indices['id_processor']]
+                        
+                    if not id_processor:
+                        with connection.cursor() as cur:
+                            cur.execute("SELECT f_generate_id('PRC','inventori_processor','id_processor');")
+                            id_processor = cur.fetchone()[0]
+                            
+                    Processor.objects.update_or_create(
+                        id_processor=id_processor,
+                        defaults={
+                            'nama_processor': nama_proc,
+                            'manufacturer': manufacturer,
+                            'model': model,
+                            'cores': cores,
+                            'threads': threads,
+                            'base_clock': base_clock,
+                            'max_clock': max_clock,
+                            'arsitektur': arsitektur,
+                            'processor_score': score,
+                            'keterangan': keterangan
+                        }
+                    )
+                    created_count += 1
+                messages.success(request, f'Berhasil meng-import {created_count} Processor dari Excel!')
+                return redirect('tambah_komponen_it')
+
+            elif comp_type == 'processor':
                 Processor.objects.create(
                     nama_processor=request.POST.get('nama_processor'),
                     manufacturer=request.POST.get('manufacturer'),
@@ -3725,6 +4244,7 @@ def tambah_komponen_it_view(request):
                     base_clock=float(request.POST.get('base_clock') or 0.0),
                     max_clock=float(request.POST.get('max_clock') or 0.0),
                     arsitektur=request.POST.get('arsitektur', ''),
+                    processor_score=int(request.POST.get('processor_score') or 0),
                     keterangan=request.POST.get('keterangan', '')
                 )
                 messages.success(request, 'Processor berhasil ditambahkan!')
@@ -3746,9 +4266,25 @@ def tambah_komponen_it_view(request):
             messages.error(request, f'Gagal menambahkan komponen: {str(e)}')
             return redirect('tambah_komponen_it')
 
-    processors = Processor.objects.all().order_by('-id_processor')[:10]
-    rams = RAM.objects.all().order_by('-id_ram')[:10]
-    storages = Storage.objects.all().order_by('-id_storage')[:10]
+    from django.core.paginator import Paginator
+    
+    # Processors Paginator
+    processor_list = Processor.objects.all().order_by('-id_processor')
+    paginator_proc = Paginator(processor_list, 10)
+    page_proc = request.GET.get('page_proc', 1)
+    processors = paginator_proc.get_page(page_proc)
+    
+    # RAMs Paginator
+    ram_list = RAM.objects.all().order_by('-id_ram')
+    paginator_ram = Paginator(ram_list, 10)
+    page_ram = request.GET.get('page_ram', 1)
+    rams = paginator_ram.get_page(page_ram)
+    
+    # Storages Paginator
+    storage_list = Storage.objects.all().order_by('-id_storage')
+    paginator_storage = Paginator(storage_list, 10)
+    page_storage = request.GET.get('page_storage', 1)
+    storages = paginator_storage.get_page(page_storage)
 
     return render(request, 'it/inventori/tambah_komponen_it.html', {
         'processors': processors,
@@ -3782,6 +4318,7 @@ def manajemen_role_teknologi_it_view(request):
     paginator_tech = Paginator(teknologi_list, per_page)
     page_tech = request.GET.get('page_tech')
     tech_obj = paginator_tech.get_page(page_tech)
+    unique_categories = Teknologi.objects.exclude(kategori__isnull=True).exclude(kategori='').values_list('kategori', flat=True).distinct().order_by('kategori')
     active_tab = request.GET.get('tab', 'role')
     context = {
         "role_list": role_obj,
@@ -3792,6 +4329,7 @@ def manajemen_role_teknologi_it_view(request):
         "search_tech": search_tech,
         "per_page": per_page,
         "active_tab": active_tab,
+        "unique_categories": unique_categories,
     }
     return render(request,"it/inventori/manajemenroleteknologi_it.html", context)
 def tambah_teknologi_it_view(request):
@@ -3943,7 +4481,7 @@ def tambah_role_it_view(request):
     # GET Request: render the template
     processor_service = ReadProcessorService()
     processor_list = processor_service.ambil_processor_dropdown()
-    teknologi_list = Teknologi.objects.all().order_by('nama_teknologi')
+    teknologi_list = Teknologi.objects.all().order_by('kategori', 'nama_teknologi')
     return render(request, "it/inventori/tambahrole_it.html", {
         "processor_list": processor_list,
         "teknologi_list": teknologi_list,
@@ -3995,7 +4533,7 @@ def edit_role_it_view(request, id_role):
     teknologi_repo = (TeknologiRepository(conn))
     teknologi_service = (TeknologiService(teknologi_repo,conn))
     repo_bobot = (BobotKriteriaRepository(conn))
-    all_teknologi = (teknologi_service.ambil_semua())
+    all_teknologi = Teknologi.objects.all().order_by('kategori', 'nama_teknologi')
     if request.method == "GET":
         from inventori.services.processor.read import ReadProcessorService
         import json
@@ -4037,8 +4575,8 @@ def edit_role_it_view(request, id_role):
         all_tek_serialized = []
         for t in all_teknologi:
             all_tek_serialized.append({
-                "id_teknologi": t["id_teknologi"],
-                "nama_teknologi": t["nama_teknologi"]
+                "id_teknologi": t.id_teknologi,
+                "nama_teknologi": t.nama_teknologi
             })
             
         context = {
@@ -4404,6 +4942,39 @@ def hapus_user_hc_view(request):
     return redirect('manajemenuser_hc')
 
 
+def toggle_user_status_hc_view(request):
+    """Mengubah status aktif/non-aktif pengguna."""
+    from inventori.models import User
+
+    if request.method == 'POST':
+        id_user = request.POST.get('id_user', '').strip()
+
+        if not id_user:
+            messages.error(request, 'ID Pengguna tidak diberikan.')
+            return redirect('manajemenuser_hc')
+
+        try:
+            user = User.objects.get(id_user=id_user)
+            user.is_active = not user.is_active
+            user.save()
+            
+            # Sync dengan Django User jika ada
+            from django.contrib.auth.models import User as DjangoUser
+            django_user = DjangoUser.objects.filter(username=user.id_user).first()
+            if django_user:
+                django_user.is_active = user.is_active
+                django_user.save()
+                
+            status_str = "diaktifkan" if user.is_active else "dinonaktifkan"
+            messages.success(request, f'Pengguna "{user.nama}" berhasil {status_str}.')
+        except User.DoesNotExist:
+            messages.error(request, 'Pengguna tidak ditemukan.')
+        except Exception as e:
+            messages.error(request, f'Gagal mengubah status pengguna: {str(e)}')
+
+    return redirect('manajemenuser_hc')
+
+
 def profile_view(request):
     """Menampilkan dan mengelola data profil pengguna serta perubahan password."""
     if not request.user.is_authenticated:
@@ -4587,3 +5158,245 @@ def konfirmasi_penerimaan_talent_view(request):
         except Exception as e:
             messages.error(request, f'Gagal melakukan konfirmasi: {str(e)}')
     return redirect('riwayatpeminjamanlaptop_talent')
+
+
+def riwayat_dss_hc_view(request):
+    from dss.models import DSSProses
+    from django.core.paginator import Paginator
+
+    riwayat_list = DSSProses.objects.all().order_by('-created_at')
+    
+    # Filter by search
+    q = request.GET.get('q', '').strip()
+    if q:
+        riwayat_list = riwayat_list.filter(role_dss__icontains=q) | riwayat_list.filter(jenis_dss__icontains=q)
+
+    paginator = Paginator(riwayat_list, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        'riwayat_list': page_obj,
+        'q': q,
+        'active_page': 'riwayat_dss',
+    }
+    return render(request, 'hc/dss/riwayatdss_hc.html', context)
+
+
+def riwayat_dss_it_view(request):
+    from dss.models import DSSProses
+    from django.core.paginator import Paginator
+
+    riwayat_list = DSSProses.objects.all().order_by('-created_at')
+    
+    # Filter by search
+    q = request.GET.get('q', '').strip()
+    if q:
+        riwayat_list = riwayat_list.filter(role_dss__icontains=q) | riwayat_list.filter(jenis_dss__icontains=q)
+
+    paginator = Paginator(riwayat_list, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        'riwayat_list': page_obj,
+        'q': q,
+        'active_page': 'riwayat_dss',
+    }
+    return render(request, 'it/dss/riwayatdss_it.html', context)
+
+
+def export_laptop_pdf_view(request):
+    import io
+    from datetime import datetime
+    from django.http import HttpResponse
+    from reportlab.lib.pagesizes import A4
+    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.lib import colors
+    from inventori.models import LaptopInventori, Peminjaman
+    
+    # Active Loans
+    peminjaman_list = Peminjaman.objects.filter(status='dipinjam').select_related('id_laptop_inventori', 'id_user')
+    
+    # Rusak / Perbaikan
+    rusak_list = LaptopInventori.objects.filter(status__in=['rusak', 'perbaikan', 'Broken', 'Perbaikan'])
+    
+    # Tersedia
+    tersedia_list = LaptopInventori.objects.filter(status__iexact='tersedia')
+
+    # Create response
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="laporan_inventori_laptop.pdf"'
+
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=30, leftMargin=30, topMargin=30, bottomMargin=30)
+    story = []
+
+    styles = getSampleStyleSheet()
+    
+    # Custom Styles
+    title_style = ParagraphStyle(
+        'TitleStyle',
+        parent=styles['Heading1'],
+        fontSize=18,
+        leading=22,
+        textColor=colors.HexColor('#0b57c6'),
+        spaceAfter=5,
+        alignment=1 # Centered
+    )
+    
+    subtitle_style = ParagraphStyle(
+        'SubtitleStyle',
+        parent=styles['Normal'],
+        fontSize=9,
+        leading=11,
+        textColor=colors.HexColor('#64748b'),
+        spaceAfter=15,
+        alignment=1 # Centered
+    )
+    
+    section_style = ParagraphStyle(
+        'SectionStyle',
+        parent=styles['Heading2'],
+        fontSize=11,
+        leading=15,
+        textColor=colors.HexColor('#1e293b'),
+        spaceBefore=12,
+        spaceAfter=6,
+        fontName='Helvetica-Bold'
+    )
+    
+    cell_style = ParagraphStyle(
+        'CellStyle',
+        parent=styles['Normal'],
+        fontSize=8,
+        leading=10,
+        textColor=colors.HexColor('#334155')
+    )
+    
+    header_style = ParagraphStyle(
+        'HeaderStyle',
+        parent=styles['Normal'],
+        fontSize=8,
+        leading=10,
+        textColor=colors.white,
+        fontName='Helvetica-Bold'
+    )
+
+    # Title
+    story.append(Paragraph("LAPORAN INVENTORI LAPTOP PERUSAHAAN", title_style))
+    story.append(Paragraph(f"Tanggal Unduh: {datetime.now().strftime('%d %B %Y %H:%M')}", subtitle_style))
+    story.append(Spacer(1, 10))
+
+    # Helper function to generate Table Styles
+    def get_table_style():
+        return TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#0b57c6')),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 6),
+            ('TOPPADDING', (0, 0), (-1, 0), 6),
+            ('BOTTOMPADDING', (0, 1), (-1, -1), 5),
+            ('TOPPADDING', (0, 1), (-1, -1), 5),
+            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.HexColor('#f8fafc'), colors.white]),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#e2e8f0')),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ])
+
+    # Table 1: Laptop Dipinjam
+    story.append(Paragraph("1. DAFTAR LAPTOP SEDANG DIPINJAM", section_style))
+    
+    data_dipinjam = [[
+        Paragraph("No", header_style),
+        Paragraph("Laptop", header_style),
+        Paragraph("Serial Number", header_style),
+        Paragraph("Peminjam", header_style),
+        Paragraph("Tgl Pinjam", header_style),
+        Paragraph("Jatuh Tempo", header_style)
+    ]]
+    
+    for idx, loan in enumerate(peminjaman_list):
+        data_dipinjam.append([
+            Paragraph(str(idx + 1), cell_style),
+            Paragraph(f"{loan.id_laptop_inventori.nama_laptop} ({loan.id_laptop_inventori.model or '-'})", cell_style),
+            Paragraph(loan.id_laptop_inventori.no_inventori, cell_style),
+            Paragraph(loan.id_user.nama, cell_style),
+            Paragraph(loan.tanggal_pinjam.strftime('%d-%m-%Y') if loan.tanggal_pinjam else '-', cell_style),
+            Paragraph(loan.tanggal_jatuh_tempo.strftime('%d-%m-%Y') if loan.tanggal_jatuh_tempo else '-', cell_style)
+        ])
+        
+    if len(peminjaman_list) == 0:
+        data_dipinjam.append([Paragraph("Tidak ada data laptop yang sedang dipinjam.", cell_style), "", "", "", "", ""])
+        
+    t_dipinjam = Table(data_dipinjam, colWidths=[20, 170, 90, 100, 75, 75])
+    t_dipinjam.setStyle(get_table_style())
+    if len(peminjaman_list) == 0:
+        t_dipinjam.setStyle(TableStyle([('SPAN', (0, 1), (-1, 1))]))
+    story.append(t_dipinjam)
+    story.append(Spacer(1, 10))
+
+    # Table 2: Laptop Rusak
+    story.append(Paragraph("2. DAFTAR LAPTOP RUSAK / PERBAIKAN", section_style))
+    
+    data_rusak = [[
+        Paragraph("No", header_style),
+        Paragraph("Laptop", header_style),
+        Paragraph("Serial Number", header_style),
+        Paragraph("Lokasi", header_style),
+        Paragraph("Status", header_style)
+    ]]
+    
+    for idx, laptop in enumerate(rusak_list):
+        data_rusak.append([
+            Paragraph(str(idx + 1), cell_style),
+            Paragraph(f"{laptop.nama_laptop} ({laptop.model or '-'})", cell_style),
+            Paragraph(laptop.no_inventori, cell_style),
+            Paragraph(laptop.lokasi or '-', cell_style),
+            Paragraph(laptop.status.title(), cell_style)
+        ])
+        
+    if len(rusak_list) == 0:
+        data_rusak.append([Paragraph("Tidak ada data laptop rusak.", cell_style), "", "", "", ""])
+        
+    t_rusak = Table(data_rusak, colWidths=[20, 190, 100, 110, 110])
+    t_rusak.setStyle(get_table_style())
+    if len(rusak_list) == 0:
+        t_rusak.setStyle(TableStyle([('SPAN', (0, 1), (-1, 1))]))
+    story.append(t_rusak)
+    story.append(Spacer(1, 10))
+
+    # Table 3: Laptop Tersedia
+    story.append(Paragraph("3. DAFTAR LAPTOP TERSEDIA (AVAILABLE)", section_style))
+    
+    data_tersedia = [[
+        Paragraph("No", header_style),
+        Paragraph("Laptop", header_style),
+        Paragraph("Serial Number", header_style),
+        Paragraph("Lokasi", header_style),
+        Paragraph("Status", header_style)
+    ]]
+    
+    for idx, laptop in enumerate(tersedia_list):
+        data_tersedia.append([
+            Paragraph(str(idx + 1), cell_style),
+            Paragraph(f"{laptop.nama_laptop} ({laptop.model or '-'})", cell_style),
+            Paragraph(laptop.no_inventori, cell_style),
+            Paragraph(laptop.lokasi or '-', cell_style),
+            Paragraph(laptop.status.title(), cell_style)
+        ])
+        
+    if len(tersedia_list) == 0:
+        data_tersedia.append([Paragraph("Tidak ada data laptop tersedia.", cell_style), "", "", "", ""])
+        
+    t_tersedia = Table(data_tersedia, colWidths=[20, 190, 100, 110, 110])
+    t_tersedia.setStyle(get_table_style())
+    if len(tersedia_list) == 0:
+        t_tersedia.setStyle(TableStyle([('SPAN', (0, 1), (-1, 1))]))
+    story.append(t_tersedia)
+
+    doc.build(story)
+    pdf = buffer.getvalue()
+    buffer.close()
+    response.write(pdf)
+    return response
+

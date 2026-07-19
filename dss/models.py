@@ -53,7 +53,7 @@ class LaptopAlternatif(models.Model):
 
     brand_alternatif = models.TextField()
 
-    id_dss = models.ForeignKey(DSSProses, on_delete=models.CASCADE)
+    id_dss = models.ForeignKey(DSSProses, on_delete=models.CASCADE, db_column='id_dss')
 
     def __str__(self):
         return f"{self.brand_alternatif} {self.model_alternatif}"
@@ -83,7 +83,7 @@ class NilaiAlternatif(models.Model):
 class HasilSAW(models.Model):
     id_hasil = models.CharField(primary_key=True, max_length=100)
 
-    id_dss = models.ForeignKey(DSSProses, on_delete=models.CASCADE)
+    id_dss = models.ForeignKey(DSSProses, on_delete=models.CASCADE, db_column='id_dss')
 
     tanggal_proses = models.DateTimeField(auto_now_add=True)
 

@@ -199,7 +199,25 @@
                             </div>
                             <div class="form-group">
                                 <label>Kategori</label>
-                                <input type="text" name="kategori" class="form-control" placeholder="Contoh: Frontend Library" required>
+                                <div id="category-select-wrapper" style="display: flex; gap: 8px; align-items: center;">
+                                    <select name="kategori_select" id="techCategorySelect" class="form-control" style="flex: 1;" onchange="handleCategorySelect(this.value)">
+                                        <option value="">-- Pilih Kategori --</option>
+                                        {% for cat in unique_categories %}
+                                        <option value="{{ cat }}">{{ cat }}</option>
+                                        {% endfor %}
+                                        <option value="__new__">+ Tambah Kategori Baru...</option>
+                                    </select>
+                                    <button type="button" class="modal-btn modal-btn-save" onclick="showNewCategoryInput()" style="padding: 10px 14px; border: 1px dashed #cbd5e1; background: #f8fafc; border-radius: 8px; font-weight: 600; color: #475569; cursor: pointer; display: flex; align-items: center; gap: 6px; width: auto; margin: 0; font-size: 13px;">
+                                        <i class="fa-solid fa-plus"></i> Baru
+                                    </button>
+                                </div>
+                                <div id="new-category-input-wrapper" style="display: none; gap: 8px; align-items: center; margin-top: 8px;">
+                                    <input type="text" id="newCategoryInput" class="form-control" placeholder="Masukkan Kategori Baru..." style="flex: 1;">
+                                    <button type="button" class="modal-btn modal-btn-cancel" onclick="hideNewCategoryInput()" style="padding: 10px 14px; border: 1px solid #cbd5e1; background: #ffffff; border-radius: 8px; font-weight: 600; color: #64748b; cursor: pointer; width: auto; margin: 0; font-size: 13px;">
+                                        Batal
+                                    </button>
+                                </div>
+                                <input type="hidden" name="kategori" id="actualCategoryInput" required>
                             </div>
                         </div>
 
@@ -333,7 +351,25 @@
                 </div>
                 <div class="form-group">
                     <label>Kategori</label>
-                    <input type="text" id="edit_kategori" name="kategori" class="form-control" required>
+                    <div id="edit-category-select-wrapper" style="display: flex; gap: 8px; align-items: center;">
+                        <select name="kategori_select" id="editTechCategorySelect" class="form-control" style="flex: 1;" onchange="handleEditCategorySelect(this.value)">
+                            <option value="">-- Pilih Kategori --</option>
+                            {% for cat in unique_categories %}
+                            <option value="{{ cat }}">{{ cat }}</option>
+                            {% endfor %}
+                            <option value="__new__">+ Tambah Kategori Baru...</option>
+                        </select>
+                        <button type="button" class="modal-btn modal-btn-save" onclick="showEditNewCategoryInput()" style="padding: 10px 14px; border: 1px dashed #cbd5e1; background: #f8fafc; border-radius: 8px; font-weight: 600; color: #475569; cursor: pointer; display: flex; align-items: center; gap: 6px; width: auto; margin: 0; font-size: 13px;">
+                            <i class="fa-solid fa-plus"></i> Baru
+                        </button>
+                    </div>
+                    <div id="edit-new-category-input-wrapper" style="display: none; gap: 8px; align-items: center; margin-top: 8px;">
+                        <input type="text" id="editNewCategoryInput" class="form-control" placeholder="Masukkan Kategori Baru..." style="flex: 1;">
+                        <button type="button" class="modal-btn modal-btn-cancel" onclick="hideEditNewCategoryInput()" style="padding: 10px 14px; border: 1px solid #cbd5e1; background: #ffffff; border-radius: 8px; font-weight: 600; color: #64748b; cursor: pointer; width: auto; margin: 0; font-size: 13px;">
+                            Batal
+                        </button>
+                    </div>
+                    <input type="hidden" name="kategori" id="editActualCategoryInput" required>
                 </div>
             </div>
             <div class="modal-actions">
@@ -454,10 +490,83 @@
         document.getElementById("editRoleModal").classList.remove("active");
     }
 
+    // Helper functions for Tambah Teknologi Form
+    function handleCategorySelect(val) {
+        if (val === "__new__") {
+            showNewCategoryInput();
+        } else {
+            document.getElementById("actualCategoryInput").value = val;
+        }
+    }
+    function showNewCategoryInput() {
+        document.getElementById("category-select-wrapper").style.display = "none";
+        document.getElementById("new-category-input-wrapper").style.display = "flex";
+        document.getElementById("newCategoryInput").focus();
+        document.getElementById("newCategoryInput").required = true;
+        // Bind keyup to synchronize actual value
+        document.getElementById("newCategoryInput").onkeyup = function() {
+            document.getElementById("actualCategoryInput").value = this.value;
+        };
+    }
+    function hideNewCategoryInput() {
+        document.getElementById("category-select-wrapper").style.display = "flex";
+        document.getElementById("new-category-input-wrapper").style.display = "none";
+        document.getElementById("newCategoryInput").required = false;
+        document.getElementById("newCategoryInput").value = "";
+        document.getElementById("techCategorySelect").value = "";
+        document.getElementById("actualCategoryInput").value = "";
+    }
+
+    // Helper functions for Edit Teknologi Modal
+    function handleEditCategorySelect(val) {
+        if (val === "__new__") {
+            showEditNewCategoryInput();
+        } else {
+            document.getElementById("editActualCategoryInput").value = val;
+        }
+    }
+    function showEditNewCategoryInput() {
+        document.getElementById("edit-category-select-wrapper").style.display = "none";
+        document.getElementById("edit-new-category-input-wrapper").style.display = "flex";
+        document.getElementById("editNewCategoryInput").focus();
+        document.getElementById("editNewCategoryInput").required = true;
+        document.getElementById("editNewCategoryInput").onkeyup = function() {
+            document.getElementById("editActualCategoryInput").value = this.value;
+        };
+    }
+    function hideEditNewCategoryInput() {
+        document.getElementById("edit-category-select-wrapper").style.display = "flex";
+        document.getElementById("edit-new-category-input-wrapper").style.display = "none";
+        document.getElementById("editNewCategoryInput").required = false;
+        document.getElementById("editNewCategoryInput").value = "";
+        document.getElementById("editTechCategorySelect").value = "";
+        document.getElementById("editActualCategoryInput").value = "";
+    }
+
     // Modal: Edit Teknologi
     function openEditTeknologi(id, nama, kategori) {
         document.getElementById("edit_nama_teknologi").value = nama;
-        document.getElementById("edit_kategori").value = kategori;
+        
+        // Check if value exists in select option list
+        const select = document.getElementById("editTechCategorySelect");
+        let hasOption = false;
+        for (let i = 0; i < select.options.length; i++) {
+            if (select.options[i].value === kategori) {
+                hasOption = true;
+                break;
+            }
+        }
+        
+        if (hasOption) {
+            select.value = kategori;
+            document.getElementById("editActualCategoryInput").value = kategori;
+            hideEditNewCategoryInput();
+        } else {
+            select.value = "__new__";
+            showEditNewCategoryInput();
+            document.getElementById("editNewCategoryInput").value = kategori;
+            document.getElementById("editActualCategoryInput").value = kategori;
+        }
         
         document.getElementById("editTeknologiForm").action = "/it/edit-teknologi/" + id + "/";
         document.getElementById("editTeknologiModal").classList.add("active");

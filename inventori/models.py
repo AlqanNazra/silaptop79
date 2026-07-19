@@ -8,6 +8,7 @@ class User(models.Model):
     password = models.CharField(max_length=255)
     role = models.CharField(max_length=50)
     departemen = models.CharField(max_length=100, default='Non IT')
+    is_active = models.BooleanField(default=True)
 
     def __str__(self):
         return self.nama
@@ -88,6 +89,7 @@ class LaptopInventori(models.Model):
 
     ukuran_layar = models.FloatField(null=True, blank=True)
     baterai = models.CharField(max_length=50, null=True, blank=True)  # Kapasitas baterai, e.g. "70 Wh"
+    gambar = models.TextField(null=True, blank=True)
 
     def save(self, *args, **kwargs):
         if self.kondisi:

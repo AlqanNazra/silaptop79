@@ -22,7 +22,10 @@ from core.views import (
     tambahuser_hc_view,
     edit_user_hc_view,
     hapus_user_hc_view,
+    toggle_user_status_hc_view,
+    riwayat_dss_hc_view,
     decrypt_password_view,
+    export_laptop_pdf_view,
 
     # IT Views
     dashboard_it_view,
@@ -52,6 +55,7 @@ from core.views import (
     tambahproyek_it_view,
     editproyek_it_view,
     hapusproyek_it_view,
+    riwayat_dss_it_view,
 
     # Talent Views
     dashboard_talent_view,
@@ -104,6 +108,7 @@ urlpatterns = [
     # ==========================================
     path('hc/', hc_required(dashboard_hc_view), name='dashboard_hc'),
     path('hc/manajemen-laptop/', hc_required(manajemenlaptop_hc_view), name='manajemen_laptop_hc'),
+    path('hc/manajemen-laptop/export-pdf/', hc_required(export_laptop_pdf_view), name='export_laptop_pdf_hc'),
     path('hc/pengajuan-laptop/', hc_required(pengajuanlaptop_hc_view), name='pengajuanlaptop_hc'),
     path('hc/detail-pengajuan/', hc_required(detailpengajuan_hc_view), name='detailpengajuan_hc'),
     path('hc/setujui-pengajuan/', hc_required(setujui_pengajuan_hc_view), name='setujui_pengajuan_hc'),
@@ -119,11 +124,13 @@ urlpatterns = [
     path('hc/detail-rekomendasi/', hc_required(detailrekomendasi_hc_view), name='detailrekomendasi_hc'),
     path('hc/detail-scrapping/', hc_required(detailrekomendasiscrapping_hc_view), name='detailrekomendasiscrapping_hc'),
     path('hc/notifikasi/', hc_required(notifikasi_hc_view), name='notifikasi_hc'),
+    path('hc/riwayat-dss/', hc_required(riwayat_dss_hc_view), name='riwayat_dss_hc'),
     path('hc/manajemen-talent/', hc_required(manajementalent_hc_view), name='manajementalent_hc'),
     path('hc/manajemen-user/', hc_required(manajemenuser_hc_view), name='manajemenuser_hc'),
     path('hc/manajemen-user/tambah/', hc_required(tambahuser_hc_view), name='tambahuser_hc'),
     path('hc/manajemen-user/edit/', hc_required(edit_user_hc_view), name='edit_user_hc'),
     path('hc/manajemen-user/hapus/', hc_required(hapus_user_hc_view), name='hapus_user_hc'),
+    path('hc/manajemen-user/toggle-status/', hc_required(toggle_user_status_hc_view), name='toggle_user_status_hc'),
     path('hc/user/decrypt-password/', hc_required(decrypt_password_view), name='decrypt_password_hc'),
 
     # ==========================================
@@ -131,6 +138,7 @@ urlpatterns = [
     # ==========================================
     path('it/', it_required(dashboard_it_view), name='dashboard_it'),
     path('it/manajemen-laptop/', it_required(manajemenlaptop_it_view), name='manajemen_laptop_it'),
+    path('it/manajemen-laptop/export-pdf/', it_required(export_laptop_pdf_view), name='export_laptop_pdf_it'),
     path('it/tambah-komponen/', it_required(tambah_komponen_it_view), name='tambah_komponen_it'),
     path('it/pengajuan-laptop/', it_required(pengajuanlaptop_it_view), name='pengajuanlaptop_it'),
     path('it/detail-pengajuan/', it_required(detailpengajuan_it_view), name='detailpengajuan_it'),
@@ -146,6 +154,7 @@ urlpatterns = [
     path('it/detail-rekomendasi/', it_required(detailrekomendasi_it_view), name='detailrekomendasi_it'),
     path('it/detail-scrapping/', it_required(detailrekomendasiscrapping_it_view), name='detailrekomendasiscrapping_it'),
     path('it/notifikasi/', it_required(notifikasi_it_view), name='notifikasi_it'),
+    path('it/riwayat-dss/', it_required(riwayat_dss_it_view), name='riwayat_dss_it'),
     path('it/konfirmasi-pengembalian/', it_required(konfirmasi_pengembalian_it_view), name='konfirmasi_pengembalian_it'),
     path('it/manajemen-pengadaan/', it_required(manajemenpengadaan_it_view), name='manajemen_pengadaan_it'),
     path('it/detail-pengadaan/', it_required(detailpengadaan_it_view), name='detailpengadaan_it'),
