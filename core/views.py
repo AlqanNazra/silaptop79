@@ -1044,6 +1044,7 @@ def inputkriteria_hc_view(request):
                 filter_data = FilterInventoriDTO(
                     min_ram_kapasitas=int(minimum_requirement.get("ram",0) or 0),
                     min_storage=int(minimum_requirement.get("storage",0) or 0),
+                    processor_score=int(minimum_requirement.get("processor_score",0) or 0)
                 )
 
             else:
