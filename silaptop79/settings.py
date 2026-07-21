@@ -35,6 +35,14 @@ ALLOWED_HOSTS = os.environ.get(
     "localhost,127.0.0.1,*"
 ).split(",")
 
+CSRF_TRUSTED_ORIGINS = [
+    'https://silaptop79-production.up.railway.app',
+    'https://*.up.railway.app',
+]
+CSRF_TRUSTED_ORIGINS_ENV = os.environ.get("CSRF_TRUSTED_ORIGINS", "")
+if CSRF_TRUSTED_ORIGINS_ENV:
+    CSRF_TRUSTED_ORIGINS = [o.strip() for o in CSRF_TRUSTED_ORIGINS_ENV.split(",") if o.strip()]
+
 # Authentication Settings
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/login-redirect/'
