@@ -54,7 +54,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-DROP FUNCTION getfilteredlaptopinventori(character varying,character varying,character varying,character varying,double precision,double precision,double precision,character varying,character varying,character varying,integer,integer,integer,integer,integer,integer,integer,character varying,integer,integer,integer,character varying)
+DROP FUNCTION getfilteredlaptopinventori(character varying,character varying,character varying,character varying,double precision,double precision,double precision,character varying,character varying,character varying,integer,integer,integer,integer,integer,integer,integer,character varying,integer,integer,integer,character varying);
 
 -- Filter Inventori
 CREATE OR REPLACE FUNCTION GetFilteredLaptopinventori(
@@ -165,7 +165,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-DROP FUNCTION getfilteredlaptoppengadaan(character varying,numeric,integer,integer,character varying,double precision,double precision,double precision,double precision,double precision,double precision,character varying,character varying,character varying,integer,integer,integer,integer,integer,integer,integer,character varying,integer,integer,integer,character varying)
+DROP FUNCTION getfilteredlaptoppengadaan(character varying,numeric,integer,integer,character varying,double precision,double precision,double precision,double precision,double precision,double precision,character varying,character varying,character varying,integer,integer,integer,integer,integer,integer,integer,character varying,integer,integer,integer,character varying);
 
 -- FILTER PENGADAAN
 CREATE OR REPLACE FUNCTION GetFilteredLaptopPengadaan(
