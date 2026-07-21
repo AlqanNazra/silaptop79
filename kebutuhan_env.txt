@@ -1,0 +1,37 @@
+SPESIFIKASI KEBUTUHAN DEPLOYMENT APLIKASI - SILAPTOP79
+===================================================
+
+1. SPESIFIKASI RUNTIME & SISTEM
+---------------------------------
+* Bahasa Pemrograman: Python 3.10 s/d 3.14 (Development menggunakan 3.14.6)
+* Database Server   : PostgreSQL 12 atau yang lebih baru
+* Web Server/WSGI   : Gunicorn (tercantum pada requirements.txt)
+
+
+2. CONTOH KONFIGURASI ENVIRONMENT VARIABLES (.env)
+---------------------------------------------------
+Berikut variabel environment yang harus di-set pada server:
+
+DEBUG=False
+SECRET_KEY=ganti_dengan_key_acak_yang_aman_disini
+ALLOWED_HOSTS=silaptop79.cloudias79.com,localhost,127.0.0.1
+
+# Konfigurasi Database PostgreSQL (Railway Internal)
+DB_NAME=railway
+DB_USER=postgres
+DB_PASSWORD=qgkwcevoLtCBZSHlxzgzIaOQlTZrqrAX
+DB_HOST=postgres.railway.internal
+DB_PORT=5432
+
+
+3. PROSEDUR INISIALISASI DATABASE (MENGGUNAKAN FILE BACKUP .TAR)
+---------------------------------------------------------------
+Karena database dideploy menggunakan file backup (.tar hasil pg_dump), IT Infra hanya perlu memulihkan/restore database tersebut ke server PostgreSQL baru.
+
+Langkah Pemulihan Database:
+1. Buat database baru di PostgreSQL (misal bernama `TA`).
+2. Restore file database `.tar` menggunakan utilitas `pg_restore`:
+   ```bash
+   pg_restore -U [username] -d [nama_db_baru] -h [host_db] -p [port_db] [nama_file_backup].tar
+   ```
+   *Catatan: File tar ini sudah mencakup skema tabel, custom functions, triggers, stored procedures, serta semua master data (teknologi, role, dll.) sehingga tidak perlu menjalankan migrasi django (`migrate`) maupun script SQL secara manual.*
