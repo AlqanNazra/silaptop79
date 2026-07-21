@@ -8,11 +8,11 @@ def get_connection():
             conn = psycopg2.connect(db_url)
         else:
             conn = psycopg2.connect(
-                host="postgres.railway.internal",
+                host="localhost",
                 port="5432",
-                database="railway",
-                user="postgres",
-                password="qgkwcevoLtCBZSHlxzgzIaOQlTZrqrAX"
+                database="TA",
+                user="dafffc",
+                password="190105"
             )
 
         conn.autocommit = False
