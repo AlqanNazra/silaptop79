@@ -39,7 +39,7 @@ $$ LANGUAGE plpgsql;
 -- =============================================
 
 -- Sequence
-CREATE SEQUENCE seq_no_inventori START 1;
+CREATE SEQUENCE IF NOT EXISTS seq_no_inventori START 1;
 
 --  Function 
 CREATE OR REPLACE FUNCTION generate_no_inventori()
@@ -54,7 +54,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-DROP FUNCTION getfilteredlaptopinventori(character varying,character varying,character varying,character varying,double precision,double precision,double precision,character varying,character varying,character varying,integer,integer,integer,integer,integer,integer,integer,character varying,integer,integer,integer,character varying);
+DROP FUNCTION IF EXISTS getfilteredlaptopinventori(character varying,character varying,character varying,character varying,double precision,double precision,double precision,character varying,character varying,character varying,integer,integer,integer,integer,integer,integer,integer,character varying,integer,integer,integer,character varying);
 
 -- Filter Inventori
 CREATE OR REPLACE FUNCTION GetFilteredLaptopinventori(
@@ -165,7 +165,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-DROP FUNCTION getfilteredlaptoppengadaan(character varying,numeric,integer,integer,character varying,double precision,double precision,double precision,double precision,double precision,double precision,character varying,character varying,character varying,integer,integer,integer,integer,integer,integer,integer,character varying,integer,integer,integer,character varying);
+DROP FUNCTION IF EXISTS getfilteredlaptoppengadaan(character varying,numeric,integer,integer,character varying,double precision,double precision,double precision,double precision,double precision,double precision,character varying,character varying,character varying,integer,integer,integer,integer,integer,integer,integer,character varying,integer,integer,integer,character varying);
 
 -- FILTER PENGADAAN
 CREATE OR REPLACE FUNCTION GetFilteredLaptopPengadaan(
