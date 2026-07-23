@@ -1201,13 +1201,25 @@ def hasilrekomendasi_hc_view(request):
             
         ranking_sesuai = request.session.get("ranking_sesuai",[])
         ranking_alternatif = request.session.get("ranking_alternatif",[])
-        id_sesuai = {item["id"] for item in ranking_sesuai}
-        ranking_alternatif = [item for item in ranking_alternatif if item["id"] not in id_sesuai]
         
-        warning = request.session.get("warning_dss")
-        # if not ranking_sesuai:
-        #     messages.error(request,"Silakan hitung DSS terlebih dahulu")
-        #     return redirect("inputkriteria_it")
+        # Deduplicate ranking_sesuai by exact id
+        seen_sesuai = set()
+        dedup_sesuai = []
+        for item in ranking_sesuai:
+            if item["id"] not in seen_sesuai:
+                seen_sesuai.add(item["id"])
+                dedup_sesuai.append(item)
+        ranking_sesuai = dedup_sesuai
+
+        # Deduplicate ranking_alternatif by exact id
+        seen_alt = set()
+        dedup_alt = []
+        for item in ranking_alternatif:
+            if item["id"] not in seen_alt and item["id"] not in seen_sesuai:
+                seen_alt.add(item["id"])
+                dedup_alt.append(item)
+        ranking_alternatif = dedup_alt
+        
         sort_by = request.GET.get("sort","skor_desc")
         # print("\n=== TEST DETAIL ===")
         # print(
@@ -1269,6 +1281,97 @@ def hasilrekomendasi_hc_view(request):
                         "baterai":pengadaan.get("baterai",0),
                         "berat":pengadaan.get("berat",0)
                     }    
+        # Strict details-based deduplication
+        seen_details = set()
+        dedup_sesuai = []
+        for item in ranking_sesuai:
+            detail = item.get("detail", {})
+            nama = str(detail.get("nama", "")).strip().lower()
+            proc = str(detail.get("processor", "")).strip().lower()
+            ram = str(detail.get("ram", ""))
+            storage = str(detail.get("storage", ""))
+            harga = str(detail.get("harga", ""))
+            skor_str = f"{item.get('skor', 0):.3f}"
+            
+            key = (nama, proc, ram, storage, harga, skor_str)
+            if key not in seen_details:
+                seen_details.add(key)
+                dedup_sesuai.append(item)
+        ranking_sesuai = dedup_sesuai
+
+        dedup_alternatif = []
+        for item in ranking_alternatif:
+            detail = item.get("detail", {})
+            nama = str(detail.get("nama", "")).strip().lower()
+            proc = str(detail.get("processor", "")).strip().lower()
+            ram = str(detail.get("ram", ""))
+            storage = str(detail.get("storage", ""))
+            harga = str(detail.get("harga", ""))
+            skor_str = f"{item.get('skor', 0):.3f}"
+            
+            key = (nama, proc, ram, storage, harga, skor_str)
+            if key not in seen_details:
+                seen_details.add(key)
+                dedup_alternatif.append(item)
+        ranking_alternatif = dedup_alternatif
+
+        # Reset sequential ranking ranks
+        for idx, item in enumerate(ranking_sesuai, start=1):
+            item["rank"] = idx
+        for idx, item in enumerate(ranking_alternatif, start=1):
+            item["rank"] = idx
+
+        # Check for identical scores and describe differences
+        from collections import defaultdict
+        score_groups = defaultdict(list)
+        for item in ranking_sesuai:
+            try:
+                skor = round(float(item.get("skor", 0)), 3)
+                score_groups[skor].append(item)
+            except (ValueError, TypeError):
+                pass
+        
+        for skor, items in score_groups.items():
+            if len(items) > 1:
+                for target_item in items:
+                    other_items = [x for x in items if x["id"] != target_item["id"]]
+                    other_names = [x["detail"].get("nama", "Laptop") for x in other_items]
+                    other_names_str = " dan ".join([", ".join(other_names[:-1]), other_names[-1]]) if len(other_names) > 2 else " dan ".join(other_names)
+                    
+                    diffs = []
+                    # Check RAM differences
+                    rams = {x["detail"].get("ram", 0) for x in items}
+                    if len(rams) > 1:
+                        diffs.append(f"RAM ({target_item['detail'].get('ram', 0)}GB vs {', '.join(f'{x}GB' for x in rams if x != target_item['detail'].get('ram', 0))})")
+                    
+                    # Check Storage differences
+                    storages = {x["detail"].get("storage", 0) for x in items}
+                    if len(storages) > 1:
+                        diffs.append(f"Penyimpanan ({target_item['detail'].get('storage', 0)}GB vs {', '.join(f'{x}GB' for x in storages if x != target_item['detail'].get('storage', 0))})")
+                    
+                    # Check Price differences
+                    prices = {x["detail"].get("harga", 0) for x in items}
+                    if len(prices) > 1:
+                        formatted_target_price = f"Rp {target_item['detail'].get('harga', 0):,}"
+                        formatted_other_prices = [f"Rp {x:,}" for x in prices if x != target_item['detail'].get('harga', 0)]
+                        diffs.append(f"Harga ({formatted_target_price} vs {', '.join(formatted_other_prices)})")
+                    
+                    # Check Processor Benchmark Score differences
+                    benchmarks = {x["detail"].get("benchmark", 0) for x in items}
+                    if len(benchmarks) > 1:
+                        diffs.append(f"Skor Processor ({target_item['detail'].get('benchmark', 0)} vs {', '.join(str(x) for x in benchmarks if x != target_item['detail'].get('benchmark', 0))})")
+                    
+                    # Check GPU differences
+                    gpus = {x["detail"].get("gpu", "-") for x in items if x["detail"].get("gpu")}
+                    if len(gpus) > 1:
+                        diffs.append(f"GPU ({target_item['detail'].get('gpu', '-')} vs {', '.join(x for x in gpus if x != target_item['detail'].get('gpu', '-'))})")
+
+                    diff_list_html = "".join([f"<li>{d}</li>" for d in diffs])
+                    diff_text = f"<ol style='margin-top: 8px; margin-bottom: 0; padding-left: 20px;'>{diff_list_html}</ol>" if diffs else "Spesifikasi utama identik."
+                    target_item["warning_skor_sama"] = f"Skor sama dengan <strong>{other_names_str}</strong>.<br><br><strong>Perbedaan:</strong>{diff_text}"
+
+        warning = request.session.get("warning_dss") or ""
+
         rata_rata_harga = 0
         if jenis_rekomendasi == "pengadaan":
 
@@ -2323,13 +2426,25 @@ def hasilrekomendasi_it_view(request):
             
         ranking_sesuai = request.session.get("ranking_sesuai",[])
         ranking_alternatif = request.session.get("ranking_alternatif",[])
-        id_sesuai = {item["id"] for item in ranking_sesuai}
-        ranking_alternatif = [item for item in ranking_alternatif if item["id"] not in id_sesuai]
         
-        warning = request.session.get("warning_dss")
-        # if not ranking_sesuai:
-        #     messages.error(request,"Silakan hitung DSS terlebih dahulu")
-        #     return redirect("inputkriteria_it")
+        # Deduplicate ranking_sesuai by exact id
+        seen_sesuai = set()
+        dedup_sesuai = []
+        for item in ranking_sesuai:
+            if item["id"] not in seen_sesuai:
+                seen_sesuai.add(item["id"])
+                dedup_sesuai.append(item)
+        ranking_sesuai = dedup_sesuai
+
+        # Deduplicate ranking_alternatif by exact id
+        seen_alt = set()
+        dedup_alt = []
+        for item in ranking_alternatif:
+            if item["id"] not in seen_alt and item["id"] not in seen_sesuai:
+                seen_alt.add(item["id"])
+                dedup_alt.append(item)
+        ranking_alternatif = dedup_alt
+        
         sort_by = request.GET.get("sort","skor_desc")
         # print("\n=== TEST DETAIL ===")
         # print(
@@ -2402,6 +2517,98 @@ def hasilrekomendasi_it_view(request):
                         "baterai":pengadaan.get("baterai",0),
                         "berat":pengadaan.get("berat",0)
                     }    
+        # Strict details-based deduplication
+        seen_details = set()
+        dedup_sesuai = []
+        for item in ranking_sesuai:
+            detail = item.get("detail", {})
+            nama = str(detail.get("nama", "")).strip().lower()
+            proc = str(detail.get("processor", "")).strip().lower()
+            ram = str(detail.get("ram", ""))
+            storage = str(detail.get("storage", ""))
+            harga = str(detail.get("harga", ""))
+            skor_str = f"{item.get('skor', 0):.3f}"
+            
+            key = (nama, proc, ram, storage, harga, skor_str)
+            if key not in seen_details:
+                seen_details.add(key)
+                dedup_sesuai.append(item)
+        ranking_sesuai = dedup_sesuai
+
+        dedup_alternatif = []
+        for item in ranking_alternatif:
+            detail = item.get("detail", {})
+            nama = str(detail.get("nama", "")).strip().lower()
+            proc = str(detail.get("processor", "")).strip().lower()
+            ram = str(detail.get("ram", ""))
+            storage = str(detail.get("storage", ""))
+            harga = str(detail.get("harga", ""))
+            skor_str = f"{item.get('skor', 0):.3f}"
+            
+            key = (nama, proc, ram, storage, harga, skor_str)
+            if key not in seen_details:
+                seen_details.add(key)
+                dedup_alternatif.append(item)
+        ranking_alternatif = dedup_alternatif
+
+        # Reset sequential ranking ranks
+        for idx, item in enumerate(ranking_sesuai, start=1):
+            item["rank"] = idx
+        for idx, item in enumerate(ranking_alternatif, start=1):
+            item["rank"] = idx
+
+        # Check for identical scores and describe differences
+        # Check for identical scores and describe differences
+        from collections import defaultdict
+        score_groups = defaultdict(list)
+        for item in ranking_sesuai:
+            try:
+                skor = round(float(item.get("skor", 0)), 3)
+                score_groups[skor].append(item)
+            except (ValueError, TypeError):
+                pass
+        
+        for skor, items in score_groups.items():
+            if len(items) > 1:
+                for target_item in items:
+                    other_items = [x for x in items if x["id"] != target_item["id"]]
+                    other_names = [x["detail"].get("nama", "Laptop") for x in other_items]
+                    other_names_str = " dan ".join([", ".join(other_names[:-1]), other_names[-1]]) if len(other_names) > 2 else " dan ".join(other_names)
+                    
+                    diffs = []
+                    # Check RAM differences
+                    rams = {x["detail"].get("ram", 0) for x in items}
+                    if len(rams) > 1:
+                        diffs.append(f"RAM ({target_item['detail'].get('ram', 0)}GB vs {', '.join(f'{x}GB' for x in rams if x != target_item['detail'].get('ram', 0))})")
+                    
+                    # Check Storage differences
+                    storages = {x["detail"].get("storage", 0) for x in items}
+                    if len(storages) > 1:
+                        diffs.append(f"Penyimpanan ({target_item['detail'].get('storage', 0)}GB vs {', '.join(f'{x}GB' for x in storages if x != target_item['detail'].get('storage', 0))})")
+                    
+                    # Check Price differences
+                    prices = {x["detail"].get("harga", 0) for x in items}
+                    if len(prices) > 1:
+                        formatted_target_price = f"Rp {target_item['detail'].get('harga', 0):,}"
+                        formatted_other_prices = [f"Rp {x:,}" for x in prices if x != target_item['detail'].get('harga', 0)]
+                        diffs.append(f"Harga ({formatted_target_price} vs {', '.join(formatted_other_prices)})")
+                    
+                    # Check Processor Benchmark Score differences
+                    benchmarks = {x["detail"].get("benchmark", 0) for x in items}
+                    if len(benchmarks) > 1:
+                        diffs.append(f"Skor Processor ({target_item['detail'].get('benchmark', 0)} vs {', '.join(str(x) for x in benchmarks if x != target_item['detail'].get('benchmark', 0))})")
+                    
+                    # Check GPU differences
+                    gpus = {x["detail"].get("gpu", "-") for x in items if x["detail"].get("gpu")}
+                    if len(gpus) > 1:
+                        diffs.append(f"GPU ({target_item['detail'].get('gpu', '-')} vs {', '.join(x for x in gpus if x != target_item['detail'].get('gpu', '-'))})")
+
+                    diff_list_html = "".join([f"<li>{d}</li>" for d in diffs])
+                    diff_text = f"<ol style='margin-top: 8px; margin-bottom: 0; padding-left: 20px;'>{diff_list_html}</ol>" if diffs else "Spesifikasi utama identik."
+                    target_item["warning_skor_sama"] = f"Skor sama dengan <strong>{other_names_str}</strong>.<br><br><strong>Perbedaan:</strong>{diff_text}"
+
+        warning = request.session.get("warning_dss") or ""
+
         rata_rata_harga = 0
         if jenis_rekomendasi == "pengadaan":
 

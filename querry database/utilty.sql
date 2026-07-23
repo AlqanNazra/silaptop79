@@ -12,7 +12,7 @@ BEGIN
     query_str := 'SELECT ' || quote_ident(nama_kolom) || 
                  ' FROM ' || quote_ident(nama_tabel) || 
                  ' WHERE ' || quote_ident(nama_kolom) || ' LIKE ' || quote_literal(prefix || '%') ||
-                 ' ORDER BY ' || quote_ident(nama_kolom) || ' DESC LIMIT 1';
+                 ' ORDER BY NULLIF(regexp_replace(' || quote_ident(nama_kolom) || ', ''[^0-9]'', '''', ''g''), '''')::INT DESC LIMIT 1';
     
     EXECUTE query_str INTO last_id;
 
@@ -29,7 +29,7 @@ BEGIN
         END;
     END IF;
 
-    RETURN prefix || '_' || LPAD(new_no::TEXT, 4, '0');
+    RETURN prefix || '_' || CASE WHEN length(new_no::TEXT) < 4 THEN LPAD(new_no::TEXT, 4, '0') ELSE new_no::TEXT END;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -114,16 +114,15 @@ BEGIN
         li.ukuran_layar,
         li.baterai,
         li.nama_processor,
-        p.manufacturer,       -- Diambil dari tabel processor
-        p.model AS processor_model, -- Diambil dari tabel processor
-        p.cores,              -- Diambil dari tabel processor
-        p.processor_score,    -- Diambil dari tabel processor
+        li.manufacturer,
+        li.processor_model,
+        li.cores,
+        li.processor_score,
         li.ram_kapasitas,
         li.ram_tipe,
         li.storage_kapasitas,
         li.storage_tipe
     FROM public.ambil_laptop_inventori() li
-    LEFT JOIN public.inventori_processor p ON li.nama_processor = p.nama_processor-- JOIN DISINI
 
     WHERE
         -- IDENTITAS
@@ -139,16 +138,16 @@ BEGIN
         AND (f_min_ukuran_layar IS NULL OR li.ukuran_layar >= f_min_ukuran_layar)
         AND (f_max_ukuran_layar IS NULL OR li.ukuran_layar <= f_max_ukuran_layar)
 
-        -- PROCESSOR (Menggunakan alias 'p' dari tabel processor)
+        -- PROCESSOR
         AND (f_nama_processor IS NULL OR li.nama_processor = f_nama_processor)
-        AND (f_manufacturer IS NULL OR p.manufacturer = f_manufacturer)
-        AND (f_processor_model IS NULL OR p.model = f_processor_model)
-        AND (f_processor_score IS NULL OR p.processor_score >= f_processor_score)
+        AND (f_manufacturer IS NULL OR li.manufacturer = f_manufacturer)
+        AND (f_processor_model IS NULL OR li.processor_model = f_processor_model)
+        AND (f_processor_score IS NULL OR li.processor_score >= f_processor_score)
 
         -- CORES
-        AND (f_cores IS NULL OR p.cores = f_cores)
-        AND (f_min_cores IS NULL OR p.cores >= f_min_cores)
-        AND (f_max_cores IS NULL OR p.cores <= f_max_cores)
+        AND (f_cores IS NULL OR li.cores = f_cores)
+        AND (f_min_cores IS NULL OR li.cores >= f_min_cores)
+        AND (f_max_cores IS NULL OR li.cores <= f_max_cores)
 
         -- RAM
         AND (f_ram_kapasitas IS NULL OR li.ram_kapasitas >= f_min_ram_kapasitas)
@@ -232,18 +231,15 @@ BEGIN
         lp.ukuran_layar,
         lp.baterai,
         lp.nama_processor,
-        p.manufacturer,       -- Diambil dari tabel processor
-        p.model AS processor_model, -- Diambil dari tabel processor
-        p.cores,              -- Diambil dari tabel processor
-        p.processor_score,    -- Diambil dari tabel processor
+        lp.manufacturer,
+        lp.processor_model,
+        lp.cores,
+        lp.processor_score,
         lp.ram_kapasitas,
         lp.ram_tipe,
         lp.storage_kapasitas,
         lp.storage_tipe
     FROM ambil_laptop_pengadaan() lp
-    LEFT JOIN public.inventori_processor p
-    ON lp.nama_processor = p.nama_processor
--- JOIN DISINI
 
     WHERE
         -- ID
@@ -269,14 +265,14 @@ BEGIN
 
         -- PROCESSOR
         AND (f_nama_processor IS NULL OR lp.nama_processor ILIKE '%' || f_nama_processor || '%')
-        AND (f_manufacturer IS NULL OR p.manufacturer = f_manufacturer)
-        AND (f_processor_model IS NULL OR p.model ILIKE '%' || f_processor_model || '%')
-        AND (f_processor_score IS NULL OR p.processor_score >= f_processor_score) -- Sudah diperbaiki ke alias 'p'
+        AND (f_manufacturer IS NULL OR lp.manufacturer = f_manufacturer)
+        AND (f_processor_model IS NULL OR lp.processor_model ILIKE '%' || f_processor_model || '%')
+        AND (f_processor_score IS NULL OR lp.processor_score >= f_processor_score)
 
         -- CORES
-        AND (f_cores IS NULL OR p.cores = f_cores)
-        AND (f_min_cores IS NULL OR p.cores >= f_min_cores)
-        AND (f_max_cores IS NULL OR p.cores <= f_max_cores)
+        AND (f_cores IS NULL OR lp.cores = f_cores)
+        AND (f_min_cores IS NULL OR lp.cores >= f_min_cores)
+        AND (f_max_cores IS NULL OR lp.cores <= f_max_cores)
 
         -- RAM
         AND (f_ram_kapasitas IS NULL OR lp.ram_kapasitas = f_min_ram_kapasitas)

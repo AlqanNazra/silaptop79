@@ -95,6 +95,16 @@
                 </div>
             </div>
 
+            {% if warning %}
+            <div class="info-card" style="background: #fffbeb; border: 1px solid #fef3c7; margin-bottom: 24px;">
+                <div class="info-card-icon" style="color: #d97706;"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                <div class="info-card-text">
+                    <h4 style="color: #92400e;">Peringatan Hasil Rekomendasi</h4>
+                    <p style="color: #b45309; margin-top: 4px;">{{ warning|safe }}</p>
+                </div>
+            </div>
+            {% endif %}
+
             <!-- Main Ranking Table -->
             <div class="table-card">
                 <div class="table-header">
@@ -159,7 +169,16 @@
                             {% if jenis_rekomendasi == "pengadaan" %}
                             <td>Rp {{ item.detail.harga|floatformat:0 }}</td>
                             {% endif %}
-                            <td><span class="score-val {% if forloop.counter == 1 %}high{% endif %}">{{ item.skor|floatformat:3 }}</span></td>
+                            <td>
+                                 <span class="score-val {% if forloop.counter == 1 %}high{% endif %}" style="display: inline-flex; align-items: center; gap: 6px;">
+                                     {{ item.skor|floatformat:3 }}
+                                     {% if item.warning_skor_sama %}
+                                     <span class="warning-tooltip-trigger" style="color: #d97706; cursor: pointer; font-size: 14px;" onclick="showWarningDetail('{{ item.warning_skor_sama|escapejs }}')">
+                                         <i class="fa-solid fa-triangle-exclamation"></i>
+                                     </span>
+                                     {% endif %}
+                                 </span>
+                             </td>
                             <td><a href="{% url 'detailrekomendasi_it' %}?id={{ item.id }}&jenis={{ jenis_rekomendasi }}" class="btn-detail">
                                 Detail</a>
                             </td>
@@ -603,6 +622,16 @@
             Swal.close();
         }).catch((err) => {
             Swal.fire('Error', 'Gagal mencetak PDF: ' + err, 'error');
+        });
+    }
+
+    function showWarningDetail(message) {
+        Swal.fire({
+            title: 'Perbandingan Spesifikasi Laptop',
+            html: `<div style="text-align: left; line-height: 1.6; font-size: 14px; color: #4b5563;">${message}</div>`,
+            icon: 'warning',
+            confirmButtonText: 'Tutup',
+            confirmButtonColor: '#3b82f6'
         });
     }
 </script>
